@@ -70,7 +70,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         return ring[position(rangeCheck(index))]
     }
 
-    override fun set(index: Int, element: Double) {
+    override fun setAt(index: Int, element: Double) {
         ring[position(rangeCheck(index))] = element
     }
 

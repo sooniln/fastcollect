@@ -13,6 +13,11 @@ public object ArrayUtils {
      */
     private const val SOFT_MAX_ARRAY_SIZE = Int.MAX_VALUE - 8
 
+    internal val EmptyIntArray = IntArray(0)
+    internal val EmptyLongArray = LongArray(0)
+    internal val EmptyFloatArray = LongArray(0)
+    internal val EmptyDoubleArray = LongArray(0)
+
     public fun growArraySize(oldSize: Int, minGrowth: Int, prefGrowth: Int = oldSize shr 1): Int {
         require(minGrowth > 0)
         val prefSize = oldSize + max(minGrowth, prefGrowth) // might overflow
@@ -27,7 +32,8 @@ public object ArrayUtils {
     private fun hugeSize(oldSize: Int, minGrowth: Int): Int {
         val minSize = oldSize + minGrowth
         return if (minSize < 0) {
-            throw OutOfMemoryError("Required array length $oldSize + $minGrowth is too large")
+            // TODO: compileKotlinJs fails to find OOME, why?
+            throw Error("Required array length $oldSize + $minGrowth is too large")
         } else if (minSize <= SOFT_MAX_ARRAY_SIZE) {
             SOFT_MAX_ARRAY_SIZE
         } else {

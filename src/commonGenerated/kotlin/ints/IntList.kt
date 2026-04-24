@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.ints
 
+import io.github.sooniln.fastcollect.Boxing.assertBoxing
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -60,18 +61,29 @@ public interface IntList : List<Int>, IntCollection {
     override fun subList(fromIndex: Int, toIndex: Int): IntList
 }
 
-public interface MutableIntList : IntList, MutableIntCollection {
+public interface MutableIntList : IntList, MutableIntCollection, MutableList<Int> {
     override fun listIterator(): MutableIntListIterator
     override fun listIterator(index: Int): MutableIntListIterator
 
-    public operator fun set(index: Int, element: Int)
+    @Deprecated(
+        message = "Use the extension set(index, element) method or setAt(index, element) instead.",
+        replaceWith = ReplaceWith("set(index, element)", "io.github.sooniln.fastcollect.ints.set"),
+        level = DeprecationLevel.HIDDEN)
+    override fun set(index: Int, element: Int): Int {
+        assertBoxing()
+        val value = get(index)
+        setAt(index, value)
+        return value
+    }
+
+    public fun setAt(index: Int, element: Int)
 
     override fun add(element: Int): Boolean {
         add(size, element)
         return true
     }
 
-    public fun add(index: Int, element: Int)
+    override fun add(index: Int, element: Int)
 
     override fun remove(element: Int): Boolean {
         val index = indexOf(element)
@@ -82,8 +94,6 @@ public interface MutableIntList : IntList, MutableIntCollection {
         removeAt(index)
         return true
     }
-
-    public fun removeAt(index: Int): Int
 
     public fun removeRange(fromIndex: Int, toIndex: Int)
 
@@ -99,12 +109,21 @@ public interface MutableIntList : IntList, MutableIntCollection {
         return addAll(size, elements)
     }
 
+    override fun removeAll(elements: Collection<Int>): Boolean {
+        return super.removeAll(elements)
+    }
+
+    override fun retainAll(elements: Collection<Int>): Boolean {
+        return super.retainAll(elements)
+    }
+
     public fun addAll(index: Int, elements: IntCollection): Boolean
-    public fun addAll(index: Int, elements: Collection<Int>): Boolean
+    override fun addAll(index: Int, elements: Collection<Int>): Boolean
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableIntList
 }
 
+public operator fun MutableIntList.set(index: Int, element: Int): Unit = setAt(index, element)
 public fun MutableIntList.addFirst(element: Int): Unit = add(0, element)
 public fun MutableIntList.addLast(element: Int): Unit = add(size, element)
 public fun MutableIntList.removeFirst(): Int = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
@@ -393,8 +412,8 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
         final override var size = toIndex - fromIndex
             private set
 
-        override fun set(index: Int, element: Int) {
-            list[index + offset] = element
+        override fun setAt(index: Int, element: Int) {
+            return list.setAt(index + offset, element)
         }
 
         override fun get(index: Int): Int {

@@ -36,7 +36,12 @@ public interface IntSet : Set<Int>, IntCollection {
     override fun containsAll(elements: Collection<Int>): Boolean = super.containsAll(elements)
 }
 
-public interface MutableIntSet : IntSet, MutableIntCollection
+public interface MutableIntSet : IntSet, MutableIntCollection, MutableSet<Int> {
+    override fun clear(): Unit = super.clear()
+    override fun addAll(elements: Collection<Int>): Boolean = super.addAll(elements)
+    override fun removeAll(elements: Collection<Int>): Boolean = super.removeAll(elements)
+    override fun retainAll(elements: Collection<Int>): Boolean = super.retainAll(elements)
+}
 
 private object EmptyIntSet : IntSet {
     override val size: Int get() = 0

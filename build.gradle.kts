@@ -24,10 +24,10 @@ object Generate {
             "List.kte",
         )
         val Expansions = listOf(
-            mapOf("Type" to "Int", "lowerType" to "int", "subpackage" to "ints"),
-            mapOf("Type" to "Long", "lowerType" to "long", "subpackage" to "longs"),
-            mapOf("Type" to "Float", "lowerType" to "float", "subpackage" to "floats"),
-            mapOf("Type" to "Double", "lowerType" to "double", "subpackage" to "doubles"),
+            mapOf("Type" to "Int"),
+            mapOf("Type" to "Long"),
+            mapOf("Type" to "Float"),
+            mapOf("Type" to "Double"),
         )
     }
 
@@ -37,31 +37,83 @@ object Generate {
             "Set.kte",
         )
         val Expansions = listOf(
-            mapOf("Type" to "Int", "lowerType" to "int", "subpackage" to "ints"),
-            mapOf("Type" to "Long", "lowerType" to "long", "subpackage" to "longs"),
+            mapOf("Type" to "Int"),
+            mapOf("Type" to "Long"),
+        )
+    }
+
+    object KeyValueTypes {
+        val Files = listOf(
+            "HashMap.kte",
+            "Map.kte",
+        )
+        val Expansions = listOf(
+            mapOf("KeyType" to "Int", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
+            mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
+            mapOf("KeyType" to "Int", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
+            mapOf("KeyType" to "Int", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
+            mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
+            mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
+            mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
+            mapOf("KeyType" to "Long", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
         )
     }
 }
 
 tasks.register<Copy>("GenerateCollections") {
+    description = "Generates source code for primitively typed collection classes from templates."
     group = "generate"
     into(Generate.OUT_DIR)
 
+    val anyTypesExpansions = Generate.AnyTypes.Expansions.map { expansion ->
+        buildMap(expansion.size + 2) {
+            putAll(expansion)
+            put("lowerType", expansion["Type"]!!.lowercase())
+            put("subpackage", expansion["Type"]!!.lowercase() + "s")
+        }
+    }
+
     Generate.AnyTypes.Files.forEach { filename ->
-        Generate.AnyTypes.Expansions.forEach { expansion ->
-            into("${expansion["subpackage"]}") {
+        anyTypesExpansions.forEach { expansion ->
+            into(expansion["subpackage"]!!) {
                 from("${Generate.IN_DIR}/$filename")
-                rename { filename -> expansion["Type"] + filename.removeSuffix(".kte") + ".kt" }
+                rename { filename -> expansion["Type"]!! + filename.removeSuffix(".kte") + ".kt" }
                 expand(*expansion.toList().toTypedArray())
             }
         }
     }
 
+    val keyTypesExpansions = Generate.KeyTypes.Expansions.map { expansion ->
+        buildMap(expansion.size + 2) {
+            putAll(expansion)
+            put("lowerType", expansion["Type"]!!.lowercase())
+            put("subpackage", expansion["Type"]!!.lowercase() + "s")
+        }
+    }
+
     Generate.KeyTypes.Files.forEach { filename ->
-        Generate.KeyTypes.Expansions.forEach { expansion ->
-            into("${expansion["subpackage"]}") {
+        keyTypesExpansions.forEach { expansion ->
+            into(expansion["subpackage"]!!) {
                 from("${Generate.IN_DIR}/$filename")
-                rename { filename -> expansion["Type"] + filename.removeSuffix(".kte") + ".kt" }
+                rename { filename -> expansion["Type"]!! + filename.removeSuffix(".kte") + ".kt" }
+                expand(*expansion.toList().toTypedArray())
+            }
+        }
+    }
+
+    val keyValueTypesExpansions = Generate.KeyValueTypes.Expansions.map { expansion ->
+        buildMap(expansion.size + 2) {
+            putAll(expansion)
+            put("keySubpackage", expansion["KeyType"]!!.lowercase() + "s")
+            put("valueSubpackage", expansion["ValueType"]!!.lowercase() + "s")
+        }
+    }
+
+    Generate.KeyValueTypes.Files.forEach { filename ->
+        keyValueTypesExpansions.forEach { expansion ->
+            into(expansion["keySubpackage"]!!) {
+                from("${Generate.IN_DIR}/$filename")
+                rename { filename -> expansion["KeyType"]!! + "2" + expansion["ValueType"]!! + filename.removeSuffix(".kte") + ".kt" }
                 expand(*expansion.toList().toTypedArray())
             }
         }

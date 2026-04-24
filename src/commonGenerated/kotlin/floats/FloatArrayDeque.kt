@@ -70,7 +70,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         return ring[position(rangeCheck(index))]
     }
 
-    override fun set(index: Int, element: Float) {
+    override fun setAt(index: Int, element: Float) {
         ring[position(rangeCheck(index))] = element
     }
 

@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.longs
 
+import io.github.sooniln.fastcollect.Boxing.assertBoxing
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -60,18 +61,29 @@ public interface LongList : List<Long>, LongCollection {
     override fun subList(fromIndex: Int, toIndex: Int): LongList
 }
 
-public interface MutableLongList : LongList, MutableLongCollection {
+public interface MutableLongList : LongList, MutableLongCollection, MutableList<Long> {
     override fun listIterator(): MutableLongListIterator
     override fun listIterator(index: Int): MutableLongListIterator
 
-    public operator fun set(index: Int, element: Long)
+    @Deprecated(
+        message = "Use the extension set(index, element) method or setAt(index, element) instead.",
+        replaceWith = ReplaceWith("set(index, element)", "io.github.sooniln.fastcollect.ints.set"),
+        level = DeprecationLevel.HIDDEN)
+    override fun set(index: Int, element: Long): Long {
+        assertBoxing()
+        val value = get(index)
+        setAt(index, value)
+        return value
+    }
+
+    public fun setAt(index: Int, element: Long)
 
     override fun add(element: Long): Boolean {
         add(size, element)
         return true
     }
 
-    public fun add(index: Int, element: Long)
+    override fun add(index: Int, element: Long)
 
     override fun remove(element: Long): Boolean {
         val index = indexOf(element)
@@ -82,8 +94,6 @@ public interface MutableLongList : LongList, MutableLongCollection {
         removeAt(index)
         return true
     }
-
-    public fun removeAt(index: Int): Long
 
     public fun removeRange(fromIndex: Int, toIndex: Int)
 
@@ -99,12 +109,21 @@ public interface MutableLongList : LongList, MutableLongCollection {
         return addAll(size, elements)
     }
 
+    override fun removeAll(elements: Collection<Long>): Boolean {
+        return super.removeAll(elements)
+    }
+
+    override fun retainAll(elements: Collection<Long>): Boolean {
+        return super.retainAll(elements)
+    }
+
     public fun addAll(index: Int, elements: LongCollection): Boolean
-    public fun addAll(index: Int, elements: Collection<Long>): Boolean
+    override fun addAll(index: Int, elements: Collection<Long>): Boolean
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableLongList
 }
 
+public operator fun MutableLongList.set(index: Int, element: Long): Unit = setAt(index, element)
 public fun MutableLongList.addFirst(element: Long): Unit = add(0, element)
 public fun MutableLongList.addLast(element: Long): Unit = add(size, element)
 public fun MutableLongList.removeFirst(): Long = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
@@ -393,8 +412,8 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
         final override var size = toIndex - fromIndex
             private set
 
-        override fun set(index: Int, element: Long) {
-            list[index + offset] = element
+        override fun setAt(index: Int, element: Long) {
+            return list.setAt(index + offset, element)
         }
 
         override fun get(index: Int): Long {

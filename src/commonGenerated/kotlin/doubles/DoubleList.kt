@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.doubles
 
+import io.github.sooniln.fastcollect.Boxing.assertBoxing
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -60,18 +61,29 @@ public interface DoubleList : List<Double>, DoubleCollection {
     override fun subList(fromIndex: Int, toIndex: Int): DoubleList
 }
 
-public interface MutableDoubleList : DoubleList, MutableDoubleCollection {
+public interface MutableDoubleList : DoubleList, MutableDoubleCollection, MutableList<Double> {
     override fun listIterator(): MutableDoubleListIterator
     override fun listIterator(index: Int): MutableDoubleListIterator
 
-    public operator fun set(index: Int, element: Double)
+    @Deprecated(
+        message = "Use the extension set(index, element) method or setAt(index, element) instead.",
+        replaceWith = ReplaceWith("set(index, element)", "io.github.sooniln.fastcollect.ints.set"),
+        level = DeprecationLevel.HIDDEN)
+    override fun set(index: Int, element: Double): Double {
+        assertBoxing()
+        val value = get(index)
+        setAt(index, value)
+        return value
+    }
+
+    public fun setAt(index: Int, element: Double)
 
     override fun add(element: Double): Boolean {
         add(size, element)
         return true
     }
 
-    public fun add(index: Int, element: Double)
+    override fun add(index: Int, element: Double)
 
     override fun remove(element: Double): Boolean {
         val index = indexOf(element)
@@ -82,8 +94,6 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection {
         removeAt(index)
         return true
     }
-
-    public fun removeAt(index: Int): Double
 
     public fun removeRange(fromIndex: Int, toIndex: Int)
 
@@ -99,12 +109,21 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection {
         return addAll(size, elements)
     }
 
+    override fun removeAll(elements: Collection<Double>): Boolean {
+        return super.removeAll(elements)
+    }
+
+    override fun retainAll(elements: Collection<Double>): Boolean {
+        return super.retainAll(elements)
+    }
+
     public fun addAll(index: Int, elements: DoubleCollection): Boolean
-    public fun addAll(index: Int, elements: Collection<Double>): Boolean
+    override fun addAll(index: Int, elements: Collection<Double>): Boolean
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableDoubleList
 }
 
+public operator fun MutableDoubleList.set(index: Int, element: Double): Unit = setAt(index, element)
 public fun MutableDoubleList.addFirst(element: Double): Unit = add(0, element)
 public fun MutableDoubleList.addLast(element: Double): Unit = add(size, element)
 public fun MutableDoubleList.removeFirst(): Double = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
@@ -393,8 +412,8 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
         final override var size = toIndex - fromIndex
             private set
 
-        override fun set(index: Int, element: Double) {
-            list[index + offset] = element
+        override fun setAt(index: Int, element: Double) {
+            return list.setAt(index + offset, element)
         }
 
         override fun get(index: Int): Double {

@@ -36,7 +36,12 @@ public interface LongSet : Set<Long>, LongCollection {
     override fun containsAll(elements: Collection<Long>): Boolean = super.containsAll(elements)
 }
 
-public interface MutableLongSet : LongSet, MutableLongCollection
+public interface MutableLongSet : LongSet, MutableLongCollection, MutableSet<Long> {
+    override fun clear(): Unit = super.clear()
+    override fun addAll(elements: Collection<Long>): Boolean = super.addAll(elements)
+    override fun removeAll(elements: Collection<Long>): Boolean = super.removeAll(elements)
+    override fun retainAll(elements: Collection<Long>): Boolean = super.retainAll(elements)
+}
 
 private object EmptyLongSet : LongSet {
     override val size: Int get() = 0

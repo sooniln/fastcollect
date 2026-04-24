@@ -70,7 +70,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         return ring[position(rangeCheck(index))]
     }
 
-    override fun set(index: Int, element: Long) {
+    override fun setAt(index: Int, element: Long) {
         ring[position(rangeCheck(index))] = element
     }
 

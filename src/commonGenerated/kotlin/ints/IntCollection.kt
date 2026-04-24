@@ -44,13 +44,13 @@ public interface IntCollection : Collection<Int> {
     }
 }
 
-public interface MutableIntCollection : IntCollection, MutableIterable<Int> {
+public interface MutableIntCollection : IntCollection, MutableCollection<Int> {
     override fun iterator(): MutableIntIterator
 
-    public fun add(element: Int): Boolean
-    public fun remove(element: Int): Boolean
+    override fun add(element: Int): Boolean
+    override fun remove(element: Int): Boolean
 
-    public fun clear() {
+    override fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.nextInt()
@@ -66,7 +66,7 @@ public interface MutableIntCollection : IntCollection, MutableIterable<Int> {
         return modified
     }
 
-    public fun addAll(elements: Collection<Int>): Boolean {
+    override fun addAll(elements: Collection<Int>): Boolean {
         if (elements is IntCollection) {
             return addAll(elements)
         }
@@ -78,7 +78,7 @@ public interface MutableIntCollection : IntCollection, MutableIterable<Int> {
         return modified
     }
 
-    public fun removeAll(elements: Collection<Int>): Boolean {
+    override fun removeAll(elements: Collection<Int>): Boolean {
         var modified = false
         val it = iterator()
         while (it.hasNext()) {
@@ -90,7 +90,7 @@ public interface MutableIntCollection : IntCollection, MutableIterable<Int> {
         return modified
     }
 
-    public fun retainAll(elements: Collection<Int>): Boolean {
+    override fun retainAll(elements: Collection<Int>): Boolean {
         var modified = false
         val it = iterator()
         while (it.hasNext()) {

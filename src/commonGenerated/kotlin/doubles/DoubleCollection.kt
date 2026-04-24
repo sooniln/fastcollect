@@ -44,13 +44,13 @@ public interface DoubleCollection : Collection<Double> {
     }
 }
 
-public interface MutableDoubleCollection : DoubleCollection, MutableIterable<Double> {
+public interface MutableDoubleCollection : DoubleCollection, MutableCollection<Double> {
     override fun iterator(): MutableDoubleIterator
 
-    public fun add(element: Double): Boolean
-    public fun remove(element: Double): Boolean
+    override fun add(element: Double): Boolean
+    override fun remove(element: Double): Boolean
 
-    public fun clear() {
+    override fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.nextDouble()
@@ -66,7 +66,7 @@ public interface MutableDoubleCollection : DoubleCollection, MutableIterable<Dou
         return modified
     }
 
-    public fun addAll(elements: Collection<Double>): Boolean {
+    override fun addAll(elements: Collection<Double>): Boolean {
         if (elements is DoubleCollection) {
             return addAll(elements)
         }
@@ -78,7 +78,7 @@ public interface MutableDoubleCollection : DoubleCollection, MutableIterable<Dou
         return modified
     }
 
-    public fun removeAll(elements: Collection<Double>): Boolean {
+    override fun removeAll(elements: Collection<Double>): Boolean {
         var modified = false
         val it = iterator()
         while (it.hasNext()) {
@@ -90,7 +90,7 @@ public interface MutableDoubleCollection : DoubleCollection, MutableIterable<Dou
         return modified
     }
 
-    public fun retainAll(elements: Collection<Double>): Boolean {
+    override fun retainAll(elements: Collection<Double>): Boolean {
         var modified = false
         val it = iterator()
         while (it.hasNext()) {

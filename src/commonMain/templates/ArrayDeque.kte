@@ -70,7 +70,7 @@ public class ${Type}ArrayDeque private constructor(array: ${Type}Array, size: In
         return ring[position(rangeCheck(index))]
     }
 
-    override fun set(index: Int, element: ${Type}) {
+    override fun setAt(index: Int, element: ${Type}) {
         ring[position(rangeCheck(index))] = element
     }
 

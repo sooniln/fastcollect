@@ -44,13 +44,13 @@ public interface LongCollection : Collection<Long> {
     }
 }
 
-public interface MutableLongCollection : LongCollection, MutableIterable<Long> {
+public interface MutableLongCollection : LongCollection, MutableCollection<Long> {
     override fun iterator(): MutableLongIterator
 
-    public fun add(element: Long): Boolean
-    public fun remove(element: Long): Boolean
+    override fun add(element: Long): Boolean
+    override fun remove(element: Long): Boolean
 
-    public fun clear() {
+    override fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.nextLong()
@@ -66,7 +66,7 @@ public interface MutableLongCollection : LongCollection, MutableIterable<Long> {
         return modified
     }
 
-    public fun addAll(elements: Collection<Long>): Boolean {
+    override fun addAll(elements: Collection<Long>): Boolean {
         if (elements is LongCollection) {
             return addAll(elements)
         }
@@ -78,7 +78,7 @@ public interface MutableLongCollection : LongCollection, MutableIterable<Long> {
         return modified
     }
 
-    public fun removeAll(elements: Collection<Long>): Boolean {
+    override fun removeAll(elements: Collection<Long>): Boolean {
         var modified = false
         val it = iterator()
         while (it.hasNext()) {
@@ -90,7 +90,7 @@ public interface MutableLongCollection : LongCollection, MutableIterable<Long> {
         return modified
     }
 
-    public fun retainAll(elements: Collection<Long>): Boolean {
+    override fun retainAll(elements: Collection<Long>): Boolean {
         var modified = false
         val it = iterator()
         while (it.hasNext()) {

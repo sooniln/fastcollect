@@ -44,13 +44,13 @@ public interface FloatCollection : Collection<Float> {
     }
 }
 
-public interface MutableFloatCollection : FloatCollection, MutableIterable<Float> {
+public interface MutableFloatCollection : FloatCollection, MutableCollection<Float> {
     override fun iterator(): MutableFloatIterator
 
-    public fun add(element: Float): Boolean
-    public fun remove(element: Float): Boolean
+    override fun add(element: Float): Boolean
+    override fun remove(element: Float): Boolean
 
-    public fun clear() {
+    override fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.nextFloat()
@@ -66,7 +66,7 @@ public interface MutableFloatCollection : FloatCollection, MutableIterable<Float
         return modified
     }
 
-    public fun addAll(elements: Collection<Float>): Boolean {
+    override fun addAll(elements: Collection<Float>): Boolean {
         if (elements is FloatCollection) {
             return addAll(elements)
         }
@@ -78,7 +78,7 @@ public interface MutableFloatCollection : FloatCollection, MutableIterable<Float
         return modified
     }
 
-    public fun removeAll(elements: Collection<Float>): Boolean {
+    override fun removeAll(elements: Collection<Float>): Boolean {
         var modified = false
         val it = iterator()
         while (it.hasNext()) {
@@ -90,7 +90,7 @@ public interface MutableFloatCollection : FloatCollection, MutableIterable<Float
         return modified
     }
 
-    public fun retainAll(elements: Collection<Float>): Boolean {
+    override fun retainAll(elements: Collection<Float>): Boolean {
         var modified = false
         val it = iterator()
         while (it.hasNext()) {

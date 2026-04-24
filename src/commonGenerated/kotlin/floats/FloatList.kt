@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.floats
 
+import io.github.sooniln.fastcollect.Boxing.assertBoxing
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -60,18 +61,29 @@ public interface FloatList : List<Float>, FloatCollection {
     override fun subList(fromIndex: Int, toIndex: Int): FloatList
 }
 
-public interface MutableFloatList : FloatList, MutableFloatCollection {
+public interface MutableFloatList : FloatList, MutableFloatCollection, MutableList<Float> {
     override fun listIterator(): MutableFloatListIterator
     override fun listIterator(index: Int): MutableFloatListIterator
 
-    public operator fun set(index: Int, element: Float)
+    @Deprecated(
+        message = "Use the extension set(index, element) method or setAt(index, element) instead.",
+        replaceWith = ReplaceWith("set(index, element)", "io.github.sooniln.fastcollect.ints.set"),
+        level = DeprecationLevel.HIDDEN)
+    override fun set(index: Int, element: Float): Float {
+        assertBoxing()
+        val value = get(index)
+        setAt(index, value)
+        return value
+    }
+
+    public fun setAt(index: Int, element: Float)
 
     override fun add(element: Float): Boolean {
         add(size, element)
         return true
     }
 
-    public fun add(index: Int, element: Float)
+    override fun add(index: Int, element: Float)
 
     override fun remove(element: Float): Boolean {
         val index = indexOf(element)
@@ -82,8 +94,6 @@ public interface MutableFloatList : FloatList, MutableFloatCollection {
         removeAt(index)
         return true
     }
-
-    public fun removeAt(index: Int): Float
 
     public fun removeRange(fromIndex: Int, toIndex: Int)
 
@@ -99,12 +109,21 @@ public interface MutableFloatList : FloatList, MutableFloatCollection {
         return addAll(size, elements)
     }
 
+    override fun removeAll(elements: Collection<Float>): Boolean {
+        return super.removeAll(elements)
+    }
+
+    override fun retainAll(elements: Collection<Float>): Boolean {
+        return super.retainAll(elements)
+    }
+
     public fun addAll(index: Int, elements: FloatCollection): Boolean
-    public fun addAll(index: Int, elements: Collection<Float>): Boolean
+    override fun addAll(index: Int, elements: Collection<Float>): Boolean
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableFloatList
 }
 
+public operator fun MutableFloatList.set(index: Int, element: Float): Unit = setAt(index, element)
 public fun MutableFloatList.addFirst(element: Float): Unit = add(0, element)
 public fun MutableFloatList.addLast(element: Float): Unit = add(size, element)
 public fun MutableFloatList.removeFirst(): Float = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
@@ -393,8 +412,8 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
         final override var size = toIndex - fromIndex
             private set
 
-        override fun set(index: Int, element: Float) {
-            list[index + offset] = element
+        override fun setAt(index: Int, element: Float) {
+            return list.setAt(index + offset, element)
         }
 
         override fun get(index: Int): Float {
