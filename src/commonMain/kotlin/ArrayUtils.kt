@@ -27,8 +27,7 @@ public object ArrayUtils {
     private fun hugeSize(oldSize: Int, minGrowth: Int): Int {
         val minSize = oldSize + minGrowth
         return if (minSize < 0) {
-            // TODO: why can't OOME be used?
-            throw Error("Required array length $oldSize + $minGrowth is too large")
+            throw OutOfMemoryError("Required array length $oldSize + $minGrowth is too large")
         } else if (minSize <= SOFT_MAX_ARRAY_SIZE) {
             SOFT_MAX_ARRAY_SIZE
         } else {

@@ -223,7 +223,7 @@ public class LongHashSet(
 
         val lastIndex = arrayUsage - 1
         if (slot < lastIndex) {
-            valuesArr.copyInto(valuesArr, slot, slot + 1, lastIndex)
+            valuesArr[slot] = valuesArr[lastIndex]
         }
         --arrayUsage
     }
