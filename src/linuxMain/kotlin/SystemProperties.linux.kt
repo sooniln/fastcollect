@@ -29,7 +29,7 @@ internal actual fun getProperty(key: String): String? {
 
         args.find { arg ->
             if (arg.startsWith("--$key")) {
-                var remainder = arg.substring("--$key".length)
+                val remainder = arg.substring("--$key".length)
                 if (remainder.isEmpty()) return "true"
                 if (remainder.startsWith("=") || remainder.startsWith(",")) return remainder.substring(1)
             }
