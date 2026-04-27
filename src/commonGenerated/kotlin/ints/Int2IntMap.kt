@@ -31,7 +31,7 @@ public interface Int2IntMap : Map<Int, Int> {
     override fun get(key: Int): Int? {
         assertBoxing()
         val value = lookup(key)
-        return if (value == defaultValue && !containsKey(key)) null else value
+        return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
     public fun lookup(key: Int): Int
@@ -80,6 +80,11 @@ public interface Int2IntMap : Map<Int, Int> {
     public fun fastIterator(): FastIterator<Int2IntMap.Entry> = primitiveEntries.fastIterator()
 }
 
+
+// handles presence of NaN correctly
+@Suppress("NOTHING_TO_INLINE")
+public inline fun Int2IntMap.isDefaultValue(value: Int): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Int2IntMap.getValue(key: Int): Int = getOrElse(key) { throw NoSuchElementException() }
 
@@ -93,7 +98,7 @@ public inline fun Int2IntMap.getOrElse(key: Int, defaultValue: () -> Int): Int {
     }
 
     val value = lookup(key)
-    return if (value == this.defaultValue && !containsKey(key)) defaultValue() else value
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -128,7 +133,7 @@ public interface MutableInt2IntMap : Int2IntMap, MutableMap<Int, Int> {
     override fun put(key: Int, value: Int): Int? {
         assertBoxing()
         val value = putValue(key, value)
-        return if (value == defaultValue && !containsKey(key)) null else value
+        return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
     public fun putValue(key: Int, value: Int): Int
@@ -174,7 +179,7 @@ public inline fun MutableInt2IntMap.getOrPut(key: Int, defaultValue: () -> Int):
     }
 
     var value = lookup(key)
-    if (value == this.defaultValue && !containsKey(key)) {
+    if (isDefaultValue(value) && !containsKey(key)) {
         value = defaultValue()
         putValue(key, value)
     }
@@ -188,7 +193,7 @@ public inline fun MutableInt2IntMap.merge(key: Int, value: Int, merge: (oldValue
     }
 
     val oldValue = lookup(key)
-    val newValue = if (oldValue == defaultValue && !containsKey(key)) value else merge(oldValue, value)
+    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
     if (newValue != oldValue) {
         putValue(key, newValue)
     }

@@ -31,7 +31,7 @@ public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
     override fun get(key: ${KeyType}): ${ValueType}? {
         assertBoxing()
         val value = lookup(key)
-        return if (value == defaultValue && !containsKey(key)) null else value
+        return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
     public fun lookup(key: ${KeyType}): ${ValueType}
@@ -80,6 +80,11 @@ public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
     public fun fastIterator(): FastIterator<${KeyType}2${ValueType}Map.Entry> = primitiveEntries.fastIterator()
 }
 
+
+// handles presence of NaN correctly
+@Suppress("NOTHING_TO_INLINE")
+public inline fun ${KeyType}2${ValueType}Map.isDefaultValue(value: ${ValueType}): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+
 @Suppress("NOTHING_TO_INLINE")
 public inline fun ${KeyType}2${ValueType}Map.getValue(key: ${KeyType}): ${ValueType} = getOrElse(key) { throw NoSuchElementException() }
 
@@ -93,7 +98,7 @@ public inline fun ${KeyType}2${ValueType}Map.getOrElse(key: ${KeyType}, defaultV
     }
 
     val value = lookup(key)
-    return if (value == this.defaultValue && !containsKey(key)) defaultValue() else value
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -128,7 +133,7 @@ public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map,
     override fun put(key: ${KeyType}, value: ${ValueType}): ${ValueType}? {
         assertBoxing()
         val value = putValue(key, value)
-        return if (value == defaultValue && !containsKey(key)) null else value
+        return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
     public fun putValue(key: ${KeyType}, value: ${ValueType}): ${ValueType}
@@ -174,7 +179,7 @@ public inline fun Mutable${KeyType}2${ValueType}Map.getOrPut(key: ${KeyType}, de
     }
 
     var value = lookup(key)
-    if (value == this.defaultValue && !containsKey(key)) {
+    if (isDefaultValue(value) && !containsKey(key)) {
         value = defaultValue()
         putValue(key, value)
     }
@@ -188,7 +193,7 @@ public inline fun Mutable${KeyType}2${ValueType}Map.merge(key: ${KeyType}, value
     }
 
     val oldValue = lookup(key)
-    val newValue = if (oldValue == defaultValue && !containsKey(key)) value else merge(oldValue, value)
+    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
     if (newValue != oldValue) {
         putValue(key, newValue)
     }

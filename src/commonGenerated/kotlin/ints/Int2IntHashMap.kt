@@ -300,7 +300,7 @@ public class Int2IntHashMap(
             override val size: Int get() = this@Int2IntHashMap.size
             override fun contains(element: MutableInt2IntMap.MutableEntry): Boolean {
                 val value = lookup(element.key())
-                return if (value == defaultValue && !containsKey(element.key())) false else value == element.value()
+                return if (isDefaultValue(value) && !containsKey(element.key())) false else value == element.value()
             }
             override fun add(element: MutableInt2IntMap.MutableEntry): Boolean = throw UnsupportedOperationException()
             override fun remove(element: MutableInt2IntMap.MutableEntry): Boolean = throw UnsupportedOperationException()

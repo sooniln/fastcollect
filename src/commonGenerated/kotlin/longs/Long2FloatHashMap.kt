@@ -300,7 +300,7 @@ public class Long2FloatHashMap(
             override val size: Int get() = this@Long2FloatHashMap.size
             override fun contains(element: MutableLong2FloatMap.MutableEntry): Boolean {
                 val value = lookup(element.key())
-                return if (value == defaultValue && !containsKey(element.key())) false else value == element.value()
+                return if (isDefaultValue(value) && !containsKey(element.key())) false else value == element.value()
             }
             override fun add(element: MutableLong2FloatMap.MutableEntry): Boolean = throw UnsupportedOperationException()
             override fun remove(element: MutableLong2FloatMap.MutableEntry): Boolean = throw UnsupportedOperationException()

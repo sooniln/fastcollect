@@ -31,7 +31,7 @@ public interface Long2IntMap : Map<Long, Int> {
     override fun get(key: Long): Int? {
         assertBoxing()
         val value = lookup(key)
-        return if (value == defaultValue && !containsKey(key)) null else value
+        return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
     public fun lookup(key: Long): Int
@@ -80,6 +80,11 @@ public interface Long2IntMap : Map<Long, Int> {
     public fun fastIterator(): FastIterator<Long2IntMap.Entry> = primitiveEntries.fastIterator()
 }
 
+
+// handles presence of NaN correctly
+@Suppress("NOTHING_TO_INLINE")
+public inline fun Long2IntMap.isDefaultValue(value: Int): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Long2IntMap.getValue(key: Long): Int = getOrElse(key) { throw NoSuchElementException() }
 
@@ -93,7 +98,7 @@ public inline fun Long2IntMap.getOrElse(key: Long, defaultValue: () -> Int): Int
     }
 
     val value = lookup(key)
-    return if (value == this.defaultValue && !containsKey(key)) defaultValue() else value
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -128,7 +133,7 @@ public interface MutableLong2IntMap : Long2IntMap, MutableMap<Long, Int> {
     override fun put(key: Long, value: Int): Int? {
         assertBoxing()
         val value = putValue(key, value)
-        return if (value == defaultValue && !containsKey(key)) null else value
+        return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
     public fun putValue(key: Long, value: Int): Int
@@ -174,7 +179,7 @@ public inline fun MutableLong2IntMap.getOrPut(key: Long, defaultValue: () -> Int
     }
 
     var value = lookup(key)
-    if (value == this.defaultValue && !containsKey(key)) {
+    if (isDefaultValue(value) && !containsKey(key)) {
         value = defaultValue()
         putValue(key, value)
     }
@@ -188,7 +193,7 @@ public inline fun MutableLong2IntMap.merge(key: Long, value: Int, merge: (oldVal
     }
 
     val oldValue = lookup(key)
-    val newValue = if (oldValue == defaultValue && !containsKey(key)) value else merge(oldValue, value)
+    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
     if (newValue != oldValue) {
         putValue(key, newValue)
     }

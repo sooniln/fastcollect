@@ -31,7 +31,7 @@ public interface Long2FloatMap : Map<Long, Float> {
     override fun get(key: Long): Float? {
         assertBoxing()
         val value = lookup(key)
-        return if (value == defaultValue && !containsKey(key)) null else value
+        return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
     public fun lookup(key: Long): Float
@@ -80,6 +80,11 @@ public interface Long2FloatMap : Map<Long, Float> {
     public fun fastIterator(): FastIterator<Long2FloatMap.Entry> = primitiveEntries.fastIterator()
 }
 
+
+// handles presence of NaN correctly
+@Suppress("NOTHING_TO_INLINE")
+public inline fun Long2FloatMap.isDefaultValue(value: Float): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Long2FloatMap.getValue(key: Long): Float = getOrElse(key) { throw NoSuchElementException() }
 
@@ -93,7 +98,7 @@ public inline fun Long2FloatMap.getOrElse(key: Long, defaultValue: () -> Float):
     }
 
     val value = lookup(key)
-    return if (value == this.defaultValue && !containsKey(key)) defaultValue() else value
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
 }
 
 @OptIn(ExperimentalContracts::class)
@@ -128,7 +133,7 @@ public interface MutableLong2FloatMap : Long2FloatMap, MutableMap<Long, Float> {
     override fun put(key: Long, value: Float): Float? {
         assertBoxing()
         val value = putValue(key, value)
-        return if (value == defaultValue && !containsKey(key)) null else value
+        return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
     public fun putValue(key: Long, value: Float): Float
@@ -174,7 +179,7 @@ public inline fun MutableLong2FloatMap.getOrPut(key: Long, defaultValue: () -> F
     }
 
     var value = lookup(key)
-    if (value == this.defaultValue && !containsKey(key)) {
+    if (isDefaultValue(value) && !containsKey(key)) {
         value = defaultValue()
         putValue(key, value)
     }
@@ -188,7 +193,7 @@ public inline fun MutableLong2FloatMap.merge(key: Long, value: Float, merge: (ol
     }
 
     val oldValue = lookup(key)
-    val newValue = if (oldValue == defaultValue && !containsKey(key)) value else merge(oldValue, value)
+    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
     if (newValue != oldValue) {
         putValue(key, newValue)
     }
