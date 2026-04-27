@@ -1,6 +1,9 @@
 package io.github.sooniln.fastcollect.longs
 
 import io.github.sooniln.fastcollect.Boxing.assertBoxing
+import io.github.sooniln.fastcollect.EntrySet
+import io.github.sooniln.fastcollect.FastIterator
+import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.floats.FloatCollection
 import io.github.sooniln.fastcollect.floats.MutableFloatCollection
 import kotlin.contracts.ExperimentalContracts
@@ -16,22 +19,22 @@ public interface Long2FloatMap : Map<Long, Float> {
 
     override fun containsValue(value: Float): Boolean {
         for (entry in primitiveEntries) {
-            if (entry.value == value) return true
+            if (entry.value() == value) return true
         }
         return false
     }
 
     @Deprecated(
-        message = "Use the extension get(key) method instead.",
-        replaceWith = ReplaceWith("get(key)", "io.github.sooniln.fastcollect.ints.get"),
-        level = DeprecationLevel.HIDDEN)
+        message = "Use the lookup(key) method instead.",
+        replaceWith = ReplaceWith("lookup(key)"),
+        level = DeprecationLevel.WARNING)
     override fun get(key: Long): Float? {
         assertBoxing()
-        val value = getValue(key)
+        val value = lookup(key)
         return if (value == defaultValue && !containsKey(key)) null else value
     }
 
-    public fun getValue(key: Long): Float
+    public fun lookup(key: Long): Float
 
     override val keys: LongSet
 
@@ -40,25 +43,48 @@ public interface Long2FloatMap : Map<Long, Float> {
     @Deprecated(
         message = "Use primitiveEntries instead.",
         replaceWith = ReplaceWith("primitiveEntries"),
-        level = DeprecationLevel.HIDDEN)
+        level = DeprecationLevel.WARNING)
     override val entries: Set<Map.Entry<Long, Float>>
         get() {
             assertBoxing()
             return primitiveEntries
         }
 
-    public val primitiveEntries: Set<Entry>
+    public val primitiveEntries: EntrySet<Entry>
 
     public interface Entry : Map.Entry<Long, Float> {
-        override val key: Long
-        override val value: Float
+        @Deprecated(
+            message = "Use key() instead.",
+            replaceWith = ReplaceWith("key()"),
+            level = DeprecationLevel.WARNING)
+        override val key: Long get() {
+            assertBoxing()
+            return key()
+        }
+
+        @Deprecated(
+            message = "Use value() instead.",
+            replaceWith = ReplaceWith("key()"),
+            level = DeprecationLevel.WARNING)
+        override val value: Float get() {
+            assertBoxing()
+            return value()
+        }
+
+        public fun key(): Long
+        public fun value(): Float
     }
+
+    public operator fun iterator(): Iterator<Long2FloatMap.Entry> = primitiveEntries.iterator()
+
+    public fun fastIterator(): FastIterator<Long2FloatMap.Entry> = primitiveEntries.fastIterator()
 }
 
-public operator fun Long2FloatMap.get(key: Long): Float = getValue(key)
+@Suppress("NOTHING_TO_INLINE")
+public inline fun Long2FloatMap.getValue(key: Long): Float = getOrElse(key) { throw NoSuchElementException() }
 
 @Suppress("NOTHING_TO_INLINE")
-public inline operator fun Long2FloatMap.iterator(): Iterator<Long2FloatMap.Entry> = primitiveEntries.iterator()
+public inline fun Long2FloatMap.getOrDefault(key: Long, defaultValue: Float): Float = getOrElse(key) { defaultValue }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun Long2FloatMap.getOrElse(key: Long, defaultValue: () -> Float): Float {
@@ -66,8 +92,31 @@ public inline fun Long2FloatMap.getOrElse(key: Long, defaultValue: () -> Float):
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
 
-    val value = getValue(key)
+    val value = lookup(key)
     return if (value == this.defaultValue && !containsKey(key)) defaultValue() else value
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun Long2FloatMap.filterTo(destination: MutableLong2FloatMap, predicate: (key: Long, value: Float) -> Boolean): MutableLong2FloatMap {
+    contract {
+        callsInPlace(predicate, InvocationKind.UNKNOWN)
+    }
+
+    for (entry in primitiveEntries.fastIterator()) {
+        if (predicate(entry.key(), entry.value())) {
+            destination.putValue(entry.key(), entry.value())
+        }
+    }
+    return destination
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun Long2FloatMap.filter(predicate: (key: Long, value: Float) -> Boolean): Long2FloatMap {
+    contract {
+        callsInPlace(predicate, InvocationKind.UNKNOWN)
+    }
+
+    return filterTo(Long2FloatHashMap(), predicate)
 }
 
 public interface MutableLong2FloatMap : Long2FloatMap, MutableMap<Long, Float> {
@@ -75,7 +124,7 @@ public interface MutableLong2FloatMap : Long2FloatMap, MutableMap<Long, Float> {
     @Deprecated(
         message = "Use putValue(key, value) instead.",
         replaceWith = ReplaceWith("putValue(key, value)"),
-        level = DeprecationLevel.HIDDEN)
+        level = DeprecationLevel.WARNING)
     override fun put(key: Long, value: Float): Float? {
         assertBoxing()
         val value = putValue(key, value)
@@ -91,7 +140,7 @@ public interface MutableLong2FloatMap : Long2FloatMap, MutableMap<Long, Float> {
     @Deprecated(
         message = "Use removeKey(key) instead.",
         replaceWith = ReplaceWith("removeKey(key, value)"),
-        level = DeprecationLevel.HIDDEN)
+        level = DeprecationLevel.WARNING)
     override fun remove(key: Long): Float? {
         assertBoxing()
         return if (containsKey(key)) removeKey(key) else null
@@ -103,23 +152,20 @@ public interface MutableLong2FloatMap : Long2FloatMap, MutableMap<Long, Float> {
     override val values: MutableFloatCollection
 
     @Suppress("UNCHECKED_CAST")
-    @Deprecated(message = "Use primitiveEntries instead.", replaceWith = ReplaceWith("primitiveEntries"), level = DeprecationLevel.HIDDEN)
+    @Deprecated(
+        message = "Use primitiveEntries instead.",
+        replaceWith = ReplaceWith("primitiveEntries"),
+        level = DeprecationLevel.WARNING)
     override val entries: MutableSet<MutableMap.MutableEntry<Long, Float>>
         get() {
             assertBoxing()
             return primitiveEntries as MutableSet<MutableMap.MutableEntry<Long, Float>>
         }
 
-    override val primitiveEntries: MutableSet<MutableEntry>
+    override val primitiveEntries: MutableEntrySet<MutableEntry>
 
-    public interface MutableEntry : Long2FloatMap.Entry, MutableMap.MutableEntry<Long, Float> {
-        override val key: Long
-        override val value: Float
-    }
+    public interface MutableEntry : Long2FloatMap.Entry, MutableMap.MutableEntry<Long, Float>
 }
-
-public fun MutableLong2FloatMap.put(key: Long, value: Float): Float = putValue(key, value)
-public fun MutableLong2FloatMap.remove(key: Long): Float = removeKey(key)
 
 @OptIn(ExperimentalContracts::class)
 public inline fun MutableLong2FloatMap.getOrPut(key: Long, defaultValue: () -> Float): Float {
@@ -127,7 +173,7 @@ public inline fun MutableLong2FloatMap.getOrPut(key: Long, defaultValue: () -> F
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
 
-    var value = getValue(key)
+    var value = lookup(key)
     if (value == this.defaultValue && !containsKey(key)) {
         value = defaultValue()
         putValue(key, value)
@@ -141,7 +187,7 @@ public inline fun MutableLong2FloatMap.merge(key: Long, value: Float, merge: (ol
         callsInPlace(merge, InvocationKind.AT_MOST_ONCE)
     }
 
-    val oldValue = getValue(key)
+    val oldValue = lookup(key)
     val newValue = if (oldValue == defaultValue && !containsKey(key)) value else merge(oldValue, value)
     if (newValue != oldValue) {
         putValue(key, newValue)

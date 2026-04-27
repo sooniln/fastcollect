@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 rootProject.name = "fastcollect"
 
 include("benchmark")
+include("jitAsm")

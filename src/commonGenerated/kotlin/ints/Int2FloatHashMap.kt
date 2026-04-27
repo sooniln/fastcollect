@@ -1,10 +1,13 @@
 package io.github.sooniln.fastcollect.ints
 
+import io.github.sooniln.fastcollect.FastIterator
+import io.github.sooniln.fastcollect.MutableEntrySet
+import io.github.sooniln.fastcollect.MutableFastIterator
 import io.github.sooniln.fastcollect.floats.MutableFloatCollection
 import io.github.sooniln.fastcollect.floats.MutableFloatIterator
 import kotlin.math.max
 
-internal class Int2FloatHashMap(
+public class Int2FloatHashMap(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
     private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
     override val defaultValue: Float = Float.NaN
@@ -47,17 +50,13 @@ internal class Int2FloatHashMap(
         return size == 0
     }
 
-    fun ensureCapacity(capacity: Int) {
+    public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
         if (keysArr.isEmpty()) {
             threshold = capacity
         } else {
             growTo(capacity)
         }
-    }
-
-    override operator fun set(key: Int, value: Float) {
-        put(key, value)
     }
 
     override fun putValue(key: Int, value: Float): Float {
@@ -264,11 +263,11 @@ internal class Int2FloatHashMap(
         ensureCapacity(from.size)
 
         if (from is Int2FloatMap) {
-            for (entry in from.primitiveEntries) {
-                set(entry.key, entry.value)
+            for (entry in from.fastIterator()) {
+                set(entry.key(), entry.value())
             }
         } else {
-            for (entry in from.entries) {
+            for (entry in from) {
                 set(entry.key, entry.value)
             }
         }
@@ -296,17 +295,18 @@ internal class Int2FloatHashMap(
         }
     }
 
-    override val primitiveEntries: MutableSet<MutableInt2FloatMap.MutableEntry> by lazy {
-        object : AbstractMutableSet<MutableInt2FloatMap.MutableEntry>() {
+    override val primitiveEntries: MutableEntrySet<MutableInt2FloatMap.MutableEntry> by lazy {
+        object : AbstractMutableSet<MutableInt2FloatMap.MutableEntry>(), MutableEntrySet<MutableInt2FloatMap.MutableEntry> {
             override val size: Int get() = this@Int2FloatHashMap.size
             override fun contains(element: MutableInt2FloatMap.MutableEntry): Boolean {
-                val value = getValue(element.key)
-                return if (value == defaultValue && !containsKey(element.key)) false else value == element.value
+                val value = lookup(element.key())
+                return if (value == defaultValue && !containsKey(element.key())) false else value == element.value()
             }
             override fun add(element: MutableInt2FloatMap.MutableEntry): Boolean = throw UnsupportedOperationException()
             override fun remove(element: MutableInt2FloatMap.MutableEntry): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): MutableIterator<MutableInt2FloatMap.MutableEntry> = EntryIterator<MutableInt2FloatMap.MutableEntry> { key, value -> Entry(key, value) }
-            override fun clear() = this@Int2FloatHashMap.clear()
+            override fun iterator(): MutableIterator<MutableInt2FloatMap.MutableEntry> = EntryIterator()
+            override fun fastIterator(): MutableFastIterator<MutableInt2FloatMap.MutableEntry> = FastEntryIterator()
+            override fun clear() = throw UnsupportedOperationException()
         }
     }
 
@@ -338,7 +338,7 @@ internal class Int2FloatHashMap(
         }
     }
 
-    override fun getValue(key: Int): Float {
+    override fun lookup(key: Int): Float {
         if (key == ZERO) {
             return if (containsZero) {
                 zeroValue
@@ -407,10 +407,8 @@ internal class Int2FloatHashMap(
         if (other is Map<*, *>) {
             if (other.size != size) return false
 
-            for (entry in primitiveEntries) {
-                val key = entry.key
-                val value = entry.value
-                if (value != other[key]) return false
+            for (entry in FastEntryIterator()) {
+                if (other[entry.key()] != entry.value()) return false
             }
 
             return true
@@ -421,14 +419,15 @@ internal class Int2FloatHashMap(
 
     override fun hashCode(): Int {
         var result = 0
-        val it = EntryIterator { key, value -> result += key.hashCode() xor value.hashCode() }
-        while (it.hasNext()) it.next()
+        for (entry in FastEntryIterator()) {
+            result += entry.key().hashCode() xor entry.value().hashCode()
+        }
         return result
     }
 
     // TODO: should be in abstract class?
     override fun toString(): String {
-        return primitiveEntries.joinToString(", ", "{", "}") { "${it.key}=${it.value}" }
+        return Iterable<Entry> { FastEntryIterator() }.joinToString(", ", "{", "}") { "${it.key()}=${it.value()}" }
     }
 
     private inner class KeyIterator : MutableIntIterator() {
@@ -538,7 +537,7 @@ internal class Int2FloatHashMap(
         }
     }
 
-    private inner class EntryIterator<T>(private val visitor: (Int, Float) -> T): MutableIterator<T> {
+    private inner class FastEntryIterator: MutableFastIterator<Entry> {
         private val keysArr = this@Int2FloatHashMap.keysArr
         private val valuesArr = this@Int2FloatHashMap.valuesArr
         private val arrayUsage = this@Int2FloatHashMap.arrayUsage
@@ -546,8 +545,10 @@ internal class Int2FloatHashMap(
         private var entriesLeft = size
         private var slot = numSlots()
         private var previousSlot = -1
+
         private var nextKey = ZERO
         private var nextValue = zeroValue
+        private val entry = Entry(nextKey, nextValue)
 
         init {
             if (entriesLeft > 0 && !containsZero) decrement()
@@ -559,11 +560,12 @@ internal class Int2FloatHashMap(
             return entriesLeft > 0
         }
 
-        override fun next(): T {
+        override fun next(): Entry {
             if (entriesLeft-- <= 0) throw NoSuchElementException()
-            val next = visitor(nextKey, nextValue)
+            entry._key = nextKey
+            entry._value = nextValue
             decrement()
-            return next
+            return entry
         }
 
         override fun remove() {
@@ -594,19 +596,34 @@ internal class Int2FloatHashMap(
         }
     }
 
-    private inner class Entry(override val key: Int, value: Float) : MutableInt2FloatMap.MutableEntry {
-        override var value: Float = value
-            private set
+    private inner class EntryIterator : MutableIterator<Entry> {
+        private val it = FastEntryIterator()
+
+        override fun hasNext(): Boolean = it.hasNext()
+        override fun next(): Entry = Entry(it.next())
+        override fun remove() = it.remove()
+    }
+
+    private inner class Entry(var _key: Int, var _value: Float) : MutableInt2FloatMap.MutableEntry {
+        constructor(entry: Entry) : this(entry._key, entry._value)
+
+        override fun key(): Int = _key
+        override fun value(): Float = _value
 
         override fun setValue(newValue: Float): Float {
-            val oldValue = value
-            merge(key, newValue) { oldValue, value ->
-                if (oldValue != value) throw ConcurrentModificationException()
-                return@merge newValue
-            }
+            val oldValue = _value
+            // TODO: what the fuck is going on with nullability here
+            _value = merge(_key, newValue) { oldValue, value ->
+                if (oldValue != _value) throw ConcurrentModificationException()
+                return@merge value
+            }!!
             return oldValue
         }
     }
+
+    override operator fun iterator(): Iterator<Int2FloatMap.Entry> = EntryIterator()
+
+    override fun fastIterator(): FastIterator<Int2FloatMap.Entry> = FastEntryIterator()
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun isHashing(): Boolean = keysArr.size > HASHIFY_THRESHOLD
@@ -637,7 +654,7 @@ internal class Int2FloatHashMap(
         return (slot - slot(mask)) and mask
     }
 
-    companion object {
+    private companion object {
 
         private val EMPTY_KEY_ARRAY = IntArray(0)
         private val EMPTY_VALUE_ARRAY = FloatArray(0)

@@ -23,5 +23,9 @@ jmh {
     verbosity = "EXTRA"
     failOnError = true
     //profilers.add("gc")
-    includes.add("IntSetBenchmark.fast")
+    includes.add("Int2IntMapBenchmark\\.fastcollectIter")
+}
+
+tasks.withType<me.champeau.jmh.JMHTask> {
+    outputs.upToDateWhen { false }
 }

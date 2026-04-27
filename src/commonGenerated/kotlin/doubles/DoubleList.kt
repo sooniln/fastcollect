@@ -66,13 +66,13 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
     override fun listIterator(index: Int): MutableDoubleListIterator
 
     @Deprecated(
-        message = "Use the extension set(index, element) method or setAt(index, element) instead.",
-        replaceWith = ReplaceWith("set(index, element)", "io.github.sooniln.fastcollect.ints.set"),
-        level = DeprecationLevel.HIDDEN)
+        message = "Use setAt(index, element) instead.",
+        replaceWith = ReplaceWith("setAt(index, element)"),
+        level = DeprecationLevel.WARNING)
     override fun set(index: Int, element: Double): Double {
         assertBoxing()
         val value = get(index)
-        setAt(index, value)
+        setAt(index, element)
         return value
     }
 
@@ -123,7 +123,6 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
     override fun subList(fromIndex: Int, toIndex: Int): MutableDoubleList
 }
 
-public operator fun MutableDoubleList.set(index: Int, element: Double): Unit = setAt(index, element)
 public fun MutableDoubleList.addFirst(element: Double): Unit = add(0, element)
 public fun MutableDoubleList.addLast(element: Double): Unit = add(size, element)
 public fun MutableDoubleList.removeFirst(): Double = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
@@ -391,7 +390,7 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
 
         override fun set(element: Double) {
             check(lastIndex >= 0)
-            set(lastIndex, element)
+            setAt(lastIndex, element)
         }
 
         override fun add(element: Double) {

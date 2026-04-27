@@ -66,13 +66,13 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, Mut
     override fun listIterator(index: Int): Mutable${Type}ListIterator
 
     @Deprecated(
-        message = "Use the extension set(index, element) method or setAt(index, element) instead.",
-        replaceWith = ReplaceWith("set(index, element)", "io.github.sooniln.fastcollect.ints.set"),
-        level = DeprecationLevel.HIDDEN)
+        message = "Use setAt(index, element) instead.",
+        replaceWith = ReplaceWith("setAt(index, element)"),
+        level = DeprecationLevel.WARNING)
     override fun set(index: Int, element: ${Type}): ${Type} {
         assertBoxing()
         val value = get(index)
-        setAt(index, value)
+        setAt(index, element)
         return value
     }
 
@@ -123,7 +123,6 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, Mut
     override fun subList(fromIndex: Int, toIndex: Int): Mutable${Type}List
 }
 
-public operator fun Mutable${Type}List.set(index: Int, element: ${Type}): Unit = setAt(index, element)
 public fun Mutable${Type}List.addFirst(element: ${Type}): Unit = add(0, element)
 public fun Mutable${Type}List.addLast(element: ${Type}): Unit = add(size, element)
 public fun Mutable${Type}List.removeFirst(): ${Type} = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
@@ -391,7 +390,7 @@ public abstract class AbstractMutable${Type}List : Abstract${Type}List(), Mutabl
 
         override fun set(element: ${Type}) {
             check(lastIndex >= 0)
-            set(lastIndex, element)
+            setAt(lastIndex, element)
         }
 
         override fun add(element: ${Type}) {

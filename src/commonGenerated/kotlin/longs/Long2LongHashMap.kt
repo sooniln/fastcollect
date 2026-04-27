@@ -1,10 +1,13 @@
 package io.github.sooniln.fastcollect.longs
 
+import io.github.sooniln.fastcollect.FastIterator
+import io.github.sooniln.fastcollect.MutableEntrySet
+import io.github.sooniln.fastcollect.MutableFastIterator
 import io.github.sooniln.fastcollect.longs.MutableLongCollection
 import io.github.sooniln.fastcollect.longs.MutableLongIterator
 import kotlin.math.max
 
-internal class Long2LongHashMap(
+public class Long2LongHashMap(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
     private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
     override val defaultValue: Long = Long.MIN_VALUE
@@ -47,17 +50,13 @@ internal class Long2LongHashMap(
         return size == 0
     }
 
-    fun ensureCapacity(capacity: Int) {
+    public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
         if (keysArr.isEmpty()) {
             threshold = capacity
         } else {
             growTo(capacity)
         }
-    }
-
-    override operator fun set(key: Long, value: Long) {
-        put(key, value)
     }
 
     override fun putValue(key: Long, value: Long): Long {
@@ -264,11 +263,11 @@ internal class Long2LongHashMap(
         ensureCapacity(from.size)
 
         if (from is Long2LongMap) {
-            for (entry in from.primitiveEntries) {
-                set(entry.key, entry.value)
+            for (entry in from.fastIterator()) {
+                set(entry.key(), entry.value())
             }
         } else {
-            for (entry in from.entries) {
+            for (entry in from) {
                 set(entry.key, entry.value)
             }
         }
@@ -296,17 +295,18 @@ internal class Long2LongHashMap(
         }
     }
 
-    override val primitiveEntries: MutableSet<MutableLong2LongMap.MutableEntry> by lazy {
-        object : AbstractMutableSet<MutableLong2LongMap.MutableEntry>() {
+    override val primitiveEntries: MutableEntrySet<MutableLong2LongMap.MutableEntry> by lazy {
+        object : AbstractMutableSet<MutableLong2LongMap.MutableEntry>(), MutableEntrySet<MutableLong2LongMap.MutableEntry> {
             override val size: Int get() = this@Long2LongHashMap.size
             override fun contains(element: MutableLong2LongMap.MutableEntry): Boolean {
-                val value = getValue(element.key)
-                return if (value == defaultValue && !containsKey(element.key)) false else value == element.value
+                val value = lookup(element.key())
+                return if (value == defaultValue && !containsKey(element.key())) false else value == element.value()
             }
             override fun add(element: MutableLong2LongMap.MutableEntry): Boolean = throw UnsupportedOperationException()
             override fun remove(element: MutableLong2LongMap.MutableEntry): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): MutableIterator<MutableLong2LongMap.MutableEntry> = EntryIterator<MutableLong2LongMap.MutableEntry> { key, value -> Entry(key, value) }
-            override fun clear() = this@Long2LongHashMap.clear()
+            override fun iterator(): MutableIterator<MutableLong2LongMap.MutableEntry> = EntryIterator()
+            override fun fastIterator(): MutableFastIterator<MutableLong2LongMap.MutableEntry> = FastEntryIterator()
+            override fun clear() = throw UnsupportedOperationException()
         }
     }
 
@@ -338,7 +338,7 @@ internal class Long2LongHashMap(
         }
     }
 
-    override fun getValue(key: Long): Long {
+    override fun lookup(key: Long): Long {
         if (key == ZERO) {
             return if (containsZero) {
                 zeroValue
@@ -407,10 +407,8 @@ internal class Long2LongHashMap(
         if (other is Map<*, *>) {
             if (other.size != size) return false
 
-            for (entry in primitiveEntries) {
-                val key = entry.key
-                val value = entry.value
-                if (value != other[key]) return false
+            for (entry in FastEntryIterator()) {
+                if (other[entry.key()] != entry.value()) return false
             }
 
             return true
@@ -421,14 +419,15 @@ internal class Long2LongHashMap(
 
     override fun hashCode(): Int {
         var result = 0
-        val it = EntryIterator { key, value -> result += key.hashCode() xor value.hashCode() }
-        while (it.hasNext()) it.next()
+        for (entry in FastEntryIterator()) {
+            result += entry.key().hashCode() xor entry.value().hashCode()
+        }
         return result
     }
 
     // TODO: should be in abstract class?
     override fun toString(): String {
-        return primitiveEntries.joinToString(", ", "{", "}") { "${it.key}=${it.value}" }
+        return Iterable<Entry> { FastEntryIterator() }.joinToString(", ", "{", "}") { "${it.key()}=${it.value()}" }
     }
 
     private inner class KeyIterator : MutableLongIterator() {
@@ -538,7 +537,7 @@ internal class Long2LongHashMap(
         }
     }
 
-    private inner class EntryIterator<T>(private val visitor: (Long, Long) -> T): MutableIterator<T> {
+    private inner class FastEntryIterator: MutableFastIterator<Entry> {
         private val keysArr = this@Long2LongHashMap.keysArr
         private val valuesArr = this@Long2LongHashMap.valuesArr
         private val arrayUsage = this@Long2LongHashMap.arrayUsage
@@ -546,8 +545,10 @@ internal class Long2LongHashMap(
         private var entriesLeft = size
         private var slot = numSlots()
         private var previousSlot = -1
+
         private var nextKey = ZERO
         private var nextValue = zeroValue
+        private val entry = Entry(nextKey, nextValue)
 
         init {
             if (entriesLeft > 0 && !containsZero) decrement()
@@ -559,11 +560,12 @@ internal class Long2LongHashMap(
             return entriesLeft > 0
         }
 
-        override fun next(): T {
+        override fun next(): Entry {
             if (entriesLeft-- <= 0) throw NoSuchElementException()
-            val next = visitor(nextKey, nextValue)
+            entry._key = nextKey
+            entry._value = nextValue
             decrement()
-            return next
+            return entry
         }
 
         override fun remove() {
@@ -594,19 +596,34 @@ internal class Long2LongHashMap(
         }
     }
 
-    private inner class Entry(override val key: Long, value: Long) : MutableLong2LongMap.MutableEntry {
-        override var value: Long = value
-            private set
+    private inner class EntryIterator : MutableIterator<Entry> {
+        private val it = FastEntryIterator()
+
+        override fun hasNext(): Boolean = it.hasNext()
+        override fun next(): Entry = Entry(it.next())
+        override fun remove() = it.remove()
+    }
+
+    private inner class Entry(var _key: Long, var _value: Long) : MutableLong2LongMap.MutableEntry {
+        constructor(entry: Entry) : this(entry._key, entry._value)
+
+        override fun key(): Long = _key
+        override fun value(): Long = _value
 
         override fun setValue(newValue: Long): Long {
-            val oldValue = value
-            merge(key, newValue) { oldValue, value ->
-                if (oldValue != value) throw ConcurrentModificationException()
-                return@merge newValue
-            }
+            val oldValue = _value
+            // TODO: what the fuck is going on with nullability here
+            _value = merge(_key, newValue) { oldValue, value ->
+                if (oldValue != _value) throw ConcurrentModificationException()
+                return@merge value
+            }!!
             return oldValue
         }
     }
+
+    override operator fun iterator(): Iterator<Long2LongMap.Entry> = EntryIterator()
+
+    override fun fastIterator(): FastIterator<Long2LongMap.Entry> = FastEntryIterator()
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun isHashing(): Boolean = keysArr.size > HASHIFY_THRESHOLD
@@ -637,7 +654,7 @@ internal class Long2LongHashMap(
         return (slot - slot(mask)) and mask
     }
 
-    companion object {
+    private companion object {
 
         private val EMPTY_KEY_ARRAY = LongArray(0)
         private val EMPTY_VALUE_ARRAY = LongArray(0)

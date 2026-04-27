@@ -121,6 +121,8 @@ tasks.register<Copy>("GenerateCollections") {
 }
 
 kotlin {
+    jvmToolchain(17)
+
     jvm {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)

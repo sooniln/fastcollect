@@ -1,6 +1,9 @@
 package io.github.sooniln.fastcollect.ints
 
 import io.github.sooniln.fastcollect.Boxing.assertBoxing
+import io.github.sooniln.fastcollect.EntrySet
+import io.github.sooniln.fastcollect.FastIterator
+import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.longs.LongCollection
 import io.github.sooniln.fastcollect.longs.MutableLongCollection
 import kotlin.contracts.ExperimentalContracts
@@ -16,22 +19,22 @@ public interface Int2LongMap : Map<Int, Long> {
 
     override fun containsValue(value: Long): Boolean {
         for (entry in primitiveEntries) {
-            if (entry.value == value) return true
+            if (entry.value() == value) return true
         }
         return false
     }
 
     @Deprecated(
-        message = "Use the extension get(key) method instead.",
-        replaceWith = ReplaceWith("get(key)", "io.github.sooniln.fastcollect.ints.get"),
-        level = DeprecationLevel.HIDDEN)
+        message = "Use the lookup(key) method instead.",
+        replaceWith = ReplaceWith("lookup(key)"),
+        level = DeprecationLevel.WARNING)
     override fun get(key: Int): Long? {
         assertBoxing()
-        val value = getValue(key)
+        val value = lookup(key)
         return if (value == defaultValue && !containsKey(key)) null else value
     }
 
-    public fun getValue(key: Int): Long
+    public fun lookup(key: Int): Long
 
     override val keys: IntSet
 
@@ -40,25 +43,48 @@ public interface Int2LongMap : Map<Int, Long> {
     @Deprecated(
         message = "Use primitiveEntries instead.",
         replaceWith = ReplaceWith("primitiveEntries"),
-        level = DeprecationLevel.HIDDEN)
+        level = DeprecationLevel.WARNING)
     override val entries: Set<Map.Entry<Int, Long>>
         get() {
             assertBoxing()
             return primitiveEntries
         }
 
-    public val primitiveEntries: Set<Entry>
+    public val primitiveEntries: EntrySet<Entry>
 
     public interface Entry : Map.Entry<Int, Long> {
-        override val key: Int
-        override val value: Long
+        @Deprecated(
+            message = "Use key() instead.",
+            replaceWith = ReplaceWith("key()"),
+            level = DeprecationLevel.WARNING)
+        override val key: Int get() {
+            assertBoxing()
+            return key()
+        }
+
+        @Deprecated(
+            message = "Use value() instead.",
+            replaceWith = ReplaceWith("key()"),
+            level = DeprecationLevel.WARNING)
+        override val value: Long get() {
+            assertBoxing()
+            return value()
+        }
+
+        public fun key(): Int
+        public fun value(): Long
     }
+
+    public operator fun iterator(): Iterator<Int2LongMap.Entry> = primitiveEntries.iterator()
+
+    public fun fastIterator(): FastIterator<Int2LongMap.Entry> = primitiveEntries.fastIterator()
 }
 
-public operator fun Int2LongMap.get(key: Int): Long = getValue(key)
+@Suppress("NOTHING_TO_INLINE")
+public inline fun Int2LongMap.getValue(key: Int): Long = getOrElse(key) { throw NoSuchElementException() }
 
 @Suppress("NOTHING_TO_INLINE")
-public inline operator fun Int2LongMap.iterator(): Iterator<Int2LongMap.Entry> = primitiveEntries.iterator()
+public inline fun Int2LongMap.getOrDefault(key: Int, defaultValue: Long): Long = getOrElse(key) { defaultValue }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun Int2LongMap.getOrElse(key: Int, defaultValue: () -> Long): Long {
@@ -66,8 +92,31 @@ public inline fun Int2LongMap.getOrElse(key: Int, defaultValue: () -> Long): Lon
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
 
-    val value = getValue(key)
+    val value = lookup(key)
     return if (value == this.defaultValue && !containsKey(key)) defaultValue() else value
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun Int2LongMap.filterTo(destination: MutableInt2LongMap, predicate: (key: Int, value: Long) -> Boolean): MutableInt2LongMap {
+    contract {
+        callsInPlace(predicate, InvocationKind.UNKNOWN)
+    }
+
+    for (entry in primitiveEntries.fastIterator()) {
+        if (predicate(entry.key(), entry.value())) {
+            destination.putValue(entry.key(), entry.value())
+        }
+    }
+    return destination
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun Int2LongMap.filter(predicate: (key: Int, value: Long) -> Boolean): Int2LongMap {
+    contract {
+        callsInPlace(predicate, InvocationKind.UNKNOWN)
+    }
+
+    return filterTo(Int2LongHashMap(), predicate)
 }
 
 public interface MutableInt2LongMap : Int2LongMap, MutableMap<Int, Long> {
@@ -75,7 +124,7 @@ public interface MutableInt2LongMap : Int2LongMap, MutableMap<Int, Long> {
     @Deprecated(
         message = "Use putValue(key, value) instead.",
         replaceWith = ReplaceWith("putValue(key, value)"),
-        level = DeprecationLevel.HIDDEN)
+        level = DeprecationLevel.WARNING)
     override fun put(key: Int, value: Long): Long? {
         assertBoxing()
         val value = putValue(key, value)
@@ -91,7 +140,7 @@ public interface MutableInt2LongMap : Int2LongMap, MutableMap<Int, Long> {
     @Deprecated(
         message = "Use removeKey(key) instead.",
         replaceWith = ReplaceWith("removeKey(key, value)"),
-        level = DeprecationLevel.HIDDEN)
+        level = DeprecationLevel.WARNING)
     override fun remove(key: Int): Long? {
         assertBoxing()
         return if (containsKey(key)) removeKey(key) else null
@@ -103,23 +152,20 @@ public interface MutableInt2LongMap : Int2LongMap, MutableMap<Int, Long> {
     override val values: MutableLongCollection
 
     @Suppress("UNCHECKED_CAST")
-    @Deprecated(message = "Use primitiveEntries instead.", replaceWith = ReplaceWith("primitiveEntries"), level = DeprecationLevel.HIDDEN)
+    @Deprecated(
+        message = "Use primitiveEntries instead.",
+        replaceWith = ReplaceWith("primitiveEntries"),
+        level = DeprecationLevel.WARNING)
     override val entries: MutableSet<MutableMap.MutableEntry<Int, Long>>
         get() {
             assertBoxing()
             return primitiveEntries as MutableSet<MutableMap.MutableEntry<Int, Long>>
         }
 
-    override val primitiveEntries: MutableSet<MutableEntry>
+    override val primitiveEntries: MutableEntrySet<MutableEntry>
 
-    public interface MutableEntry : Int2LongMap.Entry, MutableMap.MutableEntry<Int, Long> {
-        override val key: Int
-        override val value: Long
-    }
+    public interface MutableEntry : Int2LongMap.Entry, MutableMap.MutableEntry<Int, Long>
 }
-
-public fun MutableInt2LongMap.put(key: Int, value: Long): Long = putValue(key, value)
-public fun MutableInt2LongMap.remove(key: Int): Long = removeKey(key)
 
 @OptIn(ExperimentalContracts::class)
 public inline fun MutableInt2LongMap.getOrPut(key: Int, defaultValue: () -> Long): Long {
@@ -127,7 +173,7 @@ public inline fun MutableInt2LongMap.getOrPut(key: Int, defaultValue: () -> Long
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
 
-    var value = getValue(key)
+    var value = lookup(key)
     if (value == this.defaultValue && !containsKey(key)) {
         value = defaultValue()
         putValue(key, value)
@@ -141,7 +187,7 @@ public inline fun MutableInt2LongMap.merge(key: Int, value: Long, merge: (oldVal
         callsInPlace(merge, InvocationKind.AT_MOST_ONCE)
     }
 
-    val oldValue = getValue(key)
+    val oldValue = lookup(key)
     val newValue = if (oldValue == defaultValue && !containsKey(key)) value else merge(oldValue, value)
     if (newValue != oldValue) {
         putValue(key, newValue)

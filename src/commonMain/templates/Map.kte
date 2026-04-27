@@ -1,6 +1,9 @@
 package io.github.sooniln.fastcollect.${keySubpackage}
 
 import io.github.sooniln.fastcollect.Boxing.assertBoxing
+import io.github.sooniln.fastcollect.EntrySet
+import io.github.sooniln.fastcollect.FastIterator
+import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.${valueSubpackage}.${ValueType}Collection
 import io.github.sooniln.fastcollect.${valueSubpackage}.Mutable${ValueType}Collection
 import kotlin.contracts.ExperimentalContracts
@@ -16,22 +19,22 @@ public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
 
     override fun containsValue(value: ${ValueType}): Boolean {
         for (entry in primitiveEntries) {
-            if (entry.value == value) return true
+            if (entry.value() == value) return true
         }
         return false
     }
 
     @Deprecated(
-        message = "Use the extension get(key) method instead.",
-        replaceWith = ReplaceWith("get(key)", "io.github.sooniln.fastcollect.ints.get"),
-        level = DeprecationLevel.HIDDEN)
+        message = "Use the lookup(key) method instead.",
+        replaceWith = ReplaceWith("lookup(key)"),
+        level = DeprecationLevel.WARNING)
     override fun get(key: ${KeyType}): ${ValueType}? {
         assertBoxing()
-        val value = getValue(key)
+        val value = lookup(key)
         return if (value == defaultValue && !containsKey(key)) null else value
     }
 
-    public fun getValue(key: ${KeyType}): ${ValueType}
+    public fun lookup(key: ${KeyType}): ${ValueType}
 
     override val keys: ${KeyType}Set
 
@@ -40,25 +43,48 @@ public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
     @Deprecated(
         message = "Use primitiveEntries instead.",
         replaceWith = ReplaceWith("primitiveEntries"),
-        level = DeprecationLevel.HIDDEN)
+        level = DeprecationLevel.WARNING)
     override val entries: Set<Map.Entry<${KeyType}, ${ValueType}>>
         get() {
             assertBoxing()
             return primitiveEntries
         }
 
-    public val primitiveEntries: Set<Entry>
+    public val primitiveEntries: EntrySet<Entry>
 
     public interface Entry : Map.Entry<${KeyType}, ${ValueType}> {
-        override val key: ${KeyType}
-        override val value: ${ValueType}
+        @Deprecated(
+            message = "Use key() instead.",
+            replaceWith = ReplaceWith("key()"),
+            level = DeprecationLevel.WARNING)
+        override val key: ${KeyType} get() {
+            assertBoxing()
+            return key()
+        }
+
+        @Deprecated(
+            message = "Use value() instead.",
+            replaceWith = ReplaceWith("key()"),
+            level = DeprecationLevel.WARNING)
+        override val value: ${ValueType} get() {
+            assertBoxing()
+            return value()
+        }
+
+        public fun key(): ${KeyType}
+        public fun value(): ${ValueType}
     }
+
+    public operator fun iterator(): Iterator<${KeyType}2${ValueType}Map.Entry> = primitiveEntries.iterator()
+
+    public fun fastIterator(): FastIterator<${KeyType}2${ValueType}Map.Entry> = primitiveEntries.fastIterator()
 }
 
-public operator fun ${KeyType}2${ValueType}Map.get(key: ${KeyType}): ${ValueType} = getValue(key)
+@Suppress("NOTHING_TO_INLINE")
+public inline fun ${KeyType}2${ValueType}Map.getValue(key: ${KeyType}): ${ValueType} = getOrElse(key) { throw NoSuchElementException() }
 
 @Suppress("NOTHING_TO_INLINE")
-public inline operator fun ${KeyType}2${ValueType}Map.iterator(): Iterator<${KeyType}2${ValueType}Map.Entry> = primitiveEntries.iterator()
+public inline fun ${KeyType}2${ValueType}Map.getOrDefault(key: ${KeyType}, defaultValue: ${ValueType}): ${ValueType} = getOrElse(key) { defaultValue }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun ${KeyType}2${ValueType}Map.getOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
@@ -66,8 +92,31 @@ public inline fun ${KeyType}2${ValueType}Map.getOrElse(key: ${KeyType}, defaultV
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
 
-    val value = getValue(key)
+    val value = lookup(key)
     return if (value == this.defaultValue && !containsKey(key)) defaultValue() else value
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${KeyType}2${ValueType}Map.filterTo(destination: Mutable${KeyType}2${ValueType}Map, predicate: (key: ${KeyType}, value: ${ValueType}) -> Boolean): Mutable${KeyType}2${ValueType}Map {
+    contract {
+        callsInPlace(predicate, InvocationKind.UNKNOWN)
+    }
+
+    for (entry in primitiveEntries.fastIterator()) {
+        if (predicate(entry.key(), entry.value())) {
+            destination.putValue(entry.key(), entry.value())
+        }
+    }
+    return destination
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${KeyType}2${ValueType}Map.filter(predicate: (key: ${KeyType}, value: ${ValueType}) -> Boolean): ${KeyType}2${ValueType}Map {
+    contract {
+        callsInPlace(predicate, InvocationKind.UNKNOWN)
+    }
+
+    return filterTo(${KeyType}2${ValueType}HashMap(), predicate)
 }
 
 public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map, MutableMap<${KeyType}, ${ValueType}> {
@@ -75,7 +124,7 @@ public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map,
     @Deprecated(
         message = "Use putValue(key, value) instead.",
         replaceWith = ReplaceWith("putValue(key, value)"),
-        level = DeprecationLevel.HIDDEN)
+        level = DeprecationLevel.WARNING)
     override fun put(key: ${KeyType}, value: ${ValueType}): ${ValueType}? {
         assertBoxing()
         val value = putValue(key, value)
@@ -91,7 +140,7 @@ public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map,
     @Deprecated(
         message = "Use removeKey(key) instead.",
         replaceWith = ReplaceWith("removeKey(key, value)"),
-        level = DeprecationLevel.HIDDEN)
+        level = DeprecationLevel.WARNING)
     override fun remove(key: ${KeyType}): ${ValueType}? {
         assertBoxing()
         return if (containsKey(key)) removeKey(key) else null
@@ -103,23 +152,20 @@ public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map,
     override val values: Mutable${ValueType}Collection
 
     @Suppress("UNCHECKED_CAST")
-    @Deprecated(message = "Use primitiveEntries instead.", replaceWith = ReplaceWith("primitiveEntries"), level = DeprecationLevel.HIDDEN)
+    @Deprecated(
+        message = "Use primitiveEntries instead.",
+        replaceWith = ReplaceWith("primitiveEntries"),
+        level = DeprecationLevel.WARNING)
     override val entries: MutableSet<MutableMap.MutableEntry<${KeyType}, ${ValueType}>>
         get() {
             assertBoxing()
             return primitiveEntries as MutableSet<MutableMap.MutableEntry<${KeyType}, ${ValueType}>>
         }
 
-    override val primitiveEntries: MutableSet<MutableEntry>
+    override val primitiveEntries: MutableEntrySet<MutableEntry>
 
-    public interface MutableEntry : ${KeyType}2${ValueType}Map.Entry, MutableMap.MutableEntry<${KeyType}, ${ValueType}> {
-        override val key: ${KeyType}
-        override val value: ${ValueType}
-    }
+    public interface MutableEntry : ${KeyType}2${ValueType}Map.Entry, MutableMap.MutableEntry<${KeyType}, ${ValueType}>
 }
-
-public fun Mutable${KeyType}2${ValueType}Map.put(key: ${KeyType}, value: ${ValueType}): ${ValueType} = putValue(key, value)
-public fun Mutable${KeyType}2${ValueType}Map.remove(key: ${KeyType}): ${ValueType} = removeKey(key)
 
 @OptIn(ExperimentalContracts::class)
 public inline fun Mutable${KeyType}2${ValueType}Map.getOrPut(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
@@ -127,7 +173,7 @@ public inline fun Mutable${KeyType}2${ValueType}Map.getOrPut(key: ${KeyType}, de
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
 
-    var value = getValue(key)
+    var value = lookup(key)
     if (value == this.defaultValue && !containsKey(key)) {
         value = defaultValue()
         putValue(key, value)
@@ -141,7 +187,7 @@ public inline fun Mutable${KeyType}2${ValueType}Map.merge(key: ${KeyType}, value
         callsInPlace(merge, InvocationKind.AT_MOST_ONCE)
     }
 
-    val oldValue = getValue(key)
+    val oldValue = lookup(key)
     val newValue = if (oldValue == defaultValue && !containsKey(key)) value else merge(oldValue, value)
     if (newValue != oldValue) {
         putValue(key, newValue)
