@@ -43,3 +43,6 @@ bin/
 
 ### AI ###
 .claude
+
+### hsdis ###
+hsdis-*.dll
