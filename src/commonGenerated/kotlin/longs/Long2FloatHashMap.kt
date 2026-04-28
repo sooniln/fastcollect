@@ -10,6 +10,7 @@ import kotlin.math.max
 public class Long2FloatHashMap(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
     private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
+    /** The default value should be the value that is ideally least likely to occur in the map. */
     override val defaultValue: Float = Float.NaN
 ) : MutableLong2FloatMap {
 
@@ -18,37 +19,16 @@ public class Long2FloatHashMap(
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
     }
 
+    // when used in hashing mode, the last slot in the array is used to store the zero key/value respectively. when used
+    // in array mode, there is no special handling for zero.
     private var keysArr = EMPTY_KEY_ARRAY
     private var valuesArr = EMPTY_VALUE_ARRAY
 
-    private var arrayUsage = 0
-    private var zeroValue = 0.toFloat()
+    override var size: Int = 0
+        private set
 
-    // use threshold to store the initial size before we allocate anything, and since threshold cannot be negative, we
-    // also use the highest bit to store whether the map contains zero or not
-    private var thresholdAndContainsZero = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
-
-    private var threshold: Int
-        inline get() = thresholdAndContainsZero and ARRAY_USAGE_MASK
-        inline set(value) {
-            thresholdAndContainsZero = value or (thresholdAndContainsZero and ARRAY_USAGE_MASK.inv())
-        }
-
-    private var containsZero: Boolean
-        inline get() = thresholdAndContainsZero and ARRAY_USAGE_MASK.inv() != 0
-        inline set(value) {
-            thresholdAndContainsZero = if (value) {
-                thresholdAndContainsZero or ARRAY_USAGE_MASK.inv()
-            } else {
-                thresholdAndContainsZero and ARRAY_USAGE_MASK
-            }
-        }
-
-    override val size: Int get() = if (containsZero) arrayUsage + 1 else arrayUsage
-
-    override fun isEmpty(): Boolean {
-        return size == 0
-    }
+    // use threshold to store the initial size before we allocate anything
+    private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
 
     public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
@@ -60,29 +40,27 @@ public class Long2FloatHashMap(
     }
 
     override fun putValue(key: Long, value: Float): Float {
-        if (key == ZERO) {
-            if (!containsZero) {
-                containsZero = true
-                zeroValue = value
-                return defaultValue
-            } else {
-                val oldValue = zeroValue
-                zeroValue = value
-                return oldValue
-            }
-        }
-
         resizeIfNecessary()
-
         return if (isHashing()) putInternalHashing(key, value) else putInternalArray(key, value)
     }
 
     private fun putInternalHashing(key: Long, value: Float): Float {
         // assert(isHashing())
-        // assert(key != 0)
+
+        if (key == ZERO) {
+            val endSlot = keysArr.endSlot()
+            val oldValue = if (keysArr[endSlot] != ZERO) {
+                keysArr[endSlot] = ZERO
+                ++size
+                defaultValue
+            } else {
+                valuesArr[endSlot]
+            }
+            valuesArr[endSlot] = value
+            return oldValue
+        }
 
         val mask = keysArr.mask()
-
         var slot = key.slot(mask)
         var newKeySlotDistance = 0
         while (true) {
@@ -96,7 +74,7 @@ public class Long2FloatHashMap(
                 ZERO -> {
                     keysArr[slot] = key
                     valuesArr[slot] = value
-                    ++arrayUsage
+                    ++size
                     return defaultValue
                 }
                 else -> {
@@ -120,7 +98,7 @@ public class Long2FloatHashMap(
 
                         keysArr[slot] = newKey
                         valuesArr[slot] = newValue
-                        ++arrayUsage
+                        ++size
                         return defaultValue
                     }
                 }
@@ -133,10 +111,9 @@ public class Long2FloatHashMap(
 
     private fun putInternalArray(key: Long, value: Float): Float {
         // assert(!isHashing())
-        // assert(key != 0)
 
         var slot = 0
-        while (slot < arrayUsage) {
+        while (slot < size) {
             if (keysArr[slot] == key) {
                 val oldValue = valuesArr[slot]
                 valuesArr[slot] = value
@@ -148,23 +125,16 @@ public class Long2FloatHashMap(
 
         keysArr[slot] = key
         valuesArr[slot] = value
-        ++arrayUsage
+        ++size
         return defaultValue
     }
 
     override fun removeKey(key: Long): Float {
-        if (key == ZERO) {
-            if (containsZero) {
-                containsZero = false
-                return zeroValue
-            }
-        } else {
-            val slot = findSlot(key)
-            if (slot >= 0) {
-                val oldValue = valuesArr[slot]
-                removeSlot(slot)
-                return oldValue
-            }
+        val slot = findSlot(key)
+        if (slot >= 0) {
+            val oldValue = valuesArr[slot]
+            removeSlot(slot)
+            return oldValue
         }
 
         return defaultValue
@@ -172,8 +142,10 @@ public class Long2FloatHashMap(
 
     override fun clear() {
         keysArr.fill(ZERO)
-        containsZero = false
-        arrayUsage = 0
+        if (keysArr.isHashing()) {
+            keysArr[keysArr.endSlot()] = NONZERO
+        }
+        size = 0
     }
 
     private fun findSlot(key: Long): Int {
@@ -182,10 +154,14 @@ public class Long2FloatHashMap(
 
     private fun findSlotHashing(key: Long): Int {
         // assert(isHashing())
-        // assert(key != 0)
+
+        if (key == ZERO) {
+            val endSlot = keysArr.endSlot()
+            // assert(endSlot >= 0)
+            return if (keysArr[endSlot] != ZERO) -1 else endSlot
+        }
 
         val mask = keysArr.mask()
-
         var slot = key.slot(mask)
         var currKey = keysArr[slot]
         while (true) {
@@ -203,10 +179,9 @@ public class Long2FloatHashMap(
 
     private fun findSlotArray(key: Long): Int {
         // assert(!isHashing())
-        // assert(key != 0)
 
         // iterate backwards under assumption more recently added values are more likely to be queried
-        var slot = arrayUsage - 1
+        var slot = size - 1
         while (slot >= 0) {
             if (keysArr[slot] == key) {
                 return slot
@@ -223,6 +198,13 @@ public class Long2FloatHashMap(
 
     private fun removeSlotHashing(slot: Int) {
         // assert(isHashing())
+
+        val endSlot = keysArr.endSlot()
+        if (slot == endSlot) {
+            keysArr[endSlot] = NONZERO
+            --size
+            return
+        }
 
         val mask = keysArr.mask()
 
@@ -243,20 +225,18 @@ public class Long2FloatHashMap(
             nextValue = valuesArr[nextSlot]
         }
         keysArr[currSlot] = ZERO
-        --arrayUsage
+        --size
     }
 
     private fun removeSlotArray(slot: Int) {
         // assert(!isHashing())
-        // assert(keysArr[slot] != 0)
         // assert(slot < arrayUsage)
 
-        val lastIndex = arrayUsage - 1
+        val lastIndex = --size
         if (slot < lastIndex) {
             keysArr[slot] = keysArr[lastIndex]
             valuesArr[slot] = valuesArr[lastIndex]
         }
-        --arrayUsage
     }
 
     override fun putAll(from: Map<out Long, Float>) {
@@ -311,55 +291,43 @@ public class Long2FloatHashMap(
     }
 
     override fun containsKey(key: Long): Boolean {
-        return if (key == ZERO) {
-            containsZero
-        } else {
-            findSlot(key) >= 0
-        }
+        return findSlot(key) >= 0
     }
 
     override fun containsValue(value: Float): Boolean {
-        if (containsZero && zeroValue == value) return true
+        return if (isHashing()) containsValueHashing(value) else containsValueArray(value)
+    }
 
-        if (isHashing()) {
-            var slot = 0
-            while (slot < keysArr.size) {
-                if (valuesArr[slot] == value && keysArr[slot] != ZERO) return true
-                ++slot
-            }
-            return false
-        } else {
-            var slot = arrayUsage - 1
-            while (slot >= 0) {
-                if (valuesArr[slot] == value) return true
-                --slot
-            }
-            return false
+    private fun containsValueHashing(value: Float): Boolean {
+        val endSlot = keysArr.endSlot()
+        if (valuesArr[endSlot] == value && keysArr[endSlot] == ZERO) return true
+
+        var slot = 0
+        while (slot < endSlot) {
+            if (valuesArr[slot] == value && keysArr[slot] != ZERO) return true
+            ++slot
         }
+        return false
+    }
+
+    private fun containsValueArray(value: Float): Boolean {
+        var slot = size - 1
+        while (slot >= 0) {
+            if (valuesArr[slot] == value) return true
+            --slot
+        }
+        return false
     }
 
     override fun lookup(key: Long): Float {
-        if (key == ZERO) {
-            return if (containsZero) {
-                zeroValue
-            } else {
-                defaultValue
-            }
-        } else {
-            val slot = findSlot(key)
-            return if (slot >= 0) {
-                valuesArr[slot]
-            } else {
-                defaultValue
-            }
-        }
+        val slot = findSlot(key)
+        return if (slot >= 0) valuesArr[slot] else defaultValue
     }
 
     private fun resizeIfNecessary() {
         if (keysArr.isEmpty()) {
-            // assert(threshold > 0)
             growTo(threshold)
-        } else if (arrayUsage >= threshold) {
+        } else if (size >= threshold) {
             growTo(threshold shl 1)
         }
     }
@@ -373,33 +341,43 @@ public class Long2FloatHashMap(
         if (newLength <= HASHIFY_THRESHOLD) {
             keysArr = keysArr.copyOf(newLength)
             valuesArr = valuesArr.copyOf(newLength)
-            threshold = keysArr.size
+            threshold = newLength
             return
         }
 
         val oldKeys = keysArr
         val oldValues = valuesArr
-        val oldArrayUsage = arrayUsage
+        val oldSize = size
 
         keysArr = LongArray(newLength)
         valuesArr = FloatArray(newLength)
-        arrayUsage = 0
-        threshold = (keysArr.size * loadFactor).toInt()
+        size = 0
 
-        if (oldValues.size <= HASHIFY_THRESHOLD) {
+        val endSlot = keysArr.endSlot()
+        threshold = (endSlot * loadFactor).toInt()
+
+        if (!oldKeys.isHashing()) {
+            keysArr[endSlot] = NONZERO
+
             var slot = 0
-            while (slot < oldArrayUsage) {
+            while (slot < oldSize) {
                 putInternalHashing(oldKeys[slot], oldValues[slot])
                 ++slot
             }
         } else {
-            // TODO: better algorithm?
-            for ((slot, key) in oldKeys.withIndex()) {
+            val oldEndSlot = oldKeys.endSlot()
+            for (slot in 0..<oldEndSlot) {
+                val key = oldKeys[slot]
                 if (key != ZERO) {
                     putInternalHashing(key, oldValues[slot])
                 }
             }
+
+            keysArr[endSlot] = oldKeys[oldEndSlot]
+            valuesArr[endSlot] = oldValues[oldEndSlot]
         }
+
+        size = oldSize
     }
 
     override fun equals(other: Any?): Boolean {
@@ -427,197 +405,129 @@ public class Long2FloatHashMap(
 
     // TODO: should be in abstract class?
     override fun toString(): String {
-        return Iterable<Entry> { FastEntryIterator() }.joinToString(", ", "{", "}") { "${it.key()}=${it.value()}" }
+        return Iterable<Long2FloatMap.Entry> { FastEntryIterator() }.joinToString(", ", "{", "}") { "${it.key()}=${it.value()}" }
+    }
+
+    private open inner class SlotIterator() {
+        private val keysArr = this@Long2FloatHashMap.keysArr
+        private val valuesArr = this@Long2FloatHashMap.valuesArr
+
+        private var slotsLeft = size
+        private val mask = keysArr.mask()
+
+        private var slot: Int
+        private var previousSlot = -1
+
+        init {
+            if (keysArr.isHashing()) {
+                slot = keysArr.endSlot()
+                if (keysArr[slot] != ZERO && slotsLeft > 0) {
+                    decrement()
+                }
+            } else {
+                slot = size - 1
+            }
+        }
+
+        fun hasNext(): Boolean {
+            return slotsLeft > 0
+        }
+
+        fun nextSlot() {
+            if (slotsLeft-- <= 0) throw NoSuchElementException()
+            previousSlot = slot
+            if (slotsLeft > 0) decrement()
+        }
+
+        fun slot(): Int = slot
+        fun key(): Long = keysArr[previousSlot]
+        fun value(): Float = valuesArr[previousSlot]
+
+        protected fun updateValue(newValue: Float) {
+            check(previousSlot != -1)
+            if (keysArr !== this@Long2FloatHashMap.keysArr) throw ConcurrentModificationException()
+            valuesArr[previousSlot] = newValue
+        }
+
+        fun remove() {
+            check(previousSlot != -1)
+            if (keysArr !== this@Long2FloatHashMap.keysArr) throw ConcurrentModificationException()
+
+            removeSlot(previousSlot)
+            previousSlot = -1
+        }
+
+        private fun decrement() {
+            if (keysArr.isHashing()) {
+                // deliberate local variable so JIT can optimize better
+                var s = (slot - 1) and mask
+                while (keysArr[s] == ZERO) {
+                    s = (s - 1) and mask
+                }
+                slot = s
+            } else {
+                --slot
+            }
+        }
     }
 
     private inner class KeyIterator : MutableLongIterator() {
-        private val keysArr = this@Long2FloatHashMap.keysArr
-        private val arrayUsage = this@Long2FloatHashMap.arrayUsage
-
-        private var entriesLeft = size
-        private var slot = numSlots()
-        private var previousSlot = -1
-        private var nextKey = ZERO
-
-        init {
-            if (entriesLeft > 0 && !containsZero) decrement()
-        }
-
-        private fun numSlots() = if (isHashing()) keysArr.size else arrayUsage
-
-        override fun hasNext(): Boolean {
-            return entriesLeft > 0
-        }
-
-        override fun nextLong(): Long {
-            if (entriesLeft-- <= 0) throw NoSuchElementException()
-            val k = nextKey
-            decrement()
-            return k
-        }
-
-        override fun remove() {
-            check(previousSlot != -1)
-            if (previousSlot < numSlots()) {
-                removeSlot(previousSlot)
-            } else {
-                // assert(previousSlot == numSlots() && containsZero)
-                containsZero = false
-            }
-            previousSlot = -1
-        }
-
-        private fun decrement() {
-            previousSlot = slot
-            if (entriesLeft <= 0) return
-
-            do {
-                if (slot > 0) {
-                    // simple subtraction is a lot faster if we can get away with it (ie 99% of the time)
-                    --slot
-                } else {
-                    slot = (slot - 1) and keysArr.mask()
-                }
-            } while (keysArr[slot] == ZERO)
-            nextKey = keysArr[slot]
-        }
-    }
-
-    private inner class ValueIterator : MutableFloatIterator() {
-        private val keysArr = this@Long2FloatHashMap.keysArr
-        private val valuesArr = this@Long2FloatHashMap.valuesArr
-        private val arrayUsage = this@Long2FloatHashMap.arrayUsage
-
-        private var entriesLeft = size
-        private var slot = numSlots()
-        private var previousSlot = -1
-        private var nextValue = zeroValue
-
-        init {
-            if (entriesLeft > 0 && !containsZero) decrement()
-        }
-
-        private fun numSlots() = if (isHashing()) keysArr.size else arrayUsage
-
-        override fun hasNext(): Boolean {
-            return entriesLeft > 0
-        }
-
-        override fun nextFloat(): Float {
-            if (entriesLeft-- <= 0) throw NoSuchElementException()
-            val v = nextValue
-            decrement()
-            return v
-        }
-
-        override fun remove() {
-            check(previousSlot != -1)
-            if (previousSlot < numSlots()) {
-                removeSlot(previousSlot)
-            } else {
-                // assert(previousSlot == numSlots() && containsZero)
-                containsZero = false
-            }
-            previousSlot = -1
-        }
-
-        private fun decrement() {
-            previousSlot = slot
-            if (entriesLeft <= 0) return
-
-            do {
-                if (slot > 0) {
-                    // simple subtraction is a lot faster if we can get away with it (ie 99% of the time)
-                    --slot
-                } else {
-                    slot = (slot - 1) and keysArr.mask()
-                }
-            } while (keysArr[slot] == ZERO)
-            nextValue = valuesArr[slot]
-        }
-    }
-
-    private inner class FastEntryIterator: MutableFastIterator<Entry> {
-        private val keysArr = this@Long2FloatHashMap.keysArr
-        private val valuesArr = this@Long2FloatHashMap.valuesArr
-        private val arrayUsage = this@Long2FloatHashMap.arrayUsage
-
-        private var entriesLeft = size
-        private var slot = numSlots()
-        private var previousSlot = -1
-
-        private var nextKey = ZERO
-        private var nextValue = zeroValue
-        private val entry = Entry(nextKey, nextValue)
-
-        init {
-            if (entriesLeft > 0 && !containsZero) decrement()
-        }
-
-        private fun numSlots() = if (isHashing()) keysArr.size else arrayUsage
-
-        override fun hasNext(): Boolean {
-            return entriesLeft > 0
-        }
-
-        override fun next(): Entry {
-            if (entriesLeft-- <= 0) throw NoSuchElementException()
-            entry._key = nextKey
-            entry._value = nextValue
-            decrement()
-            return entry
-        }
-
-        override fun remove() {
-            check(previousSlot != -1)
-            if (previousSlot < numSlots()) {
-                removeSlot(previousSlot)
-            } else {
-                // assert(previousSlot == numSlots() && containsZero)
-                containsZero = false
-            }
-            previousSlot = -1
-        }
-
-        private fun decrement() {
-            previousSlot = slot
-            if (entriesLeft <= 0) return
-
-            do {
-                if (slot > 0) {
-                    // simple subtraction is a lot faster if we can get away with it (ie 99% of the time)
-                    --slot
-                } else {
-                    slot = (slot - 1) and keysArr.mask()
-                }
-            } while (keysArr[slot] == ZERO)
-            nextKey = keysArr[slot]
-            nextValue = valuesArr[slot]
-        }
-    }
-
-    private inner class EntryIterator : MutableIterator<Entry> {
-        private val it = FastEntryIterator()
+        private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
-        override fun next(): Entry = Entry(it.next())
+        override fun nextLong(): Long {
+            it.nextSlot()
+            return it.key()
+        }
         override fun remove() = it.remove()
     }
 
-    private inner class Entry(var _key: Long, var _value: Float) : MutableLong2FloatMap.MutableEntry {
-        constructor(entry: Entry) : this(entry._key, entry._value)
+    private inner class ValueIterator : MutableFloatIterator() {
+        private val it = SlotIterator()
 
-        override fun key(): Long = _key
-        override fun value(): Float = _value
+        override fun hasNext(): Boolean = it.hasNext()
+        override fun nextFloat(): Float {
+            it.nextSlot()
+            return it.value()
+        }
+        override fun remove() = it.remove()
+    }
+
+    private inner class FastEntryIterator: SlotIterator(), MutableFastIterator<MutableLong2FloatMap.MutableEntry>, MutableLong2FloatMap.MutableEntry {
 
         override fun setValue(newValue: Float): Float {
-            val oldValue = _value
-            // TODO: what the fuck is going on with nullability here
-            _value = merge(_key, newValue) { oldValue, value ->
-                if (oldValue != _value) throw ConcurrentModificationException()
-                return@merge value
-            }!!
+            val oldValue = value()
+            updateValue(newValue)
             return oldValue
+        }
+
+        override fun next(): MutableLong2FloatMap.MutableEntry {
+            nextSlot()
+            return this
+        }
+    }
+
+    private inner class EntryIterator : SlotIterator(), MutableIterator<MutableLong2FloatMap.MutableEntry> {
+
+        override fun next(): MutableLong2FloatMap.MutableEntry {
+            nextSlot()
+            return object : MutableLong2FloatMap.MutableEntry {
+                private val _key = this@EntryIterator.key()
+                private var _value = this@EntryIterator.value()
+
+                override fun key(): Long = _key
+                override fun value(): Float = _value
+
+                override fun setValue(newValue: Float): Float {
+                    val oldValue = _value
+                    // TODO: what the fuck is going on with nullability here
+                    _value = merge(_key, newValue) { oldValue, value ->
+                        if (oldValue != _value) throw ConcurrentModificationException()
+                        return@merge value
+                    }!!
+                    return oldValue
+                }
+            }
         }
     }
 
@@ -626,16 +536,26 @@ public class Long2FloatHashMap(
     override fun fastIterator(): FastIterator<Long2FloatMap.Entry> = FastEntryIterator()
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun isHashing(): Boolean = keysArr.size > HASHIFY_THRESHOLD
+    private inline fun Int.isHashingLength(): Boolean = (this - 1) > HASHIFY_THRESHOLD
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun mixHash(element: Int): Int {
-        val h = element * INT_PHI
+    private inline fun LongArray.isHashing(): Boolean = size.isHashingLength()
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun isHashing(): Boolean = keysArr.isHashing()
+
+    // the slot at the end of slot iteration (exclusive), also the slot that stores the zero value
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun LongArray.endSlot(): Int = size - 1
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun LongArray.mask() = size - 2
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun mixHash(hashcode: Int): Int {
+        val h = hashcode * INT_PHI
         return h xor (h ushr 16)
     }
-
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.mask() = size - 1
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun Long.slot(mask: Int): Int {
@@ -661,6 +581,7 @@ public class Long2FloatHashMap(
 
         // the value of a field in an uninitialized primitive array
         private const val ZERO: Long = 0.toLong()
+        private const val NONZERO: Long = 1.toLong()
 
         /** 2<sup>32</sup> &middot; &phi;, &phi; = (&#x221A;5 &minus; 1)/2. */
         private const val INT_PHI: Int = -0x61c88647
@@ -669,15 +590,15 @@ public class Long2FloatHashMap(
         private const val DEFAULT_INITIAL_CAPACITY = 1 shl 2  // must be power of two
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two
         private const val HASHIFY_THRESHOLD: Int = 1 shl 5 // must be power of two
-        private const val MIN_HASH_CAPACITY = 1 shl 4 // must be power of two
-
-        private const val ARRAY_USAGE_MASK = 0x7FFFFFFF
+        private const val MIN_HASH_CAPACITY = HASHIFY_THRESHOLD shr 1 // must be power of two
 
         private fun arraySize(capacity: Int, loadFactor: Float): Int {
+            check(capacity >= 0)
             return if (capacity <= HASHIFY_THRESHOLD) {
                 capacity
             } else {
-                max(minPowerOfTwo((capacity / loadFactor).toInt()), MIN_HASH_CAPACITY)
+                // add extra slot to hold zero value at the end
+                max(minPowerOfTwo((capacity / loadFactor).toInt()), MIN_HASH_CAPACITY) + 1
             }
         }
 

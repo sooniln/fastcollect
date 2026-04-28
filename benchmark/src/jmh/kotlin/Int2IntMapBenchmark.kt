@@ -138,6 +138,26 @@ open class Int2IntMapBenchmark {
     }
 
     @Benchmark
+    fun fastutilIterateKeys(s: ReadState): Int {
+        var c = 0
+        val it = s.fastutil.keys.iterator()
+        while (it.hasNext()) {
+            c += it.nextInt()
+        }
+        return c
+    }
+
+    @Benchmark
+    fun fastutilIterateValues(s: ReadState): Int {
+        var c = 0
+        val it = s.fastutil.values.iterator()
+        while (it.hasNext()) {
+            c += it.nextInt()
+        }
+        return c
+    }
+
+    @Benchmark
     fun fastutilIterateSlow(s: ReadState): Int {
         var c = 0
         for (e in s.fastutil) {
@@ -165,6 +185,24 @@ open class Int2IntMapBenchmark {
     }
 
     @Benchmark
+    fun fastcollectIterateKeys(s: ReadState): Int {
+        var c = 0
+        for (e in s.fastcollect.keys) {
+            c += e
+        }
+        return c
+    }
+
+    @Benchmark
+    fun fastcollectIterateValues(s: ReadState): Int {
+        var c = 0
+        for (e in s.fastcollect.values) {
+            c += e
+        }
+        return c
+    }
+
+    @Benchmark
     fun fastcollectIterateSlow(s: ReadState): Int {
         var c = 0
         for (e in s.fastcollect.entries) {
@@ -187,6 +225,24 @@ open class Int2IntMapBenchmark {
         var c = 0
         for (e in s.fastcollect.fastIterator()) {
             c += e.key() + e.value()
+        }
+        return c
+    }
+
+    @Benchmark
+    fun jvmIterateKeys(s: ReadState): Int {
+        var c = 0
+        for (e in s.jvm.keys) {
+            c += e
+        }
+        return c
+    }
+
+    @Benchmark
+    fun jvmIterateValues(s: ReadState): Int {
+        var c = 0
+        for (e in s.jvm.values) {
+            c += e
         }
         return c
     }

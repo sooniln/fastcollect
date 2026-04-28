@@ -22,8 +22,7 @@ jmh {
     includeTests = false
     verbosity = "EXTRA"
     failOnError = true
-    //profilers.add("gc")
-    includes.add("Int2IntMapBenchmark\\.fastcollectIter")
+    //includes.add("Int2IntMapBenchmark\\.fast.+?Iterate")
 }
 
 tasks.withType<me.champeau.jmh.JMHTask> {
