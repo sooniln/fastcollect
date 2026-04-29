@@ -21,7 +21,7 @@ import kotlin.random.Random
 @Warmup(iterations = 5, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
 @BenchmarkMode(Mode.AverageTime)
-@OutputTimeUnit(TimeUnit.MILLISECONDS)
+@OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class Int2IntMapBenchmark {
 
     @State(Scope.Benchmark)
@@ -45,7 +45,7 @@ open class Int2IntMapBenchmark {
     open class ReadState {
         private val rnd = Random(123)
 
-        @Param(/*"5", "31", "1000", "10000", */"10000000")
+        @Param(/*"5",*/ "31", "1000", /*"10000",*/ "1000000")
         var size: Int = 0
 
         lateinit var fastutil: Int2IntOpenHashMap
@@ -135,6 +135,54 @@ open class Int2IntMapBenchmark {
             if (s.jvm.containsKey(i)) ++c
         }
         return c
+    }
+
+    @Benchmark
+    fun fastutilPutHit(s: ReadState): Int2IntOpenHashMap {
+        for (i in s.inElements) {
+            s.fastutil[i] = i
+        }
+        return s.fastutil
+    }
+
+    @Benchmark
+    fun fastcollectPutHit(s: ReadState): Int2IntHashMap {
+        for (i in s.inElements) {
+            s.fastcollect[i] = i
+        }
+        return s.fastcollect
+    }
+
+    @Benchmark
+    fun jvmPutHit(s: ReadState): Map<Int, Int> {
+        for (i in s.inElements) {
+            s.jvm[i] = i
+        }
+        return s.jvm
+    }
+
+    @Benchmark
+    fun fastutilPutMiss(s: ReadState): Int2IntOpenHashMap {
+        for (i in s.outElements) {
+            s.fastutil[i] = i
+        }
+        return s.fastutil
+    }
+
+    @Benchmark
+    fun fastcollectPutMiss(s: ReadState): Int2IntHashMap {
+        for (i in s.outElements) {
+            s.fastcollect[i] = i
+        }
+        return s.fastcollect
+    }
+
+    @Benchmark
+    fun jvmPutMiss(s: ReadState): Map<Int, Int> {
+        for (i in s.outElements) {
+            s.jvm[i] = i
+        }
+        return s.jvm
     }
 
     @Benchmark

@@ -22,7 +22,7 @@ jmh {
     includeTests = false
     verbosity = "EXTRA"
     failOnError = true
-    //includes.add("Int2IntMapBenchmark\\.fast.+?Iterate")
+    includes.add("Int2IntMapBenchmark\\.fastcollect(Get|Put)")
 }
 
 tasks.withType<me.champeau.jmh.JMHTask> {

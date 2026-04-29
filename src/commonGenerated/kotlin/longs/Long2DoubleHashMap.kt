@@ -161,19 +161,18 @@ public class Long2DoubleHashMap(
             return if (keysArr[endSlot] != ZERO) -1 else endSlot
         }
 
+        val keysArr = keysArr
         val mask = keysArr.mask()
         var slot = key.slot(mask)
-        var currKey = keysArr[slot]
         while (true) {
             // we could stop looking once the distance < current distance, but this generally worsens performance (extra
             // unpredictable branch which only cuts off a couple iterations).
+            val currKey = keysArr[slot]
             when (currKey) {
-                ZERO -> return -1
                 key -> return slot
+                ZERO -> return -1
             }
-
             slot = slot.nextSlot(mask)
-            currKey = keysArr[slot]
         }
     }
 
@@ -181,6 +180,7 @@ public class Long2DoubleHashMap(
         // assert(!isHashing())
 
         // iterate backwards under assumption more recently added values are more likely to be queried
+        val keysArr = keysArr
         var slot = size - 1
         while (slot >= 0) {
             if (keysArr[slot] == key) {
@@ -320,8 +320,51 @@ public class Long2DoubleHashMap(
     }
 
     override fun lookup(key: Long): Double {
-        val slot = findSlot(key)
-        return if (slot >= 0) valuesArr[slot] else defaultValue
+        return if (isHashing()) lookupHashing(key) else lookupArray(key)
+    }
+
+    private fun lookupHashing(key: Long): Double {
+        // assert(isHashing())
+
+        val keysArr = keysArr
+        val valuesArr = valuesArr
+
+        if (key == ZERO) {
+            val endSlot = keysArr.endSlot()
+            // assert(endSlot >= 0)
+            return if (keysArr[endSlot] != ZERO) defaultValue else valuesArr[endSlot]
+        }
+
+        val mask = keysArr.mask()
+        var slot = key.slot(mask)
+        while (true) {
+            // we could stop looking once the distance < current distance, but this generally worsens performance (extra
+            // unpredictable branch which only cuts off a couple iterations).
+            val currKey = keysArr[slot]
+            when (currKey) {
+                key -> return valuesArr[slot]
+                ZERO -> return defaultValue
+            }
+            slot = slot.nextSlot(mask)
+        }
+    }
+
+    private fun lookupArray(key: Long): Double {
+        // assert(!isHashing())
+
+        val keysArr = keysArr
+        val valuesArr = valuesArr
+
+        // iterate backwards under assumption more recently added values are more likely to be queried
+        var slot = size - 1
+        while (slot >= 0) {
+            if (keysArr[slot] == key) {
+                return valuesArr[slot]
+            }
+            --slot
+        }
+
+        return defaultValue
     }
 
     private fun resizeIfNecessary() {

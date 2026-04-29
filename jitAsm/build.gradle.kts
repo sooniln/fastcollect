@@ -43,9 +43,7 @@ tasks.register<JavaExec>("jitAsm") {
         "-XX:PrintAssemblyOptions=intel",
         // Reduce noise: try to compile/print only the method we care about.
         "-XX:CompileCommand=quiet",
-        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.Int2IntMapAsmProbe::iterate",
-        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.Int2IntMapAsmProbe::iterateFast",
-        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.Int2IntMapAsmProbe::iterate",
-        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.Int2IntMapAsmProbe::iterateFast",
+        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.ints.Int2IntHashMap::lookup",
+        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.ints.Int2IntHashMap::lookup",
     )
 }
