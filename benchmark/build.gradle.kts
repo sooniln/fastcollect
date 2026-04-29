@@ -10,7 +10,7 @@ repositories {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 dependencies {
@@ -22,7 +22,8 @@ jmh {
     includeTests = false
     verbosity = "EXTRA"
     failOnError = true
-    includes.add("Int2IntMapBenchmark\\.fastcollect(Get|Put)")
+    //includes.add("Int2IntMapBenchmark\\.fastcollect(Get|Put)")
+    includes.add("IntArrayIndexOfBenchmark.fast")
 }
 
 tasks.withType<me.champeau.jmh.JMHTask> {

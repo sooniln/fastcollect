@@ -1,6 +1,6 @@
 package io.github.sooniln.fastcollect.longs
 
-import io.github.sooniln.fastcollect.Boxing.assertBoxing
+import io.github.sooniln.fastcollect.assertBoxing
 import io.github.sooniln.fastcollect.EntrySet
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet

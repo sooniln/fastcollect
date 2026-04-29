@@ -121,7 +121,7 @@ tasks.register<Copy>("GenerateCollections") {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 
     jvm {
         compilerOptions {

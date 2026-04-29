@@ -3,6 +3,7 @@ package io.github.sooniln.fastcollect.longs
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.MutableFastIterator
+import io.github.sooniln.fastcollect.assert
 import io.github.sooniln.fastcollect.ints.MutableIntCollection
 import io.github.sooniln.fastcollect.ints.MutableIntIterator
 import kotlin.math.max
@@ -45,7 +46,10 @@ public class Long2IntHashMap(
     }
 
     private fun putInternalHashing(key: Long, value: Int): Int {
-        // assert(isHashing())
+        assert(isHashing())
+
+        val keysArr = keysArr
+        val valuesArr = valuesArr
 
         if (key == ZERO) {
             val endSlot = keysArr.endSlot()
@@ -110,7 +114,7 @@ public class Long2IntHashMap(
     }
 
     private fun putInternalArray(key: Long, value: Int): Int {
-        // assert(!isHashing())
+        assert(!isHashing())
 
         var slot = 0
         while (slot < size) {
@@ -153,11 +157,11 @@ public class Long2IntHashMap(
     }
 
     private fun findSlotHashing(key: Long): Int {
-        // assert(isHashing())
+        assert(isHashing())
 
         if (key == ZERO) {
             val endSlot = keysArr.endSlot()
-            // assert(endSlot >= 0)
+            assert(endSlot >= 0)
             return if (keysArr[endSlot] != ZERO) -1 else endSlot
         }
 
@@ -177,7 +181,7 @@ public class Long2IntHashMap(
     }
 
     private fun findSlotArray(key: Long): Int {
-        // assert(!isHashing())
+        assert(!isHashing())
 
         // iterate backwards under assumption more recently added values are more likely to be queried
         val keysArr = keysArr
@@ -197,7 +201,7 @@ public class Long2IntHashMap(
     }
 
     private fun removeSlotHashing(slot: Int) {
-        // assert(isHashing())
+        assert(isHashing())
 
         val endSlot = keysArr.endSlot()
         if (slot == endSlot) {
@@ -229,8 +233,8 @@ public class Long2IntHashMap(
     }
 
     private fun removeSlotArray(slot: Int) {
-        // assert(!isHashing())
-        // assert(slot < arrayUsage)
+        assert(!isHashing())
+        assert(slot < size)
 
         val lastIndex = --size
         if (slot < lastIndex) {
@@ -324,14 +328,14 @@ public class Long2IntHashMap(
     }
 
     private fun lookupHashing(key: Long): Int {
-        // assert(isHashing())
+        assert(isHashing())
 
         val keysArr = keysArr
         val valuesArr = valuesArr
 
         if (key == ZERO) {
             val endSlot = keysArr.endSlot()
-            // assert(endSlot >= 0)
+            assert(endSlot >= 0)
             return if (keysArr[endSlot] != ZERO) defaultValue else valuesArr[endSlot]
         }
 
@@ -350,7 +354,7 @@ public class Long2IntHashMap(
     }
 
     private fun lookupArray(key: Long): Int {
-        // assert(!isHashing())
+        assert(!isHashing())
 
         val keysArr = keysArr
         val valuesArr = valuesArr
@@ -602,14 +606,14 @@ public class Long2IntHashMap(
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun Long.slot(mask: Int): Int {
-        // assert(this != 0)
-        // assert(mask == keysArr.mask())
+        assert(this != ZERO)
+        assert(mask == keysArr.mask())
         return mixHash(this.hashCode()) and mask
     }
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun Int.nextSlot(mask: Int): Int {
-        // assert(mask == keysArr.mask())
+        assert(mask == keysArr.mask())
         return (this + 1) and mask
     }
 
