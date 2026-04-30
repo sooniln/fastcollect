@@ -1,16 +1,18 @@
 [versions]
 dokka = "2.2.0"
+fastutil = "8.5.18"
 jmh = "0.7.3"
-jte = "3.2.3"
 kotlin = "2.3.20"
+kotlinxBenchmark = "0.4.16"
 mavenPublish = "0.35.0"
 
 [libraries]
+fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "fastutil" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinx-benchmark-runtime = { module = "org.jetbrains.kotlinx:kotlinx-benchmark-runtime", version.ref = "kotlinxBenchmark" }
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 jmh = { id = "me.champeau.jmh", version.ref = "jmh" }
-jte = { id = "gg.jte.gradle", version.ref = "jte"}
-kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinxBenchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kotlinxBenchmark"}
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }

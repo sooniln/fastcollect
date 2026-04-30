@@ -1,0 +1,131 @@
+package io.github.sooniln.fastcollect.${subpackage}
+
+/**
+ * A collection of ${Type}s which inherits from [Collection].
+ */
+public interface ${Type}Collection : Collection<${Type}> {
+    override fun isEmpty(): Boolean {
+        return size == 0
+    }
+
+    override fun iterator(): ${Type}Iterator
+
+    override fun contains(element: ${Type}): Boolean {
+        val it = iterator()
+        while (it.hasNext()) {
+            if (it.next${Type}() == element) {
+                return true
+            }
+        }
+        return false
+    }
+
+    public fun containsAll(elements: ${Type}Collection): Boolean {
+        for (e in elements) {
+            if (!contains(e)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    override fun containsAll(elements: Collection<${Type}>): Boolean {
+        if (elements is ${Type}Collection) {
+            return containsAll(elements)
+        }
+
+        for (e in elements) {
+            if (!contains(e)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    public fun to${Type}Array(): ${Type}Array {
+        return (this as Collection<${Type}>).to${Type}Array()
+    }
+}
+
+/**
+ * A mutable collection of ${Type}s which inherits from [MutableCollection].
+ */
+public interface Mutable${Type}Collection : ${Type}Collection, MutableCollection<${Type}> {
+    override fun iterator(): Mutable${Type}Iterator
+
+    override fun add(element: ${Type}): Boolean
+    override fun remove(element: ${Type}): Boolean
+
+    override fun clear() {
+        val it = iterator()
+        while (it.hasNext()) {
+            it.next${Type}()
+            it.remove()
+        }
+    }
+
+    public fun addAll(elements: ${Type}Collection): Boolean {
+        var modified = false
+        for (e in elements) {
+            modified = add(e) or modified
+        }
+        return modified
+    }
+
+    override fun addAll(elements: Collection<${Type}>): Boolean {
+        if (elements is ${Type}Collection) {
+            return addAll(elements)
+        }
+
+        var modified = false
+        for (e in elements) {
+            modified = add(e) or modified
+        }
+        return modified
+    }
+
+    override fun removeAll(elements: Collection<${Type}>): Boolean {
+        var modified = false
+        val it = iterator()
+        while (it.hasNext()) {
+            if (elements.contains(it.next${Type}())) {
+                it.remove()
+                modified = true
+            }
+        }
+        return modified
+    }
+
+    override fun retainAll(elements: Collection<${Type}>): Boolean {
+        var modified = false
+        val it = iterator()
+        while (it.hasNext()) {
+            if (!elements.contains(it.next${Type}())) {
+                it.remove()
+                modified = true
+            }
+        }
+        return modified
+    }
+}
+
+public fun Mutable${Type}Collection.removeAll(predicate: (${Type}) -> Boolean): Boolean = filterInPlace(predicate)
+public fun Mutable${Type}Collection.retainAll(predicate: (${Type}) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+
+private inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${Type}) -> Boolean): Boolean {
+    var modified = false
+    val it = iterator()
+    while (it.hasNext()) {
+        if (removePredicate(it.next${Type}())) {
+            it.remove()
+            modified = true
+        }
+    }
+    return modified
+}
+
+public abstract class Abstract${Type}Collection : ${Type}Collection {
+    override fun toString(): String {
+        return joinToString(", ", "[", "]")
+    }
+}

@@ -1,0 +1,496 @@
+package io.github.sooniln.fastcollect.${subpackage}
+
+import io.github.sooniln.fastcollect.assertBoxing
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+
+public fun empty${Type}List(): ${Type}List = Empty${Type}List
+
+public fun ${lowerType}ListOf(): ${Type}List = Empty${Type}List
+public fun ${lowerType}ListOf(element: ${Type}): ${Type}List = Singleton${Type}List(element)
+public fun ${lowerType}ListOf(vararg elements: ${Type}): ${Type}List = ${Type}ArrayDeque.wrap(elements)
+
+public fun mutable${Type}ListOf(): Mutable${Type}List = ${Type}ArrayDeque()
+public fun mutable${Type}ListOf(element: ${Type}): Mutable${Type}List = ${Type}ArrayDeque(1).apply { add(element) }
+public fun mutable${Type}ListOf(vararg elements: ${Type}): Mutable${Type}List = ${Type}ArrayDeque.wrap(elements)
+
+public fun ${Type}Array.as${Type}List(): ${Type}List = ${Type}ArrayListWrapper(this)
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun build${Type}List(expectedSize: Int = 0, builderAction: Mutable${Type}List.() -> Unit): ${Type}List {
+    contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+    val list = ${Type}ArrayDeque(expectedSize)
+    list.builderAction()
+    return list
+}
+
+/**
+ * A list of ${Type}s which inherits from [List].
+ */
+public interface ${Type}List : List<${Type}>, ${Type}Collection {
+    override fun listIterator(): ${Type}ListIterator
+    override fun listIterator(index: Int): ${Type}ListIterator
+
+    override fun isEmpty(): Boolean = super.isEmpty()
+
+    override fun contains(element: ${Type}): Boolean {
+        return indexOf(element) != -1
+    }
+
+    override fun containsAll(elements: Collection<${Type}>): Boolean = super.containsAll(elements)
+
+    override fun indexOf(element: ${Type}): Int {
+        val it = listIterator()
+        while (it.hasNext()) {
+            if (it.next${Type}() == element) {
+                return it.previousIndex()
+            }
+        }
+        return -1
+    }
+
+    override fun lastIndexOf(element: ${Type}): Int {
+        val it = listIterator(size)
+        while (it.hasPrevious()) {
+            if (it.previous() == element) {
+                return it.nextIndex()
+            }
+        }
+        return -1
+    }
+
+    override fun subList(fromIndex: Int, toIndex: Int): ${Type}List
+}
+
+/**
+ * A mutable list of ${Type}s which inherits from [MutableList].
+ */
+public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, MutableList<${Type}> {
+    override fun listIterator(): Mutable${Type}ListIterator
+    override fun listIterator(index: Int): Mutable${Type}ListIterator
+
+    @Deprecated(
+        message = "Use setAt(index, element) instead.",
+        replaceWith = ReplaceWith("setAt(index, element)"),
+        level = DeprecationLevel.WARNING)
+    override fun set(index: Int, element: ${Type}): ${Type} {
+        assertBoxing()
+        val value = get(index)
+        setAt(index, element)
+        return value
+    }
+
+    public fun setAt(index: Int, element: ${Type})
+
+    override fun add(element: ${Type}): Boolean {
+        add(size, element)
+        return true
+    }
+
+    override fun add(index: Int, element: ${Type})
+
+    public fun addFirst(element: ${Type}): Unit = add(0, element)
+    public fun addLast(element: ${Type}): Unit = add(size, element)
+    public fun removeFirst(): ${Type} = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
+    public fun removeLast(): ${Type} = if (isEmpty()) throw NoSuchElementException() else removeAt(lastIndex)
+
+    override fun remove(element: ${Type}): Boolean {
+        val index = indexOf(element)
+        if (index == -1) {
+            return false
+        }
+
+        removeAt(index)
+        return true
+    }
+
+    public fun removeRange(fromIndex: Int, toIndex: Int)
+
+    override fun clear() {
+        removeRange(0, size)
+    }
+
+    override fun addAll(elements: ${Type}Collection): Boolean {
+        return addAll(size, elements)
+    }
+
+    override fun addAll(elements: Collection<${Type}>): Boolean {
+        return addAll(size, elements)
+    }
+
+    override fun removeAll(elements: Collection<${Type}>): Boolean {
+        return super.removeAll(elements)
+    }
+
+    override fun retainAll(elements: Collection<${Type}>): Boolean {
+        return super.retainAll(elements)
+    }
+
+    public fun addAll(index: Int, elements: ${Type}Collection): Boolean
+    override fun addAll(index: Int, elements: Collection<${Type}>): Boolean
+
+    override fun subList(fromIndex: Int, toIndex: Int): Mutable${Type}List
+}
+
+public abstract class Abstract${Type}List : Abstract${Type}Collection(), ${Type}List {
+
+    override fun iterator(): ${Type}Iterator {
+        return IteratorImpl()
+    }
+
+    override fun listIterator(): ${Type}ListIterator {
+        return listIterator(0)
+    }
+
+    override fun listIterator(index: Int): ${Type}ListIterator {
+        return ListIteratorImpl(index)
+    }
+
+    override fun subList(fromIndex: Int, toIndex: Int): ${Type}List {
+        return if (this is RandomAccess) {
+            RandomAccess${Type}SubList(this, fromIndex, toIndex)
+        } else {
+            ${Type}SubList(this, fromIndex, toIndex)
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other !is List<*>) return false
+        if (size != other.size) return false
+
+        val it = listIterator()
+        val otherIt = other.listIterator()
+        if (otherIt is ${Type}Iterator) {
+            while (it.hasNext() && otherIt.hasNext()) {
+                if (it.next${Type}() != otherIt.next${Type}()) {
+                    return false
+                }
+            }
+        } else {
+            while (it.hasNext() && otherIt.hasNext()) {
+                if (it.next${Type}() != otherIt.next()) {
+                    return false
+                }
+            }
+        }
+        return !(it.hasNext() || otherIt.hasNext())
+    }
+
+    override fun hashCode(): Int {
+        var hashCode = 1
+        for (element in this) {
+            hashCode = 31 * hashCode + element.hashCode()
+        }
+        return hashCode
+    }
+
+    protected fun rangeCheck(index: Int): Int {
+        if (index !in indices) throw IndexOutOfBoundsException("index=\$index, size=\$size")
+        return index
+    }
+
+    protected fun rangeCheck(fromIndex: Int, toIndex: Int) {
+        require(fromIndex <= toIndex)
+        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=\$fromIndex")
+        if (toIndex > size) throw IndexOutOfBoundsException("toIndex=\$toIndex, size=\$size")
+    }
+
+    private inner class IteratorImpl(private var index: Int = 0): ${Type}Iterator() {
+
+        override fun next${Type}(): ${Type} {
+            val value = get(index)
+            index++
+            return value
+        }
+
+        override fun hasNext(): Boolean {
+            return index != size
+        }
+    }
+
+    private inner class ListIteratorImpl(private var index: Int = 0): ${Type}ListIterator() {
+
+        override fun previous${Type}(): ${Type} {
+            val i = index - 1
+            val value = get(i)
+            index = i
+            return value
+        }
+
+        override fun next${Type}(): ${Type} {
+            val value = get(index)
+            index++
+            return value
+        }
+
+        override fun hasNext(): Boolean {
+            return index != size
+        }
+
+        override fun hasPrevious(): Boolean {
+            return index != 0
+        }
+
+        override fun nextIndex(): Int {
+            return index
+        }
+
+        override fun previousIndex(): Int {
+            return index - 1
+        }
+    }
+
+    private open class ${Type}SubList(private val list: ${Type}List, fromIndex: Int, toIndex: Int) : Abstract${Type}List() {
+
+        init {
+            rangeCheck(fromIndex, toIndex)
+        }
+
+        private val offset = fromIndex
+        final override var size = toIndex - fromIndex
+            protected set
+
+        override fun get(index: Int): ${Type} {
+            return list[index + offset]
+        }
+    }
+
+    private class RandomAccess${Type}SubList(list: ${Type}List, fromIndex: Int, toIndex: Int) : ${Type}SubList(list, fromIndex, toIndex), RandomAccess
+}
+
+public abstract class AbstractMutable${Type}List : Abstract${Type}List(), Mutable${Type}List {
+
+    override fun removeRange(fromIndex: Int, toIndex: Int) {
+        if (fromIndex == 0 && toIndex == 0) return
+
+        require(fromIndex <= toIndex)
+        rangeCheck(fromIndex)
+        rangeCheckForAdd(toIndex)
+
+        val it = listIterator(fromIndex)
+        repeat(toIndex-fromIndex) { _ ->
+            it.next${Type}()
+            it.remove()
+        }
+    }
+
+    override fun addAll(index: Int, elements: ${Type}Collection): Boolean {
+        var index = rangeCheckForAdd(index)
+        var modified = false
+        for (element in elements) {
+            add(index++, element)
+            modified = true
+        }
+        return modified
+    }
+
+    override fun addAll(index: Int, elements: Collection<${Type}>): Boolean {
+        if (elements is ${Type}Collection) {
+            return addAll(index, elements)
+        }
+
+        var index = rangeCheckForAdd(index)
+        var modified = false
+        for (element in elements) {
+            add(index++, element)
+            modified = true
+        }
+        return modified
+    }
+
+    override fun iterator(): Mutable${Type}Iterator {
+        return IteratorImpl()
+    }
+
+    override fun listIterator(): Mutable${Type}ListIterator {
+        return listIterator(0)
+    }
+
+    override fun listIterator(index: Int): Mutable${Type}ListIterator {
+        return ListIteratorImpl(index)
+    }
+
+    override fun subList(fromIndex: Int, toIndex: Int): Mutable${Type}List {
+        return if (this is RandomAccess) {
+            RandomAccess${Type}SubList(this, fromIndex, toIndex)
+        } else {
+            ${Type}SubList(this, fromIndex, toIndex)
+        }
+    }
+
+    protected fun rangeCheckForAdd(index: Int): Int {
+        if (index !in 0..size) throw IndexOutOfBoundsException("index=\$index, size=\$size")
+        return index
+    }
+
+    private inner class IteratorImpl(private var index: Int = 0): Mutable${Type}Iterator() {
+        private var lastIndex = -1
+
+        override fun next${Type}(): ${Type} {
+            val i = index
+            val value = get(i)
+            lastIndex = i
+            index = i + 1
+            return value
+        }
+
+        override fun hasNext(): Boolean {
+            return index != size
+        }
+
+        override fun remove() {
+            check(lastIndex >= 0)
+
+            removeAt(lastIndex)
+            if (lastIndex < index) index--
+            lastIndex = -1
+        }
+    }
+
+    private inner class ListIteratorImpl(private var index: Int = 0): Mutable${Type}ListIterator() {
+
+        private var lastIndex = -1
+
+        override fun previous${Type}(): ${Type} {
+            val i = index - 1
+            val value = get(i)
+            index = i
+            lastIndex = i
+            return value
+        }
+
+        override fun next${Type}(): ${Type} {
+            val i = index
+            val value = get(i)
+            lastIndex = i
+            index = i + 1
+            return value
+        }
+
+        override fun hasNext(): Boolean {
+            return index != size
+        }
+
+        override fun hasPrevious(): Boolean {
+            return index != 0
+        }
+
+        override fun nextIndex(): Int {
+            return index
+        }
+
+        override fun previousIndex(): Int {
+            return index - 1
+        }
+
+        override fun remove() {
+            check(lastIndex >= 0)
+
+            removeAt(lastIndex)
+            if (lastIndex < index) index--
+            lastIndex = -1
+        }
+
+        override fun set(element: ${Type}) {
+            check(lastIndex >= 0)
+            setAt(lastIndex, element)
+        }
+
+        override fun add(element: ${Type}) {
+            val i = index
+            add(i, element)
+            lastIndex = -1
+            index = i + 1
+        }
+    }
+
+    private open class ${Type}SubList(private val list: Mutable${Type}List, fromIndex: Int, toIndex: Int) : AbstractMutable${Type}List() {
+
+        init {
+            rangeCheck(fromIndex, toIndex)
+        }
+
+        private val offset = fromIndex
+        final override var size = toIndex - fromIndex
+            private set
+
+        override fun setAt(index: Int, element: ${Type}) {
+            return list.setAt(index + offset, element)
+        }
+
+        override fun get(index: Int): ${Type} {
+            return list[index + offset]
+        }
+
+        override fun add(index: Int, element: ${Type}) {
+            list.add(index + offset, element)
+            size++
+        }
+
+        override fun removeAt(index: Int): ${Type} {
+            val result = list.removeAt(index + offset)
+            size--
+            return result
+        }
+
+        override fun removeRange(fromIndex: Int, toIndex: Int) {
+            list.removeRange(fromIndex + offset, toIndex + offset)
+        }
+
+        override fun addAll(index: Int, elements: ${Type}Collection): Boolean {
+            if (elements.isEmpty()) return false
+
+            list.addAll(offset + index, elements)
+            size += elements.size
+            return true
+        }
+    }
+
+    private class RandomAccess${Type}SubList(list: Mutable${Type}List, fromIndex: Int, toIndex: Int) : ${Type}SubList(list, fromIndex, toIndex), RandomAccess
+}
+
+private object Empty${Type}List : ${Type}List, RandomAccess {
+    override val size: Int get() = 0
+
+    override fun isEmpty(): Boolean = true
+    override fun contains(element: ${Type}): Boolean = false
+    override fun containsAll(elements: Collection<${Type}>): Boolean = elements.isEmpty()
+    override fun containsAll(elements: ${Type}Collection): Boolean = elements.isEmpty()
+
+    override fun get(index: Int): ${Type} = throw IndexOutOfBoundsException()
+    override fun indexOf(element: ${Type}): Int = -1
+    override fun lastIndexOf(element: ${Type}): Int = -1
+
+    override fun iterator(): ${Type}Iterator = empty${Type}Iterator()
+    override fun listIterator(): ${Type}ListIterator = empty${Type}Iterator()
+    override fun listIterator(index: Int): ${Type}ListIterator = if (index == 0) listIterator() else throw IndexOutOfBoundsException()
+
+    override fun subList(fromIndex: Int, toIndex: Int): ${Type}List {
+        if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()
+        return Empty${Type}List
+    }
+}
+
+private class Singleton${Type}List(private val value: ${Type}) : Abstract${Type}List(), RandomAccess {
+    override val size: Int get() = 1
+
+    override fun isEmpty(): Boolean = false
+    override fun contains(element: ${Type}): Boolean = value == element
+
+    override fun get(index: Int): ${Type} = if (index == 0) return value else throw IndexOutOfBoundsException()
+    override fun indexOf(element: ${Type}): Int = if (element == value) 0 else -1
+    override fun lastIndexOf(element: ${Type}): Int = if (element == value) 0 else -1
+
+    override fun subList(fromIndex: Int, toIndex: Int): ${Type}List {
+        rangeCheck(fromIndex, toIndex)
+        return if (fromIndex == 0 && toIndex == 1) this else Empty${Type}List
+    }
+}
+
+private class ${Type}ArrayListWrapper(private val array: ${Type}Array): Abstract${Type}List(), RandomAccess {
+    override val size: Int get() = array.size
+    override fun get(index: Int): ${Type} = array[index]
+}

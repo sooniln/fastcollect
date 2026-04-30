@@ -15,17 +15,14 @@ java {
 }
 
 dependencies {
-    implementation(project(":"))
+    implementation(project(":fastcollect"))
 }
 
-tasks.register<JavaExec>("jitAsm") {
+private fun registerJitAsm(name: String, configuration: JavaExec.() -> Unit): TaskProvider<JavaExec> = tasks.register<JavaExec>(name) {
     group = "verification"
-    description = "Run a small harness that heats up IntHashSet and prints the generated machine code via -XX:+PrintAssembly (requires hsdis)."
-
-    println("TEST: " + sourceSets["main"].runtimeClasspath.files)
+    description = "Run a small harness that heats up and prints the generated machine code (requires hsdis to be present on path)."
 
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass = "io.github.sooniln.fastcollect.IntSetAsmProbe"
 
     jvmArgs(
         "-Xms256m",
@@ -39,7 +36,14 @@ tasks.register<JavaExec>("jitAsm") {
         "-XX:+UnlockDiagnosticVMOptions",
         "-XX:+PrintAssembly",
         "-XX:PrintAssemblyOptions=intel",
-        // Reduce noise: try to compile/print only the method we care about.
+    )
+
+    configuration()
+}
+
+registerJitAsm("jitAsmIntHashSetContains") {
+    mainClass = "io.github.sooniln.fastcollect.IntHashSetContainsAsmProbe"
+    jvmArgs(
         "-XX:CompileCommand=quiet",
         "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.ints.IntHashSet::contains",
         "-XX:CompileCommand=print,io.github.sooniln.fastcollect.ints.IntHashSet::contains",

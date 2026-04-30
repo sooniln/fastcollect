@@ -13,20 +13,19 @@ template files rather than the generated output.
 
 Prefer to run only JVM tests for speed (unless there is a good reason to run tests on other platforms).
 
-Use "./gradlew jvmTest" to run all tests on the JVM platform.
+* Use "./gradlew jvmTest" to run all tests on the JVM platform.
 
 ## Benchmarking
 
-The benchmark subproject is responsible for running JVM benchmarks using JMH. The full benchmark suite will usually also
-run benchmarks on fastutil and JDK collections. For local benchmarking during development it usually wastes less time to
-filter benchmarks to only the relevant methods.
+The benchmark subproject is used for general benchmarks across multiple platforms and there is little reason to use it
+normally. Local benchmarking for development should use tasks from the jmh subproject which run JVM benchmarks using
+JMH. It's also usually more efficient to filter benchmarks to only the relevant classes and/or methods.
 
-Use "./gradlew jmh" to run all JMH benchmarks.
-Use "./gradlew jmh -Pjmh.includes='<regex>" to run only benchmarks which match the regular expression given by <regex>.
+* Use "./gradlew jmh" to run all JVM JMH benchmarks.
+* Use "./gradlew jmh -PjmhIncludes='<regex>'" to run only JVM JMH benchmarks which match the regular expression given
+  by <regex>.
 
 ## JIT-ASM
 
-The jitAsm subproject is responsible for outputting JIT ASM for interesting methods within the library to allow for
-detailed analysis of the output byte code and a deeper understanding of performance.
-
-Use "./gradlew jitAsm" or similar to output JVM assembly for analysis.
+The jitAsm subproject holds harnesses that can be run to output JIT ASM for interesting methods to allow for detailed
+analysis of the assembly code and a deeper understanding of real performance.

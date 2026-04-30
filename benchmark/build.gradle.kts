@@ -1,9 +1,6 @@
-import me.champeau.jmh.JMHTask
-import org.gradle.kotlin.dsl.kotlin
-
 plugins {
-    kotlin("jvm")
-    alias(libs.plugins.jmh)
+    kotlin("multiplatform")
+    alias(libs.plugins.kotlinxBenchmark)
 }
 
 repositories {
@@ -12,53 +9,37 @@ repositories {
 
 kotlin {
     jvmToolchain(17)
+
+    jvm()
+    linuxX64()
+    js {
+        nodejs()
+    }
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        nodejs()
+    }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(libs.kotlinx.benchmark.runtime)
+                implementation(project(":fastcollect"))
+                implementation(libs.fastutil)
+            }
+        }
+    }
 }
 
-dependencies {
-    jmhImplementation(project(":"))
-    jmhImplementation("it.unimi.dsi:fastutil:8.5.18")
-}
+benchmark {
+    configurations {
+        named("main") {}
+    }
 
-jmh {
-    includeTests = false
-    verbosity = "EXTRA"
-    failOnError = true
-}
-
-private fun registerJMHTask(name: String, configuration: JMHTask.()->Unit): TaskProvider<JMHTask> = tasks.register<JMHTask>(name) {
-    group = "verification"
-
-    includeTests = false
-    verbosity = "EXTRA"
-    failOnError = true
-
-    val baseTask = tasks.named<JMHTask>("jmh")
-
-    jmhClasspath = baseTask.get().jmhClasspath
-    testRuntimeClasspath = baseTask.get().testRuntimeClasspath
-    jarArchive = baseTask.get().jarArchive
-    javaLauncher = baseTask.get().javaLauncher
-    resultsFile = baseTask.get().resultsFile
-
-    configuration()
-}
-
-registerJMHTask("jmhFastCollectList") {
-    description = "Run JMH benchmarks for FastCollect IntArrayDeque"
-    includes.set(listOf("ListBenchmark\\.fastcollect"))
-}
-
-registerJMHTask("jmhFastCollectMap") {
-    description = "Run JMH benchmarks for FastCollect Int2IntHashMap"
-    includes.set(listOf("MapBenchmark\\.fastcollect"))
-}
-
-registerJMHTask("jmhFastCollectSet") {
-    description = "Run JMH benchmarks for FastCollect IntHashSet"
-    includes.set(listOf("SetBenchmark\\.fastcollect"))
-}
-
-// ensure JMH tasks are never cached
-tasks.withType<JMHTask> {
-    outputs.upToDateWhen { false }
+    targets {
+        register("jvm")
+        register("linuxX64")
+        register("js")
+        register("wasmJs")
+    }
 }
