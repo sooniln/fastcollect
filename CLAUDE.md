@@ -9,6 +9,12 @@ identical code. The GenerateCollections gradle task is responsible for taking as
 src/commonMain/templates and generating output into src/commonGenerated. Changes should thus always be made to the
 template files rather than the generated output.
 
+## Testing
+
+Prefer to run only JVM tests for speed (unless there is a good reason to run tests on other platforms).
+
+Use "./gradlew jvmTest" to run all tests on the JVM platform.
+
 ## Benchmarking
 
 The benchmark subproject is responsible for running JVM benchmarks using JMH. The full benchmark suite will usually also

@@ -9,13 +9,11 @@ import kotlin.test.assertFailsWith
 
 class Long2IntHashMapTest {
 
-    private fun newMap() = Long2IntHashMap()
-
     // --- construction & size ---
 
     @Test
     fun emptyMapHasSizeZero() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         assertEquals(0, map.size)
         assertTrue(map.isEmpty())
     }
@@ -29,7 +27,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun defaultValueIsMinValue() {
-        assertEquals(Int.MIN_VALUE, newMap().defaultValue)
+        assertEquals(Int.MIN_VALUE, Long2IntHashMap().defaultValue)
     }
 
     @Test
@@ -63,20 +61,20 @@ class Long2IntHashMapTest {
 
     @Test
     fun putValueNewKeyReturnsDefaultValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         assertEquals(map.defaultValue, map.putValue(1L, 100))
     }
 
     @Test
     fun putValueExistingKeyReturnsOldValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 100)
         assertEquals(100, map.putValue(1L, 200))
     }
 
     @Test
     fun putValueIncreasesSize() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10)
         map.putValue(2L, 20)
         assertEquals(2, map.size)
@@ -84,7 +82,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun putValueUpdateDoesNotChangeSize() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10)
         map.putValue(1L, 20)
         assertEquals(1, map.size)
@@ -92,7 +90,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun setOperatorPutsValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map[5L] = 50
         assertEquals(50, map.lookup(5L))
     }
@@ -101,20 +99,20 @@ class Long2IntHashMapTest {
 
     @Test
     fun lookupPresentKeyReturnsValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 42)
         assertEquals(42, map.lookup(1L))
     }
 
     @Test
     fun lookupAbsentKeyReturnsDefaultValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         assertEquals(map.defaultValue, map.lookup(99L))
     }
 
     @Test
     fun lookupUpdatedKeyReturnsNewValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10)
         map.putValue(1L, 20)
         assertEquals(20, map.lookup(1L))
@@ -124,19 +122,19 @@ class Long2IntHashMapTest {
 
     @Test
     fun containsKeyReturnsTrueForPresentKey() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(5L, 50)
         assertTrue(map.containsKey(5L))
     }
 
     @Test
     fun containsKeyReturnsFalseForAbsentKey() {
-        assertFalse(newMap().containsKey(5L))
+        assertFalse(Long2IntHashMap().containsKey(5L))
     }
 
     @Test
     fun containsKeyFalseAfterRemove() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(5L, 50)
         map.removeKey(5L)
         assertFalse(map.containsKey(5L))
@@ -146,28 +144,28 @@ class Long2IntHashMapTest {
 
     @Test
     fun containsValueReturnsTrueForPresentValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 42)
         assertTrue(map.containsValue(42))
     }
 
     @Test
     fun containsValueReturnsFalseForAbsentValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 42)
         assertFalse(map.containsValue(99))
     }
 
     @Test
     fun containsValueReturnsFalseAfterRemoval() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 42)
         map.removeKey(1L)
         assertFalse(map.containsValue(42))
     }
 
     @Test
-    fun containsValueWhenValueEqualsDefaultValue() {
+    fun containsValueWhenValueEqualsCustomDefault() {
         val map = Long2IntHashMap(defaultValue = -1)
         map.putValue(1L, -1)
         assertTrue(map.containsValue(-1))
@@ -177,45 +175,45 @@ class Long2IntHashMapTest {
 
     @Test
     fun putValueZeroKeyFirstTimeReturnsDefaultValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         assertEquals(map.defaultValue, map.putValue(0L, 100))
     }
 
     @Test
     fun putValueZeroKeyUpdateReturnsOldValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(0L, 100)
         assertEquals(100, map.putValue(0L, 200))
     }
 
     @Test
     fun lookupZeroKeyPresentReturnsValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(0L, 99)
         assertEquals(99, map.lookup(0L))
     }
 
     @Test
     fun lookupZeroKeyAbsentReturnsDefaultValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         assertEquals(map.defaultValue, map.lookup(0L))
     }
 
     @Test
     fun containsKeyZeroTrueWhenPresent() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(0L, 1)
         assertTrue(map.containsKey(0L))
     }
 
     @Test
     fun containsKeyZeroFalseWhenAbsent() {
-        assertFalse(newMap().containsKey(0L))
+        assertFalse(Long2IntHashMap().containsKey(0L))
     }
 
     @Test
     fun zeroKeyCountedInSize() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(0L, 1)
         map.putValue(1L, 2)
         assertEquals(2, map.size)
@@ -223,7 +221,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun removeZeroKeyReturnsOldValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(0L, 77)
         assertEquals(77, map.removeKey(0L))
         assertFalse(map.containsKey(0L))
@@ -231,13 +229,13 @@ class Long2IntHashMapTest {
 
     @Test
     fun removeZeroKeyAbsentReturnsDefaultValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         assertEquals(map.defaultValue, map.removeKey(0L))
     }
 
     @Test
     fun zeroKeyIncludedInIteration() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(0L, 10)
         map.putValue(1L, 20)
         val result = mutableMapOf<Long, Int>()
@@ -247,7 +245,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun containsValueChecksZeroKeyValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(0L, 55)
         assertTrue(map.containsValue(55))
     }
@@ -256,20 +254,20 @@ class Long2IntHashMapTest {
 
     @Test
     fun removeKeyPresentReturnsOldValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(3L, 30)
         assertEquals(30, map.removeKey(3L))
     }
 
     @Test
     fun removeKeyAbsentReturnsDefaultValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         assertEquals(map.defaultValue, map.removeKey(99L))
     }
 
     @Test
     fun removeKeyDecreasesSize() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20)
         map.removeKey(1L)
         assertEquals(1, map.size)
@@ -277,7 +275,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun removedKeyNoLongerContained() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(7L, 70)
         map.removeKey(7L)
         assertFalse(map.containsKey(7L))
@@ -285,14 +283,14 @@ class Long2IntHashMapTest {
 
     @Test
     fun removeKeyFromEmptyMapReturnsDefaultValue() {
-        assertEquals(newMap().defaultValue, newMap().removeKey(1L))
+        assertEquals(Long2IntHashMap().defaultValue, Long2IntHashMap().removeKey(1L))
     }
 
     // --- clear ---
 
     @Test
     fun clearEmptiesMap() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20)
         map.clear()
         assertEquals(0, map.size)
@@ -301,7 +299,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun clearRemovesZeroKey() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(0L, 1); map.putValue(1L, 2)
         map.clear()
         assertFalse(map.containsKey(0L))
@@ -310,7 +308,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun addAfterClearWorks() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20)
         map.clear()
         map.putValue(3L, 30)
@@ -322,7 +320,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun iterationTraversesAllEntries() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20); map.putValue(3L, 30)
         val result = mutableMapOf<Long, Int>()
         for (e in map.primitiveEntries) result[e.key()] = e.value()
@@ -332,13 +330,13 @@ class Long2IntHashMapTest {
     @Test
     fun iterationOnEmptyMapProducesNoEntries() {
         var count = 0
-        for (e in newMap().primitiveEntries) count++
+        for (e in Long2IntHashMap().primitiveEntries) count++
         assertEquals(0, count)
     }
 
     @Test
     fun iterationCountMatchesSize() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         for (i in 1..20) map.putValue(i.toLong(), i * 10)
         var count = 0
         for (e in map.primitiveEntries) count++
@@ -347,7 +345,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun fastIteratorTraversesAllEntries() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20)
         val result = mutableMapOf<Long, Int>()
         val iter = map.fastIterator()
@@ -360,7 +358,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun iteratorRemoveDecreasesSize() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20); map.putValue(3L, 30)
         val iter = map.primitiveEntries.iterator()
         val removedKey = iter.next().key()
@@ -373,33 +371,33 @@ class Long2IntHashMapTest {
 
     @Test
     fun keysContainsPresentKey() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(7L, 70)
         assertTrue(map.keys.contains(7L))
     }
 
     @Test
     fun keysDoesNotContainAbsentKey() {
-        assertFalse(newMap().keys.contains(7L))
+        assertFalse(Long2IntHashMap().keys.contains(7L))
     }
 
     @Test
     fun keysSizeMatchesMapSize() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20)
         assertEquals(2, map.keys.size)
     }
 
     @Test
     fun keysContainsZeroKey() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(0L, 1)
         assertTrue(map.keys.contains(0L))
     }
 
     @Test
     fun keysIterationMatchesMapKeys() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20); map.putValue(3L, 30)
         assertEquals(setOf(1L, 2L, 3L), map.keys.toSet())
     }
@@ -408,19 +406,19 @@ class Long2IntHashMapTest {
 
     @Test
     fun valuesContainsPresentValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 42)
         assertTrue(map.values.contains(42))
     }
 
     @Test
     fun valuesDoesNotContainAbsentValue() {
-        assertFalse(newMap().values.contains(99))
+        assertFalse(Long2IntHashMap().values.contains(99))
     }
 
     @Test
     fun valuesSizeMatchesMapSize() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20)
         assertEquals(2, map.values.size)
     }
@@ -429,30 +427,30 @@ class Long2IntHashMapTest {
 
     @Test
     fun getOrDefaultReturnsValueForPresentKey() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 42)
         assertEquals(42, map.getOrDefault(1L, -1))
     }
 
     @Test
     fun getOrDefaultReturnsSuppliedDefaultForAbsentKey() {
-        assertEquals(-1, newMap().getOrDefault(99L, -1))
+        assertEquals(-1, Long2IntHashMap().getOrDefault(99L, -1))
     }
 
     @Test
     fun getOrElseReturnsValueForPresentKey() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 42)
         assertEquals(42, map.getOrElse(1L) { -1 })
     }
 
     @Test
     fun getOrElseReturnsLambdaResultForAbsentKey() {
-        assertEquals(-1, newMap().getOrElse(99L) { -1 })
+        assertEquals(-1, Long2IntHashMap().getOrElse(99L) { -1 })
     }
 
     @Test
-    fun getOrElseWhenValueMatchesDefaultValueButKeyPresent() {
+    fun getOrElseWhenValueMatchesCustomDefaultButKeyPresent() {
         val map = Long2IntHashMap(defaultValue = 0)
         map.putValue(1L, 0)
         assertEquals(0, map.getOrElse(1L) { 99 })
@@ -460,19 +458,19 @@ class Long2IntHashMapTest {
 
     @Test
     fun getValueReturnsValueForPresentKey() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 42)
         assertEquals(42, map.getValue(1L))
     }
 
     @Test
     fun getValueThrowsNoSuchElementForAbsentKey() {
-        assertFailsWith<NoSuchElementException> { newMap().getValue(99L) }
+        assertFailsWith<NoSuchElementException> { Long2IntHashMap().getValue(99L) }
     }
 
     @Test
     fun getOrPutReturnsExistingValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 42)
         assertEquals(42, map.getOrPut(1L) { 99 })
         assertEquals(42, map.lookup(1L))
@@ -480,7 +478,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun getOrPutInsertsAndReturnsNewValueForAbsentKey() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         assertEquals(99, map.getOrPut(1L) { 99 })
         assertEquals(99, map.lookup(1L))
         assertEquals(1, map.size)
@@ -488,7 +486,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun mergeInsertsValueWhenKeyAbsent() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         val result = map.merge(1L, 10) { old, new -> old + new }
         assertEquals(10, result)
         assertEquals(10, map.lookup(1L))
@@ -496,7 +494,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun mergeCallsMergeFunctionWhenKeyPresent() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10)
         val result = map.merge(1L, 5) { old, new -> old + new }
         assertEquals(15, result)
@@ -505,7 +503,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun filterReturnsEntriesMatchingPredicate() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20); map.putValue(3L, 30)
         val filtered = map.filter { _, value -> value > 15 }
         assertFalse(filtered.containsKey(1L))
@@ -517,7 +515,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun filterDoesNotMutateOriginalMap() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20)
         map.filter { key, _ -> key == 1L }
         assertEquals(2, map.size)
@@ -525,7 +523,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun filterToAddsToDestination() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10); map.putValue(2L, 20); map.putValue(3L, 30)
         val dest = Long2IntHashMap()
         dest.putValue(9L, 90)
@@ -560,6 +558,12 @@ class Long2IntHashMapTest {
     }
 
     @Test
+    fun equalsWithStandardMap() {
+        val map = Long2IntHashMap().apply { putValue(1L, 10); putValue(2L, 20) }
+        assertEquals(mapOf(1L to 10, 2L to 20), map)
+    }
+
+    @Test
     fun hashCodeConsistentWithEqualMaps() {
         val a = Long2IntHashMap().apply { putValue(1L, 10); putValue(2L, 20) }
         val b = Long2IntHashMap().apply { putValue(1L, 10); putValue(2L, 20) }
@@ -591,7 +595,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun putAllFromRegularMapAddsAllEntries() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putAll(mapOf(1L to 10, 2L to 20, 3L to 30))
         assertEquals(3, map.size)
         assertEquals(10, map.lookup(1L))
@@ -601,7 +605,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun putAllFromLong2IntMapAddsAllEntries() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         val src = Long2IntHashMap().apply { putValue(1L, 10); putValue(2L, 20); putValue(3L, 30) }
         map.putAll(src)
         assertEquals(3, map.size)
@@ -612,7 +616,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun putAllFromLong2IntMapWithZeroKey() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         val src = Long2IntHashMap().apply { putValue(0L, 99); putValue(1L, 10) }
         map.putAll(src)
         assertEquals(2, map.size)
@@ -622,7 +626,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun putAllFromEmptyMapIsNoOp() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, 10)
         map.putAll(mapOf())
         assertEquals(1, map.size)
@@ -632,7 +636,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun ensureCapacityPreservesData() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         for (i in 1..20) map.putValue(i.toLong(), i * 10)
         map.ensureCapacity(200)
         assertEquals(20, map.size)
@@ -641,14 +645,14 @@ class Long2IntHashMapTest {
 
     @Test
     fun ensureCapacityNegativeThrows() {
-        assertFailsWith<IllegalArgumentException> { newMap().ensureCapacity(-1) }
+        assertFailsWith<IllegalArgumentException> { Long2IntHashMap().ensureCapacity(-1) }
     }
 
     // --- large map (forces hash mode: >32 entries) ---
 
     @Test
     fun largeMapStoresAndRetrievesAllEntries() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         for (i in 1..100) map.putValue(i.toLong(), i * 3)
         assertEquals(100, map.size)
         for (i in 1..100) assertEquals(i * 3, map.lookup(i.toLong()))
@@ -656,7 +660,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun largeMapIterationIsComplete() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         for (i in 1..100) map.putValue(i.toLong(), i)
         val found = mutableMapOf<Long, Int>()
         for (e in map.primitiveEntries) found[e.key()] = e.value()
@@ -666,7 +670,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun largeMapRemoveAndLookup() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         for (i in 1..50) map.putValue(i.toLong(), i * 2)
         for (i in 1..25) map.removeKey(i.toLong())
         assertEquals(25, map.size)
@@ -676,7 +680,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun largeMapWithZeroKeyIteratesAll() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(0L, -1)
         for (i in 1..50) map.putValue(i.toLong(), i)
         assertEquals(51, map.size)
@@ -686,11 +690,11 @@ class Long2IntHashMapTest {
         assertEquals(-1, found[0L])
     }
 
-    // --- negative and boundary keys/values ---
+    // --- negative keys/values and boundary values ---
 
     @Test
     fun negativeKeysStoredCorrectly() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(-1L, -100)
         map.putValue(-50L, -500)
         assertEquals(-100, map.lookup(-1L))
@@ -699,7 +703,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun longMaxValueAsKey() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(Long.MAX_VALUE, 1)
         assertTrue(map.containsKey(Long.MAX_VALUE))
         assertEquals(1, map.lookup(Long.MAX_VALUE))
@@ -707,7 +711,7 @@ class Long2IntHashMapTest {
 
     @Test
     fun intMaxValueAsValue() {
-        val map = newMap()
+        val map = Long2IntHashMap()
         map.putValue(1L, Int.MAX_VALUE)
         assertEquals(Int.MAX_VALUE, map.lookup(1L))
     }
@@ -723,7 +727,7 @@ class Long2IntHashMapTest {
     // --- value equals defaultValue but key is present ---
 
     @Test
-    fun lookupWhenValueEqualsDefaultValueAndKeyPresent() {
+    fun lookupWhenValueEqualsCustomDefaultAndKeyPresent() {
         val map = Long2IntHashMap(defaultValue = 42)
         map.putValue(1L, 42)
         assertTrue(map.containsKey(1L))

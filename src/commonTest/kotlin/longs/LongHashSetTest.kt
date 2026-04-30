@@ -185,6 +185,18 @@ class LongHashSetTest {
         assertFalse(LongHashSet().remove(1L))
     }
 
+    @Test
+    fun removePreservesAllOtherElements() {
+        val set = LongHashSet()
+        for (i in 1..100) set.add(i.toLong())
+        for (i in 1..100) {
+            set.remove(i.toLong())
+            for (j in i + 1..100) {
+                assertTrue(set.contains(j.toLong()), "After removing $i, set no longer contains $j")
+            }
+        }
+    }
+
     // --- contains ---
 
     @Test

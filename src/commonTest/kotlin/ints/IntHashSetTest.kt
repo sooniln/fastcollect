@@ -185,6 +185,18 @@ class IntHashSetTest {
         assertFalse(IntHashSet().remove(1))
     }
 
+    @Test
+    fun removePreservesAllOtherElements() {
+        val set = IntHashSet()
+        for (i in 1..100) set.add(i)
+        for (i in 1..100) {
+            set.remove(i)
+            for (j in i + 1..100) {
+                assertTrue(set.contains(j), "After removing $i, set no longer contains $j")
+            }
+        }
+    }
+
     // --- contains ---
 
     @Test

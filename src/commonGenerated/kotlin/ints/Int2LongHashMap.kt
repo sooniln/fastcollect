@@ -3,7 +3,6 @@ package io.github.sooniln.fastcollect.ints
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.MutableFastIterator
-import io.github.sooniln.fastcollect.assert
 import io.github.sooniln.fastcollect.longs.MutableLongCollection
 import io.github.sooniln.fastcollect.longs.MutableLongIterator
 import kotlin.math.max
@@ -46,8 +45,6 @@ public class Int2LongHashMap(
     }
 
     private fun putHashing(key: Int, value: Long): Long {
-        assert(isHashing())
-
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -66,45 +63,31 @@ public class Int2LongHashMap(
 
         val mask = keysArr.mask()
         var slot = key.slot(mask)
+        var newKey = key
+        var newValue = value
         var newKeySlotDistance = 0
         while (true) {
-            var currKey = keysArr[slot]
-            when (currKey) {
-                key -> {
+            when (val currKey = keysArr[slot]) {
+                newKey -> {
                     val oldValue = valuesArr[slot]
-                    valuesArr[slot] = value
+                    valuesArr[slot] = newValue
                     return oldValue
                 }
                 ZERO -> {
-                    keysArr[slot] = key
-                    valuesArr[slot] = value
+                    keysArr[slot] = newKey
+                    valuesArr[slot] = newValue
                     ++size
                     return defaultValue
                 }
                 else -> {
-                    if (newKeySlotDistance > currKey.slotDistance(slot, mask)) {
-                        var currValue = valuesArr[slot]
-                        var newKey = key
-                        var newValue = value
-
-                        // move all slots right until we hit a zero slot. max slot distance is generally not high
-                        // enough for System.arrayCopy() to outperform the manual loop here, especially with the
-                        // additional complexity needed for System.arrayCopy().
-                        do {
-                            keysArr[slot] = newKey
-                            valuesArr[slot] = newValue
-                            newKey = currKey
-                            newValue = currValue
-
-                            slot = slot.nextSlot(mask)
-                            currKey = keysArr[slot]
-                            currValue = valuesArr[slot]
-                        } while (currKey != ZERO)
-
+                    val currKeySlotDistance = currKey.slotDistance(slot, mask)
+                    if (newKeySlotDistance > currKeySlotDistance) {
+                        val currValue = valuesArr[slot]
                         keysArr[slot] = newKey
                         valuesArr[slot] = newValue
-                        ++size
-                        return defaultValue
+                        newKey = currKey
+                        newValue = currValue
+                        newKeySlotDistance = currKeySlotDistance
                     }
                 }
             }
@@ -115,8 +98,6 @@ public class Int2LongHashMap(
     }
 
     private fun putArray(key: Int, value: Long): Long {
-        assert(!isHashing())
-
         var slot = 0
         while (slot < size) {
             if (keysArr[slot] == key) {
@@ -158,33 +139,29 @@ public class Int2LongHashMap(
     }
 
     private fun findSlotHashing(key: Int): Int {
-        assert(isHashing())
-
         val keysArr = keysArr
 
         if (key == ZERO) {
             val endSlot = keysArr.endSlot()
-            assert(endSlot >= 0)
             return if (keysArr[endSlot] != ZERO) -1 else endSlot
         }
 
         val mask = keysArr.mask()
         var slot = key.slot(mask)
         while (true) {
-            // we could stop looking once the distance < current distance, but this generally worsens performance (extra
-            // unpredictable branch which only cuts off a couple iterations).
             val currKey = keysArr[slot]
-            when (currKey) {
-                key -> return slot
-                ZERO -> return -1
+            if (currKey == key) {
+                return slot
+            } else if (currKey == ZERO) {
+                return -1
             }
+            // do not bother to compare slot distances to break out of the loop - the additional cost is usually more
+            // expensive than a couple extra iterations.
             slot = slot.nextSlot(mask)
         }
     }
 
     private fun findSlotArray(key: Int): Int {
-        assert(!isHashing())
-
         val keysArr = keysArr
 
         // iterate backwards under assumption more recently added values are more likely to be queried
@@ -204,8 +181,6 @@ public class Int2LongHashMap(
     }
 
     private fun removeSlotHashing(slot: Int) {
-        assert(isHashing())
-
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -218,9 +193,7 @@ public class Int2LongHashMap(
 
         val mask = keysArr.mask()
 
-        // move all slots left until we hit a zero slot. max slot distance is generally not high enough for
-        // System.arrayCopy() to outperform the manual loop here, especially with the additional complexity needed
-        // for System.arrayCopy().
+        // move all slots left until we hit a zero slot
         var currSlot = slot
         var nextSlot = currSlot.nextSlot(mask)
         var nextKey = keysArr[nextSlot]
@@ -239,9 +212,6 @@ public class Int2LongHashMap(
     }
 
     private fun removeSlotArray(slot: Int) {
-        assert(!isHashing())
-        assert(slot < size)
-
         val lastIndex = --size
         if (slot < lastIndex) {
             keysArr[slot] = keysArr[lastIndex]
@@ -330,51 +300,9 @@ public class Int2LongHashMap(
     }
 
     override fun lookup(key: Int): Long {
-        return if (isHashing()) lookupHashing(key) else lookupArray(key)
-    }
-
-    private fun lookupHashing(key: Int): Long {
-        assert(isHashing())
-
-        val keysArr = keysArr
         val valuesArr = valuesArr
-
-        if (key == ZERO) {
-            val endSlot = keysArr.endSlot()
-            assert(endSlot >= 0)
-            return if (keysArr[endSlot] != ZERO) defaultValue else valuesArr[endSlot]
-        }
-
-        val mask = keysArr.mask()
-        var slot = key.slot(mask)
-        while (true) {
-            // we could stop looking once the distance < current distance, but this generally worsens performance (extra
-            // unpredictable branch which only cuts off a couple iterations).
-            val currKey = keysArr[slot]
-            when (currKey) {
-                key -> return valuesArr[slot]
-                ZERO -> return defaultValue
-            }
-            slot = slot.nextSlot(mask)
-        }
-    }
-
-    private fun lookupArray(key: Int): Long {
-        assert(!isHashing())
-
-        val keysArr = keysArr
-        val valuesArr = valuesArr
-
-        // iterate backwards under assumption more recently added values are more likely to be queried
-        var slot = size - 1
-        while (slot >= 0) {
-            if (keysArr[slot] == key) {
-                return valuesArr[slot]
-            }
-            --slot
-        }
-
-        return defaultValue
+        val slot = findSlot(key)
+        return if (slot >= 0) valuesArr[slot] else defaultValue
     }
 
     private fun resizeIfNecessary() {
@@ -578,18 +506,16 @@ public class Int2LongHashMap(
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun Int.slot(mask: Int): Int {
-        assert(this != ZERO)
-        assert(mask == keysArr.mask())
         return mixHash(this.hashCode()) and mask
     }
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun Int.nextSlot(mask: Int): Int {
-        assert(mask == keysArr.mask())
         return (this + 1) and mask
     }
 
-    private fun Int.slotDistance(slot: Int, mask: Int): Int {
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun Int.slotDistance(slot: Int, mask: Int): Int {
         return (slot - slot(mask)) and mask
     }
 
@@ -607,7 +533,7 @@ public class Int2LongHashMap(
         /** 2<sup>32</sup> &middot; &phi;, &phi; = (&#x221A;5 &minus; 1)/2. */
         private const val INT_PHI: Int = -0x61c88647
 
-        private const val DEFAULT_LOAD_FACTOR = .75f
+        private const val DEFAULT_LOAD_FACTOR = .85f
         private const val DEFAULT_INITIAL_CAPACITY = 1 shl 2  // must be power of two
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two
         private const val HASHIFY_THRESHOLD: Int = 1 shl 5 // must be power of two

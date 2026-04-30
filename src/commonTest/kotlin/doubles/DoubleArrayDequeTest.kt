@@ -138,7 +138,7 @@ class DoubleArrayDequeTest {
     }
 
     @Test
-    fun setAtReplacesElement() {
+    fun setReplacesElement() {
         val deque = DoubleArrayDeque(doubleArrayOf(1.0, 2.0, 3.0))
         deque.setAt(1, 99.0)
         assertEquals(listOf(1.0, 99.0, 3.0), deque.toList())
@@ -151,7 +151,7 @@ class DoubleArrayDequeTest {
     }
 
     @Test
-    fun setAtOutOfBoundsThrows() {
+    fun setOutOfBoundsThrows() {
         val deque = DoubleArrayDeque(doubleArrayOf(1.0))
         assertFailsWith<IndexOutOfBoundsException> { deque.setAt(5, 99.0) }
     }

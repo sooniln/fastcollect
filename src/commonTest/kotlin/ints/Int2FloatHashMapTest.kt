@@ -9,13 +9,11 @@ import kotlin.test.assertFailsWith
 
 class Int2FloatHashMapTest {
 
-    private fun newMap() = Int2FloatHashMap()
-
     // --- construction & size ---
 
     @Test
     fun emptyMapHasSizeZero() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         assertEquals(0, map.size)
         assertTrue(map.isEmpty())
     }
@@ -29,7 +27,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun defaultValueIsNaN() {
-        assertTrue(newMap().defaultValue.isNaN())
+        assertTrue(Int2FloatHashMap().defaultValue.isNaN())
     }
 
     @Test
@@ -63,20 +61,20 @@ class Int2FloatHashMapTest {
 
     @Test
     fun putValueNewKeyReturnsDefaultValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         assertTrue(map.putValue(1, 100f).isNaN())
     }
 
     @Test
     fun putValueExistingKeyReturnsOldValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 100f)
         assertEquals(100f, map.putValue(1, 200f))
     }
 
     @Test
     fun putValueIncreasesSize() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f)
         map.putValue(2, 20f)
         assertEquals(2, map.size)
@@ -84,7 +82,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun putValueUpdateDoesNotChangeSize() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f)
         map.putValue(1, 20f)
         assertEquals(1, map.size)
@@ -92,7 +90,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun setOperatorPutsValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map[5] = 50f
         assertEquals(50f, map.lookup(5))
     }
@@ -101,20 +99,20 @@ class Int2FloatHashMapTest {
 
     @Test
     fun lookupPresentKeyReturnsValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 42f)
         assertEquals(42f, map.lookup(1))
     }
 
     @Test
     fun lookupAbsentKeyReturnsDefaultValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         assertTrue(map.lookup(99).isNaN())
     }
 
     @Test
     fun lookupUpdatedKeyReturnsNewValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f)
         map.putValue(1, 20f)
         assertEquals(20f, map.lookup(1))
@@ -124,19 +122,19 @@ class Int2FloatHashMapTest {
 
     @Test
     fun containsKeyReturnsTrueForPresentKey() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(5, 50f)
         assertTrue(map.containsKey(5))
     }
 
     @Test
     fun containsKeyReturnsFalseForAbsentKey() {
-        assertFalse(newMap().containsKey(5))
+        assertFalse(Int2FloatHashMap().containsKey(5))
     }
 
     @Test
     fun containsKeyFalseAfterRemove() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(5, 50f)
         map.removeKey(5)
         assertFalse(map.containsKey(5))
@@ -146,21 +144,21 @@ class Int2FloatHashMapTest {
 
     @Test
     fun containsValueReturnsTrueForPresentValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 42f)
         assertTrue(map.containsValue(42f))
     }
 
     @Test
     fun containsValueReturnsFalseForAbsentValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 42f)
         assertFalse(map.containsValue(99f))
     }
 
     @Test
     fun containsValueReturnsFalseAfterRemoval() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 42f)
         map.removeKey(1)
         assertFalse(map.containsValue(42f))
@@ -177,45 +175,45 @@ class Int2FloatHashMapTest {
 
     @Test
     fun putValueZeroKeyFirstTimeReturnsDefaultValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         assertTrue(map.putValue(0, 100f).isNaN())
     }
 
     @Test
     fun putValueZeroKeyUpdateReturnsOldValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(0, 100f)
         assertEquals(100f, map.putValue(0, 200f))
     }
 
     @Test
     fun lookupZeroKeyPresentReturnsValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(0, 99f)
         assertEquals(99f, map.lookup(0))
     }
 
     @Test
     fun lookupZeroKeyAbsentReturnsDefaultValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         assertTrue(map.lookup(0).isNaN())
     }
 
     @Test
     fun containsKeyZeroTrueWhenPresent() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(0, 1f)
         assertTrue(map.containsKey(0))
     }
 
     @Test
     fun containsKeyZeroFalseWhenAbsent() {
-        assertFalse(newMap().containsKey(0))
+        assertFalse(Int2FloatHashMap().containsKey(0))
     }
 
     @Test
     fun zeroKeyCountedInSize() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(0, 1f)
         map.putValue(1, 2f)
         assertEquals(2, map.size)
@@ -223,7 +221,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun removeZeroKeyReturnsOldValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(0, 77f)
         assertEquals(77f, map.removeKey(0))
         assertFalse(map.containsKey(0))
@@ -231,13 +229,13 @@ class Int2FloatHashMapTest {
 
     @Test
     fun removeZeroKeyAbsentReturnsDefaultValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         assertTrue(map.removeKey(0).isNaN())
     }
 
     @Test
     fun zeroKeyIncludedInIteration() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(0, 10f)
         map.putValue(1, 20f)
         val result = mutableMapOf<Int, Float>()
@@ -247,7 +245,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun containsValueChecksZeroKeyValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(0, 55f)
         assertTrue(map.containsValue(55f))
     }
@@ -256,20 +254,20 @@ class Int2FloatHashMapTest {
 
     @Test
     fun removeKeyPresentReturnsOldValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(3, 30f)
         assertEquals(30f, map.removeKey(3))
     }
 
     @Test
     fun removeKeyAbsentReturnsDefaultValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         assertTrue(map.removeKey(99).isNaN())
     }
 
     @Test
     fun removeKeyDecreasesSize() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f)
         map.removeKey(1)
         assertEquals(1, map.size)
@@ -277,7 +275,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun removedKeyNoLongerContained() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(7, 70f)
         map.removeKey(7)
         assertFalse(map.containsKey(7))
@@ -285,14 +283,14 @@ class Int2FloatHashMapTest {
 
     @Test
     fun removeKeyFromEmptyMapReturnsDefaultValue() {
-        assertTrue(newMap().removeKey(1).isNaN())
+        assertTrue(Int2FloatHashMap().removeKey(1).isNaN())
     }
 
     // --- clear ---
 
     @Test
     fun clearEmptiesMap() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f)
         map.clear()
         assertEquals(0, map.size)
@@ -301,7 +299,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun clearRemovesZeroKey() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(0, 1f); map.putValue(1, 2f)
         map.clear()
         assertFalse(map.containsKey(0))
@@ -310,7 +308,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun addAfterClearWorks() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f)
         map.clear()
         map.putValue(3, 30f)
@@ -322,7 +320,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun iterationTraversesAllEntries() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f); map.putValue(3, 30f)
         val result = mutableMapOf<Int, Float>()
         for (e in map.primitiveEntries) result[e.key()] = e.value()
@@ -332,13 +330,13 @@ class Int2FloatHashMapTest {
     @Test
     fun iterationOnEmptyMapProducesNoEntries() {
         var count = 0
-        for (e in newMap().primitiveEntries) count++
+        for (e in Int2FloatHashMap().primitiveEntries) count++
         assertEquals(0, count)
     }
 
     @Test
     fun iterationCountMatchesSize() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         for (i in 1..20) map.putValue(i, i * 10f)
         var count = 0
         for (e in map.primitiveEntries) count++
@@ -347,7 +345,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun fastIteratorTraversesAllEntries() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f)
         val result = mutableMapOf<Int, Float>()
         val iter = map.fastIterator()
@@ -360,7 +358,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun iteratorRemoveDecreasesSize() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f); map.putValue(3, 30f)
         val iter = map.primitiveEntries.iterator()
         val removedKey = iter.next().key()
@@ -373,33 +371,33 @@ class Int2FloatHashMapTest {
 
     @Test
     fun keysContainsPresentKey() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(7, 70f)
         assertTrue(map.keys.contains(7))
     }
 
     @Test
     fun keysDoesNotContainAbsentKey() {
-        assertFalse(newMap().keys.contains(7))
+        assertFalse(Int2FloatHashMap().keys.contains(7))
     }
 
     @Test
     fun keysSizeMatchesMapSize() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f)
         assertEquals(2, map.keys.size)
     }
 
     @Test
     fun keysContainsZeroKey() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(0, 1f)
         assertTrue(map.keys.contains(0))
     }
 
     @Test
     fun keysIterationMatchesMapKeys() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f); map.putValue(3, 30f)
         assertEquals(setOf(1, 2, 3), map.keys.toSet())
     }
@@ -408,19 +406,19 @@ class Int2FloatHashMapTest {
 
     @Test
     fun valuesContainsPresentValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 42f)
         assertTrue(map.values.contains(42f))
     }
 
     @Test
     fun valuesDoesNotContainAbsentValue() {
-        assertFalse(newMap().values.contains(99f))
+        assertFalse(Int2FloatHashMap().values.contains(99f))
     }
 
     @Test
     fun valuesSizeMatchesMapSize() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f)
         assertEquals(2, map.values.size)
     }
@@ -429,26 +427,26 @@ class Int2FloatHashMapTest {
 
     @Test
     fun getOrDefaultReturnsValueForPresentKey() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 42f)
         assertEquals(42f, map.getOrDefault(1, -1f))
     }
 
     @Test
     fun getOrDefaultReturnsSuppliedDefaultForAbsentKey() {
-        assertEquals(-1f, newMap().getOrDefault(99, -1f))
+        assertEquals(-1f, Int2FloatHashMap().getOrDefault(99, -1f))
     }
 
     @Test
     fun getOrElseReturnsValueForPresentKey() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 42f)
         assertEquals(42f, map.getOrElse(1) { -1f })
     }
 
     @Test
     fun getOrElseReturnsLambdaResultForAbsentKey() {
-        assertEquals(-1f, newMap().getOrElse(99) { -1f })
+        assertEquals(-1f, Int2FloatHashMap().getOrElse(99) { -1f })
     }
 
     @Test
@@ -460,19 +458,19 @@ class Int2FloatHashMapTest {
 
     @Test
     fun getValueReturnsValueForPresentKey() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 42f)
         assertEquals(42f, map.getValue(1))
     }
 
     @Test
     fun getValueThrowsNoSuchElementForAbsentKey() {
-        assertFailsWith<NoSuchElementException> { newMap().getValue(99) }
+        assertFailsWith<NoSuchElementException> { Int2FloatHashMap().getValue(99) }
     }
 
     @Test
     fun getOrPutReturnsExistingValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 42f)
         assertEquals(42f, map.getOrPut(1) { 99f })
         assertEquals(42f, map.lookup(1))
@@ -480,7 +478,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun getOrPutInsertsAndReturnsNewValueForAbsentKey() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         assertEquals(99f, map.getOrPut(1) { 99f })
         assertEquals(99f, map.lookup(1))
         assertEquals(1, map.size)
@@ -488,15 +486,24 @@ class Int2FloatHashMapTest {
 
     @Test
     fun mergeInsertsValueWhenKeyAbsent() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         val result = map.merge(1, 10f) { old, new -> old + new }
         assertEquals(10f, result)
         assertEquals(10f, map.lookup(1))
     }
 
     @Test
+    fun mergeCallsMergeFunctionWhenKeyPresent() {
+        val map = Int2FloatHashMap()
+        map.putValue(1, 10f)
+        val result = map.merge(1, 5f) { old, new -> old + new }
+        assertEquals(15f, result)
+        assertEquals(15f, map.lookup(1))
+    }
+
+    @Test
     fun filterReturnsEntriesMatchingPredicate() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f); map.putValue(3, 30f)
         val filtered = map.filter { _, value -> value > 15f }
         assertFalse(filtered.containsKey(1))
@@ -508,7 +515,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun filterDoesNotMutateOriginalMap() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f)
         map.filter { key, _ -> key == 1 }
         assertEquals(2, map.size)
@@ -516,7 +523,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun filterToAddsToDestination() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f); map.putValue(2, 20f); map.putValue(3, 30f)
         val dest = Int2FloatHashMap()
         dest.putValue(9, 90f)
@@ -551,6 +558,12 @@ class Int2FloatHashMapTest {
     }
 
     @Test
+    fun equalsWithStandardMap() {
+        val map = Int2FloatHashMap().apply { putValue(1, 10f); putValue(2, 20f) }
+        assertEquals(mapOf(1 to 10f, 2 to 20f), map)
+    }
+
+    @Test
     fun hashCodeConsistentWithEqualMaps() {
         val a = Int2FloatHashMap().apply { putValue(1, 10f); putValue(2, 20f) }
         val b = Int2FloatHashMap().apply { putValue(1, 10f); putValue(2, 20f) }
@@ -582,7 +595,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun putAllFromRegularMapAddsAllEntries() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putAll(mapOf(1 to 10f, 2 to 20f, 3 to 30f))
         assertEquals(3, map.size)
         assertEquals(10f, map.lookup(1))
@@ -592,7 +605,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun putAllFromInt2FloatMapAddsAllEntries() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         val src = Int2FloatHashMap().apply { putValue(1, 10f); putValue(2, 20f); putValue(3, 30f) }
         map.putAll(src)
         assertEquals(3, map.size)
@@ -603,7 +616,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun putAllFromInt2FloatMapWithZeroKey() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         val src = Int2FloatHashMap().apply { putValue(0, 99f); putValue(1, 10f) }
         map.putAll(src)
         assertEquals(2, map.size)
@@ -613,7 +626,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun putAllFromEmptyMapIsNoOp() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, 10f)
         map.putAll(mapOf())
         assertEquals(1, map.size)
@@ -623,7 +636,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun ensureCapacityPreservesData() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         for (i in 1..20) map.putValue(i, i * 10f)
         map.ensureCapacity(200)
         assertEquals(20, map.size)
@@ -632,14 +645,14 @@ class Int2FloatHashMapTest {
 
     @Test
     fun ensureCapacityNegativeThrows() {
-        assertFailsWith<IllegalArgumentException> { newMap().ensureCapacity(-1) }
+        assertFailsWith<IllegalArgumentException> { Int2FloatHashMap().ensureCapacity(-1) }
     }
 
     // --- large map (forces hash mode: >32 entries) ---
 
     @Test
     fun largeMapStoresAndRetrievesAllEntries() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         for (i in 1..100) map.putValue(i, i * 3f)
         assertEquals(100, map.size)
         for (i in 1..100) assertEquals(i * 3f, map.lookup(i))
@@ -647,7 +660,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun largeMapIterationIsComplete() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         for (i in 1..100) map.putValue(i, i.toFloat())
         val found = mutableMapOf<Int, Float>()
         for (e in map.primitiveEntries) found[e.key()] = e.value()
@@ -657,7 +670,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun largeMapRemoveAndLookup() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         for (i in 1..50) map.putValue(i, i * 2f)
         for (i in 1..25) map.removeKey(i)
         assertEquals(25, map.size)
@@ -667,7 +680,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun largeMapWithZeroKeyIteratesAll() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(0, -1f)
         for (i in 1..50) map.putValue(i, i.toFloat())
         assertEquals(51, map.size)
@@ -681,7 +694,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun negativeKeysStoredCorrectly() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(-1, -100f)
         map.putValue(-50, -500f)
         assertEquals(-100f, map.lookup(-1))
@@ -690,7 +703,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun intMaxValueAsKey() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(Int.MAX_VALUE, 1f)
         assertTrue(map.containsKey(Int.MAX_VALUE))
         assertEquals(1f, map.lookup(Int.MAX_VALUE))
@@ -698,7 +711,7 @@ class Int2FloatHashMapTest {
 
     @Test
     fun floatMaxValueAsValue() {
-        val map = newMap()
+        val map = Int2FloatHashMap()
         map.putValue(1, Float.MAX_VALUE)
         assertEquals(Float.MAX_VALUE, map.lookup(1))
     }

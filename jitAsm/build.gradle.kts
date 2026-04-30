@@ -20,12 +20,12 @@ dependencies {
 
 tasks.register<JavaExec>("jitAsm") {
     group = "verification"
-    description = "Run a small harness that heats up Int2IntHashMap and prints the generated machine code via -XX:+PrintAssembly (requires hsdis)."
+    description = "Run a small harness that heats up IntHashSet and prints the generated machine code via -XX:+PrintAssembly (requires hsdis)."
 
     println("TEST: " + sourceSets["main"].runtimeClasspath.files)
 
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass = "io.github.sooniln.fastcollect.Int2IntMapAsmProbe"
+    mainClass = "io.github.sooniln.fastcollect.IntSetAsmProbe"
 
     jvmArgs(
         "-Xms256m",
@@ -41,7 +41,7 @@ tasks.register<JavaExec>("jitAsm") {
         "-XX:PrintAssemblyOptions=intel",
         // Reduce noise: try to compile/print only the method we care about.
         "-XX:CompileCommand=quiet",
-        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.ints.Int2IntHashMap::lookup",
-        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.ints.Int2IntHashMap::lookup",
+        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.ints.IntHashSet::contains",
+        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.ints.IntHashSet::contains",
     )
 }

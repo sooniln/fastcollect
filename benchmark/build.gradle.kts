@@ -45,17 +45,17 @@ private fun registerJMHTask(name: String, configuration: JMHTask.()->Unit): Task
 
 registerJMHTask("jmhFastCollectList") {
     description = "Run JMH benchmarks for FastCollect IntArrayDeque"
-    includes.add("ListBenchmark\\.fastcollect")
+    includes.set(listOf("ListBenchmark\\.fastcollect"))
 }
 
 registerJMHTask("jmhFastCollectMap") {
     description = "Run JMH benchmarks for FastCollect Int2IntHashMap"
-    includes.add("MapBenchmark\\.fastcollect")
+    includes.set(listOf("MapBenchmark\\.fastcollect"))
 }
 
 registerJMHTask("jmhFastCollectSet") {
     description = "Run JMH benchmarks for FastCollect IntHashSet"
-    includes.add("SetBenchmark\\.fastcollect")
+    includes.set(listOf("SetBenchmark\\.fastcollect"))
 }
 
 // ensure JMH tasks are never cached

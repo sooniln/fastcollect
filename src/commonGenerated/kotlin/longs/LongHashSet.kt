@@ -1,6 +1,5 @@
 package io.github.sooniln.fastcollect.longs
 
-import io.github.sooniln.fastcollect.assert
 import kotlin.math.max
 
 public class LongHashSet(
@@ -42,8 +41,6 @@ public class LongHashSet(
     }
 
     private fun addHashing(element: Long): Boolean {
-        assert(isHashing())
-
         val keysArr = keysArr
 
         if (element == ZERO) {
@@ -59,48 +56,34 @@ public class LongHashSet(
 
         val mask = keysArr.mask()
         var slot = element.slot(mask)
+        var newKey = element
         var newKeySlotDistance = 0
         while (true) {
-            var currKey = keysArr[slot]
-            when (currKey) {
-                element -> {
+            when (val currKey = keysArr[slot]) {
+                newKey -> {
                     return false
                 }
                 ZERO -> {
-                    keysArr[slot] = element
+                    keysArr[slot] = newKey
                     ++size
                     return true
                 }
                 else -> {
-                    if (newKeySlotDistance > currKey.slotDistance(slot, mask)) {
-                        var newKey = element
-
-                        // move all slots right until we hit a zero slot. max slot distance is generally not high enough
-                        // for System.arrayCopy() to outperform the manual loop here, especially with the additional
-                        // complexity needed for System.arrayCopy().
-                        do {
-                            keysArr[slot] = newKey
-                            newKey = currKey
-
-                            slot = slot.nextSlot(mask)
-                            currKey = keysArr[slot]
-                        } while (currKey != ZERO)
-
+                    val currKeySlotDistance =  currKey.slotDistance(slot, mask)
+                    if (newKeySlotDistance > currKeySlotDistance) {
                         keysArr[slot] = newKey
-                        ++size
-                        return true
+                        newKey = currKey
+                        newKeySlotDistance = currKeySlotDistance
                     }
                 }
             }
 
             slot = slot.nextSlot(mask)
-            newKeySlotDistance++
+            ++newKeySlotDistance
         }
     }
 
     private fun addArray(element: Long): Boolean {
-        assert(!isHashing())
-
         var slot = 0
         while (slot < size) {
             if (keysArr[slot] == element) return false
@@ -135,33 +118,29 @@ public class LongHashSet(
     }
 
     private fun findSlotHashing(key: Long): Int {
-        assert(isHashing())
-
         val keysArr = keysArr
 
         if (key == ZERO) {
             val endSlot = keysArr.endSlot()
-            assert(endSlot >= 0)
             return if (keysArr[endSlot] != ZERO) -1 else endSlot
         }
 
         val mask = keysArr.mask()
         var slot = key.slot(mask)
         while (true) {
-            // we could stop looking once the distance < current distance, but this generally worsens performance (extra
-            // unpredictable branch which only cuts off a couple iterations).
             val currKey = keysArr[slot]
-            when (currKey) {
-                key -> return slot
-                ZERO -> return -1
+            if (currKey == key) {
+                return slot
+            } else if (currKey == ZERO) {
+                return -1
             }
+            // do not bother to compare slot distances to break out of the loop - the additional cost is usually more
+            // expensive than a couple extra iterations.
             slot = slot.nextSlot(mask)
         }
     }
 
     private fun findSlotArray(key: Long): Int {
-        assert(!isHashing())
-
         val keysArr = keysArr
 
         // iterate backwards under assumption more recently added keys are more likely to be queried
@@ -181,8 +160,6 @@ public class LongHashSet(
     }
 
     private fun removeSlotHashing(slot: Int) {
-        assert(isHashing())
-
         val keysArr = keysArr
 
         val endSlot = keysArr.endSlot()
@@ -194,14 +171,12 @@ public class LongHashSet(
 
         val mask = keysArr.mask()
 
-        // move all slots left until we hit a zero slot. max slot distance is generally not high enough for
-        // System.arrayCopy() to outperform the manual loop here, especially with the additional complexity needed
-        // for System.arrayCopy().
+        // move all slots left until we hit a zero slot
         var currSlot = slot
         var nextSlot = currSlot.nextSlot(mask)
         var nextKey = keysArr[nextSlot]
         while (nextKey != ZERO && nextKey.slotDistance(nextSlot, mask) > 0) {
-            keysArr[slot] = nextKey
+            keysArr[currSlot] = nextKey
 
             currSlot = nextSlot
             nextSlot = nextSlot.nextSlot(mask)
@@ -212,9 +187,6 @@ public class LongHashSet(
     }
 
     private fun removeSlotArray(slot: Int) {
-        assert(!isHashing())
-        assert(slot < size)
-
         val lastIndex = --size
         if (slot < lastIndex) {
             keysArr[slot] = keysArr[lastIndex]
@@ -354,14 +326,11 @@ public class LongHashSet(
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun Long.slot(mask: Int): Int {
-        assert(this != ZERO)
-        assert(mask == keysArr.mask())
         return mixHash(this.hashCode()) and mask
     }
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun Int.nextSlot(mask: Int): Int {
-        assert(mask == keysArr.mask())
         return (this + 1) and mask
     }
 
@@ -373,7 +342,7 @@ public class LongHashSet(
     internal companion object {
         private val EMPTY_ARRAY = LongArray(0)
 
-        // the value of a field in a uninitialized primitive array
+        // the value of a field in an uninitialized primitive array
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
         private const val ZERO: Long = 0.toLong()
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
@@ -382,7 +351,7 @@ public class LongHashSet(
         /** 2<sup>32</sup> &middot; &phi;, &phi; = (&#x221A;5 &minus; 1)/2. */
         private const val INT_PHI: Int = -0x61c88647
 
-        private const val DEFAULT_LOAD_FACTOR = .75f
+        private const val DEFAULT_LOAD_FACTOR = .85f
         private const val DEFAULT_INITIAL_CAPACITY = 1 shl 2  // must be power of two
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two
         private const val HASHIFY_THRESHOLD: Int = 1 shl 5 // must be power of two

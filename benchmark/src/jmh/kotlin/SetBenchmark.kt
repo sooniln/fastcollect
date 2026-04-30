@@ -29,7 +29,7 @@ open class SetBenchmark {
     open class ReadState {
         private val rnd = Random(123)
 
-        @Param("16", "100", "10000", "1000000")
+        @Param(/*"16", "100", "10000",*/ "1000000")
         var size: Int = 0
 
         lateinit var fastutil: IntOpenHashSet
@@ -43,7 +43,7 @@ open class SetBenchmark {
         @Setup(Level.Trial)
         fun setupTrial() {
             fastutil = IntOpenHashSet(size)
-            fastcollect = IntHashSet(size)
+            fastcollect = IntHashSet(size, 0.85f)
             jvm = HashSet(size)
 
             inKeys = IntArray(size)
