@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.github.sooniln.fastcollect.${keySubpackage}
 
 import io.github.sooniln.fastcollect.FastIterator
@@ -26,6 +28,10 @@ import kotlin.math.max
  *   * Use [removeKey] instead of [MutableMap.remove].
  *   * Use [primitiveEntries] instead of [Map.entries].
  *   * Use [Entry.key] instead of [Map.Entry.key] and [Entry.value] instead of [Map.Entry.value].
+ *
+ * The [keys]/[values]/[entries]/[primitiveEntries] mutable collections exposed by this class will throw
+ * [UnsupportedOperationException] on any attempt to mutate the collection, EXCEPT that [MutableIterator.remove] will
+ * work as expected. Mutation operations should be made directly on this map instead.
  *
  * This class offers faster iteration over entries - a faster iterator can be accessed via [fastIterator] or
  * `primitiveEntries.fastIterator()` with the caveat that it may not be used if the entries returned by

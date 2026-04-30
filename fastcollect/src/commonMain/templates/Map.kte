@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.github.sooniln.fastcollect.${keySubpackage}
 
 import io.github.sooniln.fastcollect.assertBoxing
@@ -115,9 +117,9 @@ public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
         public fun value(): ${ValueType}
     }
 
-    public operator fun iterator(): Iterator<${KeyType}2${ValueType}Map.Entry> = primitiveEntries.iterator()
+    public operator fun iterator(): Iterator<Entry> = primitiveEntries.iterator()
 
-    public fun fastIterator(): FastIterator<${KeyType}2${ValueType}Map.Entry> = primitiveEntries.fastIterator()
+    public fun fastIterator(): FastIterator<Entry> = primitiveEntries.fastIterator()
 }
 
 

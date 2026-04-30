@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.github.sooniln.fastcollect.ints
 
 import io.github.sooniln.fastcollect.assertBoxing
@@ -115,9 +117,9 @@ public interface Int2IntMap : Map<Int, Int> {
         public fun value(): Int
     }
 
-    public operator fun iterator(): Iterator<Int2IntMap.Entry> = primitiveEntries.iterator()
+    public operator fun iterator(): Iterator<Entry> = primitiveEntries.iterator()
 
-    public fun fastIterator(): FastIterator<Int2IntMap.Entry> = primitiveEntries.fastIterator()
+    public fun fastIterator(): FastIterator<Entry> = primitiveEntries.fastIterator()
 }
 
 
