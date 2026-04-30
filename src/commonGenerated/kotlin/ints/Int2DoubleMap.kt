@@ -4,11 +4,34 @@ import io.github.sooniln.fastcollect.assertBoxing
 import io.github.sooniln.fastcollect.EntrySet
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
+import io.github.sooniln.fastcollect.emptyEntrySet
+import io.github.sooniln.fastcollect.entrySetOf
+import io.github.sooniln.fastcollect.doubles.doubleListOf
 import io.github.sooniln.fastcollect.doubles.DoubleCollection
 import io.github.sooniln.fastcollect.doubles.MutableDoubleCollection
+import io.github.sooniln.fastcollect.doubles.emptyDoubleList
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+
+public fun emptyInt2DoubleMap(): Int2DoubleMap = EmptyInt2DoubleMap
+
+public fun int2DoubleMapOf(): Int2DoubleMap = EmptyInt2DoubleMap
+public fun int2DoubleMapOf(entry: Pair<Int, Double>): Int2DoubleMap = SingletonInt2DoubleMap(entry.first, entry.second)
+public fun int2DoubleMapOf(vararg entries: Pair<Int, Double>): Int2DoubleMap = Int2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+public fun mutableInt2DoubleMapOf(): MutableInt2DoubleMap = Int2DoubleHashMap()
+public fun mutableInt2DoubleMapOf(entry: Pair<Int, Double>): MutableInt2DoubleMap = Int2DoubleHashMap(1).apply { set(entry.first, entry.second) }
+public fun mutableInt2DoubleMapOf(vararg entries: Pair<Int, Double>): MutableInt2DoubleMap = Int2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun buildInt2DoubleSet(expectedSize: Int = 0, builderAction: MutableInt2DoubleMap.() -> Unit): Int2DoubleMap {
+    contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+    val map = Int2DoubleHashMap(expectedSize)
+    map.builderAction()
+    return map
+}
 
 public interface Int2DoubleMap : Map<Int, Double> {
     public val defaultValue: Double
@@ -33,6 +56,8 @@ public interface Int2DoubleMap : Map<Int, Double> {
         val value = lookup(key)
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
+
+    public fun getOrDefault(key: Int, defaultValue: Double): Double = getOrElse(key) { defaultValue }
 
     public fun lookup(key: Int): Double
 
@@ -87,9 +112,6 @@ public inline fun Int2DoubleMap.isDefaultValue(value: Double): Boolean = value =
 
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Int2DoubleMap.getValue(key: Int): Double = getOrElse(key) { throw NoSuchElementException() }
-
-@Suppress("NOTHING_TO_INLINE")
-public inline fun Int2DoubleMap.getOrDefault(key: Int, defaultValue: Double): Double = getOrElse(key) { defaultValue }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double): Double {
@@ -153,6 +175,15 @@ public interface MutableInt2DoubleMap : Int2DoubleMap, MutableMap<Int, Double> {
 
     public fun removeKey(key: Int): Double
 
+    public fun merge(key: Int, value: Double, merge: (oldValue: Double, value: Double) -> Double): Double {
+        val oldValue = lookup(key)
+        val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
+        if (newValue != oldValue) {
+            putValue(key, newValue)
+        }
+        return newValue
+    }
+
     override val keys: MutableIntSet
     override val values: MutableDoubleCollection
 
@@ -186,18 +217,80 @@ public inline fun MutableInt2DoubleMap.getOrPut(key: Int, defaultValue: () -> Do
     return value
 }
 
-@OptIn(ExperimentalContracts::class)
-public inline fun MutableInt2DoubleMap.merge(key: Int, value: Double, merge: (oldValue: Double, value: Double) -> Double): Double {
-    contract {
-        callsInPlace(merge, InvocationKind.AT_MOST_ONCE)
+public abstract class AbstractInt2DoubleMap : Int2DoubleMap {
+
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other is Map<*, *>) {
+            if (other.size != size) return false
+
+            for (entry in fastIterator()) {
+                if (other[entry.key()] != entry.value()) return false
+            }
+
+            return true
+        }
+
+        return false
     }
 
-    val oldValue = lookup(key)
-    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
-    if (newValue != oldValue) {
-        putValue(key, newValue)
+    override fun hashCode(): Int {
+        var result = 0
+        for (entry in fastIterator()) {
+            result += entry.key().hashCode() xor entry.value().hashCode()
+        }
+        return result
     }
-    return newValue
+
+    override fun toString(): String {
+        return Iterable { fastIterator() }.joinToString(", ", "{", "}") { "${it.key()}=${it.value()}" }
+    }
+
+    public class SimpleEntry(private val _key: Int, private val _value: Double) : Int2DoubleMap.Entry {
+        override fun key(): Int = _key
+        override fun value(): Double = _value
+    }
 }
 
-// TODO: abstract class w/toString
+public abstract class AbstractMutableInt2DoubleMap : AbstractInt2DoubleMap(), MutableInt2DoubleMap {
+
+    public class SimpleMutableEntry(private val _key: Int, private var _value: Double) : MutableInt2DoubleMap.MutableEntry {
+        override fun key(): Int = _key
+        override fun value(): Double = _value
+        override fun setValue(newValue: Double): Double {
+            val oldValue = _value
+            _value = newValue
+            return oldValue
+        }
+    }
+}
+
+private object EmptyInt2DoubleMap : Int2DoubleMap {
+    override val defaultValue: Double get() = Double.NaN
+
+    override val size: Int get() = 0
+    override fun isEmpty(): Boolean = true
+
+    override fun containsKey(key: Int): Boolean = false
+    override fun containsValue(value: Double): Boolean = false
+    override fun lookup(key: Int): Double = Double.NaN
+
+    override val keys: IntSet get() = emptyIntSet()
+    override val values: DoubleCollection get() = emptyDoubleList()
+    override val primitiveEntries: EntrySet<Int2DoubleMap.Entry> = emptyEntrySet()
+}
+
+private class SingletonInt2DoubleMap(private val key: Int, private val value: Double) : Int2DoubleMap {
+    override val defaultValue: Double get() = Double.NaN
+
+    override val size: Int get() = 1
+    override fun isEmpty(): Boolean = false
+
+    override fun containsKey(key: Int): Boolean = key == this.key
+    override fun containsValue(value: Double): Boolean = value == this.value
+    override fun lookup(key: Int): Double = if (key == this.key) value else Double.NaN
+
+    override val keys: IntSet by lazy { intSetOf(key) }
+    override val values: DoubleCollection by lazy { doubleListOf(value) }
+    override val primitiveEntries: EntrySet<Int2DoubleMap.Entry> by lazy { entrySetOf(AbstractInt2DoubleMap.SimpleEntry(key, value)) }
+}

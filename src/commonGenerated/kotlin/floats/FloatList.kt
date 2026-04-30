@@ -85,6 +85,11 @@ public interface MutableFloatList : FloatList, MutableFloatCollection, MutableLi
 
     override fun add(index: Int, element: Float)
 
+    public fun addFirst(element: Float): Unit = add(0, element)
+    public fun addLast(element: Float): Unit = add(size, element)
+    public fun removeFirst(): Float = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
+    public fun removeLast(): Float = if (isEmpty()) throw NoSuchElementException() else removeAt(lastIndex)
+
     override fun remove(element: Float): Boolean {
         val index = indexOf(element)
         if (index == -1) {
@@ -122,11 +127,6 @@ public interface MutableFloatList : FloatList, MutableFloatCollection, MutableLi
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableFloatList
 }
-
-public fun MutableFloatList.addFirst(element: Float): Unit = add(0, element)
-public fun MutableFloatList.addLast(element: Float): Unit = add(size, element)
-public fun MutableFloatList.removeFirst(): Float = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
-public fun MutableFloatList.removeLast(): Float = if (isEmpty()) throw NoSuchElementException() else removeAt(lastIndex)
 
 public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
 

@@ -120,6 +120,6 @@ private inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Doubl
 
 public abstract class AbstractDoubleCollection : DoubleCollection {
     override fun toString(): String {
-        return joinToString(prefix = "[", postfix = "]", separator = ", ")
+        return joinToString(", ", "[", "]")
     }
 }

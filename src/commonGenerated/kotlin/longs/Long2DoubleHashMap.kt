@@ -13,7 +13,7 @@ public class Long2DoubleHashMap(
     private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
     /** The default value should be the value that is ideally least likely to occur in the map. */
     override val defaultValue: Double = Double.NaN
-) : MutableLong2DoubleMap {
+) : AbstractMutableLong2DoubleMap() {
 
     init {
         require(loadFactor > 0 && loadFactor < 1) { "Load factor must be greater than 0 and smaller than 1" }
@@ -42,10 +42,10 @@ public class Long2DoubleHashMap(
 
     override fun putValue(key: Long, value: Double): Double {
         resizeIfNecessary()
-        return if (isHashing()) putInternalHashing(key, value) else putInternalArray(key, value)
+        return if (isHashing()) putHashing(key, value) else putArray(key, value)
     }
 
-    private fun putInternalHashing(key: Long, value: Double): Double {
+    private fun putHashing(key: Long, value: Double): Double {
         assert(isHashing())
 
         val keysArr = keysArr
@@ -86,6 +86,7 @@ public class Long2DoubleHashMap(
                         var currValue = valuesArr[slot]
                         var newKey = key
                         var newValue = value
+
                         // move all slots right until we hit a zero slot. max slot distance is generally not high
                         // enough for System.arrayCopy() to outperform the manual loop here, especially with the
                         // additional complexity needed for System.arrayCopy().
@@ -113,7 +114,7 @@ public class Long2DoubleHashMap(
         }
     }
 
-    private fun putInternalArray(key: Long, value: Double): Double {
+    private fun putArray(key: Long, value: Double): Double {
         assert(!isHashing())
 
         var slot = 0
@@ -159,13 +160,14 @@ public class Long2DoubleHashMap(
     private fun findSlotHashing(key: Long): Int {
         assert(isHashing())
 
+        val keysArr = keysArr
+
         if (key == ZERO) {
             val endSlot = keysArr.endSlot()
             assert(endSlot >= 0)
             return if (keysArr[endSlot] != ZERO) -1 else endSlot
         }
 
-        val keysArr = keysArr
         val mask = keysArr.mask()
         var slot = key.slot(mask)
         while (true) {
@@ -183,8 +185,9 @@ public class Long2DoubleHashMap(
     private fun findSlotArray(key: Long): Int {
         assert(!isHashing())
 
-        // iterate backwards under assumption more recently added values are more likely to be queried
         val keysArr = keysArr
+
+        // iterate backwards under assumption more recently added values are more likely to be queried
         var slot = size - 1
         while (slot >= 0) {
             if (keysArr[slot] == key) {
@@ -202,6 +205,9 @@ public class Long2DoubleHashMap(
 
     private fun removeSlotHashing(slot: Int) {
         assert(isHashing())
+
+        val keysArr = keysArr
+        val valuesArr = valuesArr
 
         val endSlot = keysArr.endSlot()
         if (slot == endSlot) {
@@ -408,15 +414,16 @@ public class Long2DoubleHashMap(
 
             var slot = 0
             while (slot < oldSize) {
-                putInternalHashing(oldKeys[slot], oldValues[slot])
+                putHashing(oldKeys[slot], oldValues[slot])
                 ++slot
             }
         } else {
+            // TODO: better algorithm?
             val oldEndSlot = oldKeys.endSlot()
             for (slot in 0..<oldEndSlot) {
                 val key = oldKeys[slot]
                 if (key != ZERO) {
-                    putInternalHashing(key, oldValues[slot])
+                    putHashing(key, oldValues[slot])
                 }
             }
 
@@ -427,37 +434,13 @@ public class Long2DoubleHashMap(
         size = oldSize
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other === this) return true
-        if (other is Map<*, *>) {
-            if (other.size != size) return false
+    override operator fun iterator(): Iterator<Long2DoubleMap.Entry> = EntryIterator()
 
-            for (entry in FastEntryIterator()) {
-                if (other[entry.key()] != entry.value()) return false
-            }
+    override fun fastIterator(): FastIterator<Long2DoubleMap.Entry> = FastEntryIterator()
 
-            return true
-        }
-
-        return false
-    }
-
-    override fun hashCode(): Int {
-        var result = 0
-        for (entry in FastEntryIterator()) {
-            result += entry.key().hashCode() xor entry.value().hashCode()
-        }
-        return result
-    }
-
-    // TODO: should be in abstract class?
-    override fun toString(): String {
-        return Iterable<Long2DoubleMap.Entry> { FastEntryIterator() }.joinToString(", ", "{", "}") { "${it.key()}=${it.value()}" }
-    }
-
-    private open inner class SlotIterator() {
-        private val keysArr = this@Long2DoubleHashMap.keysArr
-        private val valuesArr = this@Long2DoubleHashMap.valuesArr
+    private open inner class SlotIterator {
+        val keysArr = this@Long2DoubleHashMap.keysArr
+        val valuesArr = this@Long2DoubleHashMap.valuesArr
 
         private var slotsLeft = size
         private val mask = keysArr.mask()
@@ -486,7 +469,7 @@ public class Long2DoubleHashMap(
             if (slotsLeft > 0) decrement()
         }
 
-        fun slot(): Int = slot
+        fun slot(): Int = previousSlot.also { check(it != -1) }
         fun key(): Long = keysArr[previousSlot]
         fun value(): Double = valuesArr[previousSlot]
 
@@ -559,34 +542,23 @@ public class Long2DoubleHashMap(
         override fun next(): MutableLong2DoubleMap.MutableEntry {
             nextSlot()
             return object : MutableLong2DoubleMap.MutableEntry {
-                private val _key = this@EntryIterator.key()
-                private var _value = this@EntryIterator.value()
+                private val slot = slot()
 
-                override fun key(): Long = _key
-                override fun value(): Double = _value
+                override fun key(): Long = keysArr[slot]
+                override fun value(): Double = valuesArr[slot]
 
                 override fun setValue(newValue: Double): Double {
-                    val oldValue = _value
-                    // TODO: what the fuck is going on with nullability here
-                    _value = merge(_key, newValue) { oldValue, value ->
-                        if (oldValue != _value) throw ConcurrentModificationException()
-                        return@merge value
-                    }!!
+                    val oldValue = valuesArr[slot]
+                    if (keysArr !== this@Long2DoubleHashMap.keysArr) throw ConcurrentModificationException()
+                    valuesArr[slot] = newValue
                     return oldValue
                 }
             }
         }
     }
 
-    override operator fun iterator(): Iterator<Long2DoubleMap.Entry> = EntryIterator()
-
-    override fun fastIterator(): FastIterator<Long2DoubleMap.Entry> = FastEntryIterator()
-
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun Int.isHashingLength(): Boolean = (this - 1) > HASHIFY_THRESHOLD
-
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.isHashing(): Boolean = size.isHashingLength()
+    private inline fun LongArray.isHashing(): Boolean = (size - 1) > HASHIFY_THRESHOLD
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun isHashing(): Boolean = keysArr.isHashing()
@@ -627,7 +599,9 @@ public class Long2DoubleHashMap(
         private val EMPTY_VALUE_ARRAY = DoubleArray(0)
 
         // the value of a field in an uninitialized primitive array
+        @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
         private const val ZERO: Long = 0.toLong()
+        @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
         private const val NONZERO: Long = 1.toLong()
 
         /** 2<sup>32</sup> &middot; &phi;, &phi; = (&#x221A;5 &minus; 1)/2. */

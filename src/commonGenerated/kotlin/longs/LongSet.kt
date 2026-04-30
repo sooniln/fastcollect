@@ -18,9 +18,9 @@ public fun mutableLongSetOf(vararg elements: Long): MutableLongSet = LongHashSet
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun buildLongSet(expectedSize: Int = 0, builderAction: MutableLongSet.() -> Unit): LongSet {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
-    val list = LongHashSet(expectedSize)
-    list.builderAction()
-    return list
+    val set = LongHashSet(expectedSize)
+    set.builderAction()
+    return set
 }
 
 public interface LongSet : Set<Long>, LongCollection {
@@ -42,6 +42,28 @@ public interface MutableLongSet : LongSet, MutableLongCollection, MutableSet<Lon
     override fun removeAll(elements: Collection<Long>): Boolean = super.removeAll(elements)
     override fun retainAll(elements: Collection<Long>): Boolean = super.retainAll(elements)
 }
+
+public abstract class AbstractLongSet : AbstractLongCollection(), LongSet {
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other is Set<*>) {
+            if (size != other.size) return false
+            return other.containsAll(this)
+        }
+
+        return false
+    }
+
+    override fun hashCode(): Int {
+        var hashCode = 1
+        for (element in this) {
+            hashCode = 31 * hashCode + element.hashCode()
+        }
+        return hashCode
+    }
+}
+
+public abstract class AbstractMutableLongSet : AbstractLongSet(), MutableLongSet
 
 private object EmptyLongSet : LongSet {
     override val size: Int get() = 0

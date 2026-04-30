@@ -120,6 +120,6 @@ private inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float)
 
 public abstract class AbstractFloatCollection : FloatCollection {
     override fun toString(): String {
-        return joinToString(prefix = "[", postfix = "]", separator = ", ")
+        return joinToString(", ", "[", "]")
     }
 }

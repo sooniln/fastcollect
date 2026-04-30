@@ -18,9 +18,9 @@ public fun mutableIntSetOf(vararg elements: Int): MutableIntSet = IntHashSet(ele
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun buildIntSet(expectedSize: Int = 0, builderAction: MutableIntSet.() -> Unit): IntSet {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
-    val list = IntHashSet(expectedSize)
-    list.builderAction()
-    return list
+    val set = IntHashSet(expectedSize)
+    set.builderAction()
+    return set
 }
 
 public interface IntSet : Set<Int>, IntCollection {
@@ -42,6 +42,28 @@ public interface MutableIntSet : IntSet, MutableIntCollection, MutableSet<Int> {
     override fun removeAll(elements: Collection<Int>): Boolean = super.removeAll(elements)
     override fun retainAll(elements: Collection<Int>): Boolean = super.retainAll(elements)
 }
+
+public abstract class AbstractIntSet : AbstractIntCollection(), IntSet {
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other is Set<*>) {
+            if (size != other.size) return false
+            return other.containsAll(this)
+        }
+
+        return false
+    }
+
+    override fun hashCode(): Int {
+        var hashCode = 1
+        for (element in this) {
+            hashCode = 31 * hashCode + element.hashCode()
+        }
+        return hashCode
+    }
+}
+
+public abstract class AbstractMutableIntSet : AbstractIntSet(), MutableIntSet
 
 private object EmptyIntSet : IntSet {
     override val size: Int get() = 0

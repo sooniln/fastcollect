@@ -1,11 +1,12 @@
 package io.github.sooniln.fastcollect.longs
 
+import io.github.sooniln.fastcollect.assert
 import kotlin.math.max
 
 public class LongHashSet(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
     private val loadFactor: Float = DEFAULT_LOAD_FACTOR
-) : MutableLongSet {
+) : AbstractMutableLongSet() {
 
     init {
         require(loadFactor > 0 && loadFactor < 1) { "Load factor must be greater than 0 and smaller than 1" }
@@ -16,38 +17,19 @@ public class LongHashSet(
         addAll(elements)
     }
 
-    private var valuesArr = EMPTY_ARRAY
-    private var arrayUsage = 0
+    // when used in hashing mode, the last slot in the array is used to store the zero key. when used in array mode,
+    // there is no special handling for zero.
+    private var keysArr = EMPTY_ARRAY
 
-    // use threshold to store the initial size before we allocate anything. since threshold cannot be negative, we use
-    // the highest bit to store whether the set contains zero or not
-    private var thresholdAndContainsZero = capacity
+    override var size: Int = 0
+            private set
 
-    private var threshold: Int
-        inline get() = thresholdAndContainsZero and ARRAY_USAGE_MASK
-        inline set(value) {
-            thresholdAndContainsZero = value or (thresholdAndContainsZero and ARRAY_USAGE_MASK.inv())
-        }
-
-    private var containsZero: Boolean
-        inline get() = thresholdAndContainsZero and ARRAY_USAGE_MASK.inv() != 0
-        inline set(value) {
-            thresholdAndContainsZero = if (value) {
-                thresholdAndContainsZero or ARRAY_USAGE_MASK.inv()
-            } else {
-                thresholdAndContainsZero and ARRAY_USAGE_MASK
-            }
-        }
-
-    override val size: Int get() = if (containsZero) arrayUsage + 1 else arrayUsage
-
-    override fun isEmpty(): Boolean {
-        return size == 0
-    }
+    // use threshold to store the initial size before we allocate anything
+    private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
 
     public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
-        if (valuesArr.isEmpty()) {
+        if (keysArr.isEmpty()) {
             threshold = capacity
         } else {
             growTo(capacity)
@@ -55,85 +37,82 @@ public class LongHashSet(
     }
 
     override fun add(element: Long): Boolean {
-        if (element == ZERO) {
-            if (containsZero) {
-                return false
-            } else {
-                containsZero = true
-                return true
-            }
-        }
-
         resizeIfNecessary()
-
         return if (isHashing()) addHashing(element) else addArray(element)
     }
 
     private fun addHashing(element: Long): Boolean {
-        val mask = valuesArr.mask()
+        assert(isHashing())
+
+        val keysArr = keysArr
+
+        if (element == ZERO) {
+            val endSlot = keysArr.endSlot()
+            return if (keysArr[endSlot] != ZERO) {
+                keysArr[endSlot] = ZERO
+                ++size
+                true
+            } else {
+                false
+            }
+        }
+
+        val mask = keysArr.mask()
         var slot = element.slot(mask)
-        var newValueSlotDistance = 0
+        var newKeySlotDistance = 0
         while (true) {
-            var value = valuesArr[slot]
-            when (value) {
+            var currKey = keysArr[slot]
+            when (currKey) {
                 element -> {
                     return false
                 }
-
                 ZERO -> {
-                    valuesArr[slot] = element
-                    ++arrayUsage
+                    keysArr[slot] = element
+                    ++size
                     return true
                 }
-
                 else -> {
-                    var newValue = element
-                    val valueSlotDistance = value.slotDistance(slot, mask)
-                    if (newValueSlotDistance > valueSlotDistance) {
+                    if (newKeySlotDistance > currKey.slotDistance(slot, mask)) {
+                        var newKey = element
+
                         // move all slots right until we hit a zero slot. max slot distance is generally not high enough
                         // for System.arrayCopy() to outperform the manual loop here, especially with the additional
                         // complexity needed for System.arrayCopy().
                         do {
-                            valuesArr[slot] = newValue
-                            newValue = value
+                            keysArr[slot] = newKey
+                            newKey = currKey
 
-                            slot = (slot + 1) and mask
-                            value = valuesArr[slot]
-                        } while (value != ZERO)
+                            slot = slot.nextSlot(mask)
+                            currKey = keysArr[slot]
+                        } while (currKey != ZERO)
 
-                        valuesArr[slot] = newValue
-                        ++arrayUsage
+                        keysArr[slot] = newKey
+                        ++size
                         return true
                     }
                 }
             }
 
-            slot = (slot + 1) and mask
-            newValueSlotDistance++
+            slot = slot.nextSlot(mask)
+            newKeySlotDistance++
         }
     }
 
     private fun addArray(element: Long): Boolean {
+        assert(!isHashing())
+
         var slot = 0
-        while (slot < arrayUsage) {
-            if (valuesArr[slot] == element) return false
+        while (slot < size) {
+            if (keysArr[slot] == element) return false
             ++slot
         }
 
-        valuesArr[arrayUsage++] = element
+        keysArr[slot] = element
+        ++size
         return true
     }
 
     override fun remove(element: Long): Boolean {
-        if (element == ZERO) {
-            if (containsZero) {
-                containsZero = false
-                return true
-            }
-
-            return false
-        }
-
         val slot = findSlot(element)
         if (slot >= 0) {
             removeSlot(slot)
@@ -144,48 +123,56 @@ public class LongHashSet(
     }
 
     override fun clear() {
-        valuesArr.fill(ZERO)
-        containsZero = false
-        arrayUsage = 0
+        keysArr.fill(ZERO)
+        if (keysArr.isHashing()) {
+            keysArr[keysArr.endSlot()] = NONZERO
+        }
+        size = 0
     }
 
-    private fun findSlot(element: Long): Int {
-        return if (isHashing()) findSlotHashing(element) else findSlotArray(element)
+    private fun findSlot(key: Long): Int {
+        return if (isHashing()) findSlotHashing(key) else findSlotArray(key)
     }
 
-    private fun findSlotHashing(element: Long): Int {
-        // assert(isHashing())
-        // assert(element != 0)
+    private fun findSlotHashing(key: Long): Int {
+        assert(isHashing())
 
-        val mask = valuesArr.mask()
+        val keysArr = keysArr
 
-        var slot = element.slot(mask)
-        var value = valuesArr[slot]
+        if (key == ZERO) {
+            val endSlot = keysArr.endSlot()
+            assert(endSlot >= 0)
+            return if (keysArr[endSlot] != ZERO) -1 else endSlot
+        }
+
+        val mask = keysArr.mask()
+        var slot = key.slot(mask)
         while (true) {
-            // we could stop looking once the distance < current distance, but with the short runs present in
-            // benchmarks it currently doesn't seem worth the effort?
-            when (value) {
+            // we could stop looking once the distance < current distance, but this generally worsens performance (extra
+            // unpredictable branch which only cuts off a couple iterations).
+            val currKey = keysArr[slot]
+            when (currKey) {
+                key -> return slot
                 ZERO -> return -1
-                element -> return slot
             }
-
-            slot = (slot + 1) and mask
-            value = valuesArr[slot]
+            slot = slot.nextSlot(mask)
         }
     }
 
-    private fun findSlotArray(element: Long): Int {
-        // assert(!isHashing())
-        // assert(element != 0)
+    private fun findSlotArray(key: Long): Int {
+        assert(!isHashing())
 
-        // iterate backwards under assumption more recently added values are more likely to be queried
-        var slot = arrayUsage - 1
+        val keysArr = keysArr
+
+        // iterate backwards under assumption more recently added keys are more likely to be queried
+        var slot = size - 1
         while (slot >= 0) {
-            if (valuesArr[slot] == element) {
+            if (keysArr[slot] == key) {
                 return slot
             }
             --slot
         }
+
         return -1
     }
 
@@ -194,217 +181,203 @@ public class LongHashSet(
     }
 
     private fun removeSlotHashing(slot: Int) {
-        // assert(isHashing())
-        // assert(valuesArr[slot] != 0)
+        assert(isHashing())
 
-        val mask = valuesArr.mask()
+        val keysArr = keysArr
+
+        val endSlot = keysArr.endSlot()
+        if (slot == endSlot) {
+            keysArr[endSlot] = NONZERO
+            --size
+            return
+        }
+
+        val mask = keysArr.mask()
 
         // move all slots left until we hit a zero slot. max slot distance is generally not high enough for
         // System.arrayCopy() to outperform the manual loop here, especially with the additional complexity needed
         // for System.arrayCopy().
-        var slot = slot
-        var nextSlot = (slot + 1) and mask
-        var nextValue = valuesArr[nextSlot]
-        while (nextValue != ZERO && nextValue.slotDistance(nextSlot, mask) > 0) {
-            valuesArr[slot] = nextValue
+        var currSlot = slot
+        var nextSlot = currSlot.nextSlot(mask)
+        var nextKey = keysArr[nextSlot]
+        while (nextKey != ZERO && nextKey.slotDistance(nextSlot, mask) > 0) {
+            keysArr[slot] = nextKey
 
-            slot = nextSlot
-            nextSlot = (nextSlot + 1) and mask
-            nextValue = valuesArr[nextSlot]
+            currSlot = nextSlot
+            nextSlot = nextSlot.nextSlot(mask)
+            nextKey = keysArr[nextSlot]
         }
-        valuesArr[slot] = ZERO
-        --arrayUsage
+        keysArr[currSlot] = ZERO
+        --size
     }
 
     private fun removeSlotArray(slot: Int) {
-        // assert(!isHashing())
-        // assert(valuesArr[slot] != 0)
-        // assert(slot < arrayUsage)
+        assert(!isHashing())
+        assert(slot < size)
 
-        val lastIndex = arrayUsage - 1
+        val lastIndex = --size
         if (slot < lastIndex) {
-            valuesArr[slot] = valuesArr[lastIndex]
+            keysArr[slot] = keysArr[lastIndex]
         }
-        --arrayUsage
     }
 
     override fun contains(element: Long): Boolean {
-        if (element == ZERO) return containsZero
         return findSlot(element) >= 0
     }
 
-    override fun iterator(): MutableLongIterator {
-        return object : MutableLongIterator() {
-            private val valuesArr = this@LongHashSet.valuesArr
-            private val arrayUsage = this@LongHashSet.arrayUsage
-            private val mask = valuesArr.mask()
-
-            private var entriesLeft = size
-            private var slot = numSlots()
-            private var previousSlot = slot + 1
-            private var nextValue = ZERO
-
-            init {
-                if (!containsZero) decrement()
-            }
-
-            private fun numSlots() = if (isHashing()) valuesArr.size else arrayUsage
-
-            override fun hasNext(): Boolean {
-                return entriesLeft > 0
-            }
-
-            override fun nextLong(): Long {
-                if (entriesLeft <= 0) throw NoSuchElementException()
-                val v = nextValue
-                --entriesLeft
-                decrement()
-                return v
-            }
-
-            override fun remove() {
-                val slotsSize = numSlots()
-                if (previousSlot < slotsSize) {
-                    removeSlot(previousSlot)
-                } else {
-                    check(previousSlot == slotsSize)
-                    // assert(containsZero)
-                    containsZero = false
-                }
-                previousSlot = slotsSize + 1
-            }
-
-            private fun decrement() {
-                previousSlot = slot
-                if (entriesLeft == 0) return
-
-                do {
-                    if (slot > 0) {
-                        // simple subtraction is a lot faster if we can get away with it (ie 99% of the time)
-                        --slot
-                    } else {
-                        slot = (slot - 1) and mask
-                    }
-                    nextValue = valuesArr[slot]
-                } while (nextValue == ZERO)
-            }
-        }
-    }
-
     private fun resizeIfNecessary() {
-        if (valuesArr.isEmpty()) {
-            // assert(threshold > 0)
+        if (keysArr.isEmpty()) {
             growTo(threshold)
-        } else if (arrayUsage >= threshold) {
+        } else if (size >= threshold) {
             growTo(threshold shl 1)
         }
     }
 
     private fun growTo(capacity: Int) {
         val newLength = arraySize(capacity, loadFactor)
-        if (valuesArr.size >= newLength) {
+        if (keysArr.size >= newLength) {
             return
         }
 
-        if (valuesArr.isEmpty()) {
-            valuesArr = LongArray(newLength)
-            threshold = if (isHashing()) {
-                (valuesArr.size * loadFactor).toInt()
-            } else {
-                valuesArr.size
-            }
+        if (newLength <= HASHIFY_THRESHOLD) {
+            keysArr = keysArr.copyOf(newLength)
+            threshold = newLength
             return
         }
 
-        if (isHashing()) {
-            // TODO: better algorithm?
-            val oldValues = valuesArr
-            valuesArr = LongArray(newLength)
-            threshold = (valuesArr.size * loadFactor).toInt()
-            arrayUsage = 0
-            for (v in oldValues) {
-                if (v != ZERO) {
-                    add(v)
-                }
+        val oldKeys = keysArr
+        val oldSize = size
+
+        keysArr = LongArray(newLength)
+        size = 0
+
+        val endSlot = keysArr.endSlot()
+        threshold = (endSlot * loadFactor).toInt()
+
+        if (!oldKeys.isHashing()) {
+            keysArr[endSlot] = NONZERO
+
+            var slot = 0
+            while (slot < oldSize) {
+                addHashing(oldKeys[slot])
+                ++slot
             }
         } else {
-            // assert(valuesArr.size <= HASHIFY_THRESHOLD)
-
-            if (newLength <= HASHIFY_THRESHOLD) {
-                valuesArr = valuesArr.copyOf(newLength)
-                threshold = valuesArr.size
-            } else {
-                val oldValues = valuesArr
-                val oldArrayUsage = arrayUsage
-                valuesArr = LongArray(newLength)
-                threshold = (valuesArr.size * loadFactor).toInt()
-                arrayUsage = 0
-
-                var slot = 0
-                while (slot < oldArrayUsage) {
-                    add(oldValues[slot])
-                    ++slot
+            // TODO: better algorithm?
+            val oldEndSlot = oldKeys.endSlot()
+            for (slot in 0..<oldEndSlot) {
+                val key = oldKeys[slot]
+                if (key != ZERO) {
+                    addHashing(key)
                 }
+            }
+
+            keysArr[endSlot] = oldKeys[oldEndSlot]
+        }
+
+        size = oldSize
+    }
+
+    override fun iterator(): MutableLongIterator = Iterator()
+
+    private inner class Iterator : MutableLongIterator() {
+        private val keysArr = this@LongHashSet.keysArr
+
+        private var slotsLeft = size
+        private val mask = keysArr.mask()
+
+        private var slot: Int
+        private var previousSlot = -1
+
+        init {
+            if (keysArr.isHashing()) {
+                slot = keysArr.endSlot()
+                if (keysArr[slot] != ZERO && slotsLeft > 0) {
+                    decrement()
+                }
+            } else {
+                slot = size - 1
+            }
+        }
+
+        override fun hasNext(): Boolean {
+            return slotsLeft > 0
+        }
+
+        override fun nextLong(): Long {
+            if (slotsLeft-- <= 0) throw NoSuchElementException()
+            previousSlot = slot
+            if (slotsLeft > 0) decrement()
+            return keysArr[previousSlot]
+        }
+
+        override fun remove() {
+            check(previousSlot != -1)
+            if (keysArr !== this@LongHashSet.keysArr) throw ConcurrentModificationException()
+
+            removeSlot(previousSlot)
+            previousSlot = -1
+        }
+
+        private fun decrement() {
+            if (keysArr.isHashing()) {
+                // deliberate local variable so JIT can optimize better
+                var s = (slot - 1) and mask
+                while (keysArr[s] == ZERO) {
+                    s = (s - 1) and mask
+                }
+                slot = s
+            } else {
+                --slot
             }
         }
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other === this) return true
-        if (other is Set<*>) {
-            if (size != other.size) return false
-            return other.containsAll(this)
-        }
-
-        return false
-    }
-
-    override fun hashCode(): Int {
-        var result = 0
-        for (element in this) {
-            result = 31 * result + element.hashCode()
-        }
-        return result
-    }
-
-    override fun toString(): String {
-        return joinToString(", ", "[", "]") { it.toString() }
-    }
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun LongArray.isHashing(): Boolean = (size - 1) > HASHIFY_THRESHOLD
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun isHashing(): Boolean = valuesArr.size > HASHIFY_THRESHOLD
+    private inline fun isHashing(): Boolean = keysArr.isHashing()
+
+    // the slot at the end of slot iteration (exclusive), also the slot that stores the zero value
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun LongArray.endSlot(): Int = size - 1
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun mixHash(element: Int): Int {
-        val h = element * INT_PHI
+    private inline fun LongArray.mask(): Int = size - 2
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun mixHash(hashcode: Int): Int {
+        val h = hashcode * INT_PHI
         return h xor (h ushr 16)
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.mask(): Int = size - 1
-
-    @Suppress("NOTHING_TO_INLINE")
     private inline fun Long.slot(mask: Int): Int {
-        // assert(mask == valuesArr.mask())
+        assert(this != ZERO)
+        assert(mask == keysArr.mask())
         return mixHash(this.hashCode()) and mask
     }
 
     @Suppress("NOTHING_TO_INLINE")
+    private inline fun Int.nextSlot(mask: Int): Int {
+        assert(mask == keysArr.mask())
+        return (this + 1) and mask
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
     private inline fun Long.slotDistance(slot: Int, mask: Int): Int {
-        // assert(this != 0)
-        val idealSlot = slot(mask)
-        return if (idealSlot <= slot) {
-            slot - idealSlot
-        } else {
-            slot + valuesArr.size - idealSlot
-        }
+        return (slot - slot(mask)) and mask
     }
 
     internal companion object {
         private val EMPTY_ARRAY = LongArray(0)
 
         // the value of a field in a uninitialized primitive array
+        @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
         private const val ZERO: Long = 0.toLong()
+        @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
+        private const val NONZERO: Long = 1.toLong()
 
         /** 2<sup>32</sup> &middot; &phi;, &phi; = (&#x221A;5 &minus; 1)/2. */
         private const val INT_PHI: Int = -0x61c88647
@@ -413,15 +386,15 @@ public class LongHashSet(
         private const val DEFAULT_INITIAL_CAPACITY = 1 shl 2  // must be power of two
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two
         private const val HASHIFY_THRESHOLD: Int = 1 shl 5 // must be power of two
-        private const val MIN_HASH_CAPACITY = 1 shl 4 // must be power of two
-
-        private const val ARRAY_USAGE_MASK = 0x7FFFFFFF
+        private const val MIN_HASH_CAPACITY = HASHIFY_THRESHOLD shr 1 // must be power of two
 
         private fun arraySize(capacity: Int, loadFactor: Float): Int {
+            check(capacity >= 0)
             return if (capacity <= HASHIFY_THRESHOLD) {
                 capacity
             } else {
-                max(minPowerOfTwo((capacity / loadFactor).toInt()), MIN_HASH_CAPACITY)
+                // add extra slot to hold zero value at the end
+                max(minPowerOfTwo((capacity / loadFactor).toInt()), MIN_HASH_CAPACITY) + 1
             }
         }
 

@@ -36,9 +36,3 @@ public object ArrayUtils {
         }
     }
 }
-
-/**
- * An implementation of indexOf() which is guaranteed to be no slower than the framework implementation, but which may
- * run substantially faster under some circumstances.
- */
-public expect fun IntArray.fastIndexOf(element: Int, fromIndex: Int = 0, toIndex: Int = size): Int

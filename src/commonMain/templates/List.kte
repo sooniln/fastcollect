@@ -85,6 +85,11 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, Mut
 
     override fun add(index: Int, element: ${Type})
 
+    public fun addFirst(element: ${Type}): Unit = add(0, element)
+    public fun addLast(element: ${Type}): Unit = add(size, element)
+    public fun removeFirst(): ${Type} = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
+    public fun removeLast(): ${Type} = if (isEmpty()) throw NoSuchElementException() else removeAt(lastIndex)
+
     override fun remove(element: ${Type}): Boolean {
         val index = indexOf(element)
         if (index == -1) {
@@ -122,11 +127,6 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, Mut
 
     override fun subList(fromIndex: Int, toIndex: Int): Mutable${Type}List
 }
-
-public fun Mutable${Type}List.addFirst(element: ${Type}): Unit = add(0, element)
-public fun Mutable${Type}List.addLast(element: ${Type}): Unit = add(size, element)
-public fun Mutable${Type}List.removeFirst(): ${Type} = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
-public fun Mutable${Type}List.removeLast(): ${Type} = if (isEmpty()) throw NoSuchElementException() else removeAt(lastIndex)
 
 public abstract class Abstract${Type}List : Abstract${Type}Collection(), ${Type}List {
 

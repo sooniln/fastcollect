@@ -1,5 +1,5 @@
 FastCollect is a library of Kotlin collections for holding primitive values (Int, Long, Float, Double, etc...) while
-attempting to be as memory and CPU efficient as possible. The library attempts to follow Kotlin norms and idioms for
+attempting to be as memory and CPU efficient as possible. The library attempts to follow Kotlin API norms and idioms for
 dealing with collections as closely as possible.
 
 ## Code Generation
@@ -9,18 +9,18 @@ identical code. The GenerateCollections gradle task is responsible for taking as
 src/commonMain/templates and generating output into src/commonGenerated. Changes should thus always be made to the
 template files rather than the generated output.
 
-Use "./gradlew GenerateCollections" to generate the Kotlin classes from templates.
-
 ## Benchmarking
 
-The benchmark subproject is responsible for running JVM benchmarks using JMH, often in comparison with fastutil
-libraries (a library for primitive Java collections).
+The benchmark subproject is responsible for running JVM benchmarks using JMH. The full benchmark suite will usually also
+run benchmarks on fastutil and JDK collections. For local benchmarking during development it usually wastes less time to
+filter benchmarks to only the relevant methods.
 
 Use "./gradlew jmh" to run all JMH benchmarks.
+Use "./gradlew jmh -Pjmh.includes='<regex>" to run only benchmarks which match the regular expression given by <regex>.
 
 ## JIT-ASM
 
 The jitAsm subproject is responsible for outputting JIT ASM for interesting methods within the library to allow for
 detailed analysis of the output byte code and a deeper understanding of performance.
 
-Use "./gradlew jitAsm" to output JVM assembly for analysis.
+Use "./gradlew jitAsm" or similar to output JVM assembly for analysis.

@@ -85,6 +85,11 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
 
     override fun add(index: Int, element: Double)
 
+    public fun addFirst(element: Double): Unit = add(0, element)
+    public fun addLast(element: Double): Unit = add(size, element)
+    public fun removeFirst(): Double = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
+    public fun removeLast(): Double = if (isEmpty()) throw NoSuchElementException() else removeAt(lastIndex)
+
     override fun remove(element: Double): Boolean {
         val index = indexOf(element)
         if (index == -1) {
@@ -122,11 +127,6 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableDoubleList
 }
-
-public fun MutableDoubleList.addFirst(element: Double): Unit = add(0, element)
-public fun MutableDoubleList.addLast(element: Double): Unit = add(size, element)
-public fun MutableDoubleList.removeFirst(): Double = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
-public fun MutableDoubleList.removeLast(): Double = if (isEmpty()) throw NoSuchElementException() else removeAt(lastIndex)
 
 public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleList {
 

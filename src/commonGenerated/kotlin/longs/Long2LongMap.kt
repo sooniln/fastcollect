@@ -4,11 +4,34 @@ import io.github.sooniln.fastcollect.assertBoxing
 import io.github.sooniln.fastcollect.EntrySet
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
+import io.github.sooniln.fastcollect.emptyEntrySet
+import io.github.sooniln.fastcollect.entrySetOf
+import io.github.sooniln.fastcollect.longs.longListOf
 import io.github.sooniln.fastcollect.longs.LongCollection
 import io.github.sooniln.fastcollect.longs.MutableLongCollection
+import io.github.sooniln.fastcollect.longs.emptyLongList
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+
+public fun emptyLong2LongMap(): Long2LongMap = EmptyLong2LongMap
+
+public fun long2LongMapOf(): Long2LongMap = EmptyLong2LongMap
+public fun long2LongMapOf(entry: Pair<Long, Long>): Long2LongMap = SingletonLong2LongMap(entry.first, entry.second)
+public fun long2LongMapOf(vararg entries: Pair<Long, Long>): Long2LongMap = Long2LongHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+public fun mutableLong2LongMapOf(): MutableLong2LongMap = Long2LongHashMap()
+public fun mutableLong2LongMapOf(entry: Pair<Long, Long>): MutableLong2LongMap = Long2LongHashMap(1).apply { set(entry.first, entry.second) }
+public fun mutableLong2LongMapOf(vararg entries: Pair<Long, Long>): MutableLong2LongMap = Long2LongHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun buildLong2LongSet(expectedSize: Int = 0, builderAction: MutableLong2LongMap.() -> Unit): Long2LongMap {
+    contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+    val map = Long2LongHashMap(expectedSize)
+    map.builderAction()
+    return map
+}
 
 public interface Long2LongMap : Map<Long, Long> {
     public val defaultValue: Long
@@ -33,6 +56,8 @@ public interface Long2LongMap : Map<Long, Long> {
         val value = lookup(key)
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
+
+    public fun getOrDefault(key: Long, defaultValue: Long): Long = getOrElse(key) { defaultValue }
 
     public fun lookup(key: Long): Long
 
@@ -87,9 +112,6 @@ public inline fun Long2LongMap.isDefaultValue(value: Long): Boolean = value == d
 
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Long2LongMap.getValue(key: Long): Long = getOrElse(key) { throw NoSuchElementException() }
-
-@Suppress("NOTHING_TO_INLINE")
-public inline fun Long2LongMap.getOrDefault(key: Long, defaultValue: Long): Long = getOrElse(key) { defaultValue }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun Long2LongMap.getOrElse(key: Long, defaultValue: () -> Long): Long {
@@ -153,6 +175,15 @@ public interface MutableLong2LongMap : Long2LongMap, MutableMap<Long, Long> {
 
     public fun removeKey(key: Long): Long
 
+    public fun merge(key: Long, value: Long, merge: (oldValue: Long, value: Long) -> Long): Long {
+        val oldValue = lookup(key)
+        val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
+        if (newValue != oldValue) {
+            putValue(key, newValue)
+        }
+        return newValue
+    }
+
     override val keys: MutableLongSet
     override val values: MutableLongCollection
 
@@ -186,18 +217,80 @@ public inline fun MutableLong2LongMap.getOrPut(key: Long, defaultValue: () -> Lo
     return value
 }
 
-@OptIn(ExperimentalContracts::class)
-public inline fun MutableLong2LongMap.merge(key: Long, value: Long, merge: (oldValue: Long, value: Long) -> Long): Long {
-    contract {
-        callsInPlace(merge, InvocationKind.AT_MOST_ONCE)
+public abstract class AbstractLong2LongMap : Long2LongMap {
+
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other is Map<*, *>) {
+            if (other.size != size) return false
+
+            for (entry in fastIterator()) {
+                if (other[entry.key()] != entry.value()) return false
+            }
+
+            return true
+        }
+
+        return false
     }
 
-    val oldValue = lookup(key)
-    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
-    if (newValue != oldValue) {
-        putValue(key, newValue)
+    override fun hashCode(): Int {
+        var result = 0
+        for (entry in fastIterator()) {
+            result += entry.key().hashCode() xor entry.value().hashCode()
+        }
+        return result
     }
-    return newValue
+
+    override fun toString(): String {
+        return Iterable { fastIterator() }.joinToString(", ", "{", "}") { "${it.key()}=${it.value()}" }
+    }
+
+    public class SimpleEntry(private val _key: Long, private val _value: Long) : Long2LongMap.Entry {
+        override fun key(): Long = _key
+        override fun value(): Long = _value
+    }
 }
 
-// TODO: abstract class w/toString
+public abstract class AbstractMutableLong2LongMap : AbstractLong2LongMap(), MutableLong2LongMap {
+
+    public class SimpleMutableEntry(private val _key: Long, private var _value: Long) : MutableLong2LongMap.MutableEntry {
+        override fun key(): Long = _key
+        override fun value(): Long = _value
+        override fun setValue(newValue: Long): Long {
+            val oldValue = _value
+            _value = newValue
+            return oldValue
+        }
+    }
+}
+
+private object EmptyLong2LongMap : Long2LongMap {
+    override val defaultValue: Long get() = Long.MIN_VALUE
+
+    override val size: Int get() = 0
+    override fun isEmpty(): Boolean = true
+
+    override fun containsKey(key: Long): Boolean = false
+    override fun containsValue(value: Long): Boolean = false
+    override fun lookup(key: Long): Long = Long.MIN_VALUE
+
+    override val keys: LongSet get() = emptyLongSet()
+    override val values: LongCollection get() = emptyLongList()
+    override val primitiveEntries: EntrySet<Long2LongMap.Entry> = emptyEntrySet()
+}
+
+private class SingletonLong2LongMap(private val key: Long, private val value: Long) : Long2LongMap {
+    override val defaultValue: Long get() = Long.MIN_VALUE
+
+    override val size: Int get() = 1
+    override fun isEmpty(): Boolean = false
+
+    override fun containsKey(key: Long): Boolean = key == this.key
+    override fun containsValue(value: Long): Boolean = value == this.value
+    override fun lookup(key: Long): Long = if (key == this.key) value else Long.MIN_VALUE
+
+    override val keys: LongSet by lazy { longSetOf(key) }
+    override val values: LongCollection by lazy { longListOf(value) }
+    override val primitiveEntries: EntrySet<Long2LongMap.Entry> by lazy { entrySetOf(AbstractLong2LongMap.SimpleEntry(key, value)) }
+}

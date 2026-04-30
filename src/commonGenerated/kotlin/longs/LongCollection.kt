@@ -120,6 +120,6 @@ private inline fun MutableLongCollection.filterInPlace(removePredicate: (Long) -
 
 public abstract class AbstractLongCollection : LongCollection {
     override fun toString(): String {
-        return joinToString(prefix = "[", postfix = "]", separator = ", ")
+        return joinToString(", ", "[", "]")
     }
 }

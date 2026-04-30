@@ -120,6 +120,6 @@ private inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) -> 
 
 public abstract class AbstractIntCollection : IntCollection {
     override fun toString(): String {
-        return joinToString(prefix = "[", postfix = "]", separator = ", ")
+        return joinToString(", ", "[", "]")
     }
 }

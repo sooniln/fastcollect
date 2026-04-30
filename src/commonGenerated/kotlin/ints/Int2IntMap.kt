@@ -4,11 +4,34 @@ import io.github.sooniln.fastcollect.assertBoxing
 import io.github.sooniln.fastcollect.EntrySet
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
+import io.github.sooniln.fastcollect.emptyEntrySet
+import io.github.sooniln.fastcollect.entrySetOf
+import io.github.sooniln.fastcollect.ints.intListOf
 import io.github.sooniln.fastcollect.ints.IntCollection
 import io.github.sooniln.fastcollect.ints.MutableIntCollection
+import io.github.sooniln.fastcollect.ints.emptyIntList
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+
+public fun emptyInt2IntMap(): Int2IntMap = EmptyInt2IntMap
+
+public fun int2IntMapOf(): Int2IntMap = EmptyInt2IntMap
+public fun int2IntMapOf(entry: Pair<Int, Int>): Int2IntMap = SingletonInt2IntMap(entry.first, entry.second)
+public fun int2IntMapOf(vararg entries: Pair<Int, Int>): Int2IntMap = Int2IntHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+public fun mutableInt2IntMapOf(): MutableInt2IntMap = Int2IntHashMap()
+public fun mutableInt2IntMapOf(entry: Pair<Int, Int>): MutableInt2IntMap = Int2IntHashMap(1).apply { set(entry.first, entry.second) }
+public fun mutableInt2IntMapOf(vararg entries: Pair<Int, Int>): MutableInt2IntMap = Int2IntHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun buildInt2IntSet(expectedSize: Int = 0, builderAction: MutableInt2IntMap.() -> Unit): Int2IntMap {
+    contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+    val map = Int2IntHashMap(expectedSize)
+    map.builderAction()
+    return map
+}
 
 public interface Int2IntMap : Map<Int, Int> {
     public val defaultValue: Int
@@ -33,6 +56,8 @@ public interface Int2IntMap : Map<Int, Int> {
         val value = lookup(key)
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
+
+    public fun getOrDefault(key: Int, defaultValue: Int): Int = getOrElse(key) { defaultValue }
 
     public fun lookup(key: Int): Int
 
@@ -87,9 +112,6 @@ public inline fun Int2IntMap.isDefaultValue(value: Int): Boolean = value == defa
 
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Int2IntMap.getValue(key: Int): Int = getOrElse(key) { throw NoSuchElementException() }
-
-@Suppress("NOTHING_TO_INLINE")
-public inline fun Int2IntMap.getOrDefault(key: Int, defaultValue: Int): Int = getOrElse(key) { defaultValue }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun Int2IntMap.getOrElse(key: Int, defaultValue: () -> Int): Int {
@@ -153,6 +175,15 @@ public interface MutableInt2IntMap : Int2IntMap, MutableMap<Int, Int> {
 
     public fun removeKey(key: Int): Int
 
+    public fun merge(key: Int, value: Int, merge: (oldValue: Int, value: Int) -> Int): Int {
+        val oldValue = lookup(key)
+        val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
+        if (newValue != oldValue) {
+            putValue(key, newValue)
+        }
+        return newValue
+    }
+
     override val keys: MutableIntSet
     override val values: MutableIntCollection
 
@@ -186,18 +217,80 @@ public inline fun MutableInt2IntMap.getOrPut(key: Int, defaultValue: () -> Int):
     return value
 }
 
-@OptIn(ExperimentalContracts::class)
-public inline fun MutableInt2IntMap.merge(key: Int, value: Int, merge: (oldValue: Int, value: Int) -> Int): Int {
-    contract {
-        callsInPlace(merge, InvocationKind.AT_MOST_ONCE)
+public abstract class AbstractInt2IntMap : Int2IntMap {
+
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other is Map<*, *>) {
+            if (other.size != size) return false
+
+            for (entry in fastIterator()) {
+                if (other[entry.key()] != entry.value()) return false
+            }
+
+            return true
+        }
+
+        return false
     }
 
-    val oldValue = lookup(key)
-    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
-    if (newValue != oldValue) {
-        putValue(key, newValue)
+    override fun hashCode(): Int {
+        var result = 0
+        for (entry in fastIterator()) {
+            result += entry.key().hashCode() xor entry.value().hashCode()
+        }
+        return result
     }
-    return newValue
+
+    override fun toString(): String {
+        return Iterable { fastIterator() }.joinToString(", ", "{", "}") { "${it.key()}=${it.value()}" }
+    }
+
+    public class SimpleEntry(private val _key: Int, private val _value: Int) : Int2IntMap.Entry {
+        override fun key(): Int = _key
+        override fun value(): Int = _value
+    }
 }
 
-// TODO: abstract class w/toString
+public abstract class AbstractMutableInt2IntMap : AbstractInt2IntMap(), MutableInt2IntMap {
+
+    public class SimpleMutableEntry(private val _key: Int, private var _value: Int) : MutableInt2IntMap.MutableEntry {
+        override fun key(): Int = _key
+        override fun value(): Int = _value
+        override fun setValue(newValue: Int): Int {
+            val oldValue = _value
+            _value = newValue
+            return oldValue
+        }
+    }
+}
+
+private object EmptyInt2IntMap : Int2IntMap {
+    override val defaultValue: Int get() = Int.MIN_VALUE
+
+    override val size: Int get() = 0
+    override fun isEmpty(): Boolean = true
+
+    override fun containsKey(key: Int): Boolean = false
+    override fun containsValue(value: Int): Boolean = false
+    override fun lookup(key: Int): Int = Int.MIN_VALUE
+
+    override val keys: IntSet get() = emptyIntSet()
+    override val values: IntCollection get() = emptyIntList()
+    override val primitiveEntries: EntrySet<Int2IntMap.Entry> = emptyEntrySet()
+}
+
+private class SingletonInt2IntMap(private val key: Int, private val value: Int) : Int2IntMap {
+    override val defaultValue: Int get() = Int.MIN_VALUE
+
+    override val size: Int get() = 1
+    override fun isEmpty(): Boolean = false
+
+    override fun containsKey(key: Int): Boolean = key == this.key
+    override fun containsValue(value: Int): Boolean = value == this.value
+    override fun lookup(key: Int): Int = if (key == this.key) value else Int.MIN_VALUE
+
+    override val keys: IntSet by lazy { intSetOf(key) }
+    override val values: IntCollection by lazy { intListOf(value) }
+    override val primitiveEntries: EntrySet<Int2IntMap.Entry> by lazy { entrySetOf(AbstractInt2IntMap.SimpleEntry(key, value)) }
+}

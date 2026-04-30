@@ -140,7 +140,7 @@ class FloatArrayDequeTest {
     @Test
     fun setReplacesElement() {
         val deque = FloatArrayDeque(floatArrayOf(1f, 2f, 3f))
-        deque[1] = 99f
+        deque.setAt(1, 99f)
         assertEquals(listOf(1f, 99f, 3f), deque.toList())
     }
 
@@ -153,7 +153,7 @@ class FloatArrayDequeTest {
     @Test
     fun setOutOfBoundsThrows() {
         val deque = FloatArrayDeque(floatArrayOf(1f))
-        assertFailsWith<IndexOutOfBoundsException> { deque[5] = 99f }
+        assertFailsWith<IndexOutOfBoundsException> { deque.setAt(5, 99f) }
     }
 
     // --- add(index) / removeAt ---

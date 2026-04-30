@@ -4,11 +4,34 @@ import io.github.sooniln.fastcollect.assertBoxing
 import io.github.sooniln.fastcollect.EntrySet
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
+import io.github.sooniln.fastcollect.emptyEntrySet
+import io.github.sooniln.fastcollect.entrySetOf
+import io.github.sooniln.fastcollect.floats.floatListOf
 import io.github.sooniln.fastcollect.floats.FloatCollection
 import io.github.sooniln.fastcollect.floats.MutableFloatCollection
+import io.github.sooniln.fastcollect.floats.emptyFloatList
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+
+public fun emptyLong2FloatMap(): Long2FloatMap = EmptyLong2FloatMap
+
+public fun long2FloatMapOf(): Long2FloatMap = EmptyLong2FloatMap
+public fun long2FloatMapOf(entry: Pair<Long, Float>): Long2FloatMap = SingletonLong2FloatMap(entry.first, entry.second)
+public fun long2FloatMapOf(vararg entries: Pair<Long, Float>): Long2FloatMap = Long2FloatHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+public fun mutableLong2FloatMapOf(): MutableLong2FloatMap = Long2FloatHashMap()
+public fun mutableLong2FloatMapOf(entry: Pair<Long, Float>): MutableLong2FloatMap = Long2FloatHashMap(1).apply { set(entry.first, entry.second) }
+public fun mutableLong2FloatMapOf(vararg entries: Pair<Long, Float>): MutableLong2FloatMap = Long2FloatHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun buildLong2FloatSet(expectedSize: Int = 0, builderAction: MutableLong2FloatMap.() -> Unit): Long2FloatMap {
+    contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+    val map = Long2FloatHashMap(expectedSize)
+    map.builderAction()
+    return map
+}
 
 public interface Long2FloatMap : Map<Long, Float> {
     public val defaultValue: Float
@@ -33,6 +56,8 @@ public interface Long2FloatMap : Map<Long, Float> {
         val value = lookup(key)
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
+
+    public fun getOrDefault(key: Long, defaultValue: Float): Float = getOrElse(key) { defaultValue }
 
     public fun lookup(key: Long): Float
 
@@ -87,9 +112,6 @@ public inline fun Long2FloatMap.isDefaultValue(value: Float): Boolean = value ==
 
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Long2FloatMap.getValue(key: Long): Float = getOrElse(key) { throw NoSuchElementException() }
-
-@Suppress("NOTHING_TO_INLINE")
-public inline fun Long2FloatMap.getOrDefault(key: Long, defaultValue: Float): Float = getOrElse(key) { defaultValue }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun Long2FloatMap.getOrElse(key: Long, defaultValue: () -> Float): Float {
@@ -153,6 +175,15 @@ public interface MutableLong2FloatMap : Long2FloatMap, MutableMap<Long, Float> {
 
     public fun removeKey(key: Long): Float
 
+    public fun merge(key: Long, value: Float, merge: (oldValue: Float, value: Float) -> Float): Float {
+        val oldValue = lookup(key)
+        val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
+        if (newValue != oldValue) {
+            putValue(key, newValue)
+        }
+        return newValue
+    }
+
     override val keys: MutableLongSet
     override val values: MutableFloatCollection
 
@@ -186,18 +217,80 @@ public inline fun MutableLong2FloatMap.getOrPut(key: Long, defaultValue: () -> F
     return value
 }
 
-@OptIn(ExperimentalContracts::class)
-public inline fun MutableLong2FloatMap.merge(key: Long, value: Float, merge: (oldValue: Float, value: Float) -> Float): Float {
-    contract {
-        callsInPlace(merge, InvocationKind.AT_MOST_ONCE)
+public abstract class AbstractLong2FloatMap : Long2FloatMap {
+
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other is Map<*, *>) {
+            if (other.size != size) return false
+
+            for (entry in fastIterator()) {
+                if (other[entry.key()] != entry.value()) return false
+            }
+
+            return true
+        }
+
+        return false
     }
 
-    val oldValue = lookup(key)
-    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
-    if (newValue != oldValue) {
-        putValue(key, newValue)
+    override fun hashCode(): Int {
+        var result = 0
+        for (entry in fastIterator()) {
+            result += entry.key().hashCode() xor entry.value().hashCode()
+        }
+        return result
     }
-    return newValue
+
+    override fun toString(): String {
+        return Iterable { fastIterator() }.joinToString(", ", "{", "}") { "${it.key()}=${it.value()}" }
+    }
+
+    public class SimpleEntry(private val _key: Long, private val _value: Float) : Long2FloatMap.Entry {
+        override fun key(): Long = _key
+        override fun value(): Float = _value
+    }
 }
 
-// TODO: abstract class w/toString
+public abstract class AbstractMutableLong2FloatMap : AbstractLong2FloatMap(), MutableLong2FloatMap {
+
+    public class SimpleMutableEntry(private val _key: Long, private var _value: Float) : MutableLong2FloatMap.MutableEntry {
+        override fun key(): Long = _key
+        override fun value(): Float = _value
+        override fun setValue(newValue: Float): Float {
+            val oldValue = _value
+            _value = newValue
+            return oldValue
+        }
+    }
+}
+
+private object EmptyLong2FloatMap : Long2FloatMap {
+    override val defaultValue: Float get() = Float.NaN
+
+    override val size: Int get() = 0
+    override fun isEmpty(): Boolean = true
+
+    override fun containsKey(key: Long): Boolean = false
+    override fun containsValue(value: Float): Boolean = false
+    override fun lookup(key: Long): Float = Float.NaN
+
+    override val keys: LongSet get() = emptyLongSet()
+    override val values: FloatCollection get() = emptyFloatList()
+    override val primitiveEntries: EntrySet<Long2FloatMap.Entry> = emptyEntrySet()
+}
+
+private class SingletonLong2FloatMap(private val key: Long, private val value: Float) : Long2FloatMap {
+    override val defaultValue: Float get() = Float.NaN
+
+    override val size: Int get() = 1
+    override fun isEmpty(): Boolean = false
+
+    override fun containsKey(key: Long): Boolean = key == this.key
+    override fun containsValue(value: Float): Boolean = value == this.value
+    override fun lookup(key: Long): Float = if (key == this.key) value else Float.NaN
+
+    override val keys: LongSet by lazy { longSetOf(key) }
+    override val values: FloatCollection by lazy { floatListOf(value) }
+    override val primitiveEntries: EntrySet<Long2FloatMap.Entry> by lazy { entrySetOf(AbstractLong2FloatMap.SimpleEntry(key, value)) }
+}

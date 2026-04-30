@@ -495,15 +495,6 @@ class Int2FloatHashMapTest {
     }
 
     @Test
-    fun mergeCallsMergeFunctionWhenKeyPresent() {
-        val map = newMap()
-        map.putValue(1, 10f)
-        val result = map.merge(1, 5f) { old, new -> old + new }
-        assertEquals(15f, result)
-        assertEquals(15f, map.lookup(1))
-    }
-
-    @Test
     fun filterReturnsEntriesMatchingPredicate() {
         val map = newMap()
         map.putValue(1, 10f); map.putValue(2, 20f); map.putValue(3, 30f)

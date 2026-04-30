@@ -85,6 +85,11 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableList<
 
     override fun add(index: Int, element: Long)
 
+    public fun addFirst(element: Long): Unit = add(0, element)
+    public fun addLast(element: Long): Unit = add(size, element)
+    public fun removeFirst(): Long = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
+    public fun removeLast(): Long = if (isEmpty()) throw NoSuchElementException() else removeAt(lastIndex)
+
     override fun remove(element: Long): Boolean {
         val index = indexOf(element)
         if (index == -1) {
@@ -122,11 +127,6 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableList<
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableLongList
 }
-
-public fun MutableLongList.addFirst(element: Long): Unit = add(0, element)
-public fun MutableLongList.addLast(element: Long): Unit = add(size, element)
-public fun MutableLongList.removeFirst(): Long = if (isEmpty()) throw NoSuchElementException() else removeAt(0)
-public fun MutableLongList.removeLast(): Long = if (isEmpty()) throw NoSuchElementException() else removeAt(lastIndex)
 
 public abstract class AbstractLongList : AbstractLongCollection(), LongList {
 

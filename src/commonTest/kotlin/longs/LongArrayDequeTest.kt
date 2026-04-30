@@ -140,7 +140,7 @@ class LongArrayDequeTest {
     @Test
     fun setReplacesElement() {
         val deque = LongArrayDeque(longArrayOf(1L, 2L, 3L))
-        deque[1] = 99L
+        deque.setAt(1, 99L)
         assertEquals(listOf(1L, 99L, 3L), deque.toList())
     }
 
@@ -153,7 +153,7 @@ class LongArrayDequeTest {
     @Test
     fun setOutOfBoundsThrows() {
         val deque = LongArrayDeque(longArrayOf(1L))
-        assertFailsWith<IndexOutOfBoundsException> { deque[5] = 99L }
+        assertFailsWith<IndexOutOfBoundsException> { deque.setAt(5, 99L) }
     }
 
     // --- add(index) / removeAt ---

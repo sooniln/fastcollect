@@ -4,11 +4,34 @@ import io.github.sooniln.fastcollect.assertBoxing
 import io.github.sooniln.fastcollect.EntrySet
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
+import io.github.sooniln.fastcollect.emptyEntrySet
+import io.github.sooniln.fastcollect.entrySetOf
+import io.github.sooniln.fastcollect.${valueSubpackage}.${lowerValueType}ListOf
 import io.github.sooniln.fastcollect.${valueSubpackage}.${ValueType}Collection
 import io.github.sooniln.fastcollect.${valueSubpackage}.Mutable${ValueType}Collection
+import io.github.sooniln.fastcollect.${valueSubpackage}.empty${ValueType}List
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+
+public fun empty${KeyType}2${ValueType}Map(): ${KeyType}2${ValueType}Map = Empty${KeyType}2${ValueType}Map
+
+public fun ${lowerKeyType}2${ValueType}MapOf(): ${KeyType}2${ValueType}Map = Empty${KeyType}2${ValueType}Map
+public fun ${lowerKeyType}2${ValueType}MapOf(entry: Pair<${KeyType}, ${ValueType}>): ${KeyType}2${ValueType}Map = Singleton${KeyType}2${ValueType}Map(entry.first, entry.second)
+public fun ${lowerKeyType}2${ValueType}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): ${KeyType}2${ValueType}Map = ${KeyType}2${ValueType}HashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+public fun mutable${KeyType}2${ValueType}MapOf(): Mutable${KeyType}2${ValueType}Map = ${KeyType}2${ValueType}HashMap()
+public fun mutable${KeyType}2${ValueType}MapOf(entry: Pair<${KeyType}, ${ValueType}>): Mutable${KeyType}2${ValueType}Map = ${KeyType}2${ValueType}HashMap(1).apply { set(entry.first, entry.second) }
+public fun mutable${KeyType}2${ValueType}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): Mutable${KeyType}2${ValueType}Map = ${KeyType}2${ValueType}HashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun build${KeyType}2${ValueType}Set(expectedSize: Int = 0, builderAction: Mutable${KeyType}2${ValueType}Map.() -> Unit): ${KeyType}2${ValueType}Map {
+    contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+    val map = ${KeyType}2${ValueType}HashMap(expectedSize)
+    map.builderAction()
+    return map
+}
 
 public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
     public val defaultValue: ${ValueType}
@@ -33,6 +56,8 @@ public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
         val value = lookup(key)
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
+
+    public fun getOrDefault(key: ${KeyType}, defaultValue: ${ValueType}): ${ValueType} = getOrElse(key) { defaultValue }
 
     public fun lookup(key: ${KeyType}): ${ValueType}
 
@@ -87,9 +112,6 @@ public inline fun ${KeyType}2${ValueType}Map.isDefaultValue(value: ${ValueType})
 
 @Suppress("NOTHING_TO_INLINE")
 public inline fun ${KeyType}2${ValueType}Map.getValue(key: ${KeyType}): ${ValueType} = getOrElse(key) { throw NoSuchElementException() }
-
-@Suppress("NOTHING_TO_INLINE")
-public inline fun ${KeyType}2${ValueType}Map.getOrDefault(key: ${KeyType}, defaultValue: ${ValueType}): ${ValueType} = getOrElse(key) { defaultValue }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun ${KeyType}2${ValueType}Map.getOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
@@ -153,6 +175,15 @@ public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map,
 
     public fun removeKey(key: ${KeyType}): ${ValueType}
 
+    public fun merge(key: ${KeyType}, value: ${ValueType}, merge: (oldValue: ${ValueType}, value: ${ValueType}) -> ${ValueType}): ${ValueType} {
+        val oldValue = lookup(key)
+        val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
+        if (newValue != oldValue) {
+            putValue(key, newValue)
+        }
+        return newValue
+    }
+
     override val keys: Mutable${KeyType}Set
     override val values: Mutable${ValueType}Collection
 
@@ -186,18 +217,80 @@ public inline fun Mutable${KeyType}2${ValueType}Map.getOrPut(key: ${KeyType}, de
     return value
 }
 
-@OptIn(ExperimentalContracts::class)
-public inline fun Mutable${KeyType}2${ValueType}Map.merge(key: ${KeyType}, value: ${ValueType}, merge: (oldValue: ${ValueType}, value: ${ValueType}) -> ${ValueType}): ${ValueType} {
-    contract {
-        callsInPlace(merge, InvocationKind.AT_MOST_ONCE)
+public abstract class Abstract${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map {
+
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other is Map<*, *>) {
+            if (other.size != size) return false
+
+            for (entry in fastIterator()) {
+                if (other[entry.key()] != entry.value()) return false
+            }
+
+            return true
+        }
+
+        return false
     }
 
-    val oldValue = lookup(key)
-    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
-    if (newValue != oldValue) {
-        putValue(key, newValue)
+    override fun hashCode(): Int {
+        var result = 0
+        for (entry in fastIterator()) {
+            result += entry.key().hashCode() xor entry.value().hashCode()
+        }
+        return result
     }
-    return newValue
+
+    override fun toString(): String {
+        return Iterable { fastIterator() }.joinToString(", ", "{", "}") { "\${it.key()}=\${it.value()}" }
+    }
+
+    public class SimpleEntry(private val _key: ${KeyType}, private val _value: ${ValueType}) : ${KeyType}2${ValueType}Map.Entry {
+        override fun key(): ${KeyType} = _key
+        override fun value(): ${ValueType} = _value
+    }
 }
 
-// TODO: abstract class w/toString
+public abstract class AbstractMutable${KeyType}2${ValueType}Map : Abstract${KeyType}2${ValueType}Map(), Mutable${KeyType}2${ValueType}Map {
+
+    public class SimpleMutableEntry(private val _key: ${KeyType}, private var _value: ${ValueType}) : Mutable${KeyType}2${ValueType}Map.MutableEntry {
+        override fun key(): ${KeyType} = _key
+        override fun value(): ${ValueType} = _value
+        override fun setValue(newValue: ${ValueType}): ${ValueType} {
+            val oldValue = _value
+            _value = newValue
+            return oldValue
+        }
+    }
+}
+
+private object Empty${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map {
+    override val defaultValue: ${ValueType} get() = ${DefaultValue}
+
+    override val size: Int get() = 0
+    override fun isEmpty(): Boolean = true
+
+    override fun containsKey(key: ${KeyType}): Boolean = false
+    override fun containsValue(value: ${ValueType}): Boolean = false
+    override fun lookup(key: ${KeyType}): ${ValueType} = ${DefaultValue}
+
+    override val keys: ${KeyType}Set get() = empty${KeyType}Set()
+    override val values: ${ValueType}Collection get() = empty${ValueType}List()
+    override val primitiveEntries: EntrySet<${KeyType}2${ValueType}Map.Entry> = emptyEntrySet()
+}
+
+private class Singleton${KeyType}2${ValueType}Map(private val key: ${KeyType}, private val value: ${ValueType}) : ${KeyType}2${ValueType}Map {
+    override val defaultValue: ${ValueType} get() = ${DefaultValue}
+
+    override val size: Int get() = 1
+    override fun isEmpty(): Boolean = false
+
+    override fun containsKey(key: ${KeyType}): Boolean = key == this.key
+    override fun containsValue(value: ${ValueType}): Boolean = value == this.value
+    override fun lookup(key: ${KeyType}): ${ValueType} = if (key == this.key) value else ${DefaultValue}
+
+    override val keys: ${KeyType}Set by lazy { ${lowerKeyType}SetOf(key) }
+    override val values: ${ValueType}Collection by lazy { ${lowerValueType}ListOf(value) }
+    override val primitiveEntries: EntrySet<${KeyType}2${ValueType}Map.Entry> by lazy { entrySetOf(Abstract${KeyType}2${ValueType}Map.SimpleEntry(key, value)) }
+}

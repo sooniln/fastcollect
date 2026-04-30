@@ -140,7 +140,7 @@ class IntArrayDequeTest {
     @Test
     fun setReplacesElement() {
         val deque = IntArrayDeque(intArrayOf(1, 2, 3))
-        deque[1] = 99
+        deque.setAt(1, 99)
         assertEquals(listOf(1, 99, 3), deque.toList())
     }
 
@@ -153,7 +153,7 @@ class IntArrayDequeTest {
     @Test
     fun setOutOfBoundsThrows() {
         val deque = IntArrayDeque(intArrayOf(1))
-        assertFailsWith<IndexOutOfBoundsException> { deque[5] = 99 }
+        assertFailsWith<IndexOutOfBoundsException> { deque.setAt(5, 99) }
     }
 
     // --- add(index) / removeAt ---

@@ -120,6 +120,6 @@ private inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${Ty
 
 public abstract class Abstract${Type}Collection : ${Type}Collection {
     override fun toString(): String {
-        return joinToString(prefix = "[", postfix = "]", separator = ", ")
+        return joinToString(", ", "[", "]")
     }
 }

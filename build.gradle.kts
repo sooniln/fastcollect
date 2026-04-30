@@ -104,6 +104,8 @@ tasks.register<Copy>("GenerateCollections") {
     val keyValueTypesExpansions = Generate.KeyValueTypes.Expansions.map { expansion ->
         buildMap(expansion.size + 2) {
             putAll(expansion)
+            put("lowerKeyType", expansion["KeyType"]!!.lowercase())
+            put("lowerValueType", expansion["ValueType"]!!.lowercase())
             put("keySubpackage", expansion["KeyType"]!!.lowercase() + "s")
             put("valueSubpackage", expansion["ValueType"]!!.lowercase() + "s")
         }
