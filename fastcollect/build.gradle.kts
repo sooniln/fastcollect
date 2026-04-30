@@ -14,7 +14,7 @@ repositories {
 group = "io.github.sooniln"
 version = "0.0.1"
 
-object Generate {
+private object Generate {
     const val IN_DIR = "src/commonMain/templates"
     const val OUT_DIR = "src/commonGenerated/kotlin"
 
@@ -26,6 +26,8 @@ object Generate {
             "List.kte",
         )
         val Expansions = listOf(
+            mapOf("Type" to "Byte"),
+            mapOf("Type" to "Short"),
             mapOf("Type" to "Int"),
             mapOf("Type" to "Long"),
             mapOf("Type" to "Float"),
@@ -193,11 +195,11 @@ mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
 
-    coordinates(group.toString(), "fastcollect-kt", version.toString())
+    coordinates(group.toString(), "fastcollect-kotlin", version.toString())
 
     pom {
-        name = "fastcollect-kt"
-        description = "A library for high-performance primitive collections in the JVM/Kotlin ecosystem."
+        name = "fastcollect"
+        description = "A library for high-performance primitive collections in the Kotlin ecosystem."
         inceptionYear = "2026"
         url = "https://github.com/sooniln/fastcollect"
         licenses {
