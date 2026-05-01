@@ -1,6 +1,7 @@
 package io.github.sooniln.fastcollect
 
 import io.github.sooniln.fastcollect.ints.Int2IntHashMap
+import io.github.sooniln.fastcollect.ints.IntArrayDeque
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
 import kotlinx.benchmark.BenchmarkTimeUnit
@@ -62,6 +63,15 @@ open class MapBenchmark {
     }
 
     @Benchmark
+    fun fastcollectAdd(): Int2IntHashMap {
+        val map = Int2IntHashMap()
+        for (e in inKeys) {
+            map[e] = 1
+        }
+        return map
+    }
+
+    @Benchmark
     fun fastcollectGetHit(): Int {
         var value = 0
         for (e in inKeys) {
@@ -113,6 +123,15 @@ open class MapBenchmark {
             c += e.key() + e.value()
         }
         return c
+    }
+
+    @Benchmark
+    fun kotlinAdd(): HashMap<Int, Int> {
+        val map = HashMap<Int, Int>()
+        for (e in inKeys) {
+            map[e] = 1
+        }
+        return map
     }
 
     @Benchmark

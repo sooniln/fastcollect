@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect
 
+import io.github.sooniln.fastcollect.ints.Int2IntHashMap
 import io.github.sooniln.fastcollect.ints.IntHashSet
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
@@ -61,6 +62,15 @@ open class SetBenchmark {
     }
 
     @Benchmark
+    fun fastcollectAdd(): IntHashSet {
+        val set = IntHashSet()
+        for (e in inKeys) {
+            set.add(e)
+        }
+        return set
+    }
+
+    @Benchmark
     fun fastcollectGetHit(): Int {
         var value = 0
         for (k in inKeys) {
@@ -85,6 +95,15 @@ open class SetBenchmark {
             c += i
         }
         return c
+    }
+
+    @Benchmark
+    fun kotlinAdd(): HashSet<Int> {
+        val set = HashSet<Int>()
+        for (e in inKeys) {
+            set.add(e)
+        }
+        return set
     }
 
     @Benchmark

@@ -56,6 +56,15 @@ open class ListBenchmark {
     }
 
     @Benchmark
+    fun fastcollectAdd(): IntArrayDeque {
+        val list = IntArrayDeque()
+        for (e in inElements) {
+            list.add(e)
+        }
+        return list
+    }
+
+    @Benchmark
     fun fastcollectIterate(): Int {
         var value = 0
         for (v in fastcollect) {
@@ -71,6 +80,15 @@ open class ListBenchmark {
             value += fastcollect.indexOf(e)
         }
         return value
+    }
+
+    @Benchmark
+    fun kotlinAdd(): ArrayList<Int> {
+        val list = ArrayList<Int>()
+        for (e in inElements) {
+            list.add(e)
+        }
+        return list
     }
 
     @Benchmark
