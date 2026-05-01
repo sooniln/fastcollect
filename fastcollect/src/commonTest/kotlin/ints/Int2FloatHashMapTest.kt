@@ -713,7 +713,7 @@ class Int2FloatHashMapTest {
     fun floatMaxValueAsValue() {
         val map = Int2FloatHashMap()
         map.putValue(1, Float.MAX_VALUE)
-        assertEquals(Float.MAX_VALUE, map.lookup(1))
+        assertEquals(Float.MAX_VALUE, map.lookup(1), absoluteTolerance = 0.0001f)
     }
 
     @Test

@@ -18,7 +18,7 @@ private object Generate {
     const val IN_DIR = "src/commonMain/templates"
     const val OUT_DIR = "src/commonGenerated/kotlin"
 
-    object AnyTypes {
+    object CollectionTypes {
         val Files = listOf(
             "ArrayDeque.kte",
             "Collection.kte",
@@ -35,7 +35,7 @@ private object Generate {
         )
     }
 
-    object KeyTypes {
+    object SetTypes {
         val Files = listOf(
             "HashSet.kte",
             "Set.kte",
@@ -46,7 +46,7 @@ private object Generate {
         )
     }
 
-    object KeyValueTypes {
+    object MapTypes {
         val Files = listOf(
             "HashMap.kte",
             "Map.kte",
@@ -56,10 +56,12 @@ private object Generate {
             mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
             mapOf("KeyType" to "Int", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
             mapOf("KeyType" to "Int", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
+            mapOf("KeyType" to "Int", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
             mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
             mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
             mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
             mapOf("KeyType" to "Long", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
+            mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
         )
     }
 }
@@ -69,15 +71,15 @@ tasks.register<Copy>("GenerateCollections") {
     group = "generate"
     into(Generate.OUT_DIR)
 
-    val anyTypesExpansions = Generate.AnyTypes.Expansions.map { expansion ->
+    val anyTypesExpansions = Generate.CollectionTypes.Expansions.map { expansion ->
         buildMap(expansion.size + 2) {
             putAll(expansion)
-            put("lowerType", expansion["Type"]!!.lowercase())
-            put("subpackage", expansion["Type"]!!.lowercase() + "s")
+            putIfAbsent("lowerType", expansion["Type"]!!.lowercase())
+            putIfAbsent("subpackage", expansion["Type"]!!.lowercase() + "s")
         }
     }
 
-    Generate.AnyTypes.Files.forEach { filename ->
+    Generate.CollectionTypes.Files.forEach { filename ->
         anyTypesExpansions.forEach { expansion ->
             into(expansion["subpackage"]!!) {
                 from("${Generate.IN_DIR}/$filename")
@@ -87,15 +89,15 @@ tasks.register<Copy>("GenerateCollections") {
         }
     }
 
-    val keyTypesExpansions = Generate.KeyTypes.Expansions.map { expansion ->
+    val keyTypesExpansions = Generate.SetTypes.Expansions.map { expansion ->
         buildMap(expansion.size + 2) {
             putAll(expansion)
-            put("lowerType", expansion["Type"]!!.lowercase())
-            put("subpackage", expansion["Type"]!!.lowercase() + "s")
+            putIfAbsent("lowerType", expansion["Type"]!!.lowercase())
+            putIfAbsent("subpackage", expansion["Type"]!!.lowercase() + "s")
         }
     }
 
-    Generate.KeyTypes.Files.forEach { filename ->
+    Generate.SetTypes.Files.forEach { filename ->
         keyTypesExpansions.forEach { expansion ->
             into(expansion["subpackage"]!!) {
                 from("${Generate.IN_DIR}/$filename")
@@ -105,21 +107,44 @@ tasks.register<Copy>("GenerateCollections") {
         }
     }
 
-    val keyValueTypesExpansions = Generate.KeyValueTypes.Expansions.map { expansion ->
+    val keyValueTypesExpansions = Generate.MapTypes.Expansions.map { expansion ->
         buildMap(expansion.size + 2) {
+            val isReferenceValue = (expansion["isReferenceValue"] ?: false) as Boolean
+            val keyType = expansion["KeyType"] as String
+            val lowerKeyType = keyType.lowercase()
+            val valueType = expansion["ValueType"] as String
+            val lowerValueType = valueType.lowercase()
+
             putAll(expansion)
-            put("lowerKeyType", expansion["KeyType"]!!.lowercase())
-            put("lowerValueType", expansion["ValueType"]!!.lowercase())
-            put("keySubpackage", expansion["KeyType"]!!.lowercase() + "s")
-            put("valueSubpackage", expansion["ValueType"]!!.lowercase() + "s")
+            putIfAbsent("lowerKeyType", lowerKeyType)
+            putIfAbsent("lowerValueType", lowerValueType)
+            putIfAbsent("keySubpackage", lowerKeyType + "s")
+            putIfAbsent("valueSubpackage", lowerValueType + "s")
+            putIfAbsent("isReferenceValue", isReferenceValue)
+
+            if (isReferenceValue) {
+                putIfAbsent("Name", "${keyType}2Any")
+                putIfAbsent("lowerName", "${lowerKeyType}2Any")
+                putIfAbsent("ValueCollectionType", "Collection")
+                putIfAbsent("ValueIteratorType", "Iterator")
+                putIfAbsent("Nullable", "?")
+                putIfAbsent("Generics", "<$valueType>")
+            } else {
+                putIfAbsent("Name", "${keyType}2${valueType}")
+                putIfAbsent("lowerName", "${lowerKeyType}2${valueType}")
+                putIfAbsent("ValueCollectionType", "${valueType}Collection")
+                putIfAbsent("ValueIteratorType", "${valueType}Iterator")
+                putIfAbsent("Nullable", "")
+                putIfAbsent("Generics", "")
+            }
         }
     }
 
-    Generate.KeyValueTypes.Files.forEach { filename ->
+    Generate.MapTypes.Files.forEach { filename ->
         keyValueTypesExpansions.forEach { expansion ->
             into(expansion["keySubpackage"]!!) {
                 from("${Generate.IN_DIR}/$filename")
-                rename { filename -> expansion["KeyType"]!! + "2" + expansion["ValueType"]!! + filename.removeSuffix(".kte") + ".kt" }
+                rename { filename -> (expansion["Name"] as String) + filename.removeSuffix(".kte") + ".kt" }
                 expand(*expansion.toList().toTypedArray())
             }
         }

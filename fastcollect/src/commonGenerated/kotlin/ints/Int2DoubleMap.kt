@@ -8,27 +8,31 @@ import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.emptyEntrySet
 import io.github.sooniln.fastcollect.entrySetOf
+
 import io.github.sooniln.fastcollect.doubles.doubleListOf
 import io.github.sooniln.fastcollect.doubles.DoubleCollection
 import io.github.sooniln.fastcollect.doubles.MutableDoubleCollection
 import io.github.sooniln.fastcollect.doubles.emptyDoubleList
+
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
 
-public fun emptyInt2DoubleMap(): Int2DoubleMap = EmptyInt2DoubleMap
+@Suppress("UNCHECKED_CAST")
+public fun  emptyInt2DoubleMap(): Int2DoubleMap = EmptyInt2DoubleMap as Int2DoubleMap
 
-public fun int2DoubleMapOf(): Int2DoubleMap = EmptyInt2DoubleMap
-public fun int2DoubleMapOf(entry: Pair<Int, Double>): Int2DoubleMap = SingletonInt2DoubleMap(entry.first, entry.second)
-public fun int2DoubleMapOf(vararg entries: Pair<Int, Double>): Int2DoubleMap = Int2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+@Suppress("UNCHECKED_CAST")
+public fun  int2DoubleMapOf(): Int2DoubleMap = EmptyInt2DoubleMap as Int2DoubleMap
+public fun  int2DoubleMapOf(entry: Pair<Int, Double>): Int2DoubleMap = SingletonInt2DoubleMap(entry.first, entry.second)
+public fun  int2DoubleMapOf(vararg entries: Pair<Int, Double>): Int2DoubleMap = Int2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
-public fun mutableInt2DoubleMapOf(): MutableInt2DoubleMap = Int2DoubleHashMap()
-public fun mutableInt2DoubleMapOf(entry: Pair<Int, Double>): MutableInt2DoubleMap = Int2DoubleHashMap(1).apply { set(entry.first, entry.second) }
-public fun mutableInt2DoubleMapOf(vararg entries: Pair<Int, Double>): MutableInt2DoubleMap = Int2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+public fun  mutableInt2DoubleMapOf(): MutableInt2DoubleMap = Int2DoubleHashMap()
+public fun  mutableInt2DoubleMapOf(entry: Pair<Int, Double>): MutableInt2DoubleMap = Int2DoubleHashMap(1).apply { set(entry.first, entry.second) }
+public fun  mutableInt2DoubleMapOf(vararg entries: Pair<Int, Double>): MutableInt2DoubleMap = Int2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
-public inline fun buildInt2DoubleSet(expectedSize: Int = 0, builderAction: MutableInt2DoubleMap.() -> Unit): Int2DoubleMap {
+public inline fun  buildInt2DoubleMap(expectedSize: Int = 0, builderAction: MutableInt2DoubleMap.() -> Unit): Int2DoubleMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
     val map = Int2DoubleHashMap(expectedSize)
     map.builderAction()
@@ -38,6 +42,7 @@ public inline fun buildInt2DoubleSet(expectedSize: Int = 0, builderAction: Mutab
 /**
  * A map of Ints to Doubles which inherits from [Map].
  *
+
  * Because this interface is designed to store primitives, methods which lookup keys and return non-nullable primitive
  * values may not return null to indicate no such key is present. Instead, a Int2DoubleMap has a
  * [defaultValue] which is returned instead to indicate no such key is present. Thus in order to obtain the best
@@ -46,9 +51,12 @@ public inline fun buildInt2DoubleSet(expectedSize: Int = 0, builderAction: Mutab
  * correctness concern however - the map will still operate correctly and all methods will perform as expected even if
  * the map contains values equal to [defaultValue]. [Float.NaN] or [Double.NaN] are acceptable for [defaultValue] if
  * applicable.
+
  */
 public interface Int2DoubleMap : Map<Int, Double> {
+
     public val defaultValue: Double
+
 
     override fun isEmpty(): Boolean {
         return size == 0
@@ -61,6 +69,7 @@ public interface Int2DoubleMap : Map<Int, Double> {
         return false
     }
 
+
     @Deprecated(
         message = "Use the lookup(key) method instead.",
         replaceWith = ReplaceWith("lookup(key)"),
@@ -71,11 +80,14 @@ public interface Int2DoubleMap : Map<Int, Double> {
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
+
     public fun getOrDefault(key: Int, defaultValue: Double): Double = getOrElse(key) { defaultValue }
+
 
     /**
      * Returns the value associated with the given key, or [defaultValue] if the given key is not present in the map.
      */
+
     public fun lookup(key: Int): Double
 
     override val keys: IntSet
@@ -125,13 +137,13 @@ public interface Int2DoubleMap : Map<Int, Double> {
 
 // handles presence of NaN correctly
 @Suppress("NOTHING_TO_INLINE")
-public inline fun Int2DoubleMap.isDefaultValue(value: Double): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+public inline fun  Int2DoubleMap.isDefaultValue(value: Double): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
 
 @Suppress("NOTHING_TO_INLINE")
-public inline fun Int2DoubleMap.getValue(key: Int): Double = getOrElse(key) { throw NoSuchElementException() }
+public inline fun  Int2DoubleMap.getValue(key: Int): Double = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double): Double {
+public inline fun  Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double): Double {
     contract {
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
@@ -141,7 +153,7 @@ public inline fun Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double):
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun Int2DoubleMap.filterTo(destination: MutableInt2DoubleMap, predicate: (key: Int, value: Double) -> Boolean): MutableInt2DoubleMap {
+public inline fun  Int2DoubleMap.filterTo(destination: MutableInt2DoubleMap, predicate: (key: Int, value: Double) -> Boolean): MutableInt2DoubleMap {
     contract {
         callsInPlace(predicate, InvocationKind.UNKNOWN)
     }
@@ -155,7 +167,7 @@ public inline fun Int2DoubleMap.filterTo(destination: MutableInt2DoubleMap, pred
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun Int2DoubleMap.filter(predicate: (key: Int, value: Double) -> Boolean): Int2DoubleMap {
+public inline fun  Int2DoubleMap.filter(predicate: (key: Int, value: Double) -> Boolean): Int2DoubleMap {
     contract {
         callsInPlace(predicate, InvocationKind.UNKNOWN)
     }
@@ -163,10 +175,12 @@ public inline fun Int2DoubleMap.filter(predicate: (key: Int, value: Double) -> B
     return filterTo(Int2DoubleHashMap(), predicate)
 }
 
+
 /**
  * A mutable map of Ints to Doubles which inherits from [MutableMap].
  */
 public interface MutableInt2DoubleMap : Int2DoubleMap, MutableMap<Int, Double> {
+
 
     @Deprecated(
         message = "Use putValue(key, value) instead.",
@@ -178,11 +192,19 @@ public interface MutableInt2DoubleMap : Int2DoubleMap, MutableMap<Int, Double> {
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
+
+
+    /**
+     * Updates the value associated with the given key and returns the previous value, or [defaultValue] if the given
+     * key was not present previously.
+     */
+
     public fun putValue(key: Int, value: Double): Double
 
     public operator fun set(key: Int, value: Double) {
         putValue(key, value)
     }
+
 
     @Deprecated(
         message = "Use removeKey(key) instead.",
@@ -193,7 +215,9 @@ public interface MutableInt2DoubleMap : Int2DoubleMap, MutableMap<Int, Double> {
         return if (containsKey(key)) removeKey(key) else null
     }
 
+
     public fun removeKey(key: Int): Double
+
 
     public fun merge(key: Int, value: Double, merge: (oldValue: Double, value: Double) -> Double): Double {
         val oldValue = lookup(key)
@@ -203,6 +227,7 @@ public interface MutableInt2DoubleMap : Int2DoubleMap, MutableMap<Int, Double> {
         }
         return newValue
     }
+
 
     override val keys: MutableIntSet
     override val values: MutableDoubleCollection
@@ -223,8 +248,9 @@ public interface MutableInt2DoubleMap : Int2DoubleMap, MutableMap<Int, Double> {
     public interface MutableEntry : Int2DoubleMap.Entry, MutableMap.MutableEntry<Int, Double>
 }
 
+
 @OptIn(ExperimentalContracts::class)
-public inline fun MutableInt2DoubleMap.getOrPut(key: Int, defaultValue: () -> Double): Double {
+public inline fun  MutableInt2DoubleMap.getOrPut(key: Int, defaultValue: () -> Double): Double {
     contract {
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
@@ -236,6 +262,7 @@ public inline fun MutableInt2DoubleMap.getOrPut(key: Int, defaultValue: () -> Do
     }
     return value
 }
+
 
 public abstract class AbstractInt2DoubleMap : Int2DoubleMap {
 
@@ -285,23 +312,35 @@ public abstract class AbstractMutableInt2DoubleMap : AbstractInt2DoubleMap(), Mu
     }
 }
 
+
 private object EmptyInt2DoubleMap : Int2DoubleMap {
+
+
+
     override val defaultValue: Double get() = Double.NaN
+
 
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Int): Boolean = false
+
     override fun containsValue(value: Double): Boolean = false
     override fun lookup(key: Int): Double = Double.NaN
 
+
+
     override val keys: IntSet get() = emptyIntSet()
+
     override val values: DoubleCollection get() = emptyDoubleList()
     override val primitiveEntries: EntrySet<Int2DoubleMap.Entry> = emptyEntrySet()
+
 }
 
 private class SingletonInt2DoubleMap(private val key: Int, private val value: Double) : Int2DoubleMap {
+
     override val defaultValue: Double get() = Double.NaN
+
 
     override val size: Int get() = 1
     override fun isEmpty(): Boolean = false
@@ -311,6 +350,10 @@ private class SingletonInt2DoubleMap(private val key: Int, private val value: Do
     override fun lookup(key: Int): Double = if (key == this.key) value else Double.NaN
 
     override val keys: IntSet by lazy { intSetOf(key) }
+
+
     override val values: DoubleCollection by lazy { doubleListOf(value) }
+
+
     override val primitiveEntries: EntrySet<Int2DoubleMap.Entry> by lazy { entrySetOf(AbstractInt2DoubleMap.SimpleEntry(key, value)) }
 }

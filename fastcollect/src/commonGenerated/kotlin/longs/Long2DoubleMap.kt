@@ -8,27 +8,31 @@ import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.emptyEntrySet
 import io.github.sooniln.fastcollect.entrySetOf
+
 import io.github.sooniln.fastcollect.doubles.doubleListOf
 import io.github.sooniln.fastcollect.doubles.DoubleCollection
 import io.github.sooniln.fastcollect.doubles.MutableDoubleCollection
 import io.github.sooniln.fastcollect.doubles.emptyDoubleList
+
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
 
-public fun emptyLong2DoubleMap(): Long2DoubleMap = EmptyLong2DoubleMap
+@Suppress("UNCHECKED_CAST")
+public fun  emptyLong2DoubleMap(): Long2DoubleMap = EmptyLong2DoubleMap as Long2DoubleMap
 
-public fun long2DoubleMapOf(): Long2DoubleMap = EmptyLong2DoubleMap
-public fun long2DoubleMapOf(entry: Pair<Long, Double>): Long2DoubleMap = SingletonLong2DoubleMap(entry.first, entry.second)
-public fun long2DoubleMapOf(vararg entries: Pair<Long, Double>): Long2DoubleMap = Long2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+@Suppress("UNCHECKED_CAST")
+public fun  long2DoubleMapOf(): Long2DoubleMap = EmptyLong2DoubleMap as Long2DoubleMap
+public fun  long2DoubleMapOf(entry: Pair<Long, Double>): Long2DoubleMap = SingletonLong2DoubleMap(entry.first, entry.second)
+public fun  long2DoubleMapOf(vararg entries: Pair<Long, Double>): Long2DoubleMap = Long2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
-public fun mutableLong2DoubleMapOf(): MutableLong2DoubleMap = Long2DoubleHashMap()
-public fun mutableLong2DoubleMapOf(entry: Pair<Long, Double>): MutableLong2DoubleMap = Long2DoubleHashMap(1).apply { set(entry.first, entry.second) }
-public fun mutableLong2DoubleMapOf(vararg entries: Pair<Long, Double>): MutableLong2DoubleMap = Long2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+public fun  mutableLong2DoubleMapOf(): MutableLong2DoubleMap = Long2DoubleHashMap()
+public fun  mutableLong2DoubleMapOf(entry: Pair<Long, Double>): MutableLong2DoubleMap = Long2DoubleHashMap(1).apply { set(entry.first, entry.second) }
+public fun  mutableLong2DoubleMapOf(vararg entries: Pair<Long, Double>): MutableLong2DoubleMap = Long2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
-public inline fun buildLong2DoubleSet(expectedSize: Int = 0, builderAction: MutableLong2DoubleMap.() -> Unit): Long2DoubleMap {
+public inline fun  buildLong2DoubleMap(expectedSize: Int = 0, builderAction: MutableLong2DoubleMap.() -> Unit): Long2DoubleMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
     val map = Long2DoubleHashMap(expectedSize)
     map.builderAction()
@@ -38,6 +42,7 @@ public inline fun buildLong2DoubleSet(expectedSize: Int = 0, builderAction: Muta
 /**
  * A map of Longs to Doubles which inherits from [Map].
  *
+
  * Because this interface is designed to store primitives, methods which lookup keys and return non-nullable primitive
  * values may not return null to indicate no such key is present. Instead, a Long2DoubleMap has a
  * [defaultValue] which is returned instead to indicate no such key is present. Thus in order to obtain the best
@@ -46,9 +51,12 @@ public inline fun buildLong2DoubleSet(expectedSize: Int = 0, builderAction: Muta
  * correctness concern however - the map will still operate correctly and all methods will perform as expected even if
  * the map contains values equal to [defaultValue]. [Float.NaN] or [Double.NaN] are acceptable for [defaultValue] if
  * applicable.
+
  */
 public interface Long2DoubleMap : Map<Long, Double> {
+
     public val defaultValue: Double
+
 
     override fun isEmpty(): Boolean {
         return size == 0
@@ -61,6 +69,7 @@ public interface Long2DoubleMap : Map<Long, Double> {
         return false
     }
 
+
     @Deprecated(
         message = "Use the lookup(key) method instead.",
         replaceWith = ReplaceWith("lookup(key)"),
@@ -71,11 +80,14 @@ public interface Long2DoubleMap : Map<Long, Double> {
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
+
     public fun getOrDefault(key: Long, defaultValue: Double): Double = getOrElse(key) { defaultValue }
+
 
     /**
      * Returns the value associated with the given key, or [defaultValue] if the given key is not present in the map.
      */
+
     public fun lookup(key: Long): Double
 
     override val keys: LongSet
@@ -125,13 +137,13 @@ public interface Long2DoubleMap : Map<Long, Double> {
 
 // handles presence of NaN correctly
 @Suppress("NOTHING_TO_INLINE")
-public inline fun Long2DoubleMap.isDefaultValue(value: Double): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+public inline fun  Long2DoubleMap.isDefaultValue(value: Double): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
 
 @Suppress("NOTHING_TO_INLINE")
-public inline fun Long2DoubleMap.getValue(key: Long): Double = getOrElse(key) { throw NoSuchElementException() }
+public inline fun  Long2DoubleMap.getValue(key: Long): Double = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun Long2DoubleMap.getOrElse(key: Long, defaultValue: () -> Double): Double {
+public inline fun  Long2DoubleMap.getOrElse(key: Long, defaultValue: () -> Double): Double {
     contract {
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
@@ -141,7 +153,7 @@ public inline fun Long2DoubleMap.getOrElse(key: Long, defaultValue: () -> Double
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun Long2DoubleMap.filterTo(destination: MutableLong2DoubleMap, predicate: (key: Long, value: Double) -> Boolean): MutableLong2DoubleMap {
+public inline fun  Long2DoubleMap.filterTo(destination: MutableLong2DoubleMap, predicate: (key: Long, value: Double) -> Boolean): MutableLong2DoubleMap {
     contract {
         callsInPlace(predicate, InvocationKind.UNKNOWN)
     }
@@ -155,7 +167,7 @@ public inline fun Long2DoubleMap.filterTo(destination: MutableLong2DoubleMap, pr
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun Long2DoubleMap.filter(predicate: (key: Long, value: Double) -> Boolean): Long2DoubleMap {
+public inline fun  Long2DoubleMap.filter(predicate: (key: Long, value: Double) -> Boolean): Long2DoubleMap {
     contract {
         callsInPlace(predicate, InvocationKind.UNKNOWN)
     }
@@ -163,10 +175,12 @@ public inline fun Long2DoubleMap.filter(predicate: (key: Long, value: Double) ->
     return filterTo(Long2DoubleHashMap(), predicate)
 }
 
+
 /**
  * A mutable map of Longs to Doubles which inherits from [MutableMap].
  */
 public interface MutableLong2DoubleMap : Long2DoubleMap, MutableMap<Long, Double> {
+
 
     @Deprecated(
         message = "Use putValue(key, value) instead.",
@@ -178,11 +192,19 @@ public interface MutableLong2DoubleMap : Long2DoubleMap, MutableMap<Long, Double
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
+
+
+    /**
+     * Updates the value associated with the given key and returns the previous value, or [defaultValue] if the given
+     * key was not present previously.
+     */
+
     public fun putValue(key: Long, value: Double): Double
 
     public operator fun set(key: Long, value: Double) {
         putValue(key, value)
     }
+
 
     @Deprecated(
         message = "Use removeKey(key) instead.",
@@ -193,7 +215,9 @@ public interface MutableLong2DoubleMap : Long2DoubleMap, MutableMap<Long, Double
         return if (containsKey(key)) removeKey(key) else null
     }
 
+
     public fun removeKey(key: Long): Double
+
 
     public fun merge(key: Long, value: Double, merge: (oldValue: Double, value: Double) -> Double): Double {
         val oldValue = lookup(key)
@@ -203,6 +227,7 @@ public interface MutableLong2DoubleMap : Long2DoubleMap, MutableMap<Long, Double
         }
         return newValue
     }
+
 
     override val keys: MutableLongSet
     override val values: MutableDoubleCollection
@@ -223,8 +248,9 @@ public interface MutableLong2DoubleMap : Long2DoubleMap, MutableMap<Long, Double
     public interface MutableEntry : Long2DoubleMap.Entry, MutableMap.MutableEntry<Long, Double>
 }
 
+
 @OptIn(ExperimentalContracts::class)
-public inline fun MutableLong2DoubleMap.getOrPut(key: Long, defaultValue: () -> Double): Double {
+public inline fun  MutableLong2DoubleMap.getOrPut(key: Long, defaultValue: () -> Double): Double {
     contract {
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
@@ -236,6 +262,7 @@ public inline fun MutableLong2DoubleMap.getOrPut(key: Long, defaultValue: () -> 
     }
     return value
 }
+
 
 public abstract class AbstractLong2DoubleMap : Long2DoubleMap {
 
@@ -285,23 +312,35 @@ public abstract class AbstractMutableLong2DoubleMap : AbstractLong2DoubleMap(), 
     }
 }
 
+
 private object EmptyLong2DoubleMap : Long2DoubleMap {
+
+
+
     override val defaultValue: Double get() = Double.NaN
+
 
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Long): Boolean = false
+
     override fun containsValue(value: Double): Boolean = false
     override fun lookup(key: Long): Double = Double.NaN
 
+
+
     override val keys: LongSet get() = emptyLongSet()
+
     override val values: DoubleCollection get() = emptyDoubleList()
     override val primitiveEntries: EntrySet<Long2DoubleMap.Entry> = emptyEntrySet()
+
 }
 
 private class SingletonLong2DoubleMap(private val key: Long, private val value: Double) : Long2DoubleMap {
+
     override val defaultValue: Double get() = Double.NaN
+
 
     override val size: Int get() = 1
     override fun isEmpty(): Boolean = false
@@ -311,6 +350,10 @@ private class SingletonLong2DoubleMap(private val key: Long, private val value: 
     override fun lookup(key: Long): Double = if (key == this.key) value else Double.NaN
 
     override val keys: LongSet by lazy { longSetOf(key) }
+
+
     override val values: DoubleCollection by lazy { doubleListOf(value) }
+
+
     override val primitiveEntries: EntrySet<Long2DoubleMap.Entry> by lazy { entrySetOf(AbstractLong2DoubleMap.SimpleEntry(key, value)) }
 }

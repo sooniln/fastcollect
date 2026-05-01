@@ -8,27 +8,31 @@ import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.emptyEntrySet
 import io.github.sooniln.fastcollect.entrySetOf
+
 import io.github.sooniln.fastcollect.floats.floatListOf
 import io.github.sooniln.fastcollect.floats.FloatCollection
 import io.github.sooniln.fastcollect.floats.MutableFloatCollection
 import io.github.sooniln.fastcollect.floats.emptyFloatList
+
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
 
-public fun emptyInt2FloatMap(): Int2FloatMap = EmptyInt2FloatMap
+@Suppress("UNCHECKED_CAST")
+public fun  emptyInt2FloatMap(): Int2FloatMap = EmptyInt2FloatMap as Int2FloatMap
 
-public fun int2FloatMapOf(): Int2FloatMap = EmptyInt2FloatMap
-public fun int2FloatMapOf(entry: Pair<Int, Float>): Int2FloatMap = SingletonInt2FloatMap(entry.first, entry.second)
-public fun int2FloatMapOf(vararg entries: Pair<Int, Float>): Int2FloatMap = Int2FloatHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+@Suppress("UNCHECKED_CAST")
+public fun  int2FloatMapOf(): Int2FloatMap = EmptyInt2FloatMap as Int2FloatMap
+public fun  int2FloatMapOf(entry: Pair<Int, Float>): Int2FloatMap = SingletonInt2FloatMap(entry.first, entry.second)
+public fun  int2FloatMapOf(vararg entries: Pair<Int, Float>): Int2FloatMap = Int2FloatHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
-public fun mutableInt2FloatMapOf(): MutableInt2FloatMap = Int2FloatHashMap()
-public fun mutableInt2FloatMapOf(entry: Pair<Int, Float>): MutableInt2FloatMap = Int2FloatHashMap(1).apply { set(entry.first, entry.second) }
-public fun mutableInt2FloatMapOf(vararg entries: Pair<Int, Float>): MutableInt2FloatMap = Int2FloatHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+public fun  mutableInt2FloatMapOf(): MutableInt2FloatMap = Int2FloatHashMap()
+public fun  mutableInt2FloatMapOf(entry: Pair<Int, Float>): MutableInt2FloatMap = Int2FloatHashMap(1).apply { set(entry.first, entry.second) }
+public fun  mutableInt2FloatMapOf(vararg entries: Pair<Int, Float>): MutableInt2FloatMap = Int2FloatHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
-public inline fun buildInt2FloatSet(expectedSize: Int = 0, builderAction: MutableInt2FloatMap.() -> Unit): Int2FloatMap {
+public inline fun  buildInt2FloatMap(expectedSize: Int = 0, builderAction: MutableInt2FloatMap.() -> Unit): Int2FloatMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
     val map = Int2FloatHashMap(expectedSize)
     map.builderAction()
@@ -38,6 +42,7 @@ public inline fun buildInt2FloatSet(expectedSize: Int = 0, builderAction: Mutabl
 /**
  * A map of Ints to Floats which inherits from [Map].
  *
+
  * Because this interface is designed to store primitives, methods which lookup keys and return non-nullable primitive
  * values may not return null to indicate no such key is present. Instead, a Int2FloatMap has a
  * [defaultValue] which is returned instead to indicate no such key is present. Thus in order to obtain the best
@@ -46,9 +51,12 @@ public inline fun buildInt2FloatSet(expectedSize: Int = 0, builderAction: Mutabl
  * correctness concern however - the map will still operate correctly and all methods will perform as expected even if
  * the map contains values equal to [defaultValue]. [Float.NaN] or [Double.NaN] are acceptable for [defaultValue] if
  * applicable.
+
  */
 public interface Int2FloatMap : Map<Int, Float> {
+
     public val defaultValue: Float
+
 
     override fun isEmpty(): Boolean {
         return size == 0
@@ -61,6 +69,7 @@ public interface Int2FloatMap : Map<Int, Float> {
         return false
     }
 
+
     @Deprecated(
         message = "Use the lookup(key) method instead.",
         replaceWith = ReplaceWith("lookup(key)"),
@@ -71,11 +80,14 @@ public interface Int2FloatMap : Map<Int, Float> {
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
+
     public fun getOrDefault(key: Int, defaultValue: Float): Float = getOrElse(key) { defaultValue }
+
 
     /**
      * Returns the value associated with the given key, or [defaultValue] if the given key is not present in the map.
      */
+
     public fun lookup(key: Int): Float
 
     override val keys: IntSet
@@ -125,13 +137,13 @@ public interface Int2FloatMap : Map<Int, Float> {
 
 // handles presence of NaN correctly
 @Suppress("NOTHING_TO_INLINE")
-public inline fun Int2FloatMap.isDefaultValue(value: Float): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+public inline fun  Int2FloatMap.isDefaultValue(value: Float): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
 
 @Suppress("NOTHING_TO_INLINE")
-public inline fun Int2FloatMap.getValue(key: Int): Float = getOrElse(key) { throw NoSuchElementException() }
+public inline fun  Int2FloatMap.getValue(key: Int): Float = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun Int2FloatMap.getOrElse(key: Int, defaultValue: () -> Float): Float {
+public inline fun  Int2FloatMap.getOrElse(key: Int, defaultValue: () -> Float): Float {
     contract {
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
@@ -141,7 +153,7 @@ public inline fun Int2FloatMap.getOrElse(key: Int, defaultValue: () -> Float): F
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun Int2FloatMap.filterTo(destination: MutableInt2FloatMap, predicate: (key: Int, value: Float) -> Boolean): MutableInt2FloatMap {
+public inline fun  Int2FloatMap.filterTo(destination: MutableInt2FloatMap, predicate: (key: Int, value: Float) -> Boolean): MutableInt2FloatMap {
     contract {
         callsInPlace(predicate, InvocationKind.UNKNOWN)
     }
@@ -155,7 +167,7 @@ public inline fun Int2FloatMap.filterTo(destination: MutableInt2FloatMap, predic
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun Int2FloatMap.filter(predicate: (key: Int, value: Float) -> Boolean): Int2FloatMap {
+public inline fun  Int2FloatMap.filter(predicate: (key: Int, value: Float) -> Boolean): Int2FloatMap {
     contract {
         callsInPlace(predicate, InvocationKind.UNKNOWN)
     }
@@ -163,10 +175,12 @@ public inline fun Int2FloatMap.filter(predicate: (key: Int, value: Float) -> Boo
     return filterTo(Int2FloatHashMap(), predicate)
 }
 
+
 /**
  * A mutable map of Ints to Floats which inherits from [MutableMap].
  */
 public interface MutableInt2FloatMap : Int2FloatMap, MutableMap<Int, Float> {
+
 
     @Deprecated(
         message = "Use putValue(key, value) instead.",
@@ -178,11 +192,19 @@ public interface MutableInt2FloatMap : Int2FloatMap, MutableMap<Int, Float> {
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
 
+
+
+    /**
+     * Updates the value associated with the given key and returns the previous value, or [defaultValue] if the given
+     * key was not present previously.
+     */
+
     public fun putValue(key: Int, value: Float): Float
 
     public operator fun set(key: Int, value: Float) {
         putValue(key, value)
     }
+
 
     @Deprecated(
         message = "Use removeKey(key) instead.",
@@ -193,7 +215,9 @@ public interface MutableInt2FloatMap : Int2FloatMap, MutableMap<Int, Float> {
         return if (containsKey(key)) removeKey(key) else null
     }
 
+
     public fun removeKey(key: Int): Float
+
 
     public fun merge(key: Int, value: Float, merge: (oldValue: Float, value: Float) -> Float): Float {
         val oldValue = lookup(key)
@@ -203,6 +227,7 @@ public interface MutableInt2FloatMap : Int2FloatMap, MutableMap<Int, Float> {
         }
         return newValue
     }
+
 
     override val keys: MutableIntSet
     override val values: MutableFloatCollection
@@ -223,8 +248,9 @@ public interface MutableInt2FloatMap : Int2FloatMap, MutableMap<Int, Float> {
     public interface MutableEntry : Int2FloatMap.Entry, MutableMap.MutableEntry<Int, Float>
 }
 
+
 @OptIn(ExperimentalContracts::class)
-public inline fun MutableInt2FloatMap.getOrPut(key: Int, defaultValue: () -> Float): Float {
+public inline fun  MutableInt2FloatMap.getOrPut(key: Int, defaultValue: () -> Float): Float {
     contract {
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
@@ -236,6 +262,7 @@ public inline fun MutableInt2FloatMap.getOrPut(key: Int, defaultValue: () -> Flo
     }
     return value
 }
+
 
 public abstract class AbstractInt2FloatMap : Int2FloatMap {
 
@@ -285,23 +312,35 @@ public abstract class AbstractMutableInt2FloatMap : AbstractInt2FloatMap(), Muta
     }
 }
 
+
 private object EmptyInt2FloatMap : Int2FloatMap {
+
+
+
     override val defaultValue: Float get() = Float.NaN
+
 
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Int): Boolean = false
+
     override fun containsValue(value: Float): Boolean = false
     override fun lookup(key: Int): Float = Float.NaN
 
+
+
     override val keys: IntSet get() = emptyIntSet()
+
     override val values: FloatCollection get() = emptyFloatList()
     override val primitiveEntries: EntrySet<Int2FloatMap.Entry> = emptyEntrySet()
+
 }
 
 private class SingletonInt2FloatMap(private val key: Int, private val value: Float) : Int2FloatMap {
+
     override val defaultValue: Float get() = Float.NaN
+
 
     override val size: Int get() = 1
     override fun isEmpty(): Boolean = false
@@ -311,6 +350,10 @@ private class SingletonInt2FloatMap(private val key: Int, private val value: Flo
     override fun lookup(key: Int): Float = if (key == this.key) value else Float.NaN
 
     override val keys: IntSet by lazy { intSetOf(key) }
+
+
     override val values: FloatCollection by lazy { floatListOf(value) }
+
+
     override val primitiveEntries: EntrySet<Int2FloatMap.Entry> by lazy { entrySetOf(AbstractInt2FloatMap.SimpleEntry(key, value)) }
 }

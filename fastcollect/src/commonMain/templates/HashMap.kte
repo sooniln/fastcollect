@@ -5,8 +5,10 @@ package io.github.sooniln.fastcollect.${keySubpackage}
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.MutableFastIterator
+<% if (!isReferenceValue) { %>
 import io.github.sooniln.fastcollect.${valueSubpackage}.Mutable${ValueType}Collection
 import io.github.sooniln.fastcollect.${valueSubpackage}.Mutable${ValueType}Iterator
+<% } %>
 import kotlin.math.max
 
 /**
@@ -19,6 +21,7 @@ import kotlin.math.max
  * low capacities, or at worst will be only a small performance penalty - however it will substantially reduce memory
  * requirements at low capacities.
  *
+<% if (!isReferenceValue) { %>
  * Note that unfortunately many of the common Kotlin Map methods may force primitive type boxing, and thus could incur
  * performance penalties. These methods have been marked as deprecated so they will be easily visible in IDEs. It is
  * encouraged to use the replacement methods this class offers in order to guarantee no unnecessary boxing will occur:
@@ -28,6 +31,7 @@ import kotlin.math.max
  *   * Use [removeKey] instead of [MutableMap.remove].
  *   * Use [primitiveEntries] instead of [Map.entries].
  *   * Use [Entry.key] instead of [Map.Entry.key] and [Entry.value] instead of [Map.Entry.value].
+<% } %>
  *
  * The [keys]/[values]/[entries]/[primitiveEntries] mutable collections exposed by this class will throw
  * [UnsupportedOperationException] on any attempt to mutate the collection, EXCEPT that [MutableIterator.remove] will
@@ -40,12 +44,14 @@ import kotlin.math.max
  *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  */
-public class ${KeyType}2${ValueType}HashMap(
+public class ${Name}HashMap${Generics}(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
     private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
+<% if (!isReferenceValue) { %>
     /** The default value should be the value that is ideally least likely to occur in the map. */
     override val defaultValue: ${ValueType} = ${DefaultValue}
-) : AbstractMutable${KeyType}2${ValueType}Map() {
+<% } %>
+) : AbstractMutable${Name}Map${Generics}() {
 
     init {
         require(loadFactor > 0 && loadFactor < 1) { "Load factor must be greater than 0 and smaller than 1" }
@@ -55,7 +61,17 @@ public class ${KeyType}2${ValueType}HashMap(
     // when used in hashing mode, the last slot in the array is used to store the zero key/value respectively. when used
     // in array mode, there is no special handling for zero.
     private var keysArr = EMPTY_KEY_ARRAY
+<% if (!isReferenceValue) { %>
     private var valuesArr = EMPTY_VALUE_ARRAY
+<% } else { %>
+    @Suppress("UNCHECKED_CAST")
+    private var valuesArr = EMPTY_VALUE_ARRAY as Array<V?>
+
+    private val defaultValue: ${ValueType}${Nullable} = ${DefaultValue}
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun isDefaultValue(value: ${ValueType}${Nullable}) = value == ${DefaultValue}
+<% } %>
 
     override var size: Int = 0
         private set
@@ -81,12 +97,12 @@ public class ${KeyType}2${ValueType}HashMap(
         TODO()
     }
 
-    override fun putValue(key: ${KeyType}, value: ${ValueType}): ${ValueType} {
+    override fun putValue(key: ${KeyType}, value: ${ValueType}): ${ValueType}${Nullable} {
         resizeIfNecessary()
         return if (isHashing()) putHashing(key, value) else putArray(key, value)
     }
 
-    private fun putHashing(key: ${KeyType}, value: ${ValueType}): ${ValueType} {
+    private fun putHashing(key: ${KeyType}, value: ${ValueType}): ${ValueType}${Nullable} {
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -106,7 +122,7 @@ public class ${KeyType}2${ValueType}HashMap(
         val mask = keysArr.mask()
         var slot = key.slot(mask)
         var newKey = key
-        var newValue = value
+        var newValue: ${ValueType}${Nullable} = value
         var newKeySlotDistance = 0
         while (true) {
             when (val currKey = keysArr[slot]) {
@@ -139,7 +155,7 @@ public class ${KeyType}2${ValueType}HashMap(
         }
     }
 
-    private fun putArray(key: ${KeyType}, value: ${ValueType}): ${ValueType} {
+    private fun putArray(key: ${KeyType}, value: ${ValueType}): ${ValueType}${Nullable} {
         var slot = 0
         while (slot < size) {
             if (keysArr[slot] == key) {
@@ -157,7 +173,7 @@ public class ${KeyType}2${ValueType}HashMap(
         return defaultValue
     }
 
-    override fun removeKey(key: ${KeyType}): ${ValueType} {
+    override fun removeKey(key: ${KeyType}): ${ValueType}${Nullable} {
         val slot = findSlot(key)
         if (slot >= 0) {
             val oldValue = valuesArr[slot]
@@ -170,6 +186,9 @@ public class ${KeyType}2${ValueType}HashMap(
 
     override fun clear() {
         keysArr.fill(ZERO)
+<% if (isReferenceValue) { %>
+        valuesArr.fill(null)
+<% } %>
         if (keysArr.isHashing()) {
             keysArr[keysArr.endSlot()] = NONZERO
         }
@@ -229,6 +248,9 @@ public class ${KeyType}2${ValueType}HashMap(
         val endSlot = keysArr.endSlot()
         if (slot == endSlot) {
             keysArr[endSlot] = NONZERO
+<% if (isReferenceValue) { %>
+            valuesArr[endSlot] = null
+<% } %>
             --size
             return
         }
@@ -250,6 +272,9 @@ public class ${KeyType}2${ValueType}HashMap(
             nextValue = valuesArr[nextSlot]
         }
         keysArr[currSlot] = ZERO
+<% if (isReferenceValue) { %>
+        valuesArr[currSlot] = null
+<% } %>
         --size
     }
 
@@ -258,13 +283,16 @@ public class ${KeyType}2${ValueType}HashMap(
         if (slot < lastIndex) {
             keysArr[slot] = keysArr[lastIndex]
             valuesArr[slot] = valuesArr[lastIndex]
+<% if (isReferenceValue) { %>
+            valuesArr[lastIndex] = null
+<% } %>
         }
     }
 
     override fun putAll(from: Map<out ${KeyType}, ${ValueType}>) {
         ensureCapacity(from.size)
 
-        if (from is ${KeyType}2${ValueType}Map) {
+        if (from is ${Name}Map) {
             for (entry in from.fastIterator()) {
                 set(entry.key(), entry.value())
             }
@@ -277,7 +305,7 @@ public class ${KeyType}2${ValueType}HashMap(
 
     override val keys: Mutable${KeyType}Set by lazy {
         object : Mutable${KeyType}Set {
-            override val size: Int get() = this@${KeyType}2${ValueType}HashMap.size
+            override val size: Int get() = this@${Name}HashMap.size
             override fun contains(element: ${KeyType}): Boolean = containsKey(element)
             override fun add(element: ${KeyType}): Boolean = throw UnsupportedOperationException()
             override fun remove(element: ${KeyType}): Boolean = throw UnsupportedOperationException()
@@ -286,28 +314,32 @@ public class ${KeyType}2${ValueType}HashMap(
         }
     }
 
-    override val values: Mutable${ValueType}Collection by lazy {
+    override val values: Mutable${ValueCollectionType}${Generics} by lazy {
+<% if (!isReferenceValue) { %>
         object : Mutable${ValueType}Collection {
-            override val size: Int get() = this@${KeyType}2${ValueType}HashMap.size
+<% } else { %>
+        object : AbstractMutable${ValueCollectionType}${Generics}() {
+<% } %>
+            override val size: Int get() = this@${Name}HashMap.size
             override fun contains(element: ${ValueType}): Boolean = containsValue(element)
             override fun add(element: ${ValueType}): Boolean = throw UnsupportedOperationException()
             override fun remove(element: ${ValueType}): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): Mutable${ValueType}Iterator = ValueIterator()
+            override fun iterator(): Mutable${ValueIteratorType}${Generics} = ValueIterator()
             override fun clear() = throw UnsupportedOperationException()
         }
     }
 
-    override val primitiveEntries: MutableEntrySet<Mutable${KeyType}2${ValueType}Map.MutableEntry> by lazy {
-        object : AbstractMutableSet<Mutable${KeyType}2${ValueType}Map.MutableEntry>(), MutableEntrySet<Mutable${KeyType}2${ValueType}Map.MutableEntry> {
-            override val size: Int get() = this@${KeyType}2${ValueType}HashMap.size
-            override fun contains(element: Mutable${KeyType}2${ValueType}Map.MutableEntry): Boolean {
+    override val primitiveEntries: MutableEntrySet<Mutable${Name}Map.MutableEntry${Generics}> by lazy {
+        object : AbstractMutableSet<Mutable${Name}Map.MutableEntry${Generics}>(), MutableEntrySet<Mutable${Name}Map.MutableEntry${Generics}> {
+            override val size: Int get() = this@${Name}HashMap.size
+            override fun contains(element: Mutable${Name}Map.MutableEntry${Generics}): Boolean {
                 val value = lookup(element.key())
                 return if (isDefaultValue(value) && !containsKey(element.key())) false else value == element.value()
             }
-            override fun add(element: Mutable${KeyType}2${ValueType}Map.MutableEntry): Boolean = throw UnsupportedOperationException()
-            override fun remove(element: Mutable${KeyType}2${ValueType}Map.MutableEntry): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): MutableIterator<Mutable${KeyType}2${ValueType}Map.MutableEntry> = EntryIterator()
-            override fun fastIterator(): MutableFastIterator<Mutable${KeyType}2${ValueType}Map.MutableEntry> = FastEntryIterator()
+            override fun add(element: Mutable${Name}Map.MutableEntry${Generics}): Boolean = throw UnsupportedOperationException()
+            override fun remove(element: Mutable${Name}Map.MutableEntry${Generics}): Boolean = throw UnsupportedOperationException()
+            override fun iterator(): MutableIterator<Mutable${Name}Map.MutableEntry${Generics}> = EntryIterator()
+            override fun fastIterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry${Generics}> = FastEntryIterator()
             override fun clear() = throw UnsupportedOperationException()
         }
     }
@@ -341,7 +373,7 @@ public class ${KeyType}2${ValueType}HashMap(
         return false
     }
 
-    override fun lookup(key: ${KeyType}): ${ValueType} {
+    override fun lookup(key: ${KeyType}): ${ValueType}${Nullable} {
         val valuesArr = valuesArr
         val slot = findSlot(key)
         return if (slot >= 0) valuesArr[slot] else defaultValue
@@ -355,6 +387,7 @@ public class ${KeyType}2${ValueType}HashMap(
         }
     }
 
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     private fun growTo(capacity: Int) {
         val newLength = arraySize(capacity, loadFactor)
         if (keysArr.size >= newLength) {
@@ -373,7 +406,11 @@ public class ${KeyType}2${ValueType}HashMap(
         val oldSize = size
 
         keysArr = ${KeyType}Array(newLength)
+<% if (!isReferenceValue) { %>
         valuesArr = ${ValueType}Array(newLength)
+<% } else { %>
+        valuesArr = arrayOfNulls<Any>(newLength) as Array<V?>
+<% } %>
         size = 0
 
         val endSlot = keysArr.endSlot()
@@ -384,7 +421,7 @@ public class ${KeyType}2${ValueType}HashMap(
 
             var slot = 0
             while (slot < oldSize) {
-                putHashing(oldKeys[slot], oldValues[slot])
+                putHashing(oldKeys[slot], oldValues[slot] as ${ValueType})
                 ++slot
             }
         } else {
@@ -393,7 +430,7 @@ public class ${KeyType}2${ValueType}HashMap(
             for (slot in 0..<oldEndSlot) {
                 val key = oldKeys[slot]
                 if (key != ZERO) {
-                    putHashing(key, oldValues[slot])
+                    putHashing(key, oldValues[slot] as ${ValueType})
                 }
             }
 
@@ -404,13 +441,13 @@ public class ${KeyType}2${ValueType}HashMap(
         size = oldSize
     }
 
-    override operator fun iterator(): Iterator<${KeyType}2${ValueType}Map.Entry> = EntryIterator()
+    override operator fun iterator(): Iterator<${Name}Map.Entry${Generics}> = EntryIterator()
 
-    override fun fastIterator(): FastIterator<${KeyType}2${ValueType}Map.Entry> = FastEntryIterator()
+    override fun fastIterator(): FastIterator<${Name}Map.Entry${Generics}> = FastEntryIterator()
 
     private open inner class SlotIterator {
-        val keysArr = this@${KeyType}2${ValueType}HashMap.keysArr
-        val valuesArr = this@${KeyType}2${ValueType}HashMap.valuesArr
+        val keysArr = this@${Name}HashMap.keysArr
+        val valuesArr = this@${Name}HashMap.valuesArr
 
         private var slotsLeft = size
         private val mask = keysArr.mask()
@@ -441,17 +478,18 @@ public class ${KeyType}2${ValueType}HashMap(
 
         fun slot(): Int = previousSlot.also { check(it != -1) }
         fun key(): ${KeyType} = keysArr[previousSlot]
-        fun value(): ${ValueType} = valuesArr[previousSlot]
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        fun value(): ${ValueType} = valuesArr[previousSlot] as ${ValueType}
 
         protected fun updateValue(newValue: ${ValueType}) {
             check(previousSlot != -1)
-            if (keysArr !== this@${KeyType}2${ValueType}HashMap.keysArr) throw ConcurrentModificationException()
+            if (keysArr !== this@${Name}HashMap.keysArr) throw ConcurrentModificationException()
             valuesArr[previousSlot] = newValue
         }
 
         fun remove() {
             check(previousSlot != -1)
-            if (keysArr !== this@${KeyType}2${ValueType}HashMap.keysArr) throw ConcurrentModificationException()
+            if (keysArr !== this@${Name}HashMap.keysArr) throw ConcurrentModificationException()
 
             removeSlot(previousSlot)
             previousSlot = -1
@@ -482,18 +520,28 @@ public class ${KeyType}2${ValueType}HashMap(
         override fun remove() = it.remove()
     }
 
-    private inner class ValueIterator : Mutable${ValueType}Iterator() {
+<% if (!isReferenceValue) { %>
+    private inner class ValueIterator : Mutable${ValueIteratorType}${Generics}() {
+<% } else { %>
+    private inner class ValueIterator : Mutable${ValueIteratorType}${Generics} {
+<% } %>
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
+
+<% if (!isReferenceValue) { %>
         override fun next${ValueType}(): ${ValueType} {
+<% } else { %>
+        override fun next(): ${ValueType} {
+<% } %>
             it.nextSlot()
             return it.value()
         }
+
         override fun remove() = it.remove()
     }
 
-    private inner class FastEntryIterator: SlotIterator(), MutableFastIterator<Mutable${KeyType}2${ValueType}Map.MutableEntry>, Mutable${KeyType}2${ValueType}Map.MutableEntry {
+    private inner class FastEntryIterator: SlotIterator(), MutableFastIterator<Mutable${Name}Map.MutableEntry${Generics}>, Mutable${Name}Map.MutableEntry${Generics} {
 
         override fun setValue(newValue: ${ValueType}): ${ValueType} {
             val oldValue = value()
@@ -501,25 +549,26 @@ public class ${KeyType}2${ValueType}HashMap(
             return oldValue
         }
 
-        override fun next(): Mutable${KeyType}2${ValueType}Map.MutableEntry {
+        override fun next(): Mutable${Name}Map.MutableEntry${Generics} {
             nextSlot()
             return this
         }
     }
 
-    private inner class EntryIterator : SlotIterator(), MutableIterator<Mutable${KeyType}2${ValueType}Map.MutableEntry> {
+    private inner class EntryIterator : SlotIterator(), MutableIterator<Mutable${Name}Map.MutableEntry${Generics}> {
 
-        override fun next(): Mutable${KeyType}2${ValueType}Map.MutableEntry {
+        override fun next(): Mutable${Name}Map.MutableEntry${Generics} {
             nextSlot()
-            return object : Mutable${KeyType}2${ValueType}Map.MutableEntry {
+            return object : Mutable${Name}Map.MutableEntry${Generics} {
                 private val slot = slot()
 
                 override fun key(): ${KeyType} = keysArr[slot]
-                override fun value(): ${ValueType} = valuesArr[slot]
+                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+                override fun value(): ${ValueType} = valuesArr[slot] as ${ValueType}
 
                 override fun setValue(newValue: ${ValueType}): ${ValueType} {
-                    val oldValue = valuesArr[slot]
-                    if (keysArr !== this@${KeyType}2${ValueType}HashMap.keysArr) throw ConcurrentModificationException()
+                    val oldValue = value()
+                    if (keysArr !== this@${Name}HashMap.keysArr) throw ConcurrentModificationException()
                     valuesArr[slot] = newValue
                     return oldValue
                 }
@@ -564,7 +613,11 @@ public class ${KeyType}2${ValueType}HashMap(
     private companion object {
 
         private val EMPTY_KEY_ARRAY = ${KeyType}Array(0)
+<% if (!isReferenceValue) { %>
         private val EMPTY_VALUE_ARRAY = ${ValueType}Array(0)
+<% } else { %>
+        private val EMPTY_VALUE_ARRAY = emptyArray<Any?>()
+<% } %>
 
         // the value of a field in an uninitialized primitive array
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")

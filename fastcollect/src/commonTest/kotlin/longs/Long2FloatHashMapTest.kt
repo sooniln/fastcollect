@@ -713,7 +713,7 @@ class Long2FloatHashMapTest {
     fun floatMaxValueAsValue() {
         val map = Long2FloatHashMap()
         map.putValue(1L, Float.MAX_VALUE)
-        assertEquals(Float.MAX_VALUE, map.lookup(1L))
+        assertEquals(Float.MAX_VALUE, map.lookup(1L), absoluteTolerance = 0.0001f)
     }
 
     @Test

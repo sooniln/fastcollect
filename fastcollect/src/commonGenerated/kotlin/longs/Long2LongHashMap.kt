@@ -5,8 +5,10 @@ package io.github.sooniln.fastcollect.longs
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.MutableFastIterator
+
 import io.github.sooniln.fastcollect.longs.MutableLongCollection
 import io.github.sooniln.fastcollect.longs.MutableLongIterator
+
 import kotlin.math.max
 
 /**
@@ -19,6 +21,7 @@ import kotlin.math.max
  * low capacities, or at worst will be only a small performance penalty - however it will substantially reduce memory
  * requirements at low capacities.
  *
+
  * Note that unfortunately many of the common Kotlin Map methods may force primitive type boxing, and thus could incur
  * performance penalties. These methods have been marked as deprecated so they will be easily visible in IDEs. It is
  * encouraged to use the replacement methods this class offers in order to guarantee no unnecessary boxing will occur:
@@ -28,6 +31,7 @@ import kotlin.math.max
  *   * Use [removeKey] instead of [MutableMap.remove].
  *   * Use [primitiveEntries] instead of [Map.entries].
  *   * Use [Entry.key] instead of [Map.Entry.key] and [Entry.value] instead of [Map.Entry.value].
+
  *
  * The [keys]/[values]/[entries]/[primitiveEntries] mutable collections exposed by this class will throw
  * [UnsupportedOperationException] on any attempt to mutate the collection, EXCEPT that [MutableIterator.remove] will
@@ -43,8 +47,10 @@ import kotlin.math.max
 public class Long2LongHashMap(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
     private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
+
     /** The default value should be the value that is ideally least likely to occur in the map. */
     override val defaultValue: Long = Long.MIN_VALUE
+
 ) : AbstractMutableLong2LongMap() {
 
     init {
@@ -55,7 +61,9 @@ public class Long2LongHashMap(
     // when used in hashing mode, the last slot in the array is used to store the zero key/value respectively. when used
     // in array mode, there is no special handling for zero.
     private var keysArr = EMPTY_KEY_ARRAY
+
     private var valuesArr = EMPTY_VALUE_ARRAY
+
 
     override var size: Int = 0
         private set
@@ -106,7 +114,7 @@ public class Long2LongHashMap(
         val mask = keysArr.mask()
         var slot = key.slot(mask)
         var newKey = key
-        var newValue = value
+        var newValue: Long = value
         var newKeySlotDistance = 0
         while (true) {
             when (val currKey = keysArr[slot]) {
@@ -170,6 +178,7 @@ public class Long2LongHashMap(
 
     override fun clear() {
         keysArr.fill(ZERO)
+
         if (keysArr.isHashing()) {
             keysArr[keysArr.endSlot()] = NONZERO
         }
@@ -229,6 +238,7 @@ public class Long2LongHashMap(
         val endSlot = keysArr.endSlot()
         if (slot == endSlot) {
             keysArr[endSlot] = NONZERO
+
             --size
             return
         }
@@ -250,6 +260,7 @@ public class Long2LongHashMap(
             nextValue = valuesArr[nextSlot]
         }
         keysArr[currSlot] = ZERO
+
         --size
     }
 
@@ -258,6 +269,7 @@ public class Long2LongHashMap(
         if (slot < lastIndex) {
             keysArr[slot] = keysArr[lastIndex]
             valuesArr[slot] = valuesArr[lastIndex]
+
         }
     }
 
@@ -287,7 +299,9 @@ public class Long2LongHashMap(
     }
 
     override val values: MutableLongCollection by lazy {
+
         object : MutableLongCollection {
+
             override val size: Int get() = this@Long2LongHashMap.size
             override fun contains(element: Long): Boolean = containsValue(element)
             override fun add(element: Long): Boolean = throw UnsupportedOperationException()
@@ -355,6 +369,7 @@ public class Long2LongHashMap(
         }
     }
 
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     private fun growTo(capacity: Int) {
         val newLength = arraySize(capacity, loadFactor)
         if (keysArr.size >= newLength) {
@@ -373,7 +388,9 @@ public class Long2LongHashMap(
         val oldSize = size
 
         keysArr = LongArray(newLength)
+
         valuesArr = LongArray(newLength)
+
         size = 0
 
         val endSlot = keysArr.endSlot()
@@ -384,7 +401,7 @@ public class Long2LongHashMap(
 
             var slot = 0
             while (slot < oldSize) {
-                putHashing(oldKeys[slot], oldValues[slot])
+                putHashing(oldKeys[slot], oldValues[slot] as Long)
                 ++slot
             }
         } else {
@@ -393,7 +410,7 @@ public class Long2LongHashMap(
             for (slot in 0..<oldEndSlot) {
                 val key = oldKeys[slot]
                 if (key != ZERO) {
-                    putHashing(key, oldValues[slot])
+                    putHashing(key, oldValues[slot] as Long)
                 }
             }
 
@@ -441,7 +458,8 @@ public class Long2LongHashMap(
 
         fun slot(): Int = previousSlot.also { check(it != -1) }
         fun key(): Long = keysArr[previousSlot]
-        fun value(): Long = valuesArr[previousSlot]
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        fun value(): Long = valuesArr[previousSlot] as Long
 
         protected fun updateValue(newValue: Long) {
             check(previousSlot != -1)
@@ -482,14 +500,20 @@ public class Long2LongHashMap(
         override fun remove() = it.remove()
     }
 
+
     private inner class ValueIterator : MutableLongIterator() {
+
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
+
+
         override fun nextLong(): Long {
+
             it.nextSlot()
             return it.value()
         }
+
         override fun remove() = it.remove()
     }
 
@@ -515,10 +539,11 @@ public class Long2LongHashMap(
                 private val slot = slot()
 
                 override fun key(): Long = keysArr[slot]
-                override fun value(): Long = valuesArr[slot]
+                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+                override fun value(): Long = valuesArr[slot] as Long
 
                 override fun setValue(newValue: Long): Long {
-                    val oldValue = valuesArr[slot]
+                    val oldValue = value()
                     if (keysArr !== this@Long2LongHashMap.keysArr) throw ConcurrentModificationException()
                     valuesArr[slot] = newValue
                     return oldValue
@@ -564,7 +589,9 @@ public class Long2LongHashMap(
     private companion object {
 
         private val EMPTY_KEY_ARRAY = LongArray(0)
+
         private val EMPTY_VALUE_ARRAY = LongArray(0)
+
 
         // the value of a field in an uninitialized primitive array
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")

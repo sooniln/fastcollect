@@ -18,8 +18,8 @@ import kotlin.random.Random
  * A generalized benchmark which does not measure the performance of any particular APIs, but measures generalized
  * performance for comparison across frameworks on specific platforms.
  */
-@Warmup(iterations = 3, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 2, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Warmup(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Measurement(iterations = 10, time = 2, timeUnit = BenchmarkTimeUnit.SECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
@@ -27,7 +27,7 @@ open class SetBenchmark {
 
     private val rnd = Random(123)
 
-    @Param("16", "100", "10000", "1000000")
+    @Param("30", "34", "126", "130", "1022", "1026", "16382", "16386", "131070", "131074", "1048574", "1048578")
     var size: Int = 0
 
     lateinit var fastcollect: IntHashSet

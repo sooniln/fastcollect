@@ -19,8 +19,8 @@ import kotlin.random.Random
  * A generalized benchmark which does not measure the performance of any particular APIs, but measures generalized
  * performance for comparison across frameworks on specific platforms.
  */
-@Warmup(iterations = 3, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 2, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Warmup(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Measurement(iterations = 10, time = 2, timeUnit = BenchmarkTimeUnit.SECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
@@ -28,7 +28,7 @@ open class ListBenchmark {
 
     private val rnd = Random(1234)
 
-    @Param("16", "100", "10000", "1000000")
+    @Param("10", "100", "1000", "10000", "100000", "1000000")
     var size: Int = 0
 
     lateinit var fastcollect: IntArrayDeque

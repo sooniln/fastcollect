@@ -5,8 +5,10 @@ package io.github.sooniln.fastcollect.ints
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.MutableFastIterator
+
 import io.github.sooniln.fastcollect.floats.MutableFloatCollection
 import io.github.sooniln.fastcollect.floats.MutableFloatIterator
+
 import kotlin.math.max
 
 /**
@@ -19,6 +21,7 @@ import kotlin.math.max
  * low capacities, or at worst will be only a small performance penalty - however it will substantially reduce memory
  * requirements at low capacities.
  *
+
  * Note that unfortunately many of the common Kotlin Map methods may force primitive type boxing, and thus could incur
  * performance penalties. These methods have been marked as deprecated so they will be easily visible in IDEs. It is
  * encouraged to use the replacement methods this class offers in order to guarantee no unnecessary boxing will occur:
@@ -28,6 +31,7 @@ import kotlin.math.max
  *   * Use [removeKey] instead of [MutableMap.remove].
  *   * Use [primitiveEntries] instead of [Map.entries].
  *   * Use [Entry.key] instead of [Map.Entry.key] and [Entry.value] instead of [Map.Entry.value].
+
  *
  * The [keys]/[values]/[entries]/[primitiveEntries] mutable collections exposed by this class will throw
  * [UnsupportedOperationException] on any attempt to mutate the collection, EXCEPT that [MutableIterator.remove] will
@@ -43,8 +47,10 @@ import kotlin.math.max
 public class Int2FloatHashMap(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
     private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
+
     /** The default value should be the value that is ideally least likely to occur in the map. */
     override val defaultValue: Float = Float.NaN
+
 ) : AbstractMutableInt2FloatMap() {
 
     init {
@@ -55,7 +61,9 @@ public class Int2FloatHashMap(
     // when used in hashing mode, the last slot in the array is used to store the zero key/value respectively. when used
     // in array mode, there is no special handling for zero.
     private var keysArr = EMPTY_KEY_ARRAY
+
     private var valuesArr = EMPTY_VALUE_ARRAY
+
 
     override var size: Int = 0
         private set
@@ -106,7 +114,7 @@ public class Int2FloatHashMap(
         val mask = keysArr.mask()
         var slot = key.slot(mask)
         var newKey = key
-        var newValue = value
+        var newValue: Float = value
         var newKeySlotDistance = 0
         while (true) {
             when (val currKey = keysArr[slot]) {
@@ -170,6 +178,7 @@ public class Int2FloatHashMap(
 
     override fun clear() {
         keysArr.fill(ZERO)
+
         if (keysArr.isHashing()) {
             keysArr[keysArr.endSlot()] = NONZERO
         }
@@ -229,6 +238,7 @@ public class Int2FloatHashMap(
         val endSlot = keysArr.endSlot()
         if (slot == endSlot) {
             keysArr[endSlot] = NONZERO
+
             --size
             return
         }
@@ -250,6 +260,7 @@ public class Int2FloatHashMap(
             nextValue = valuesArr[nextSlot]
         }
         keysArr[currSlot] = ZERO
+
         --size
     }
 
@@ -258,6 +269,7 @@ public class Int2FloatHashMap(
         if (slot < lastIndex) {
             keysArr[slot] = keysArr[lastIndex]
             valuesArr[slot] = valuesArr[lastIndex]
+
         }
     }
 
@@ -287,7 +299,9 @@ public class Int2FloatHashMap(
     }
 
     override val values: MutableFloatCollection by lazy {
+
         object : MutableFloatCollection {
+
             override val size: Int get() = this@Int2FloatHashMap.size
             override fun contains(element: Float): Boolean = containsValue(element)
             override fun add(element: Float): Boolean = throw UnsupportedOperationException()
@@ -355,6 +369,7 @@ public class Int2FloatHashMap(
         }
     }
 
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     private fun growTo(capacity: Int) {
         val newLength = arraySize(capacity, loadFactor)
         if (keysArr.size >= newLength) {
@@ -373,7 +388,9 @@ public class Int2FloatHashMap(
         val oldSize = size
 
         keysArr = IntArray(newLength)
+
         valuesArr = FloatArray(newLength)
+
         size = 0
 
         val endSlot = keysArr.endSlot()
@@ -384,7 +401,7 @@ public class Int2FloatHashMap(
 
             var slot = 0
             while (slot < oldSize) {
-                putHashing(oldKeys[slot], oldValues[slot])
+                putHashing(oldKeys[slot], oldValues[slot] as Float)
                 ++slot
             }
         } else {
@@ -393,7 +410,7 @@ public class Int2FloatHashMap(
             for (slot in 0..<oldEndSlot) {
                 val key = oldKeys[slot]
                 if (key != ZERO) {
-                    putHashing(key, oldValues[slot])
+                    putHashing(key, oldValues[slot] as Float)
                 }
             }
 
@@ -441,7 +458,8 @@ public class Int2FloatHashMap(
 
         fun slot(): Int = previousSlot.also { check(it != -1) }
         fun key(): Int = keysArr[previousSlot]
-        fun value(): Float = valuesArr[previousSlot]
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        fun value(): Float = valuesArr[previousSlot] as Float
 
         protected fun updateValue(newValue: Float) {
             check(previousSlot != -1)
@@ -482,14 +500,20 @@ public class Int2FloatHashMap(
         override fun remove() = it.remove()
     }
 
+
     private inner class ValueIterator : MutableFloatIterator() {
+
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
+
+
         override fun nextFloat(): Float {
+
             it.nextSlot()
             return it.value()
         }
+
         override fun remove() = it.remove()
     }
 
@@ -515,10 +539,11 @@ public class Int2FloatHashMap(
                 private val slot = slot()
 
                 override fun key(): Int = keysArr[slot]
-                override fun value(): Float = valuesArr[slot]
+                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+                override fun value(): Float = valuesArr[slot] as Float
 
                 override fun setValue(newValue: Float): Float {
-                    val oldValue = valuesArr[slot]
+                    val oldValue = value()
                     if (keysArr !== this@Int2FloatHashMap.keysArr) throw ConcurrentModificationException()
                     valuesArr[slot] = newValue
                     return oldValue
@@ -564,7 +589,9 @@ public class Int2FloatHashMap(
     private companion object {
 
         private val EMPTY_KEY_ARRAY = IntArray(0)
+
         private val EMPTY_VALUE_ARRAY = FloatArray(0)
+
 
         // the value of a field in an uninitialized primitive array
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")

@@ -12,6 +12,7 @@ kotlin {
 
     jvm()
     linuxX64()
+    mingwX64()
     js {
         nodejs()
     }
@@ -39,6 +40,7 @@ benchmark {
     targets {
         register("jvm")
         register("linuxX64")
+        register("mingwX64")
         register("js")
         register("wasmJs")
     }

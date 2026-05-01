@@ -60,6 +60,12 @@ not currently support Maps with reference typed values, but this may come in a f
 > to be very common or useful. If you feel you have a compelling use case that is not currently supported, please reach
 > out.
 
+### ConcurrentModificationException
+
+The standard Kotlin libraries may make reasonable efforts to throw ConcurrentModificationException if they detect
+collections being modified in inappropriate ways. This already only a best effort, with no guarantees made, but
+FastCollect makes even less of an effort in the interests of performance.
+
 ## Benchmarking
 
 In benchmarking, FastCollect generally outperforms standard Kotlin collections by orders of magnitude, and usually

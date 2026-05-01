@@ -34,14 +34,6 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
 
     public constructor(elements: FloatArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex))
 
-    private fun positiveMod(position: Int): Int = if (position < ring.size) position else position - ring.size
-
-    private fun position(index: Int): Int = positiveMod(head + index)
-
-    private fun incrementPosition(position: Int): Int = if (position == ring.lastIndex) 0 else position + 1
-
-    private fun decrementPosition(position: Int): Int = if (position == 0) ring.lastIndex else position - 1
-
     public fun ensureCapacity(capacity: Int) {
         if (capacity > ring.size) grow(capacity)
     }
@@ -65,7 +57,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
             ring.copyInto(dest, 0, head, tail)
         } else {
             ring.copyInto(dest, 0, head, ring.size)
-            ring.copyInto(dest, ring.size - head, 0, positiveMod(tail))
+            ring.copyInto(dest, ring.size - head, 0, ring.positiveMod(tail))
         }
         return dest
     }
@@ -78,11 +70,11 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
     }
 
     override fun get(index: Int): Float {
-        return ring[position(rangeCheck(index))]
+        return ring[ring.position(rangeCheck(index))]
     }
 
     override fun setAt(index: Int, element: Float) {
-        ring[position(rangeCheck(index))] = element
+        ring[ring.position(rangeCheck(index))] = element
     }
 
     override fun add(index: Int, element: Float) {
@@ -91,17 +83,17 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         ensureCapacity(newSize)
 
         if (index == size) {
-            ring[position(size)] = element
+            ring[ring.position(size)] = element
         } else if (index == 0) {
-            head = decrementPosition(head)
+            head = ring.decrementPosition(head)
             ring[head] = element
         } else {
             // attempt to shift a minimal number of elements depending on where position falls within the array
-            val position = position(index)
+            val position = ring.position(index)
             if (index < newSize shr 1) {
                 // shift elements before position
-                val actualPosition = decrementPosition(position)
-                val newHead = decrementPosition(head)
+                val actualPosition = ring.decrementPosition(position)
+                val newHead = ring.decrementPosition(head)
                 if (actualPosition >= head) {
                     // head before position
                     ring[newHead] = ring[head]  // first element could possibly roll over to the back of the array
@@ -109,27 +101,27 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
                 } else {
                     // head after position
                     ring.copyInto(ring, newHead, head, ring.size) // head can't be zero
-                    ring[ring.lastIndex] = ring[0]
+                    ring[ring.size - 1] = ring[0]
                     ring.copyInto(ring, 0, 1, position)
                 }
                 ring[actualPosition] = element
                 head = newHead
             } else {
                 // shift elements after position
-                val tail = position(size)
+                val tail = ring.position(size)
                 if (position < tail) {
                     // position before tail
                     ring.copyInto(ring, position + 1, position, tail)
                 } else {
                     // position after tail
-                    val lastIndex = ring.lastIndex
+                    val lastIndex = ring.size - 1
                     ring.copyInto(ring, 1, 0, tail)
                     ring[0] = ring[lastIndex]
                     ring.copyInto(ring, position + 1, position, lastIndex)
                 }
                 ring[position] = element
             }
-            ring[position(index)] = element
+            ring[ring.position(index)] = element
         }
         size = newSize
     }
@@ -139,15 +131,15 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
 
         val element: Float
 
-        val lastIndex = lastIndex
+        val lastIndex = size - 1
         if (index == lastIndex) {
-            element = ring[position(lastIndex)]
+            element = ring[ring.position(lastIndex)]
         } else if (index == 0) {
             element = ring[head]
-            head = incrementPosition(head)
+            head = ring.incrementPosition(head)
         } else {
             // attempt to shift a minimal number of elements depending on where position falls within the array
-            val position = position(index)
+            val position = ring.position(index)
             element = ring[position]
 
             if (index < size shr 1) {
@@ -162,10 +154,10 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
                     ring.copyInto(ring, head + 1, head, ring.size - 1)
                 }
 
-                head = incrementPosition(head)
+                head = ring.incrementPosition(head)
             } else {
                 // shift elements after position
-                val tail = position(lastIndex)
+                val tail = ring.position(lastIndex)
                 if (position <= tail) {
                     // position before tail
                     ring.copyInto(ring, position, position + 1, tail + 1)
@@ -183,7 +175,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
     }
 
     override fun removeRange(fromIndex: Int, toIndex: Int) {
-        // TODO: better
+        // TODO: would array copy operations be more efficient?
         require(fromIndex <= toIndex)
         rangeCheckForAdd(fromIndex)
         rangeCheckForAdd(toIndex)
@@ -193,13 +185,13 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         if (fromIndex <= size - toIndex) {
             // Shift [0, fromIndex) right by `removed`, then advance head.
             for (i in fromIndex - 1 downTo 0) {
-                ring[position(i + removed)] = ring[position(i)]
+                ring[ring.position(i + removed)] = ring[ring.position(i)]
             }
             head = (head + removed) % ring.size
         } else {
             // Shift [toIndex, size) left by `removed`.
             for (i in toIndex until size) {
-                ring[position(i - removed)] = ring[position(i)]
+                ring[ring.position(i - removed)] = ring[ring.position(i)]
             }
         }
         size -= removed
@@ -220,7 +212,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
             for (i in head..<ring.size) {
                 if (ring[i] == element) return i - head
             }
-            for (i in 0..<positiveMod(tail)) {
+            for (i in 0..<ring.positiveMod(tail)) {
                 if (ring[i] == element) return i + ring.size - head
             }
         }
@@ -250,7 +242,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
 
     private fun lastIndexOfDiscrete(tail: Int, element: Float): Int {
         val head = head
-        var i = positiveMod(tail)
+        var i = ring.positiveMod(tail)
         while (i >= 0) {
             if (ring[i] == element) return i + ring.size - head
             i--
@@ -272,7 +264,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
             addToRing(elements.ring, elements.head, elementsTail)
         } else {
             addToRing(elements.ring, elements.head, elements.ring.size)
-            addToRing(elements.ring, 0, elements.positiveMod(elementsTail))
+            addToRing(elements.ring, 0, elements.ring.positiveMod(elementsTail))
         }
         return true
     }
@@ -289,7 +281,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
                 src.copyInto(ring, 0, intermediateIndex, toIndex)
             }
         } else {
-            src.copyInto(ring, positiveMod(tail), fromIndex, toIndex)
+            src.copyInto(ring, ring.positiveMod(tail), fromIndex, toIndex)
         }
         size += srcLength
     }
@@ -331,24 +323,24 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         }
 
         var position = head
-        val tail = position(size)
+        val tail = ring.position(size)
         while (true) {
             if (position == tail) {
                 return false
             } else if (removePredicate(ring[position])) {
                 break
             }
-            position = incrementPosition(position)
+            position = ring.incrementPosition(position)
         }
 
         var insertionPosition = position
-        position = incrementPosition(position)
+        position = ring.incrementPosition(position)
         while (position != tail) {
             val element = ring[position]
-            position = incrementPosition(position)
+            position = ring.incrementPosition(position)
             if (!removePredicate(element)) {
                 ring[insertionPosition] = element
-                insertionPosition = incrementPosition(insertionPosition)
+                insertionPosition = ring.incrementPosition(insertionPosition)
             }
         }
         size = insertionPosition - head
@@ -362,6 +354,8 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         return copyFromRing(FloatArray(size))
     }
 
+    override fun iterator(): MutableFloatIterator = DequeIterator()
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is List<*>) return false
@@ -369,7 +363,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         if (size != other.size) return false
         if (other is FloatList && other is RandomAccess) {
             for (i in indices) {
-                if (ring[position(i)] != other[i]) return false
+                if (ring[ring.position(i)] != other[i]) return false
             }
         } else {
             val it = other.iterator()
@@ -391,14 +385,61 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         var hashCode = 1
         if (!isEmpty()) {
             var position = head
-            val end = position(lastIndex)
+            val end = ring.position(size)
             do {
                 hashCode = 31 * hashCode + ring[position].hashCode()
-                position = incrementPosition(position)
+                position = ring.incrementPosition(position)
             } while (position != end)
         }
         return hashCode
     }
+
+    private inner class DequeIterator : MutableFloatIterator() {
+        private val ring = this@FloatArrayDeque.ring
+
+        protected var remaining = size
+        protected var position = head
+        protected var previousPosition = -1
+
+        override fun hasNext() = remaining > 0
+
+        override fun nextFloat(): Float {
+            if (remaining == 0) throw NoSuchElementException()
+
+            --remaining
+            previousPosition = position
+            position = ring.incrementPosition(position)
+            return ring[previousPosition]
+        }
+
+        override fun remove() {
+            if (ring !== this@FloatArrayDeque.ring) throw ConcurrentModificationException()
+            check(previousPosition != -1)
+
+            val removedIndex = ring.index(previousPosition)
+            removeAt(removedIndex)
+            position = ring.position(removedIndex)
+            previousPosition = -1
+        }
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun FloatArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun FloatArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun FloatArray.position(index: Int): Int = positiveMod(head + index)
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun FloatArray.index(position: Int): Int = negativeMod(position - head)
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun FloatArray.incrementPosition(position: Int): Int = if (position == size - 1) 0 else position + 1
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun FloatArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
     internal companion object {
         private val EMPTY_ARRAY = FloatArray(0)

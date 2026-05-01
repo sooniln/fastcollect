@@ -6,13 +6,10 @@ import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.MutableFastIterator
 
-import io.github.sooniln.fastcollect.longs.MutableLongCollection
-import io.github.sooniln.fastcollect.longs.MutableLongIterator
-
 import kotlin.math.max
 
 /**
- * A [HashMap](https://en.wikipedia.org/wiki/Hash_table) implementation for storing Int to Long
+ * A [HashMap](https://en.wikipedia.org/wiki/Hash_table) implementation for storing Int to V
  * relationships. Can be used in place of the Kotlin standard library [HashMap] implementations to improve performance
  * and memory usage. Has the same API contracts as the standard library [HashMap] unless noted otherwise.
  *
@@ -21,16 +18,6 @@ import kotlin.math.max
  * low capacities, or at worst will be only a small performance penalty - however it will substantially reduce memory
  * requirements at low capacities.
  *
-
- * Note that unfortunately many of the common Kotlin Map methods may force primitive type boxing, and thus could incur
- * performance penalties. These methods have been marked as deprecated so they will be easily visible in IDEs. It is
- * encouraged to use the replacement methods this class offers in order to guarantee no unnecessary boxing will occur:
- *
- *   * Use [lookup] instead of [Map.get] or the indexed read operator.
- *   * Use [putValue], [set] or the indexed write operator instead of [MutableMap.put].
- *   * Use [removeKey] instead of [MutableMap.remove].
- *   * Use [primitiveEntries] instead of [Map.entries].
- *   * Use [Entry.key] instead of [Map.Entry.key] and [Entry.value] instead of [Map.Entry.value].
 
  *
  * The [keys]/[values]/[entries]/[primitiveEntries] mutable collections exposed by this class will throw
@@ -44,14 +31,11 @@ import kotlin.math.max
  *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  */
-public class Int2LongHashMap(
+public class Int2AnyHashMap<V>(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
     private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
 
-    /** The default value should be the value that is ideally least likely to occur in the map. */
-    override val defaultValue: Long = Long.MIN_VALUE
-
-) : AbstractMutableInt2LongMap() {
+) : AbstractMutableInt2AnyMap<V>() {
 
     init {
         require(loadFactor > 0 && loadFactor < 1) { "Load factor must be greater than 0 and smaller than 1" }
@@ -62,7 +46,13 @@ public class Int2LongHashMap(
     // in array mode, there is no special handling for zero.
     private var keysArr = EMPTY_KEY_ARRAY
 
-    private var valuesArr = EMPTY_VALUE_ARRAY
+    @Suppress("UNCHECKED_CAST")
+    private var valuesArr = EMPTY_VALUE_ARRAY as Array<V?>
+
+    private val defaultValue: V? = null
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun isDefaultValue(value: V?) = value == null
 
 
     override var size: Int = 0
@@ -89,12 +79,12 @@ public class Int2LongHashMap(
         TODO()
     }
 
-    override fun putValue(key: Int, value: Long): Long {
+    override fun putValue(key: Int, value: V): V? {
         resizeIfNecessary()
         return if (isHashing()) putHashing(key, value) else putArray(key, value)
     }
 
-    private fun putHashing(key: Int, value: Long): Long {
+    private fun putHashing(key: Int, value: V): V? {
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -114,7 +104,7 @@ public class Int2LongHashMap(
         val mask = keysArr.mask()
         var slot = key.slot(mask)
         var newKey = key
-        var newValue: Long = value
+        var newValue: V? = value
         var newKeySlotDistance = 0
         while (true) {
             when (val currKey = keysArr[slot]) {
@@ -147,7 +137,7 @@ public class Int2LongHashMap(
         }
     }
 
-    private fun putArray(key: Int, value: Long): Long {
+    private fun putArray(key: Int, value: V): V? {
         var slot = 0
         while (slot < size) {
             if (keysArr[slot] == key) {
@@ -165,7 +155,7 @@ public class Int2LongHashMap(
         return defaultValue
     }
 
-    override fun removeKey(key: Int): Long {
+    override fun removeKey(key: Int): V? {
         val slot = findSlot(key)
         if (slot >= 0) {
             val oldValue = valuesArr[slot]
@@ -178,6 +168,8 @@ public class Int2LongHashMap(
 
     override fun clear() {
         keysArr.fill(ZERO)
+
+        valuesArr.fill(null)
 
         if (keysArr.isHashing()) {
             keysArr[keysArr.endSlot()] = NONZERO
@@ -239,6 +231,8 @@ public class Int2LongHashMap(
         if (slot == endSlot) {
             keysArr[endSlot] = NONZERO
 
+            valuesArr[endSlot] = null
+
             --size
             return
         }
@@ -261,6 +255,8 @@ public class Int2LongHashMap(
         }
         keysArr[currSlot] = ZERO
 
+        valuesArr[currSlot] = null
+
         --size
     }
 
@@ -270,13 +266,15 @@ public class Int2LongHashMap(
             keysArr[slot] = keysArr[lastIndex]
             valuesArr[slot] = valuesArr[lastIndex]
 
+            valuesArr[lastIndex] = null
+
         }
     }
 
-    override fun putAll(from: Map<out Int, Long>) {
+    override fun putAll(from: Map<out Int, V>) {
         ensureCapacity(from.size)
 
-        if (from is Int2LongMap) {
+        if (from is Int2AnyMap) {
             for (entry in from.fastIterator()) {
                 set(entry.key(), entry.value())
             }
@@ -289,7 +287,7 @@ public class Int2LongHashMap(
 
     override val keys: MutableIntSet by lazy {
         object : MutableIntSet {
-            override val size: Int get() = this@Int2LongHashMap.size
+            override val size: Int get() = this@Int2AnyHashMap.size
             override fun contains(element: Int): Boolean = containsKey(element)
             override fun add(element: Int): Boolean = throw UnsupportedOperationException()
             override fun remove(element: Int): Boolean = throw UnsupportedOperationException()
@@ -298,30 +296,30 @@ public class Int2LongHashMap(
         }
     }
 
-    override val values: MutableLongCollection by lazy {
+    override val values: MutableCollection<V> by lazy {
 
-        object : MutableLongCollection {
+        object : AbstractMutableCollection<V>() {
 
-            override val size: Int get() = this@Int2LongHashMap.size
-            override fun contains(element: Long): Boolean = containsValue(element)
-            override fun add(element: Long): Boolean = throw UnsupportedOperationException()
-            override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): MutableLongIterator = ValueIterator()
+            override val size: Int get() = this@Int2AnyHashMap.size
+            override fun contains(element: V): Boolean = containsValue(element)
+            override fun add(element: V): Boolean = throw UnsupportedOperationException()
+            override fun remove(element: V): Boolean = throw UnsupportedOperationException()
+            override fun iterator(): MutableIterator<V> = ValueIterator()
             override fun clear() = throw UnsupportedOperationException()
         }
     }
 
-    override val primitiveEntries: MutableEntrySet<MutableInt2LongMap.MutableEntry> by lazy {
-        object : AbstractMutableSet<MutableInt2LongMap.MutableEntry>(), MutableEntrySet<MutableInt2LongMap.MutableEntry> {
-            override val size: Int get() = this@Int2LongHashMap.size
-            override fun contains(element: MutableInt2LongMap.MutableEntry): Boolean {
+    override val primitiveEntries: MutableEntrySet<MutableInt2AnyMap.MutableEntry<V>> by lazy {
+        object : AbstractMutableSet<MutableInt2AnyMap.MutableEntry<V>>(), MutableEntrySet<MutableInt2AnyMap.MutableEntry<V>> {
+            override val size: Int get() = this@Int2AnyHashMap.size
+            override fun contains(element: MutableInt2AnyMap.MutableEntry<V>): Boolean {
                 val value = lookup(element.key())
                 return if (isDefaultValue(value) && !containsKey(element.key())) false else value == element.value()
             }
-            override fun add(element: MutableInt2LongMap.MutableEntry): Boolean = throw UnsupportedOperationException()
-            override fun remove(element: MutableInt2LongMap.MutableEntry): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): MutableIterator<MutableInt2LongMap.MutableEntry> = EntryIterator()
-            override fun fastIterator(): MutableFastIterator<MutableInt2LongMap.MutableEntry> = FastEntryIterator()
+            override fun add(element: MutableInt2AnyMap.MutableEntry<V>): Boolean = throw UnsupportedOperationException()
+            override fun remove(element: MutableInt2AnyMap.MutableEntry<V>): Boolean = throw UnsupportedOperationException()
+            override fun iterator(): MutableIterator<MutableInt2AnyMap.MutableEntry<V>> = EntryIterator()
+            override fun fastIterator(): MutableFastIterator<MutableInt2AnyMap.MutableEntry<V>> = FastEntryIterator()
             override fun clear() = throw UnsupportedOperationException()
         }
     }
@@ -330,11 +328,11 @@ public class Int2LongHashMap(
         return findSlot(key) >= 0
     }
 
-    override fun containsValue(value: Long): Boolean {
+    override fun containsValue(value: V): Boolean {
         return if (isHashing()) containsValueHashing(value) else containsValueArray(value)
     }
 
-    private fun containsValueHashing(value: Long): Boolean {
+    private fun containsValueHashing(value: V): Boolean {
         val endSlot = keysArr.endSlot()
         if (valuesArr[endSlot] == value && keysArr[endSlot] == ZERO) return true
 
@@ -346,7 +344,7 @@ public class Int2LongHashMap(
         return false
     }
 
-    private fun containsValueArray(value: Long): Boolean {
+    private fun containsValueArray(value: V): Boolean {
         var slot = size - 1
         while (slot >= 0) {
             if (valuesArr[slot] == value) return true
@@ -355,7 +353,7 @@ public class Int2LongHashMap(
         return false
     }
 
-    override fun lookup(key: Int): Long {
+    override fun lookup(key: Int): V? {
         val valuesArr = valuesArr
         val slot = findSlot(key)
         return if (slot >= 0) valuesArr[slot] else defaultValue
@@ -389,7 +387,7 @@ public class Int2LongHashMap(
 
         keysArr = IntArray(newLength)
 
-        valuesArr = LongArray(newLength)
+        valuesArr = arrayOfNulls<Any>(newLength) as Array<V?>
 
         size = 0
 
@@ -401,7 +399,7 @@ public class Int2LongHashMap(
 
             var slot = 0
             while (slot < oldSize) {
-                putHashing(oldKeys[slot], oldValues[slot] as Long)
+                putHashing(oldKeys[slot], oldValues[slot] as V)
                 ++slot
             }
         } else {
@@ -410,7 +408,7 @@ public class Int2LongHashMap(
             for (slot in 0..<oldEndSlot) {
                 val key = oldKeys[slot]
                 if (key != ZERO) {
-                    putHashing(key, oldValues[slot] as Long)
+                    putHashing(key, oldValues[slot] as V)
                 }
             }
 
@@ -421,13 +419,13 @@ public class Int2LongHashMap(
         size = oldSize
     }
 
-    override operator fun iterator(): Iterator<Int2LongMap.Entry> = EntryIterator()
+    override operator fun iterator(): Iterator<Int2AnyMap.Entry<V>> = EntryIterator()
 
-    override fun fastIterator(): FastIterator<Int2LongMap.Entry> = FastEntryIterator()
+    override fun fastIterator(): FastIterator<Int2AnyMap.Entry<V>> = FastEntryIterator()
 
     private open inner class SlotIterator {
-        val keysArr = this@Int2LongHashMap.keysArr
-        val valuesArr = this@Int2LongHashMap.valuesArr
+        val keysArr = this@Int2AnyHashMap.keysArr
+        val valuesArr = this@Int2AnyHashMap.valuesArr
 
         private var slotsLeft = size
         private val mask = keysArr.mask()
@@ -459,17 +457,17 @@ public class Int2LongHashMap(
         fun slot(): Int = previousSlot.also { check(it != -1) }
         fun key(): Int = keysArr[previousSlot]
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        fun value(): Long = valuesArr[previousSlot] as Long
+        fun value(): V = valuesArr[previousSlot] as V
 
-        protected fun updateValue(newValue: Long) {
+        protected fun updateValue(newValue: V) {
             check(previousSlot != -1)
-            if (keysArr !== this@Int2LongHashMap.keysArr) throw ConcurrentModificationException()
+            if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
             valuesArr[previousSlot] = newValue
         }
 
         fun remove() {
             check(previousSlot != -1)
-            if (keysArr !== this@Int2LongHashMap.keysArr) throw ConcurrentModificationException()
+            if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
 
             removeSlot(previousSlot)
             previousSlot = -1
@@ -501,14 +499,14 @@ public class Int2LongHashMap(
     }
 
 
-    private inner class ValueIterator : MutableLongIterator() {
+    private inner class ValueIterator : MutableIterator<V> {
 
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
 
 
-        override fun nextLong(): Long {
+        override fun next(): V {
 
             it.nextSlot()
             return it.value()
@@ -517,34 +515,34 @@ public class Int2LongHashMap(
         override fun remove() = it.remove()
     }
 
-    private inner class FastEntryIterator: SlotIterator(), MutableFastIterator<MutableInt2LongMap.MutableEntry>, MutableInt2LongMap.MutableEntry {
+    private inner class FastEntryIterator: SlotIterator(), MutableFastIterator<MutableInt2AnyMap.MutableEntry<V>>, MutableInt2AnyMap.MutableEntry<V> {
 
-        override fun setValue(newValue: Long): Long {
+        override fun setValue(newValue: V): V {
             val oldValue = value()
             updateValue(newValue)
             return oldValue
         }
 
-        override fun next(): MutableInt2LongMap.MutableEntry {
+        override fun next(): MutableInt2AnyMap.MutableEntry<V> {
             nextSlot()
             return this
         }
     }
 
-    private inner class EntryIterator : SlotIterator(), MutableIterator<MutableInt2LongMap.MutableEntry> {
+    private inner class EntryIterator : SlotIterator(), MutableIterator<MutableInt2AnyMap.MutableEntry<V>> {
 
-        override fun next(): MutableInt2LongMap.MutableEntry {
+        override fun next(): MutableInt2AnyMap.MutableEntry<V> {
             nextSlot()
-            return object : MutableInt2LongMap.MutableEntry {
+            return object : MutableInt2AnyMap.MutableEntry<V> {
                 private val slot = slot()
 
                 override fun key(): Int = keysArr[slot]
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                override fun value(): Long = valuesArr[slot] as Long
+                override fun value(): V = valuesArr[slot] as V
 
-                override fun setValue(newValue: Long): Long {
+                override fun setValue(newValue: V): V {
                     val oldValue = value()
-                    if (keysArr !== this@Int2LongHashMap.keysArr) throw ConcurrentModificationException()
+                    if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
                     valuesArr[slot] = newValue
                     return oldValue
                 }
@@ -590,7 +588,7 @@ public class Int2LongHashMap(
 
         private val EMPTY_KEY_ARRAY = IntArray(0)
 
-        private val EMPTY_VALUE_ARRAY = LongArray(0)
+        private val EMPTY_VALUE_ARRAY = emptyArray<Any?>()
 
 
         // the value of a field in an uninitialized primitive array

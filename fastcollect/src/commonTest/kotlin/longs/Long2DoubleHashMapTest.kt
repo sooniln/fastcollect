@@ -713,7 +713,7 @@ class Long2DoubleHashMapTest {
     fun doubleMaxValueAsValue() {
         val map = Long2DoubleHashMap()
         map.putValue(1L, Double.MAX_VALUE)
-        assertEquals(Double.MAX_VALUE, map.lookup(1L))
+        assertEquals(Double.MAX_VALUE, map.lookup(1L), absoluteTolerance = 0.0001)
     }
 
     @Test

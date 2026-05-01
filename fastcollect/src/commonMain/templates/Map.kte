@@ -8,29 +8,33 @@ import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.emptyEntrySet
 import io.github.sooniln.fastcollect.entrySetOf
+<% if (!isReferenceValue) { %>
 import io.github.sooniln.fastcollect.${valueSubpackage}.${lowerValueType}ListOf
 import io.github.sooniln.fastcollect.${valueSubpackage}.${ValueType}Collection
 import io.github.sooniln.fastcollect.${valueSubpackage}.Mutable${ValueType}Collection
 import io.github.sooniln.fastcollect.${valueSubpackage}.empty${ValueType}List
+<% } %>
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
 
-public fun empty${KeyType}2${ValueType}Map(): ${KeyType}2${ValueType}Map = Empty${KeyType}2${ValueType}Map
+@Suppress("UNCHECKED_CAST")
+public fun ${Generics} empty${Name}Map(): ${Name}Map${Generics} = Empty${Name}Map as ${Name}Map${Generics}
 
-public fun ${lowerKeyType}2${ValueType}MapOf(): ${KeyType}2${ValueType}Map = Empty${KeyType}2${ValueType}Map
-public fun ${lowerKeyType}2${ValueType}MapOf(entry: Pair<${KeyType}, ${ValueType}>): ${KeyType}2${ValueType}Map = Singleton${KeyType}2${ValueType}Map(entry.first, entry.second)
-public fun ${lowerKeyType}2${ValueType}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): ${KeyType}2${ValueType}Map = ${KeyType}2${ValueType}HashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+@Suppress("UNCHECKED_CAST")
+public fun ${Generics} ${lowerName}MapOf(): ${Name}Map${Generics} = Empty${Name}Map as ${Name}Map${Generics}
+public fun ${Generics} ${lowerName}MapOf(entry: Pair<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = Singleton${Name}Map${Generics}(entry.first, entry.second)
+public fun ${Generics} ${lowerName}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = ${Name}HashMap${Generics}(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
-public fun mutable${KeyType}2${ValueType}MapOf(): Mutable${KeyType}2${ValueType}Map = ${KeyType}2${ValueType}HashMap()
-public fun mutable${KeyType}2${ValueType}MapOf(entry: Pair<${KeyType}, ${ValueType}>): Mutable${KeyType}2${ValueType}Map = ${KeyType}2${ValueType}HashMap(1).apply { set(entry.first, entry.second) }
-public fun mutable${KeyType}2${ValueType}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): Mutable${KeyType}2${ValueType}Map = ${KeyType}2${ValueType}HashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+public fun ${Generics} mutable${Name}MapOf(): Mutable${Name}Map${Generics} = ${Name}HashMap()
+public fun ${Generics} mutable${Name}MapOf(entry: Pair<${KeyType}, ${ValueType}>): Mutable${Name}Map${Generics} = ${Name}HashMap${Generics}(1).apply { set(entry.first, entry.second) }
+public fun ${Generics} mutable${Name}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): Mutable${Name}Map${Generics} = ${Name}HashMap${Generics}(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
-public inline fun build${KeyType}2${ValueType}Set(expectedSize: Int = 0, builderAction: Mutable${KeyType}2${ValueType}Map.() -> Unit): ${KeyType}2${ValueType}Map {
+public inline fun ${Generics} build${Name}Map(expectedSize: Int = 0, builderAction: Mutable${Name}Map${Generics}.() -> Unit): ${Name}Map${Generics} {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
-    val map = ${KeyType}2${ValueType}HashMap(expectedSize)
+    val map = ${Name}HashMap${Generics}(expectedSize)
     map.builderAction()
     return map
 }
@@ -38,17 +42,21 @@ public inline fun build${KeyType}2${ValueType}Set(expectedSize: Int = 0, builder
 /**
  * A map of ${KeyType}s to ${ValueType}s which inherits from [Map].
  *
+<% if (!isReferenceValue) { %>
  * Because this interface is designed to store primitives, methods which lookup keys and return non-nullable primitive
- * values may not return null to indicate no such key is present. Instead, a ${KeyType}2${ValueType}Map has a
+ * values may not return null to indicate no such key is present. Instead, a ${Name}Map has a
  * [defaultValue] which is returned instead to indicate no such key is present. Thus in order to obtain the best
  * performance implementations and clients are encouraged to ensure that the [defaultValue] is the value which is least
  * likely to ever appear in the possible set of values stored in this map. This is purely a performance and not a
  * correctness concern however - the map will still operate correctly and all methods will perform as expected even if
  * the map contains values equal to [defaultValue]. [Float.NaN] or [Double.NaN] are acceptable for [defaultValue] if
  * applicable.
+<% } %>
  */
-public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
+public interface ${Name}Map${Generics} : Map<${KeyType}, ${ValueType}> {
+<% if (!isReferenceValue) { %>
     public val defaultValue: ${ValueType}
+<% } %>
 
     override fun isEmpty(): Boolean {
         return size == 0
@@ -61,6 +69,7 @@ public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
         return false
     }
 
+<% if (!isReferenceValue) { %>
     @Deprecated(
         message = "Use the lookup(key) method instead.",
         replaceWith = ReplaceWith("lookup(key)"),
@@ -70,17 +79,26 @@ public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
         val value = lookup(key)
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
+<% } else { %>
+    override fun get(key: ${KeyType}): ${ValueType}? = lookup(key)
+<% } %>
 
     public fun getOrDefault(key: ${KeyType}, defaultValue: ${ValueType}): ${ValueType} = getOrElse(key) { defaultValue }
 
+<% if (!isReferenceValue) { %>
     /**
      * Returns the value associated with the given key, or [defaultValue] if the given key is not present in the map.
      */
-    public fun lookup(key: ${KeyType}): ${ValueType}
+<% } else { %>
+    /**
+     * Returns the value associated with the given key, or null if the given key is not present in the map.
+     */
+<% } %>
+    public fun lookup(key: ${KeyType}): ${ValueType}${Nullable}
 
     override val keys: ${KeyType}Set
 
-    override val values: ${ValueType}Collection
+    override val values: ${ValueCollectionType}${Generics}
 
     @Deprecated(
         message = "Use primitiveEntries instead.",
@@ -92,9 +110,9 @@ public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
             return primitiveEntries
         }
 
-    public val primitiveEntries: EntrySet<Entry>
+    public val primitiveEntries: EntrySet<Entry${Generics}>
 
-    public interface Entry : Map.Entry<${KeyType}, ${ValueType}> {
+    public interface Entry${Generics} : Map.Entry<${KeyType}, ${ValueType}> {
         @Deprecated(
             message = "Use key() instead.",
             replaceWith = ReplaceWith("key()"),
@@ -117,21 +135,21 @@ public interface ${KeyType}2${ValueType}Map : Map<${KeyType}, ${ValueType}> {
         public fun value(): ${ValueType}
     }
 
-    public operator fun iterator(): Iterator<Entry> = primitiveEntries.iterator()
+    public operator fun iterator(): Iterator<Entry${Generics}> = primitiveEntries.iterator()
 
-    public fun fastIterator(): FastIterator<Entry> = primitiveEntries.fastIterator()
+    public fun fastIterator(): FastIterator<Entry${Generics}> = primitiveEntries.fastIterator()
 }
 
-
+<% if (!isReferenceValue) { %>
 // handles presence of NaN correctly
 @Suppress("NOTHING_TO_INLINE")
-public inline fun ${KeyType}2${ValueType}Map.isDefaultValue(value: ${ValueType}): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+public inline fun ${Generics} ${Name}Map${Generics}.isDefaultValue(value: ${ValueType}): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
 
 @Suppress("NOTHING_TO_INLINE")
-public inline fun ${KeyType}2${ValueType}Map.getValue(key: ${KeyType}): ${ValueType} = getOrElse(key) { throw NoSuchElementException() }
+public inline fun ${Generics} ${Name}Map${Generics}.getValue(key: ${KeyType}): ${ValueType} = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun ${KeyType}2${ValueType}Map.getOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
+public inline fun ${Generics} ${Name}Map${Generics}.getOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
     contract {
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
@@ -141,7 +159,7 @@ public inline fun ${KeyType}2${ValueType}Map.getOrElse(key: ${KeyType}, defaultV
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun ${KeyType}2${ValueType}Map.filterTo(destination: Mutable${KeyType}2${ValueType}Map, predicate: (key: ${KeyType}, value: ${ValueType}) -> Boolean): Mutable${KeyType}2${ValueType}Map {
+public inline fun ${Generics} ${Name}Map${Generics}.filterTo(destination: Mutable${Name}Map${Generics}, predicate: (key: ${KeyType}, value: ${ValueType}) -> Boolean): Mutable${Name}Map${Generics} {
     contract {
         callsInPlace(predicate, InvocationKind.UNKNOWN)
     }
@@ -155,19 +173,21 @@ public inline fun ${KeyType}2${ValueType}Map.filterTo(destination: Mutable${KeyT
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun ${KeyType}2${ValueType}Map.filter(predicate: (key: ${KeyType}, value: ${ValueType}) -> Boolean): ${KeyType}2${ValueType}Map {
+public inline fun ${Generics} ${Name}Map${Generics}.filter(predicate: (key: ${KeyType}, value: ${ValueType}) -> Boolean): ${Name}Map${Generics} {
     contract {
         callsInPlace(predicate, InvocationKind.UNKNOWN)
     }
 
-    return filterTo(${KeyType}2${ValueType}HashMap(), predicate)
+    return filterTo(${Name}HashMap${Generics}(), predicate)
 }
+<% } %>
 
 /**
  * A mutable map of ${KeyType}s to ${ValueType}s which inherits from [MutableMap].
  */
-public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map, MutableMap<${KeyType}, ${ValueType}> {
+public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics}, MutableMap<${KeyType}, ${ValueType}> {
 
+<% if (!isReferenceValue) { %>
     @Deprecated(
         message = "Use putValue(key, value) instead.",
         replaceWith = ReplaceWith("putValue(key, value)"),
@@ -177,13 +197,28 @@ public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map,
         val value = putValue(key, value)
         return if (isDefaultValue(value) && !containsKey(key)) null else value
     }
+<% } else { %>
+    override fun put(key: ${KeyType}, value: ${ValueType}): ${ValueType}? = putValue(key, value)
+<% } %>
 
-    public fun putValue(key: ${KeyType}, value: ${ValueType}): ${ValueType}
+<% if (!isReferenceValue) { %>
+    /**
+     * Updates the value associated with the given key and returns the previous value, or [defaultValue] if the given
+     * key was not present previously.
+     */
+<% } else { %>
+    /**
+     * Updates the value associated with the given key and returns the previous value, or null if the given key was not
+     * present previously.
+     */
+<% } %>
+    public fun putValue(key: ${KeyType}, value: ${ValueType}): ${ValueType}${Nullable}
 
     public operator fun set(key: ${KeyType}, value: ${ValueType}) {
         putValue(key, value)
     }
 
+<% if (!isReferenceValue) { %>
     @Deprecated(
         message = "Use removeKey(key) instead.",
         replaceWith = ReplaceWith("removeKey(key, value)"),
@@ -192,9 +227,13 @@ public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map,
         assertBoxing()
         return if (containsKey(key)) removeKey(key) else null
     }
+<% } else { %>
+    override fun remove(key: ${KeyType}): ${ValueType}? = removeKey(key)
+<% } %>
 
-    public fun removeKey(key: ${KeyType}): ${ValueType}
+    public fun removeKey(key: ${KeyType}): ${ValueType}${Nullable}
 
+<% if (!isReferenceValue) { %>
     public fun merge(key: ${KeyType}, value: ${ValueType}, merge: (oldValue: ${ValueType}, value: ${ValueType}) -> ${ValueType}): ${ValueType} {
         val oldValue = lookup(key)
         val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
@@ -203,9 +242,10 @@ public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map,
         }
         return newValue
     }
+<% } %>
 
     override val keys: Mutable${KeyType}Set
-    override val values: Mutable${ValueType}Collection
+    override val values: Mutable${ValueCollectionType}${Generics}
 
     @Suppress("UNCHECKED_CAST")
     @Deprecated(
@@ -218,13 +258,14 @@ public interface Mutable${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map,
             return primitiveEntries as MutableSet<MutableMap.MutableEntry<${KeyType}, ${ValueType}>>
         }
 
-    override val primitiveEntries: MutableEntrySet<MutableEntry>
+    override val primitiveEntries: MutableEntrySet<MutableEntry${Generics}>
 
-    public interface MutableEntry : ${KeyType}2${ValueType}Map.Entry, MutableMap.MutableEntry<${KeyType}, ${ValueType}>
+    public interface MutableEntry${Generics} : ${Name}Map.Entry${Generics}, MutableMap.MutableEntry<${KeyType}, ${ValueType}>
 }
 
+<% if (!isReferenceValue) { %>
 @OptIn(ExperimentalContracts::class)
-public inline fun Mutable${KeyType}2${ValueType}Map.getOrPut(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
+public inline fun ${Generics} Mutable${Name}Map${Generics}.getOrPut(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
     contract {
         callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
     }
@@ -236,8 +277,9 @@ public inline fun Mutable${KeyType}2${ValueType}Map.getOrPut(key: ${KeyType}, de
     }
     return value
 }
+<% } %>
 
-public abstract class Abstract${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map {
+public abstract class Abstract${Name}Map${Generics} : ${Name}Map${Generics} {
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
@@ -266,15 +308,15 @@ public abstract class Abstract${KeyType}2${ValueType}Map : ${KeyType}2${ValueTyp
         return Iterable { fastIterator() }.joinToString(", ", "{", "}") { "\${it.key()}=\${it.value()}" }
     }
 
-    public class SimpleEntry(private val _key: ${KeyType}, private val _value: ${ValueType}) : ${KeyType}2${ValueType}Map.Entry {
+    public class SimpleEntry${Generics}(private val _key: ${KeyType}, private val _value: ${ValueType}) : ${Name}Map.Entry${Generics} {
         override fun key(): ${KeyType} = _key
         override fun value(): ${ValueType} = _value
     }
 }
 
-public abstract class AbstractMutable${KeyType}2${ValueType}Map : Abstract${KeyType}2${ValueType}Map(), Mutable${KeyType}2${ValueType}Map {
+public abstract class AbstractMutable${Name}Map${Generics} : Abstract${Name}Map${Generics}(), Mutable${Name}Map${Generics} {
 
-    public class SimpleMutableEntry(private val _key: ${KeyType}, private var _value: ${ValueType}) : Mutable${KeyType}2${ValueType}Map.MutableEntry {
+    public class SimpleMutableEntry${Generics}(private val _key: ${KeyType}, private var _value: ${ValueType}) : Mutable${Name}Map.MutableEntry${Generics} {
         override fun key(): ${KeyType} = _key
         override fun value(): ${ValueType} = _value
         override fun setValue(newValue: ${ValueType}): ${ValueType} {
@@ -285,32 +327,58 @@ public abstract class AbstractMutable${KeyType}2${ValueType}Map : Abstract${KeyT
     }
 }
 
-private object Empty${KeyType}2${ValueType}Map : ${KeyType}2${ValueType}Map {
+<% if (!isReferenceValue) { %>
+private object Empty${Name}Map : ${Name}Map${Generics} {
+<% } else { %>
+private object Empty${Name}Map : ${Name}Map<Nothing> {
+<% } %>
+
+<% if (!isReferenceValue) { %>
     override val defaultValue: ${ValueType} get() = ${DefaultValue}
+<% } %>
 
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: ${KeyType}): Boolean = false
+<% if (!isReferenceValue) { %>
     override fun containsValue(value: ${ValueType}): Boolean = false
-    override fun lookup(key: ${KeyType}): ${ValueType} = ${DefaultValue}
+    override fun lookup(key: ${KeyType}): ${ValueType}${Nullable} = ${DefaultValue}
+<% } else { %>
+    override fun containsValue(value: Nothing): Boolean = false
+    override fun lookup(key: ${KeyType}): Nothing${Nullable} = ${DefaultValue}
+<% } %>
+
 
     override val keys: ${KeyType}Set get() = empty${KeyType}Set()
-    override val values: ${ValueType}Collection get() = empty${ValueType}List()
-    override val primitiveEntries: EntrySet<${KeyType}2${ValueType}Map.Entry> = emptyEntrySet()
+<% if (!isReferenceValue) { %>
+    override val values: ${ValueCollectionType}${Generics} get() = empty${ValueType}List()
+    override val primitiveEntries: EntrySet<${Name}Map.Entry${Generics}> = emptyEntrySet()
+<% } else { %>
+    override val values: ${ValueCollectionType}<Nothing> get() = emptyList()
+    override val primitiveEntries: EntrySet<${Name}Map.Entry<Nothing>> = emptyEntrySet()
+<% } %>
 }
 
-private class Singleton${KeyType}2${ValueType}Map(private val key: ${KeyType}, private val value: ${ValueType}) : ${KeyType}2${ValueType}Map {
+private class Singleton${Name}Map${Generics}(private val key: ${KeyType}, private val value: ${ValueType}) : ${Name}Map${Generics} {
+<% if (!isReferenceValue) { %>
     override val defaultValue: ${ValueType} get() = ${DefaultValue}
+<% } %>
 
     override val size: Int get() = 1
     override fun isEmpty(): Boolean = false
 
     override fun containsKey(key: ${KeyType}): Boolean = key == this.key
     override fun containsValue(value: ${ValueType}): Boolean = value == this.value
-    override fun lookup(key: ${KeyType}): ${ValueType} = if (key == this.key) value else ${DefaultValue}
+    override fun lookup(key: ${KeyType}): ${ValueType}${Nullable} = if (key == this.key) value else ${DefaultValue}
 
     override val keys: ${KeyType}Set by lazy { ${lowerKeyType}SetOf(key) }
-    override val values: ${ValueType}Collection by lazy { ${lowerValueType}ListOf(value) }
-    override val primitiveEntries: EntrySet<${KeyType}2${ValueType}Map.Entry> by lazy { entrySetOf(Abstract${KeyType}2${ValueType}Map.SimpleEntry(key, value)) }
+
+<% if (!isReferenceValue) { %>
+    override val values: ${ValueCollectionType}${Generics} by lazy { ${lowerValueType}ListOf(value) }
+<% } else { %>
+    override val values: ${ValueCollectionType}${Generics} by lazy { listOf(value) }
+<% } %>
+
+    override val primitiveEntries: EntrySet<${Name}Map.Entry${Generics}> by lazy { entrySetOf(Abstract${Name}Map.SimpleEntry(key, value)) }
 }
