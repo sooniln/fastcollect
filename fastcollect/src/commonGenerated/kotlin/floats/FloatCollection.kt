@@ -43,7 +43,12 @@ public interface FloatCollection : Collection<Float> {
     }
 
     public fun toFloatArray(): FloatArray {
-        return (this as Collection<Float>).toFloatArray()
+        val result = FloatArray(size)
+        var index = 0
+        for (element in this) {
+            result[index++] = element
+        }
+        return result
     }
 }
 

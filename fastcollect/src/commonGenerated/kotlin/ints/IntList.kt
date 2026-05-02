@@ -5,6 +5,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.random.Random
 
 public fun emptyIntList(): IntList = EmptyIntList
 
@@ -26,6 +27,14 @@ public inline fun buildIntList(expectedSize: Int = 0, builderAction: MutableIntL
     return list
 }
 
+public inline fun IntList(size: Int, init: (index: Int) -> Int): IntList = MutableIntList(size, init)
+
+public inline fun MutableIntList(size: Int, init: (index: Int) -> Int): MutableIntList {
+    val list = IntArrayDeque(size)
+    repeat(size) { index -> list.add(init(index)) }
+    return list
+}
+
 /**
  * A list of Ints which inherits from [List].
  */
@@ -38,6 +47,14 @@ public interface IntList : List<Int>, IntCollection {
     override fun contains(element: Int): Boolean {
         return indexOf(element) != -1
     }
+
+    @Deprecated(
+        message = "Use getAt(index) instead.",
+        replaceWith = ReplaceWith("getAt(index)"),
+        level = DeprecationLevel.WARNING)
+    override fun get(index: Int): Int = getAt(index)
+
+    public fun getAt(index: Int): Int
 
     override fun containsAll(elements: Collection<Int>): Boolean = super.containsAll(elements)
 
@@ -77,7 +94,7 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableList<Int
         level = DeprecationLevel.WARNING)
     override fun set(index: Int, element: Int): Int {
         assertBoxing()
-        val value = get(index)
+        val value = getAt(index)
         setAt(index, element)
         return value
     }
@@ -130,6 +147,47 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableList<Int
 
     public fun addAll(index: Int, elements: IntCollection): Boolean
     override fun addAll(index: Int, elements: Collection<Int>): Boolean
+
+    public fun sort() {
+        val sorted = toIntArray().also { sort() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun sortDescending() {
+        val sorted = toIntArray().also { sortDescending() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun fill(element: Int) {
+        if (this is RandomAccess) {
+            for (index in 0..lastIndex) {
+                setAt(index, element)
+            }
+        } else {
+            val it = listIterator()
+            while (it.hasNext()) {
+                it.next()
+                it.set(element)
+            }
+        }
+    }
+
+    public fun shuffle() {
+        for (i in lastIndex downTo 1) {
+            val j = Random.nextInt(i + 1)
+            val copy = this.getAt(i)
+            this.setAt(i, this.getAt(j))
+            this.setAt(j, copy)
+        }
+    }
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableIntList
 }
@@ -201,7 +259,7 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
     private inner class IteratorImpl(private var index: Int = 0): IntIterator() {
 
         override fun nextInt(): Int {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -215,13 +273,13 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
 
         override fun previousInt(): Int {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             return value
         }
 
         override fun nextInt(): Int {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -253,8 +311,8 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
         final override var size = toIndex - fromIndex
             protected set
 
-        override fun get(index: Int): Int {
-            return list[index + offset]
+        override fun getAt(index: Int): Int {
+            return list.getAt(index + offset)
         }
     }
 
@@ -331,7 +389,7 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
 
         override fun nextInt(): Int {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -356,7 +414,7 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
 
         override fun previousInt(): Int {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             lastIndex = i
             return value
@@ -364,7 +422,7 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
 
         override fun nextInt(): Int {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -421,8 +479,8 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
             return list.setAt(index + offset, element)
         }
 
-        override fun get(index: Int): Int {
-            return list[index + offset]
+        override fun getAt(index: Int): Int {
+            return list.getAt(index + offset)
         }
 
         override fun add(index: Int, element: Int) {
@@ -460,7 +518,7 @@ private object EmptyIntList : IntList, RandomAccess {
     override fun containsAll(elements: Collection<Int>): Boolean = elements.isEmpty()
     override fun containsAll(elements: IntCollection): Boolean = elements.isEmpty()
 
-    override fun get(index: Int): Int = throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Int = throw IndexOutOfBoundsException()
     override fun indexOf(element: Int): Int = -1
     override fun lastIndexOf(element: Int): Int = -1
 
@@ -480,7 +538,7 @@ private class SingletonIntList(private val value: Int) : AbstractIntList(), Rand
     override fun isEmpty(): Boolean = false
     override fun contains(element: Int): Boolean = value == element
 
-    override fun get(index: Int): Int = if (index == 0) return value else throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Int = if (index == 0) return value else throw IndexOutOfBoundsException()
     override fun indexOf(element: Int): Int = if (element == value) 0 else -1
     override fun lastIndexOf(element: Int): Int = if (element == value) 0 else -1
 
@@ -492,5 +550,5 @@ private class SingletonIntList(private val value: Int) : AbstractIntList(), Rand
 
 private class IntArrayListWrapper(private val array: IntArray): AbstractIntList(), RandomAccess {
     override val size: Int get() = array.size
-    override fun get(index: Int): Int = array[index]
+    override fun getAt(index: Int): Int = array[index]
 }

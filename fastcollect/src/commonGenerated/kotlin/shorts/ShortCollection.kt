@@ -43,7 +43,12 @@ public interface ShortCollection : Collection<Short> {
     }
 
     public fun toShortArray(): ShortArray {
-        return (this as Collection<Short>).toShortArray()
+        val result = ShortArray(size)
+        var index = 0
+        for (element in this) {
+            result[index++] = element
+        }
+        return result
     }
 }
 

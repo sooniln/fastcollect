@@ -5,11 +5,10 @@ import platform.posix.EOF
 import platform.posix.fclose
 import platform.posix.fgetc
 import platform.posix.fopen
-import platform.posix.getpid
 
 @OptIn(ExperimentalForeignApi::class)
 internal actual fun getProperty(key: String): String? {
-    val cmdlinePath = "/proc/${getpid()}/cmdline"
+    val cmdlinePath = "/proc/self/cmdline"
     val file = fopen(cmdlinePath, "r") ?: return null
 
     try {

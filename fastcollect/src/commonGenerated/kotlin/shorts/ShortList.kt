@@ -5,6 +5,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.random.Random
 
 public fun emptyShortList(): ShortList = EmptyShortList
 
@@ -26,6 +27,14 @@ public inline fun buildShortList(expectedSize: Int = 0, builderAction: MutableSh
     return list
 }
 
+public inline fun ShortList(size: Int, init: (index: Int) -> Short): ShortList = MutableShortList(size, init)
+
+public inline fun MutableShortList(size: Int, init: (index: Int) -> Short): MutableShortList {
+    val list = ShortArrayDeque(size)
+    repeat(size) { index -> list.add(init(index)) }
+    return list
+}
+
 /**
  * A list of Shorts which inherits from [List].
  */
@@ -38,6 +47,14 @@ public interface ShortList : List<Short>, ShortCollection {
     override fun contains(element: Short): Boolean {
         return indexOf(element) != -1
     }
+
+    @Deprecated(
+        message = "Use getAt(index) instead.",
+        replaceWith = ReplaceWith("getAt(index)"),
+        level = DeprecationLevel.WARNING)
+    override fun get(index: Int): Short = getAt(index)
+
+    public fun getAt(index: Int): Short
 
     override fun containsAll(elements: Collection<Short>): Boolean = super.containsAll(elements)
 
@@ -77,7 +94,7 @@ public interface MutableShortList : ShortList, MutableShortCollection, MutableLi
         level = DeprecationLevel.WARNING)
     override fun set(index: Int, element: Short): Short {
         assertBoxing()
-        val value = get(index)
+        val value = getAt(index)
         setAt(index, element)
         return value
     }
@@ -130,6 +147,47 @@ public interface MutableShortList : ShortList, MutableShortCollection, MutableLi
 
     public fun addAll(index: Int, elements: ShortCollection): Boolean
     override fun addAll(index: Int, elements: Collection<Short>): Boolean
+
+    public fun sort() {
+        val sorted = toShortArray().also { sort() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun sortDescending() {
+        val sorted = toShortArray().also { sortDescending() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun fill(element: Short) {
+        if (this is RandomAccess) {
+            for (index in 0..lastIndex) {
+                setAt(index, element)
+            }
+        } else {
+            val it = listIterator()
+            while (it.hasNext()) {
+                it.next()
+                it.set(element)
+            }
+        }
+    }
+
+    public fun shuffle() {
+        for (i in lastIndex downTo 1) {
+            val j = Random.nextInt(i + 1)
+            val copy = this.getAt(i)
+            this.setAt(i, this.getAt(j))
+            this.setAt(j, copy)
+        }
+    }
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableShortList
 }
@@ -201,7 +259,7 @@ public abstract class AbstractShortList : AbstractShortCollection(), ShortList {
     private inner class IteratorImpl(private var index: Int = 0): ShortIterator() {
 
         override fun nextShort(): Short {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -215,13 +273,13 @@ public abstract class AbstractShortList : AbstractShortCollection(), ShortList {
 
         override fun previousShort(): Short {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             return value
         }
 
         override fun nextShort(): Short {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -253,8 +311,8 @@ public abstract class AbstractShortList : AbstractShortCollection(), ShortList {
         final override var size = toIndex - fromIndex
             protected set
 
-        override fun get(index: Int): Short {
-            return list[index + offset]
+        override fun getAt(index: Int): Short {
+            return list.getAt(index + offset)
         }
     }
 
@@ -331,7 +389,7 @@ public abstract class AbstractMutableShortList : AbstractShortList(), MutableSho
 
         override fun nextShort(): Short {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -356,7 +414,7 @@ public abstract class AbstractMutableShortList : AbstractShortList(), MutableSho
 
         override fun previousShort(): Short {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             lastIndex = i
             return value
@@ -364,7 +422,7 @@ public abstract class AbstractMutableShortList : AbstractShortList(), MutableSho
 
         override fun nextShort(): Short {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -421,8 +479,8 @@ public abstract class AbstractMutableShortList : AbstractShortList(), MutableSho
             return list.setAt(index + offset, element)
         }
 
-        override fun get(index: Int): Short {
-            return list[index + offset]
+        override fun getAt(index: Int): Short {
+            return list.getAt(index + offset)
         }
 
         override fun add(index: Int, element: Short) {
@@ -460,7 +518,7 @@ private object EmptyShortList : ShortList, RandomAccess {
     override fun containsAll(elements: Collection<Short>): Boolean = elements.isEmpty()
     override fun containsAll(elements: ShortCollection): Boolean = elements.isEmpty()
 
-    override fun get(index: Int): Short = throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Short = throw IndexOutOfBoundsException()
     override fun indexOf(element: Short): Int = -1
     override fun lastIndexOf(element: Short): Int = -1
 
@@ -480,7 +538,7 @@ private class SingletonShortList(private val value: Short) : AbstractShortList()
     override fun isEmpty(): Boolean = false
     override fun contains(element: Short): Boolean = value == element
 
-    override fun get(index: Int): Short = if (index == 0) return value else throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Short = if (index == 0) return value else throw IndexOutOfBoundsException()
     override fun indexOf(element: Short): Int = if (element == value) 0 else -1
     override fun lastIndexOf(element: Short): Int = if (element == value) 0 else -1
 
@@ -492,5 +550,5 @@ private class SingletonShortList(private val value: Short) : AbstractShortList()
 
 private class ShortArrayListWrapper(private val array: ShortArray): AbstractShortList(), RandomAccess {
     override val size: Int get() = array.size
-    override fun get(index: Int): Short = array[index]
+    override fun getAt(index: Int): Short = array[index]
 }

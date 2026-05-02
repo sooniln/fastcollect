@@ -1,7 +1,7 @@
 package io.github.sooniln.fastcollect
 
 import io.github.sooniln.fastcollect.ints.Int2IntHashMap
-import io.github.sooniln.fastcollect.ints.IntArrayDeque
+import korlibs.datastructure.IntIntMap
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
 import kotlinx.benchmark.BenchmarkTimeUnit
@@ -28,9 +28,11 @@ open class MapBenchmark {
 
     private val rnd = Random(123)
 
-    @Param("30", "34", "126", "130", "1022", "1026", "16382", "16386", "131070", "131074", "1048574", "1048578")
+    // size values surrounding backing array size discontinuities (assuming loadFactor of .85)
+    @Param("30", "34", "108", "112", "1740", "1744", "13926", "13930", "111411", "111415", "1782580", "1782584")
     var size: Int = 0
 
+    lateinit var kds: IntIntMap
     lateinit var fastcollect: Int2IntHashMap
     lateinit var kotlin: HashMap<Int, Int>
 
@@ -39,6 +41,7 @@ open class MapBenchmark {
 
     @Setup
     fun setup() {
+        kds = IntIntMap(size)
         fastcollect = Int2IntHashMap(size)
         kotlin = HashMap(size)
 
@@ -48,6 +51,7 @@ open class MapBenchmark {
         repeat(size) { i ->
             val key = rnd.nextInt()
             val value = rnd.nextInt()
+            kds[key] = value
             fastcollect[key] = value
             kotlin[key] = value
             inKeys[i] = key
@@ -121,6 +125,60 @@ open class MapBenchmark {
         var c = 0
         for (e in fastcollect.fastIterator()) {
             c += e.key() + e.value()
+        }
+        return c
+    }
+
+    @Benchmark
+    fun kdsAdd(): IntIntMap {
+        val map = IntIntMap()
+        for (e in inKeys) {
+            map[e] = 1
+        }
+        return map
+    }
+
+    @Benchmark
+    fun kdsGetHit(): Int {
+        var value = 0
+        for (e in inKeys) {
+            value += kds[e]
+        }
+        return value
+    }
+
+    @Benchmark
+    fun kdsGetMiss(): Int {
+        var value = 0
+        for (e in outKeys) {
+            value += kds[e]
+        }
+        return value
+    }
+
+    @Benchmark
+    fun kdsIterateKeys(): Int {
+        var c = 0
+        for (e in kds.keys) {
+            c += e
+        }
+        return c
+    }
+
+    @Benchmark
+    fun kdsIterateValues(): Int {
+        var c = 0
+        for (e in kds.values) {
+            c += e
+        }
+        return c
+    }
+
+    @Benchmark
+    fun kdsIterate(): Int {
+        var c = 0
+        for (e in kds.entries) {
+            c += e.key + e.value
         }
         return c
     }

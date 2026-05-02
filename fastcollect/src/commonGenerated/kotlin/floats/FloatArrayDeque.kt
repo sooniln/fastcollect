@@ -69,7 +69,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         }
     }
 
-    override fun get(index: Int): Float {
+    override fun getAt(index: Int): Float {
         return ring[ring.position(rangeCheck(index))]
     }
 
@@ -220,8 +220,6 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
     }
 
     override fun lastIndexOf(element: Float): Int {
-        // as of 4/26 kotlin compiler produces highly inefficient byte-code for 'downTo'. instead we use manual while
-        // loops and break them out into separate functions so they can be better optimized.
         val tail = head + size - 1
         return if (tail < ring.size) {
             lastIndexOfContinuous(tail, element)
@@ -350,6 +348,35 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         return true
     }
 
+    override fun sort() {
+        makeContinuousUnordered()
+        ring.sort(head, head + size)
+    }
+
+    override fun sortDescending() {
+        makeContinuousUnordered()
+        ring.sortDescending(head, head + size)
+    }
+
+    private fun makeContinuousUnordered() {
+        val tail = head + size
+        if (tail > ring.size) {
+            val end = ring.positiveMod(tail)
+            if (ring.size - head > end) {
+                head = head - end
+                ring.copyInto(ring, head, 0, end)
+            } else {
+                ring.copyInto(ring, end, head, ring.size)
+                head = 0
+            }
+        }
+    }
+
+    override fun fill(element: Float) {
+        ring.fill(element, 0, size)
+        head = 0
+    }
+
     override fun toFloatArray(): FloatArray {
         return copyFromRing(FloatArray(size))
     }
@@ -363,18 +390,18 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         if (size != other.size) return false
         if (other is FloatList && other is RandomAccess) {
             for (i in indices) {
-                if (ring[ring.position(i)] != other[i]) return false
+                if (ring[ring.position(i)] != other.getAt(i)) return false
             }
         } else {
             val it = other.iterator()
             var i = 0
             if (it is FloatIterator) {
                 while (it.hasNext()) {
-                    if (it.nextFloat() != this[i++]) return false
+                    if (it.nextFloat() != this.getAt(i++)) return false
                 }
             } else {
                 while (it.hasNext()) {
-                    if (it.next() != this[i++]) return false
+                    if (it.next() != this.getAt(i++)) return false
                 }
             }
         }

@@ -4,6 +4,7 @@ import io.github.sooniln.fastcollect.ints.IntArrayDeque
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
+import org.openjdk.jmh.annotations.Fork
 import org.openjdk.jmh.annotations.Level
 import org.openjdk.jmh.annotations.Measurement
 import org.openjdk.jmh.annotations.Mode
@@ -19,6 +20,7 @@ import kotlin.random.Random
 /**
  * A JVM specific benchmark which measures the performance of various list libraries.
  */
+@Fork(1)
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
 @BenchmarkMode(Mode.AverageTime)
@@ -33,6 +35,7 @@ open class ListBenchmark {
         @Param("16", "100", "10000", "1000000")
         var size: Int = 0
 
+        lateinit var kds: korlibs.datastructure.IntArrayList
         lateinit var fastutil: IntArrayList
         lateinit var fastcollect: IntArrayDeque
         lateinit var jvm: ArrayList<Int>
@@ -42,6 +45,7 @@ open class ListBenchmark {
 
         @Setup(Level.Trial)
         fun setupTrial() {
+            kds = korlibs.datastructure.IntArrayList(size)
             fastutil = IntArrayList(size)
             fastcollect = IntArrayDeque(size)
             jvm = ArrayList(size)
@@ -50,6 +54,7 @@ open class ListBenchmark {
 
             repeat(size) { i ->
                 val element = rnd.nextInt()
+                kds.add(element)
                 fastutil.add(element)
                 fastcollect.add(element)
                 jvm.add(element)
@@ -87,6 +92,21 @@ open class ListBenchmark {
     fun fastcollectIterate(s: ReadState): Int {
         var value = 0
         for (v in s.fastcollect) {
+            value += v
+        }
+        return value
+    }
+
+    @Benchmark
+    fun kdsSearch(s: ReadState): Int {
+        val element = s.nextInElement()
+        return s.kds.indexOf(element) + s.kds.lastIndexOf(element)
+    }
+
+    @Benchmark
+    fun kdsIterate(s: ReadState): Int {
+        var value = 0
+        for (v in s.kds) {
             value += v
         }
         return value

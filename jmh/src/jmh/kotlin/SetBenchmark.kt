@@ -2,8 +2,10 @@ package io.github.sooniln.fastcollect
 
 import io.github.sooniln.fastcollect.ints.IntHashSet
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet
+import korlibs.datastructure.IntSet
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
+import org.openjdk.jmh.annotations.Fork
 import org.openjdk.jmh.annotations.Level
 import org.openjdk.jmh.annotations.Measurement
 import org.openjdk.jmh.annotations.Mode
@@ -19,6 +21,7 @@ import kotlin.random.Random
 /**
  * A JVM specific benchmark which measures the performance of various set libraries.
  */
+@Fork(1)
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
 @BenchmarkMode(Mode.AverageTime)
@@ -33,6 +36,7 @@ open class SetBenchmark {
         @Param("16", "100", "10000", "1000000")
         var size: Int = 0
 
+        lateinit var kds: IntSet
         lateinit var fastutil: IntOpenHashSet
         lateinit var fastcollect: IntHashSet
         lateinit var jvm: HashSet<Int>
@@ -43,8 +47,9 @@ open class SetBenchmark {
 
         @Setup(Level.Trial)
         fun setupTrial() {
+            kds = IntSet()
             fastutil = IntOpenHashSet(size)
-            fastcollect = IntHashSet(size, 0.85f)
+            fastcollect = IntHashSet(size)
             jvm = HashSet(size)
 
             inKeys = IntArray(size)
@@ -52,6 +57,7 @@ open class SetBenchmark {
 
             repeat(size) { i ->
                 val key = rnd.nextInt()
+                kds.add(key)
                 fastutil.add(key)
                 fastcollect.add(key)
                 jvm.add(key)
@@ -94,6 +100,7 @@ open class SetBenchmark {
         @Param("16", "100", "10000", "1000000")
         var size: Int = 0
 
+        lateinit var kds: IntSet
         lateinit var fastutil: IntOpenHashSet
         lateinit var fastcollect: IntHashSet
         lateinit var jvm: HashSet<Int>
@@ -115,11 +122,13 @@ open class SetBenchmark {
 
         @Setup(Level.Iteration)
         fun setupIteration() {
+            kds = IntSet()
             fastutil = IntOpenHashSet(size)
             fastcollect = IntHashSet(size)
             jvm = HashSet(size)
 
             for (key in inKeys) {
+                kds.add(key)
                 fastutil.add(key)
                 fastcollect.add(key)
                 jvm.add(key)
@@ -155,6 +164,25 @@ open class SetBenchmark {
         var c = 0
         for (i in s.fastcollect) {
             c += i
+        }
+        return c
+    }
+
+    @Benchmark
+    fun kdsGetHit(s: ReadState) = s.kds.contains(s.nextInKey())
+
+    @Benchmark
+    fun kdsGetMiss(s: ReadState) = s.kds.contains(s.nextOutKey())
+
+    @Benchmark
+    fun kdsPutHit(s: PutHitState) = s.kds.add(s.nextInKey())
+
+    @Benchmark
+    fun kdsIterate(s: ReadState): Int {
+        var c = 0
+        val it = s.fastutil.iterator()
+        while (it.hasNext()) {
+            c += it.nextInt()
         }
         return c
     }

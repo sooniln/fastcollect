@@ -69,7 +69,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    override fun get(index: Int): Byte {
+    override fun getAt(index: Int): Byte {
         return ring[ring.position(rangeCheck(index))]
     }
 
@@ -220,8 +220,6 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
     }
 
     override fun lastIndexOf(element: Byte): Int {
-        // as of 4/26 kotlin compiler produces highly inefficient byte-code for 'downTo'. instead we use manual while
-        // loops and break them out into separate functions so they can be better optimized.
         val tail = head + size - 1
         return if (tail < ring.size) {
             lastIndexOfContinuous(tail, element)
@@ -350,6 +348,35 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         return true
     }
 
+    override fun sort() {
+        makeContinuousUnordered()
+        ring.sort(head, head + size)
+    }
+
+    override fun sortDescending() {
+        makeContinuousUnordered()
+        ring.sortDescending(head, head + size)
+    }
+
+    private fun makeContinuousUnordered() {
+        val tail = head + size
+        if (tail > ring.size) {
+            val end = ring.positiveMod(tail)
+            if (ring.size - head > end) {
+                head = head - end
+                ring.copyInto(ring, head, 0, end)
+            } else {
+                ring.copyInto(ring, end, head, ring.size)
+                head = 0
+            }
+        }
+    }
+
+    override fun fill(element: Byte) {
+        ring.fill(element, 0, size)
+        head = 0
+    }
+
     override fun toByteArray(): ByteArray {
         return copyFromRing(ByteArray(size))
     }
@@ -363,18 +390,18 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         if (size != other.size) return false
         if (other is ByteList && other is RandomAccess) {
             for (i in indices) {
-                if (ring[ring.position(i)] != other[i]) return false
+                if (ring[ring.position(i)] != other.getAt(i)) return false
             }
         } else {
             val it = other.iterator()
             var i = 0
             if (it is ByteIterator) {
                 while (it.hasNext()) {
-                    if (it.nextByte() != this[i++]) return false
+                    if (it.nextByte() != this.getAt(i++)) return false
                 }
             } else {
                 while (it.hasNext()) {
-                    if (it.next() != this[i++]) return false
+                    if (it.next() != this.getAt(i++)) return false
                 }
             }
         }

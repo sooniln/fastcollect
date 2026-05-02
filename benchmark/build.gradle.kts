@@ -26,7 +26,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.benchmark.runtime)
                 implementation(project(":fastcollect"))
-                implementation(libs.fastutil)
+                implementation("org.korge:korlibs-datastructure:6.1.0")
             }
         }
     }

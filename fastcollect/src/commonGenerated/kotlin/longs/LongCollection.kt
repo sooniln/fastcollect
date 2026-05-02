@@ -43,7 +43,12 @@ public interface LongCollection : Collection<Long> {
     }
 
     public fun toLongArray(): LongArray {
-        return (this as Collection<Long>).toLongArray()
+        val result = LongArray(size)
+        var index = 0
+        for (element in this) {
+            result[index++] = element
+        }
+        return result
     }
 }
 

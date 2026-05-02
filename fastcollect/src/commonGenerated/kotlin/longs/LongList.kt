@@ -5,6 +5,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.random.Random
 
 public fun emptyLongList(): LongList = EmptyLongList
 
@@ -26,6 +27,14 @@ public inline fun buildLongList(expectedSize: Int = 0, builderAction: MutableLon
     return list
 }
 
+public inline fun LongList(size: Int, init: (index: Int) -> Long): LongList = MutableLongList(size, init)
+
+public inline fun MutableLongList(size: Int, init: (index: Int) -> Long): MutableLongList {
+    val list = LongArrayDeque(size)
+    repeat(size) { index -> list.add(init(index)) }
+    return list
+}
+
 /**
  * A list of Longs which inherits from [List].
  */
@@ -38,6 +47,14 @@ public interface LongList : List<Long>, LongCollection {
     override fun contains(element: Long): Boolean {
         return indexOf(element) != -1
     }
+
+    @Deprecated(
+        message = "Use getAt(index) instead.",
+        replaceWith = ReplaceWith("getAt(index)"),
+        level = DeprecationLevel.WARNING)
+    override fun get(index: Int): Long = getAt(index)
+
+    public fun getAt(index: Int): Long
 
     override fun containsAll(elements: Collection<Long>): Boolean = super.containsAll(elements)
 
@@ -77,7 +94,7 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableList<
         level = DeprecationLevel.WARNING)
     override fun set(index: Int, element: Long): Long {
         assertBoxing()
-        val value = get(index)
+        val value = getAt(index)
         setAt(index, element)
         return value
     }
@@ -130,6 +147,47 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableList<
 
     public fun addAll(index: Int, elements: LongCollection): Boolean
     override fun addAll(index: Int, elements: Collection<Long>): Boolean
+
+    public fun sort() {
+        val sorted = toLongArray().also { sort() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun sortDescending() {
+        val sorted = toLongArray().also { sortDescending() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun fill(element: Long) {
+        if (this is RandomAccess) {
+            for (index in 0..lastIndex) {
+                setAt(index, element)
+            }
+        } else {
+            val it = listIterator()
+            while (it.hasNext()) {
+                it.next()
+                it.set(element)
+            }
+        }
+    }
+
+    public fun shuffle() {
+        for (i in lastIndex downTo 1) {
+            val j = Random.nextInt(i + 1)
+            val copy = this.getAt(i)
+            this.setAt(i, this.getAt(j))
+            this.setAt(j, copy)
+        }
+    }
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableLongList
 }
@@ -201,7 +259,7 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
     private inner class IteratorImpl(private var index: Int = 0): LongIterator() {
 
         override fun nextLong(): Long {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -215,13 +273,13 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
 
         override fun previousLong(): Long {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             return value
         }
 
         override fun nextLong(): Long {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -253,8 +311,8 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
         final override var size = toIndex - fromIndex
             protected set
 
-        override fun get(index: Int): Long {
-            return list[index + offset]
+        override fun getAt(index: Int): Long {
+            return list.getAt(index + offset)
         }
     }
 
@@ -331,7 +389,7 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
 
         override fun nextLong(): Long {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -356,7 +414,7 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
 
         override fun previousLong(): Long {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             lastIndex = i
             return value
@@ -364,7 +422,7 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
 
         override fun nextLong(): Long {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -421,8 +479,8 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
             return list.setAt(index + offset, element)
         }
 
-        override fun get(index: Int): Long {
-            return list[index + offset]
+        override fun getAt(index: Int): Long {
+            return list.getAt(index + offset)
         }
 
         override fun add(index: Int, element: Long) {
@@ -460,7 +518,7 @@ private object EmptyLongList : LongList, RandomAccess {
     override fun containsAll(elements: Collection<Long>): Boolean = elements.isEmpty()
     override fun containsAll(elements: LongCollection): Boolean = elements.isEmpty()
 
-    override fun get(index: Int): Long = throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Long = throw IndexOutOfBoundsException()
     override fun indexOf(element: Long): Int = -1
     override fun lastIndexOf(element: Long): Int = -1
 
@@ -480,7 +538,7 @@ private class SingletonLongList(private val value: Long) : AbstractLongList(), R
     override fun isEmpty(): Boolean = false
     override fun contains(element: Long): Boolean = value == element
 
-    override fun get(index: Int): Long = if (index == 0) return value else throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Long = if (index == 0) return value else throw IndexOutOfBoundsException()
     override fun indexOf(element: Long): Int = if (element == value) 0 else -1
     override fun lastIndexOf(element: Long): Int = if (element == value) 0 else -1
 
@@ -492,5 +550,5 @@ private class SingletonLongList(private val value: Long) : AbstractLongList(), R
 
 private class LongArrayListWrapper(private val array: LongArray): AbstractLongList(), RandomAccess {
     override val size: Int get() = array.size
-    override fun get(index: Int): Long = array[index]
+    override fun getAt(index: Int): Long = array[index]
 }

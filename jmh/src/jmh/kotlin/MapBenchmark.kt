@@ -3,8 +3,10 @@ package io.github.sooniln.fastcollect
 import io.github.sooniln.fastcollect.ints.Int2IntHashMap
 import io.github.sooniln.fastcollect.ints.IntHashSet
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap
+import korlibs.datastructure.IntIntMap
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
+import org.openjdk.jmh.annotations.Fork
 import org.openjdk.jmh.annotations.Level
 import org.openjdk.jmh.annotations.Measurement
 import org.openjdk.jmh.annotations.Mode
@@ -20,6 +22,7 @@ import kotlin.random.Random
 /**
  * A JVM specific benchmark which measures the performance of various map libraries.
  */
+@Fork(1)
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
 @BenchmarkMode(Mode.AverageTime)
@@ -34,6 +37,7 @@ open class MapBenchmark {
         @Param("16", "100", "10000", "1000000")
         var size: Int = 0
 
+        lateinit var kds: IntIntMap
         lateinit var fastutil: Int2IntOpenHashMap
         lateinit var fastcollect: Int2IntHashMap
         lateinit var jvm: HashMap<Int, Int>
@@ -44,6 +48,7 @@ open class MapBenchmark {
 
         @Setup(Level.Trial)
         fun setupTrial() {
+            kds = IntIntMap(size)
             fastutil = Int2IntOpenHashMap(size)
             fastcollect = Int2IntHashMap(size)
             jvm = HashMap(size)
@@ -54,6 +59,7 @@ open class MapBenchmark {
             repeat(size) { i ->
                 val key = rnd.nextInt()
                 val value = rnd.nextInt()
+                kds[key] = value
                 fastutil[key] = value
                 fastcollect[key] = value
                 jvm[key] = value
@@ -96,6 +102,7 @@ open class MapBenchmark {
         @Param("16", "100", "10000", "1000000")
         var size: Int = 0
 
+        lateinit var kds: IntIntMap
         lateinit var fastutil: Int2IntOpenHashMap
         lateinit var fastcollect: Int2IntHashMap
         lateinit var jvm: HashMap<Int, Int>
@@ -117,12 +124,14 @@ open class MapBenchmark {
 
         @Setup(Level.Iteration)
         fun setupIteration() {
+            kds = IntIntMap(size)
             fastutil = Int2IntOpenHashMap(size)
             fastcollect = Int2IntHashMap(size)
             jvm = HashMap(size)
 
             for (key in inKeys) {
                 val value = rnd.nextInt()
+                kds[key] = value
                 fastutil[key] = value
                 fastcollect[key] = value
                 jvm[key] = value
@@ -185,6 +194,42 @@ open class MapBenchmark {
         var c = 0
         for (e in s.fastcollect.fastIterator()) {
             c += e.key() + e.value()
+        }
+        return c
+    }
+
+    @Benchmark
+    fun kdsGetHit(s: ReadState) = s.kds[s.nextInElement()]
+
+    @Benchmark
+    fun kdsGetMiss(s: ReadState) = s.kds[s.nextOutElement()]
+
+    @Benchmark
+    fun kdsPutHit(s: PutHitState) { s.kds[s.nextInKey()] = 1 }
+
+    @Benchmark
+    fun kdsIterateKeys(s: ReadState): Int {
+        var c = 0
+        for (e in s.kds.keys) {
+            c += e
+        }
+        return c
+    }
+
+    @Benchmark
+    fun kdsIterateValues(s: ReadState): Int {
+        var c = 0
+        for (e in s.kds.values) {
+            c += e
+        }
+        return c
+    }
+
+    @Benchmark
+    fun kdsIterate(s: ReadState): Int {
+        var c = 0
+        for (e in s.kds.entries.iterator()) {
+            c += e.key + e.value
         }
         return c
     }

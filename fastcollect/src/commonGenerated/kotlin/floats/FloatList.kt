@@ -5,6 +5,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.random.Random
 
 public fun emptyFloatList(): FloatList = EmptyFloatList
 
@@ -26,6 +27,14 @@ public inline fun buildFloatList(expectedSize: Int = 0, builderAction: MutableFl
     return list
 }
 
+public inline fun FloatList(size: Int, init: (index: Int) -> Float): FloatList = MutableFloatList(size, init)
+
+public inline fun MutableFloatList(size: Int, init: (index: Int) -> Float): MutableFloatList {
+    val list = FloatArrayDeque(size)
+    repeat(size) { index -> list.add(init(index)) }
+    return list
+}
+
 /**
  * A list of Floats which inherits from [List].
  */
@@ -38,6 +47,14 @@ public interface FloatList : List<Float>, FloatCollection {
     override fun contains(element: Float): Boolean {
         return indexOf(element) != -1
     }
+
+    @Deprecated(
+        message = "Use getAt(index) instead.",
+        replaceWith = ReplaceWith("getAt(index)"),
+        level = DeprecationLevel.WARNING)
+    override fun get(index: Int): Float = getAt(index)
+
+    public fun getAt(index: Int): Float
 
     override fun containsAll(elements: Collection<Float>): Boolean = super.containsAll(elements)
 
@@ -77,7 +94,7 @@ public interface MutableFloatList : FloatList, MutableFloatCollection, MutableLi
         level = DeprecationLevel.WARNING)
     override fun set(index: Int, element: Float): Float {
         assertBoxing()
-        val value = get(index)
+        val value = getAt(index)
         setAt(index, element)
         return value
     }
@@ -130,6 +147,47 @@ public interface MutableFloatList : FloatList, MutableFloatCollection, MutableLi
 
     public fun addAll(index: Int, elements: FloatCollection): Boolean
     override fun addAll(index: Int, elements: Collection<Float>): Boolean
+
+    public fun sort() {
+        val sorted = toFloatArray().also { sort() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun sortDescending() {
+        val sorted = toFloatArray().also { sortDescending() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun fill(element: Float) {
+        if (this is RandomAccess) {
+            for (index in 0..lastIndex) {
+                setAt(index, element)
+            }
+        } else {
+            val it = listIterator()
+            while (it.hasNext()) {
+                it.next()
+                it.set(element)
+            }
+        }
+    }
+
+    public fun shuffle() {
+        for (i in lastIndex downTo 1) {
+            val j = Random.nextInt(i + 1)
+            val copy = this.getAt(i)
+            this.setAt(i, this.getAt(j))
+            this.setAt(j, copy)
+        }
+    }
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableFloatList
 }
@@ -201,7 +259,7 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
     private inner class IteratorImpl(private var index: Int = 0): FloatIterator() {
 
         override fun nextFloat(): Float {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -215,13 +273,13 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
 
         override fun previousFloat(): Float {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             return value
         }
 
         override fun nextFloat(): Float {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -253,8 +311,8 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
         final override var size = toIndex - fromIndex
             protected set
 
-        override fun get(index: Int): Float {
-            return list[index + offset]
+        override fun getAt(index: Int): Float {
+            return list.getAt(index + offset)
         }
     }
 
@@ -331,7 +389,7 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
 
         override fun nextFloat(): Float {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -356,7 +414,7 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
 
         override fun previousFloat(): Float {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             lastIndex = i
             return value
@@ -364,7 +422,7 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
 
         override fun nextFloat(): Float {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -421,8 +479,8 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
             return list.setAt(index + offset, element)
         }
 
-        override fun get(index: Int): Float {
-            return list[index + offset]
+        override fun getAt(index: Int): Float {
+            return list.getAt(index + offset)
         }
 
         override fun add(index: Int, element: Float) {
@@ -460,7 +518,7 @@ private object EmptyFloatList : FloatList, RandomAccess {
     override fun containsAll(elements: Collection<Float>): Boolean = elements.isEmpty()
     override fun containsAll(elements: FloatCollection): Boolean = elements.isEmpty()
 
-    override fun get(index: Int): Float = throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Float = throw IndexOutOfBoundsException()
     override fun indexOf(element: Float): Int = -1
     override fun lastIndexOf(element: Float): Int = -1
 
@@ -480,7 +538,7 @@ private class SingletonFloatList(private val value: Float) : AbstractFloatList()
     override fun isEmpty(): Boolean = false
     override fun contains(element: Float): Boolean = value == element
 
-    override fun get(index: Int): Float = if (index == 0) return value else throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Float = if (index == 0) return value else throw IndexOutOfBoundsException()
     override fun indexOf(element: Float): Int = if (element == value) 0 else -1
     override fun lastIndexOf(element: Float): Int = if (element == value) 0 else -1
 
@@ -492,5 +550,5 @@ private class SingletonFloatList(private val value: Float) : AbstractFloatList()
 
 private class FloatArrayListWrapper(private val array: FloatArray): AbstractFloatList(), RandomAccess {
     override val size: Int get() = array.size
-    override fun get(index: Int): Float = array[index]
+    override fun getAt(index: Int): Float = array[index]
 }

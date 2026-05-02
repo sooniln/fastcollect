@@ -5,6 +5,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.random.Random
 
 public fun emptyDoubleList(): DoubleList = EmptyDoubleList
 
@@ -26,6 +27,14 @@ public inline fun buildDoubleList(expectedSize: Int = 0, builderAction: MutableD
     return list
 }
 
+public inline fun DoubleList(size: Int, init: (index: Int) -> Double): DoubleList = MutableDoubleList(size, init)
+
+public inline fun MutableDoubleList(size: Int, init: (index: Int) -> Double): MutableDoubleList {
+    val list = DoubleArrayDeque(size)
+    repeat(size) { index -> list.add(init(index)) }
+    return list
+}
+
 /**
  * A list of Doubles which inherits from [List].
  */
@@ -38,6 +47,14 @@ public interface DoubleList : List<Double>, DoubleCollection {
     override fun contains(element: Double): Boolean {
         return indexOf(element) != -1
     }
+
+    @Deprecated(
+        message = "Use getAt(index) instead.",
+        replaceWith = ReplaceWith("getAt(index)"),
+        level = DeprecationLevel.WARNING)
+    override fun get(index: Int): Double = getAt(index)
+
+    public fun getAt(index: Int): Double
 
     override fun containsAll(elements: Collection<Double>): Boolean = super.containsAll(elements)
 
@@ -77,7 +94,7 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
         level = DeprecationLevel.WARNING)
     override fun set(index: Int, element: Double): Double {
         assertBoxing()
-        val value = get(index)
+        val value = getAt(index)
         setAt(index, element)
         return value
     }
@@ -130,6 +147,47 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
 
     public fun addAll(index: Int, elements: DoubleCollection): Boolean
     override fun addAll(index: Int, elements: Collection<Double>): Boolean
+
+    public fun sort() {
+        val sorted = toDoubleArray().also { sort() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun sortDescending() {
+        val sorted = toDoubleArray().also { sortDescending() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun fill(element: Double) {
+        if (this is RandomAccess) {
+            for (index in 0..lastIndex) {
+                setAt(index, element)
+            }
+        } else {
+            val it = listIterator()
+            while (it.hasNext()) {
+                it.next()
+                it.set(element)
+            }
+        }
+    }
+
+    public fun shuffle() {
+        for (i in lastIndex downTo 1) {
+            val j = Random.nextInt(i + 1)
+            val copy = this.getAt(i)
+            this.setAt(i, this.getAt(j))
+            this.setAt(j, copy)
+        }
+    }
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableDoubleList
 }
@@ -201,7 +259,7 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
     private inner class IteratorImpl(private var index: Int = 0): DoubleIterator() {
 
         override fun nextDouble(): Double {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -215,13 +273,13 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
 
         override fun previousDouble(): Double {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             return value
         }
 
         override fun nextDouble(): Double {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -253,8 +311,8 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
         final override var size = toIndex - fromIndex
             protected set
 
-        override fun get(index: Int): Double {
-            return list[index + offset]
+        override fun getAt(index: Int): Double {
+            return list.getAt(index + offset)
         }
     }
 
@@ -331,7 +389,7 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
 
         override fun nextDouble(): Double {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -356,7 +414,7 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
 
         override fun previousDouble(): Double {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             lastIndex = i
             return value
@@ -364,7 +422,7 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
 
         override fun nextDouble(): Double {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -421,8 +479,8 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
             return list.setAt(index + offset, element)
         }
 
-        override fun get(index: Int): Double {
-            return list[index + offset]
+        override fun getAt(index: Int): Double {
+            return list.getAt(index + offset)
         }
 
         override fun add(index: Int, element: Double) {
@@ -460,7 +518,7 @@ private object EmptyDoubleList : DoubleList, RandomAccess {
     override fun containsAll(elements: Collection<Double>): Boolean = elements.isEmpty()
     override fun containsAll(elements: DoubleCollection): Boolean = elements.isEmpty()
 
-    override fun get(index: Int): Double = throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Double = throw IndexOutOfBoundsException()
     override fun indexOf(element: Double): Int = -1
     override fun lastIndexOf(element: Double): Int = -1
 
@@ -480,7 +538,7 @@ private class SingletonDoubleList(private val value: Double) : AbstractDoubleLis
     override fun isEmpty(): Boolean = false
     override fun contains(element: Double): Boolean = value == element
 
-    override fun get(index: Int): Double = if (index == 0) return value else throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Double = if (index == 0) return value else throw IndexOutOfBoundsException()
     override fun indexOf(element: Double): Int = if (element == value) 0 else -1
     override fun lastIndexOf(element: Double): Int = if (element == value) 0 else -1
 
@@ -492,5 +550,5 @@ private class SingletonDoubleList(private val value: Double) : AbstractDoubleLis
 
 private class DoubleArrayListWrapper(private val array: DoubleArray): AbstractDoubleList(), RandomAccess {
     override val size: Int get() = array.size
-    override fun get(index: Int): Double = array[index]
+    override fun getAt(index: Int): Double = array[index]
 }

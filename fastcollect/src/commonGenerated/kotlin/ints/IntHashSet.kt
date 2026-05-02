@@ -38,6 +38,10 @@ public class IntHashSet(
     // use threshold to store the initial size before we allocate anything
     private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
 
+    /**
+     * Ensures that the set can hold at least given number of elements without any further resizing of the backing
+     * array.
+     */
     public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
         if (keysArr.isEmpty()) {
@@ -47,13 +51,52 @@ public class IntHashSet(
         }
     }
 
+    /**
+     * Reduces the size of the backing array to the minimum required to hold the current number of elements.
+     */
     public fun trimToSize() {
         val newLength = arraySize(size, loadFactor)
         if (keysArr.size <= newLength) {
             return
+        } else if (newLength == 0) {
+            keysArr = EMPTY_ARRAY
+            threshold = DEFAULT_INITIAL_CAPACITY
+            return
         }
 
-        TODO()
+        if (!keysArr.isHashing()) {
+            keysArr = keysArr.copyOf(newLength)
+            threshold = newLength
+            return
+        }
+
+        val oldKeys = keysArr
+        val oldSize = size
+        val oldEndSlot = oldKeys.endSlot()
+
+        keysArr = IntArray(newLength)
+        size = 0
+
+        if (newLength > HASHIFY_THRESHOLD) {
+            val endSlot = keysArr.endSlot()
+            threshold = (endSlot * loadFactor).toInt()
+
+            keysArr[endSlot] = oldKeys[oldEndSlot]
+        } else {
+            threshold = newLength
+            if (oldKeys[oldEndSlot] == ZERO) {
+                addArray(ZERO)
+            }
+        }
+
+        for (slot in 0..<oldEndSlot) {
+            val key = oldKeys[slot]
+            if (key != ZERO) {
+                addHashing(key)
+            }
+        }
+
+        size = oldSize
     }
 
     override fun add(element: Int): Boolean {

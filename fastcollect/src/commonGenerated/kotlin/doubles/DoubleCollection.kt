@@ -43,7 +43,12 @@ public interface DoubleCollection : Collection<Double> {
     }
 
     public fun toDoubleArray(): DoubleArray {
-        return (this as Collection<Double>).toDoubleArray()
+        val result = DoubleArray(size)
+        var index = 0
+        for (element in this) {
+            result[index++] = element
+        }
+        return result
     }
 }
 

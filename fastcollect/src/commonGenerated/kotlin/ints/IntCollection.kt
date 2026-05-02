@@ -43,7 +43,12 @@ public interface IntCollection : Collection<Int> {
     }
 
     public fun toIntArray(): IntArray {
-        return (this as Collection<Int>).toIntArray()
+        val result = IntArray(size)
+        var index = 0
+        for (element in this) {
+            result[index++] = element
+        }
+        return result
     }
 }
 

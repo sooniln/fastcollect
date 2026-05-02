@@ -16,7 +16,8 @@ kotlin {
 
 dependencies {
     jmhImplementation(project(":fastcollect"))
-    jmhImplementation(libs.fastutil)
+    jmhImplementation("it.unimi.dsi:fastutil:8.5.18")
+    jmhImplementation("org.korge:korlibs-datastructure:6.1.0")
 }
 
 jmh {

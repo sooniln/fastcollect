@@ -5,6 +5,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.random.Random
 
 public fun emptyByteList(): ByteList = EmptyByteList
 
@@ -26,6 +27,14 @@ public inline fun buildByteList(expectedSize: Int = 0, builderAction: MutableByt
     return list
 }
 
+public inline fun ByteList(size: Int, init: (index: Int) -> Byte): ByteList = MutableByteList(size, init)
+
+public inline fun MutableByteList(size: Int, init: (index: Int) -> Byte): MutableByteList {
+    val list = ByteArrayDeque(size)
+    repeat(size) { index -> list.add(init(index)) }
+    return list
+}
+
 /**
  * A list of Bytes which inherits from [List].
  */
@@ -38,6 +47,14 @@ public interface ByteList : List<Byte>, ByteCollection {
     override fun contains(element: Byte): Boolean {
         return indexOf(element) != -1
     }
+
+    @Deprecated(
+        message = "Use getAt(index) instead.",
+        replaceWith = ReplaceWith("getAt(index)"),
+        level = DeprecationLevel.WARNING)
+    override fun get(index: Int): Byte = getAt(index)
+
+    public fun getAt(index: Int): Byte
 
     override fun containsAll(elements: Collection<Byte>): Boolean = super.containsAll(elements)
 
@@ -77,7 +94,7 @@ public interface MutableByteList : ByteList, MutableByteCollection, MutableList<
         level = DeprecationLevel.WARNING)
     override fun set(index: Int, element: Byte): Byte {
         assertBoxing()
-        val value = get(index)
+        val value = getAt(index)
         setAt(index, element)
         return value
     }
@@ -130,6 +147,47 @@ public interface MutableByteList : ByteList, MutableByteCollection, MutableList<
 
     public fun addAll(index: Int, elements: ByteCollection): Boolean
     override fun addAll(index: Int, elements: Collection<Byte>): Boolean
+
+    public fun sort() {
+        val sorted = toByteArray().also { sort() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun sortDescending() {
+        val sorted = toByteArray().also { sortDescending() }
+        val it = listIterator()
+        for (element in sorted) {
+            it.next()
+            it.set(element)
+        }
+    }
+
+    public fun fill(element: Byte) {
+        if (this is RandomAccess) {
+            for (index in 0..lastIndex) {
+                setAt(index, element)
+            }
+        } else {
+            val it = listIterator()
+            while (it.hasNext()) {
+                it.next()
+                it.set(element)
+            }
+        }
+    }
+
+    public fun shuffle() {
+        for (i in lastIndex downTo 1) {
+            val j = Random.nextInt(i + 1)
+            val copy = this.getAt(i)
+            this.setAt(i, this.getAt(j))
+            this.setAt(j, copy)
+        }
+    }
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableByteList
 }
@@ -201,7 +259,7 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
     private inner class IteratorImpl(private var index: Int = 0): ByteIterator() {
 
         override fun nextByte(): Byte {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -215,13 +273,13 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
 
         override fun previousByte(): Byte {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             return value
         }
 
         override fun nextByte(): Byte {
-            val value = get(index)
+            val value = getAt(index)
             index++
             return value
         }
@@ -253,8 +311,8 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
         final override var size = toIndex - fromIndex
             protected set
 
-        override fun get(index: Int): Byte {
-            return list[index + offset]
+        override fun getAt(index: Int): Byte {
+            return list.getAt(index + offset)
         }
     }
 
@@ -331,7 +389,7 @@ public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteL
 
         override fun nextByte(): Byte {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -356,7 +414,7 @@ public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteL
 
         override fun previousByte(): Byte {
             val i = index - 1
-            val value = get(i)
+            val value = getAt(i)
             index = i
             lastIndex = i
             return value
@@ -364,7 +422,7 @@ public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteL
 
         override fun nextByte(): Byte {
             val i = index
-            val value = get(i)
+            val value = getAt(i)
             lastIndex = i
             index = i + 1
             return value
@@ -421,8 +479,8 @@ public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteL
             return list.setAt(index + offset, element)
         }
 
-        override fun get(index: Int): Byte {
-            return list[index + offset]
+        override fun getAt(index: Int): Byte {
+            return list.getAt(index + offset)
         }
 
         override fun add(index: Int, element: Byte) {
@@ -460,7 +518,7 @@ private object EmptyByteList : ByteList, RandomAccess {
     override fun containsAll(elements: Collection<Byte>): Boolean = elements.isEmpty()
     override fun containsAll(elements: ByteCollection): Boolean = elements.isEmpty()
 
-    override fun get(index: Int): Byte = throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Byte = throw IndexOutOfBoundsException()
     override fun indexOf(element: Byte): Int = -1
     override fun lastIndexOf(element: Byte): Int = -1
 
@@ -480,7 +538,7 @@ private class SingletonByteList(private val value: Byte) : AbstractByteList(), R
     override fun isEmpty(): Boolean = false
     override fun contains(element: Byte): Boolean = value == element
 
-    override fun get(index: Int): Byte = if (index == 0) return value else throw IndexOutOfBoundsException()
+    override fun getAt(index: Int): Byte = if (index == 0) return value else throw IndexOutOfBoundsException()
     override fun indexOf(element: Byte): Int = if (element == value) 0 else -1
     override fun lastIndexOf(element: Byte): Int = if (element == value) 0 else -1
 
@@ -492,5 +550,5 @@ private class SingletonByteList(private val value: Byte) : AbstractByteList(), R
 
 private class ByteArrayListWrapper(private val array: ByteArray): AbstractByteList(), RandomAccess {
     override val size: Int get() = array.size
-    override fun get(index: Int): Byte = array[index]
+    override fun getAt(index: Int): Byte = array[index]
 }

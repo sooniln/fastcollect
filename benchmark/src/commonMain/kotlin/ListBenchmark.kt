@@ -1,6 +1,7 @@
 package io.github.sooniln.fastcollect
 
 import io.github.sooniln.fastcollect.ints.IntArrayDeque
+import korlibs.datastructure.IntArrayList
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
 import kotlinx.benchmark.BenchmarkTimeUnit
@@ -31,6 +32,7 @@ open class ListBenchmark {
     @Param("10", "100", "1000", "10000", "100000", "1000000")
     var size: Int = 0
 
+    lateinit var kds: IntArrayList
     lateinit var fastcollect: IntArrayDeque
     lateinit var kotlin: ArrayList<Int>
 
@@ -39,6 +41,7 @@ open class ListBenchmark {
 
     @Setup
     fun setup() {
+        kds = IntArrayList(size)
         fastcollect = IntArrayDeque(size)
         kotlin = ArrayList(size)
 
@@ -46,6 +49,7 @@ open class ListBenchmark {
 
         repeat(size) { i ->
             val element = rnd.nextInt()
+            kds.add(element)
             fastcollect.add(element)
             kotlin.add(element)
             inElements[i] = element
@@ -78,6 +82,33 @@ open class ListBenchmark {
         var value = 0
         for (e in inElementsSampled) {
             value += fastcollect.indexOf(e)
+        }
+        return value
+    }
+
+    @Benchmark
+    fun kdsAdd(): IntArrayList {
+        val list = IntArrayList()
+        for (e in inElements) {
+            list.add(e)
+        }
+        return list
+    }
+
+    @Benchmark
+    fun kdsIterate(): Int {
+        var value = 0
+        for (v in kds) {
+            value += v
+        }
+        return value
+    }
+
+    @Benchmark
+    fun kdsSearch(): Int {
+        var value = 0
+        for (e in inElementsSampled) {
+            value += kds.indexOf(e)
         }
         return value
     }

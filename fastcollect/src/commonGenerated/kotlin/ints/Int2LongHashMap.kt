@@ -71,6 +71,10 @@ public class Int2LongHashMap(
     // use threshold to store the initial size before we allocate anything
     private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
 
+    /**
+     * Ensures that the map can hold at least given number of key/value pairs without any further resizing of the
+     * backing array.
+     */
     public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
         if (keysArr.isEmpty()) {
@@ -80,13 +84,62 @@ public class Int2LongHashMap(
         }
     }
 
+    /**
+     * Reduces the size of the backing array to the minimum required to hold the current number of elements.
+     */
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     public fun trimToSize() {
         val newLength = arraySize(size, loadFactor)
         if (keysArr.size <= newLength) {
             return
+        } else if (newLength == 0) {
+            keysArr = EMPTY_KEY_ARRAY
+
+            valuesArr = EMPTY_VALUE_ARRAY
+
+            threshold = DEFAULT_INITIAL_CAPACITY
+            return
         }
 
-        TODO()
+        if (!keysArr.isHashing()) {
+            keysArr = keysArr.copyOf(newLength)
+            valuesArr = valuesArr.copyOf(newLength)
+            threshold = newLength
+            return
+        }
+
+        val oldKeys = keysArr
+        val oldValues = valuesArr
+        val oldSize = size
+        val oldEndSlot = oldKeys.endSlot()
+
+        keysArr = IntArray(newLength)
+
+        valuesArr = LongArray(newLength)
+
+        size = 0
+
+        if (newLength > HASHIFY_THRESHOLD) {
+            val endSlot = keysArr.endSlot()
+            threshold = (endSlot * loadFactor).toInt()
+
+            keysArr[endSlot] = oldKeys[oldEndSlot]
+            valuesArr[endSlot] = oldValues[oldEndSlot]
+        } else {
+            threshold = newLength
+            if (oldKeys[oldEndSlot] == ZERO) {
+                putArray(ZERO, oldValues[oldEndSlot] as Long)
+            }
+        }
+
+        for (slot in 0..<oldEndSlot) {
+            val key = oldKeys[slot]
+            if (key != ZERO) {
+                putHashing(key, oldValues[slot] as Long)
+            }
+        }
+
+        size = oldSize
     }
 
     override fun putValue(key: Int, value: Long): Long {

@@ -134,7 +134,7 @@ class DoubleArrayDequeTest {
     @Test
     fun getReturnsCorrectElement() {
         val deque = DoubleArrayDeque(doubleArrayOf(1.0, 2.0, 3.0))
-        assertEquals(2.0, deque[1])
+        assertEquals(2.0, deque.getAt(1))
     }
 
     @Test
@@ -147,7 +147,7 @@ class DoubleArrayDequeTest {
     @Test
     fun getOutOfBoundsThrows() {
         val deque = DoubleArrayDeque(doubleArrayOf(1.0))
-        assertFailsWith<IndexOutOfBoundsException> { deque[5] }
+        assertFailsWith<IndexOutOfBoundsException> { deque.getAt(5) }
     }
 
     @Test
@@ -423,7 +423,7 @@ class DoubleArrayDequeTest {
         for (i in 0 until 100) deque.addLast(i.toDouble())
         deque.ensureCapacity(200)
         assertEquals(100, deque.size)
-        for (i in 0 until 100) assertEquals(i.toDouble(), deque[i])
+        for (i in 0 until 100) assertEquals(i.toDouble(), deque.getAt(i))
     }
 
     @Test
@@ -433,7 +433,7 @@ class DoubleArrayDequeTest {
         deque.ensureCapacity(200)
         deque.trimToSize()
         assertEquals(50, deque.size)
-        for (i in 0 until 50) assertEquals(i.toDouble(), deque[i])
+        for (i in 0 until 50) assertEquals(i.toDouble(), deque.getAt(i))
     }
 
     @Test
@@ -542,5 +542,54 @@ class DoubleArrayDequeTest {
         deque.addLast(7.0); deque.addLast(8.0)  // logical: [4, 5, 6, 7, 8], wraps
         deque.removeRange(1, 3)
         assertEquals(listOf(4.0, 7.0, 8.0), deque.toList())
+    }
+
+    // --- sort / sortDescending ---
+
+    @Test
+    fun sortNonWrapped() {
+        val deque = DoubleArrayDeque(doubleArrayOf(5.0, 3.0, 1.0, 4.0, 2.0))
+        deque.sort()
+        assertEquals(listOf(1.0, 2.0, 3.0, 4.0, 5.0), deque.toList())
+    }
+
+    @Test
+    fun sortDescendingNonWrapped() {
+        val deque = DoubleArrayDeque(doubleArrayOf(3.0, 1.0, 4.0, 2.0, 5.0))
+        deque.sortDescending()
+        assertEquals(listOf(5.0, 4.0, 3.0, 2.0, 1.0), deque.toList())
+    }
+
+    @Test
+    fun sortWrappedHeadSegmentLarger() {
+        // ring.size=8, head=5, size=5, tail=10 → end=2, ring.size-head=3 > end (case 1)
+        val deque = DoubleArrayDeque()
+        for (i in 1..8) deque.addLast(i.toDouble())
+        repeat(5) { deque.removeFirst() }     // head=5, logical=[6,7,8]
+        deque.addLast(4.0); deque.addLast(2.0)  // logical=[6,7,8,4,2], tail wraps
+        deque.sort()
+        assertEquals(listOf(2.0, 4.0, 6.0, 7.0, 8.0), deque.toList())
+    }
+
+    @Test
+    fun sortWrappedTailSegmentLarger() {
+        // ring.size=8, head=6, size=5, tail=11 → end=3, ring.size-head=2 ≤ end (case 2)
+        val deque = DoubleArrayDeque()
+        for (i in 1..8) deque.addLast(i.toDouble())
+        repeat(6) { deque.removeFirst() }        // head=6, logical=[7,8]
+        deque.addLast(3.0); deque.addLast(1.0); deque.addLast(5.0)  // logical=[7,8,3,1,5], tail wraps
+        deque.sort()
+        assertEquals(listOf(1.0, 3.0, 5.0, 7.0, 8.0), deque.toList())
+    }
+
+    @Test
+    fun sortDescendingWrapped() {
+        // Same wrapped state as sortWrappedTailSegmentLarger, using sortDescending
+        val deque = DoubleArrayDeque()
+        for (i in 1..8) deque.addLast(i.toDouble())
+        repeat(6) { deque.removeFirst() }
+        deque.addLast(3.0); deque.addLast(1.0); deque.addLast(5.0)  // logical=[7,8,3,1,5]
+        deque.sortDescending()
+        assertEquals(listOf(8.0, 7.0, 5.0, 3.0, 1.0), deque.toList())
     }
 }

@@ -43,7 +43,12 @@ public interface ByteCollection : Collection<Byte> {
     }
 
     public fun toByteArray(): ByteArray {
-        return (this as Collection<Byte>).toByteArray()
+        val result = ByteArray(size)
+        var index = 0
+        for (element in this) {
+            result[index++] = element
+        }
+        return result
     }
 }
 

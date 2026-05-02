@@ -43,7 +43,12 @@ public interface ${Type}Collection : Collection<${Type}> {
     }
 
     public fun to${Type}Array(): ${Type}Array {
-        return (this as Collection<${Type}>).to${Type}Array()
+        val result = ${Type}Array(size)
+        var index = 0
+        for (element in this) {
+            result[index++] = element
+        }
+        return result
     }
 }
 
