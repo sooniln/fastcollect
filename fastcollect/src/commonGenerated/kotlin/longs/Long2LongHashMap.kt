@@ -340,43 +340,52 @@ public class Long2LongHashMap(
         }
     }
 
-    override val keys: MutableLongSet by lazy {
-        object : MutableLongSet {
-            override val size: Int get() = this@Long2LongHashMap.size
-            override fun contains(element: Long): Boolean = containsKey(element)
-            override fun add(element: Long): Boolean = throw UnsupportedOperationException()
-            override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): MutableLongIterator = KeyIterator()
-            override fun clear() = throw UnsupportedOperationException()
-        }
-    }
-
-    override val values: MutableLongCollection by lazy {
-
-        object : MutableLongCollection {
-
-            override val size: Int get() = this@Long2LongHashMap.size
-            override fun contains(element: Long): Boolean = containsValue(element)
-            override fun add(element: Long): Boolean = throw UnsupportedOperationException()
-            override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): MutableLongIterator = ValueIterator()
-            override fun clear() = throw UnsupportedOperationException()
-        }
-    }
-
-    override val primitiveEntries: MutableEntrySet<MutableLong2LongMap.MutableEntry> by lazy {
-        object : AbstractMutableSet<MutableLong2LongMap.MutableEntry>(), MutableEntrySet<MutableLong2LongMap.MutableEntry> {
-            override val size: Int get() = this@Long2LongHashMap.size
-            override fun contains(element: MutableLong2LongMap.MutableEntry): Boolean {
-                val value = lookup(element.key())
-                return if (isDefaultValue(value) && !containsKey(element.key())) false else value == element.value()
+    private var _keys: MutableLongSet? = null
+    override val keys: MutableLongSet get() {
+        return _keys ?:
+            object : MutableLongSet {
+                override val size: Int get() = this@Long2LongHashMap.size
+                override fun contains(element: Long): Boolean = containsKey(element)
+                override fun add(element: Long): Boolean = throw UnsupportedOperationException()
+                override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
+                override fun iterator(): MutableLongIterator = KeyIterator()
+                override fun clear() = throw UnsupportedOperationException()
             }
-            override fun add(element: MutableLong2LongMap.MutableEntry): Boolean = throw UnsupportedOperationException()
-            override fun remove(element: MutableLong2LongMap.MutableEntry): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): MutableIterator<MutableLong2LongMap.MutableEntry> = EntryIterator()
-            override fun fastIterator(): MutableFastIterator<MutableLong2LongMap.MutableEntry> = FastEntryIterator()
-            override fun clear() = throw UnsupportedOperationException()
-        }
+            .also { _keys = it }
+    }
+
+    private var _values: MutableLongCollection? = null
+    override val values: MutableLongCollection get() {
+        return _values ?:
+
+            object : MutableLongCollection {
+
+                override val size: Int get() = this@Long2LongHashMap.size
+                override fun contains(element: Long): Boolean = containsValue(element)
+                override fun add(element: Long): Boolean = throw UnsupportedOperationException()
+                override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
+                override fun iterator(): MutableLongIterator = ValueIterator()
+                override fun clear() = throw UnsupportedOperationException()
+            }
+            .also { _values = it }
+    }
+
+    private var _primitiveEntries: MutableEntrySet<MutableLong2LongMap.MutableEntry>? = null
+    override val primitiveEntries: MutableEntrySet<MutableLong2LongMap.MutableEntry> get() {
+        return _primitiveEntries ?:
+            object : AbstractMutableSet<MutableLong2LongMap.MutableEntry>(), MutableEntrySet<MutableLong2LongMap.MutableEntry> {
+                override val size: Int get() = this@Long2LongHashMap.size
+                override fun contains(element: MutableLong2LongMap.MutableEntry): Boolean {
+                    val value = lookup(element.key())
+                    return if (isDefaultValue(value) && !containsKey(element.key())) false else value == element.value()
+                }
+                override fun add(element: MutableLong2LongMap.MutableEntry): Boolean = throw UnsupportedOperationException()
+                override fun remove(element: MutableLong2LongMap.MutableEntry): Boolean = throw UnsupportedOperationException()
+                override fun iterator(): MutableIterator<MutableLong2LongMap.MutableEntry> = EntryIterator()
+                override fun fastIterator(): MutableFastIterator<MutableLong2LongMap.MutableEntry> = FastEntryIterator()
+                override fun clear() = throw UnsupportedOperationException()
+            }
+            .also { _primitiveEntries = it }
     }
 
     override fun containsKey(key: Long): Boolean {

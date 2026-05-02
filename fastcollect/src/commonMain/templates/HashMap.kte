@@ -360,45 +360,54 @@ public class ${Name}HashMap${Generics}(
         }
     }
 
-    override val keys: Mutable${KeyType}Set by lazy {
-        object : Mutable${KeyType}Set {
-            override val size: Int get() = this@${Name}HashMap.size
-            override fun contains(element: ${KeyType}): Boolean = containsKey(element)
-            override fun add(element: ${KeyType}): Boolean = throw UnsupportedOperationException()
-            override fun remove(element: ${KeyType}): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): Mutable${KeyType}Iterator = KeyIterator()
-            override fun clear() = throw UnsupportedOperationException()
-        }
-    }
-
-    override val values: Mutable${ValueCollectionType}${Generics} by lazy {
-<% if (!isReferenceValue) { %>
-        object : Mutable${ValueType}Collection {
-<% } else { %>
-        object : AbstractMutable${ValueCollectionType}${Generics}() {
-<% } %>
-            override val size: Int get() = this@${Name}HashMap.size
-            override fun contains(element: ${ValueType}): Boolean = containsValue(element)
-            override fun add(element: ${ValueType}): Boolean = throw UnsupportedOperationException()
-            override fun remove(element: ${ValueType}): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): Mutable${ValueIteratorType}${Generics} = ValueIterator()
-            override fun clear() = throw UnsupportedOperationException()
-        }
-    }
-
-    override val primitiveEntries: MutableEntrySet<Mutable${Name}Map.MutableEntry${Generics}> by lazy {
-        object : AbstractMutableSet<Mutable${Name}Map.MutableEntry${Generics}>(), MutableEntrySet<Mutable${Name}Map.MutableEntry${Generics}> {
-            override val size: Int get() = this@${Name}HashMap.size
-            override fun contains(element: Mutable${Name}Map.MutableEntry${Generics}): Boolean {
-                val value = lookup(element.key())
-                return if (isDefaultValue(value) && !containsKey(element.key())) false else value == element.value()
+    private var _keys: Mutable${KeyType}Set? = null
+    override val keys: Mutable${KeyType}Set get() {
+        return _keys ?:
+            object : Mutable${KeyType}Set {
+                override val size: Int get() = this@${Name}HashMap.size
+                override fun contains(element: ${KeyType}): Boolean = containsKey(element)
+                override fun add(element: ${KeyType}): Boolean = throw UnsupportedOperationException()
+                override fun remove(element: ${KeyType}): Boolean = throw UnsupportedOperationException()
+                override fun iterator(): Mutable${KeyType}Iterator = KeyIterator()
+                override fun clear() = throw UnsupportedOperationException()
             }
-            override fun add(element: Mutable${Name}Map.MutableEntry${Generics}): Boolean = throw UnsupportedOperationException()
-            override fun remove(element: Mutable${Name}Map.MutableEntry${Generics}): Boolean = throw UnsupportedOperationException()
-            override fun iterator(): MutableIterator<Mutable${Name}Map.MutableEntry${Generics}> = EntryIterator()
-            override fun fastIterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry${Generics}> = FastEntryIterator()
-            override fun clear() = throw UnsupportedOperationException()
-        }
+            .also { _keys = it }
+    }
+
+    private var _values: Mutable${ValueCollectionType}${Generics}? = null
+    override val values: Mutable${ValueCollectionType}${Generics} get() {
+        return _values ?:
+<% if (!isReferenceValue) { %>
+            object : Mutable${ValueType}Collection {
+<% } else { %>
+            object : AbstractMutable${ValueCollectionType}${Generics}() {
+<% } %>
+                override val size: Int get() = this@${Name}HashMap.size
+                override fun contains(element: ${ValueType}): Boolean = containsValue(element)
+                override fun add(element: ${ValueType}): Boolean = throw UnsupportedOperationException()
+                override fun remove(element: ${ValueType}): Boolean = throw UnsupportedOperationException()
+                override fun iterator(): Mutable${ValueIteratorType}${Generics} = ValueIterator()
+                override fun clear() = throw UnsupportedOperationException()
+            }
+            .also { _values = it }
+    }
+
+    private var _primitiveEntries: MutableEntrySet<Mutable${Name}Map.MutableEntry${Generics}>? = null
+    override val primitiveEntries: MutableEntrySet<Mutable${Name}Map.MutableEntry${Generics}> get() {
+        return _primitiveEntries ?:
+            object : AbstractMutableSet<Mutable${Name}Map.MutableEntry${Generics}>(), MutableEntrySet<Mutable${Name}Map.MutableEntry${Generics}> {
+                override val size: Int get() = this@${Name}HashMap.size
+                override fun contains(element: Mutable${Name}Map.MutableEntry${Generics}): Boolean {
+                    val value = lookup(element.key())
+                    return if (isDefaultValue(value) && !containsKey(element.key())) false else value == element.value()
+                }
+                override fun add(element: Mutable${Name}Map.MutableEntry${Generics}): Boolean = throw UnsupportedOperationException()
+                override fun remove(element: Mutable${Name}Map.MutableEntry${Generics}): Boolean = throw UnsupportedOperationException()
+                override fun iterator(): MutableIterator<Mutable${Name}Map.MutableEntry${Generics}> = EntryIterator()
+                override fun fastIterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry${Generics}> = FastEntryIterator()
+                override fun clear() = throw UnsupportedOperationException()
+            }
+            .also { _primitiveEntries = it }
     }
 
     override fun containsKey(key: ${KeyType}): Boolean {
