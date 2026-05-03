@@ -52,9 +52,9 @@ benchmark {
     }
 }
 
-// try to prevent js benchmarks from running out of memory - are they leaking?
+// try to prevent js benchmarks from running out of memory - what is leaking?? how does this need 8 gigs...
 tasks.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec>().configureEach {
-    nodeArgs.add("--max-old-space-size=6144")
+    nodeArgs.add("--max-old-space-size=8192")
 }
 
 fun registerMemoryMeasurementTask(name: String, configuration: JavaExec.() -> Unit) = tasks.register<JavaExec>(name) {

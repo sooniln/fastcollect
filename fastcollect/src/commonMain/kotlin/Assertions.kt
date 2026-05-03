@@ -1,10 +1,6 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.SystemProperties.KEY_THROW_ON_BOXING
-
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun assertBoxing() {
-    if (SystemProperties.THROW_ON_BOXING) {
-        throw AssertionError("Call that will result in boxing ($KEY_THROW_ON_BOXING=true)")
-    }
+    if (SystemProperties.WARN_ON_BOXING) AssertionError("Detected call that will result in boxing").printStackTrace()
 }

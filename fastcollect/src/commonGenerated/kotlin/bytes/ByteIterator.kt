@@ -1,11 +1,16 @@
 package io.github.sooniln.fastcollect.bytes
 
+import io.github.sooniln.fastcollect.assertBoxing
+
 public fun emptyByteIterator(): ByteListIterator = EmptyByteIterator
 
 public abstract class MutableByteIterator : ByteIterator(), MutableIterator<Byte>
 
 public abstract class ByteListIterator: ByteIterator(), ListIterator<Byte> {
-    final override fun previous(): Byte = previousByte()
+    final override fun previous(): Byte {
+        assertBoxing()
+        return previousByte()
+    }
     public abstract fun previousByte(): Byte
 }
 

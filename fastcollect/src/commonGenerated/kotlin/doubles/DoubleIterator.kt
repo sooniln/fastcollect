@@ -1,11 +1,16 @@
 package io.github.sooniln.fastcollect.doubles
 
+import io.github.sooniln.fastcollect.assertBoxing
+
 public fun emptyDoubleIterator(): DoubleListIterator = EmptyDoubleIterator
 
 public abstract class MutableDoubleIterator : DoubleIterator(), MutableIterator<Double>
 
 public abstract class DoubleListIterator: DoubleIterator(), ListIterator<Double> {
-    final override fun previous(): Double = previousDouble()
+    final override fun previous(): Double {
+        assertBoxing()
+        return previousDouble()
+    }
     public abstract fun previousDouble(): Double
 }
 

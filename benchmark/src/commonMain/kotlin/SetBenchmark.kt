@@ -165,7 +165,7 @@ open class SetBenchmark {
     }
 
     @Benchmark
-    fun jvmIterate(): Int {
+    fun kotlinIterate(): Int {
         var c = 0
         for (i in kotlin) {
             c += i

@@ -58,6 +58,10 @@ public class Long2DoubleHashMap(
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
     }
 
+    public constructor(map: Map<Long, Double>): this(map.size) {
+        putAll(map)
+    }
+
     // when used in hashing mode, the last slot in the array is used to store the zero key/value respectively. when used
     // in array mode, there is no special handling for zero.
     private var keysArr = EMPTY_KEY_ARRAY

@@ -1,11 +1,16 @@
 package io.github.sooniln.fastcollect.floats
 
+import io.github.sooniln.fastcollect.assertBoxing
+
 public fun emptyFloatIterator(): FloatListIterator = EmptyFloatIterator
 
 public abstract class MutableFloatIterator : FloatIterator(), MutableIterator<Float>
 
 public abstract class FloatListIterator: FloatIterator(), ListIterator<Float> {
-    final override fun previous(): Float = previousFloat()
+    final override fun previous(): Float {
+        assertBoxing()
+        return previousFloat()
+    }
     public abstract fun previousFloat(): Float
 }
 

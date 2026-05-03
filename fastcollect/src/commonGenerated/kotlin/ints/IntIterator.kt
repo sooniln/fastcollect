@@ -1,11 +1,16 @@
 package io.github.sooniln.fastcollect.ints
 
+import io.github.sooniln.fastcollect.assertBoxing
+
 public fun emptyIntIterator(): IntListIterator = EmptyIntIterator
 
 public abstract class MutableIntIterator : IntIterator(), MutableIterator<Int>
 
 public abstract class IntListIterator: IntIterator(), ListIterator<Int> {
-    final override fun previous(): Int = previousInt()
+    final override fun previous(): Int {
+        assertBoxing()
+        return previousInt()
+    }
     public abstract fun previousInt(): Int
 }
 
