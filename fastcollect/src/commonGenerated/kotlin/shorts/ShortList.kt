@@ -22,14 +22,22 @@ public fun ShortArray.asShortList(): ShortList = ShortArrayListWrapper(this)
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun buildShortList(expectedSize: Int = 0, builderAction: MutableShortList.() -> Unit): ShortList {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val list = ShortArrayDeque(expectedSize)
     list.builderAction()
     return list
 }
 
-public inline fun ShortList(size: Int, init: (index: Int) -> Short): ShortList = MutableShortList(size, init)
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun ShortList(size: Int, init: (index: Int) -> Short): ShortList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+    return MutableShortList(size, init)
+}
 
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun MutableShortList(size: Int, init: (index: Int) -> Short): MutableShortList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+
     val list = ShortArrayDeque(size)
     repeat(size) { index -> list.add(init(index)) }
     return list
@@ -79,6 +87,30 @@ public interface ShortList : List<Short>, ShortCollection {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): ShortList
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun <R> ShortList.foldRight(initial: R, operation: (Short, accumulated: R) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    val it = listIterator(size)
+    while (it.hasPrevious()) {
+        accumulated = operation(it.previous(), accumulated)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun ShortList.reduceRight(operation: (accumulated: Short, Short) -> Short) : Short {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = listIterator(size)
+    var accumulated = it.previousShort()
+    while (it.hasPrevious()) {
+        accumulated = operation(accumulated, it.previousShort())
+    }
+    return accumulated
 }
 
 /**
@@ -183,9 +215,21 @@ public interface MutableShortList : ShortList, MutableShortCollection, MutableLi
     public fun shuffle() {
         for (i in lastIndex downTo 1) {
             val j = Random.nextInt(i + 1)
-            val copy = this.getAt(i)
-            this.setAt(i, this.getAt(j))
-            this.setAt(j, copy)
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+        }
+    }
+
+    public fun reverse() {
+        val midPoint = (size / 2)
+        if (midPoint < 1) return
+        var j = size - 1
+        for (i in 0..<midPoint) {
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+            --j
         }
     }
 

@@ -34,6 +34,7 @@ public fun  mutableLong2IntMapOf(vararg entries: Pair<Long, Int>): MutableLong2I
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun  buildLong2IntMap(expectedSize: Int = 0, builderAction: MutableLong2IntMap.() -> Unit): Long2IntMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val map = Long2IntHashMap(expectedSize)
     map.builderAction()
     return map
@@ -144,35 +145,10 @@ public inline fun  Long2IntMap.getValue(key: Long): Int = getOrElse(key) { throw
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Long2IntMap.getOrElse(key: Long, defaultValue: () -> Int): Int {
-    contract {
-        callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
-    }
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = lookup(key)
     return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun  Long2IntMap.filterTo(destination: MutableLong2IntMap, predicate: (key: Long, value: Int) -> Boolean): MutableLong2IntMap {
-    contract {
-        callsInPlace(predicate, InvocationKind.UNKNOWN)
-    }
-
-    for (entry in primitiveEntries.fastIterator()) {
-        if (predicate(entry.key(), entry.value())) {
-            destination.putValue(entry.key(), entry.value())
-        }
-    }
-    return destination
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun  Long2IntMap.filter(predicate: (key: Long, value: Int) -> Boolean): Long2IntMap {
-    contract {
-        callsInPlace(predicate, InvocationKind.UNKNOWN)
-    }
-
-    return filterTo(Long2IntHashMap(), predicate)
 }
 
 
@@ -251,9 +227,7 @@ public interface MutableLong2IntMap : Long2IntMap, MutableMap<Long, Int> {
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableLong2IntMap.getOrPut(key: Long, defaultValue: () -> Int): Int {
-    contract {
-        callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
-    }
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     var value = lookup(key)
     if (isDefaultValue(value) && !containsKey(key)) {

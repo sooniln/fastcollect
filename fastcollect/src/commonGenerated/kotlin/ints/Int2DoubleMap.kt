@@ -34,6 +34,7 @@ public fun  mutableInt2DoubleMapOf(vararg entries: Pair<Int, Double>): MutableIn
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun  buildInt2DoubleMap(expectedSize: Int = 0, builderAction: MutableInt2DoubleMap.() -> Unit): Int2DoubleMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val map = Int2DoubleHashMap(expectedSize)
     map.builderAction()
     return map
@@ -144,35 +145,10 @@ public inline fun  Int2DoubleMap.getValue(key: Int): Double = getOrElse(key) { t
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double): Double {
-    contract {
-        callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
-    }
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = lookup(key)
     return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun  Int2DoubleMap.filterTo(destination: MutableInt2DoubleMap, predicate: (key: Int, value: Double) -> Boolean): MutableInt2DoubleMap {
-    contract {
-        callsInPlace(predicate, InvocationKind.UNKNOWN)
-    }
-
-    for (entry in primitiveEntries.fastIterator()) {
-        if (predicate(entry.key(), entry.value())) {
-            destination.putValue(entry.key(), entry.value())
-        }
-    }
-    return destination
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun  Int2DoubleMap.filter(predicate: (key: Int, value: Double) -> Boolean): Int2DoubleMap {
-    contract {
-        callsInPlace(predicate, InvocationKind.UNKNOWN)
-    }
-
-    return filterTo(Int2DoubleHashMap(), predicate)
 }
 
 
@@ -251,9 +227,7 @@ public interface MutableInt2DoubleMap : Int2DoubleMap, MutableMap<Int, Double> {
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2DoubleMap.getOrPut(key: Int, defaultValue: () -> Double): Double {
-    contract {
-        callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
-    }
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     var value = lookup(key)
     if (isDefaultValue(value) && !containsKey(key)) {

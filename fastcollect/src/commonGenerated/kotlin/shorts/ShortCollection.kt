@@ -1,5 +1,9 @@
 package io.github.sooniln.fastcollect.shorts
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * A collection of Shorts which inherits from [Collection].
  */
@@ -11,11 +15,8 @@ public interface ShortCollection : Collection<Short> {
     override fun iterator(): ShortIterator
 
     override fun contains(element: Short): Boolean {
-        val it = iterator()
-        while (it.hasNext()) {
-            if (it.nextShort() == element) {
-                return true
-            }
+        for (e in this) {
+            if (e == element) return true
         }
         return false
     }
@@ -43,13 +44,58 @@ public interface ShortCollection : Collection<Short> {
     }
 
     public fun toShortArray(): ShortArray {
-        val result = ShortArray(size)
+        val array = ShortArray(size)
         var index = 0
         for (element in this) {
-            result[index++] = element
+            array[index++] = element
         }
-        return result
+        return array
     }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ShortCollection.any(predicate: (Short) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+
+    for (element in this) {
+        if (predicate(element)) return true
+    }
+    return false
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ShortCollection.all(predicate: (Short) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ShortCollection.none(predicate: (Short) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> ShortCollection.fold(initial: R, operation: (accumulated: R, Short) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    for (element in this) {
+        accumulated = operation(accumulated, element)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ShortCollection.reduce(operation: (accumulated: Short, Short) -> Short): Short {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var accumulated = it.nextShort()
+    while (it.hasNext()) {
+        accumulated = operation(accumulated, it.nextShort())
+    }
+    return accumulated
 }
 
 /**
@@ -89,35 +135,62 @@ public interface MutableShortCollection : ShortCollection, MutableCollection<Sho
         return modified
     }
 
+    public fun removeAll(elements: ShortCollection): Boolean = filterInPlace { elements.contains(it) }
     override fun removeAll(elements: Collection<Short>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (elements.contains(it.nextShort())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is ShortCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
     }
 
+    public fun retainAll(elements: ShortCollection): Boolean = filterInPlace { !elements.contains(it) }
     override fun retainAll(elements: Collection<Short>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (!elements.contains(it.nextShort())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is ShortCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
+    }
+
+    public operator fun plusAssign(element: Short) {
+        add(element)
+    }
+    public operator fun plusAssign(elements: ShortCollection) {
+        addAll(elements)
+    }
+    public operator fun plusAssign(elements: Collection<Short>) {
+        addAll(elements)
+    }
+
+    public operator fun minusAssign(element: Short) {
+        remove(element)
+    }
+    public operator fun minusAssign(elements: ShortCollection) {
+        removeAll(elements)
+    }
+    public operator fun minusAssign(elements: Collection<Short>) {
+        removeAll(elements)
     }
 }
 
-public fun MutableShortCollection.removeAll(predicate: (Short) -> Boolean): Boolean = filterInPlace(predicate)
-public fun MutableShortCollection.retainAll(predicate: (Short) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableShortCollection.removeAll(predicate: (Short) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
+    var modified = false
+    val it = iterator()
+    while (it.hasNext()) {
+        if (predicate(it.nextShort())) {
+            it.remove()
+            modified = true
+        }
+    }
+    return modified
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableShortCollection.retainAll(predicate: (Short) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return removeAll { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
 private inline fun MutableShortCollection.filterInPlace(removePredicate: (Short) -> Boolean): Boolean {
+    contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
+
     var modified = false
     val it = iterator()
     while (it.hasNext()) {

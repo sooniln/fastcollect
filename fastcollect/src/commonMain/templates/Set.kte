@@ -37,6 +37,28 @@ public interface ${Type}Set : Set<${Type}>, ${Type}Collection {
     }
 
     override fun containsAll(elements: Collection<${Type}>): Boolean = super.containsAll(elements)
+
+    public infix fun union(other: ${Type}Set): ${Type}Set = ${Type}HashSet(this).apply { addAll(other) }
+
+    public infix fun intersect(other: ${Type}Set): ${Type}Set {
+        if (other.size < size) return other.intersect(this)
+
+        val set = ${Type}HashSet(size)
+        for (element in other) {
+            if (contains(element)) set.add(element)
+        }
+        return set
+    }
+
+    public infix fun subtract(other: ${Type}Set): ${Type}Set {
+        if (other.size < size) return other.intersect(this)
+
+        val set = ${Type}HashSet(size)
+        for (element in other) {
+            if (!contains(element)) set.add(element)
+        }
+        return set
+    }
 }
 
 /**

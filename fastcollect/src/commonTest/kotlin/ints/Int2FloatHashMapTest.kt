@@ -501,39 +501,6 @@ class Int2FloatHashMapTest {
         assertEquals(15f, map.lookup(1))
     }
 
-    @Test
-    fun filterReturnsEntriesMatchingPredicate() {
-        val map = Int2FloatHashMap()
-        map.putValue(1, 10f); map.putValue(2, 20f); map.putValue(3, 30f)
-        val filtered = map.filter { _, value -> value > 15f }
-        assertFalse(filtered.containsKey(1))
-        assertTrue(filtered.containsKey(2))
-        assertTrue(filtered.containsKey(3))
-        assertEquals(20f, filtered.lookup(2))
-        assertEquals(30f, filtered.lookup(3))
-    }
-
-    @Test
-    fun filterDoesNotMutateOriginalMap() {
-        val map = Int2FloatHashMap()
-        map.putValue(1, 10f); map.putValue(2, 20f)
-        map.filter { key, _ -> key == 1 }
-        assertEquals(2, map.size)
-    }
-
-    @Test
-    fun filterToAddsToDestination() {
-        val map = Int2FloatHashMap()
-        map.putValue(1, 10f); map.putValue(2, 20f); map.putValue(3, 30f)
-        val dest = Int2FloatHashMap()
-        dest.putValue(9, 90f)
-        map.filterTo(dest) { _, value -> value >= 20f }
-        assertEquals(3, dest.size)
-        assertTrue(dest.containsKey(2))
-        assertTrue(dest.containsKey(3))
-        assertTrue(dest.containsKey(9))
-    }
-
     // --- equals / hashCode ---
 
     @Test

@@ -1,5 +1,9 @@
 package io.github.sooniln.fastcollect.longs
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * A collection of Longs which inherits from [Collection].
  */
@@ -11,11 +15,8 @@ public interface LongCollection : Collection<Long> {
     override fun iterator(): LongIterator
 
     override fun contains(element: Long): Boolean {
-        val it = iterator()
-        while (it.hasNext()) {
-            if (it.nextLong() == element) {
-                return true
-            }
+        for (e in this) {
+            if (e == element) return true
         }
         return false
     }
@@ -43,13 +44,58 @@ public interface LongCollection : Collection<Long> {
     }
 
     public fun toLongArray(): LongArray {
-        val result = LongArray(size)
+        val array = LongArray(size)
         var index = 0
         for (element in this) {
-            result[index++] = element
+            array[index++] = element
         }
-        return result
+        return array
     }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongCollection.any(predicate: (Long) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+
+    for (element in this) {
+        if (predicate(element)) return true
+    }
+    return false
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongCollection.all(predicate: (Long) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongCollection.none(predicate: (Long) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> LongCollection.fold(initial: R, operation: (accumulated: R, Long) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    for (element in this) {
+        accumulated = operation(accumulated, element)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongCollection.reduce(operation: (accumulated: Long, Long) -> Long): Long {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var accumulated = it.nextLong()
+    while (it.hasNext()) {
+        accumulated = operation(accumulated, it.nextLong())
+    }
+    return accumulated
 }
 
 /**
@@ -89,35 +135,62 @@ public interface MutableLongCollection : LongCollection, MutableCollection<Long>
         return modified
     }
 
+    public fun removeAll(elements: LongCollection): Boolean = filterInPlace { elements.contains(it) }
     override fun removeAll(elements: Collection<Long>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (elements.contains(it.nextLong())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is LongCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
     }
 
+    public fun retainAll(elements: LongCollection): Boolean = filterInPlace { !elements.contains(it) }
     override fun retainAll(elements: Collection<Long>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (!elements.contains(it.nextLong())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is LongCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
+    }
+
+    public operator fun plusAssign(element: Long) {
+        add(element)
+    }
+    public operator fun plusAssign(elements: LongCollection) {
+        addAll(elements)
+    }
+    public operator fun plusAssign(elements: Collection<Long>) {
+        addAll(elements)
+    }
+
+    public operator fun minusAssign(element: Long) {
+        remove(element)
+    }
+    public operator fun minusAssign(elements: LongCollection) {
+        removeAll(elements)
+    }
+    public operator fun minusAssign(elements: Collection<Long>) {
+        removeAll(elements)
     }
 }
 
-public fun MutableLongCollection.removeAll(predicate: (Long) -> Boolean): Boolean = filterInPlace(predicate)
-public fun MutableLongCollection.retainAll(predicate: (Long) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableLongCollection.removeAll(predicate: (Long) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
+    var modified = false
+    val it = iterator()
+    while (it.hasNext()) {
+        if (predicate(it.nextLong())) {
+            it.remove()
+            modified = true
+        }
+    }
+    return modified
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableLongCollection.retainAll(predicate: (Long) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return removeAll { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
 private inline fun MutableLongCollection.filterInPlace(removePredicate: (Long) -> Boolean): Boolean {
+    contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
+
     var modified = false
     val it = iterator()
     while (it.hasNext()) {

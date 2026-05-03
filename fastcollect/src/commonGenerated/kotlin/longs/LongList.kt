@@ -22,14 +22,22 @@ public fun LongArray.asLongList(): LongList = LongArrayListWrapper(this)
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun buildLongList(expectedSize: Int = 0, builderAction: MutableLongList.() -> Unit): LongList {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val list = LongArrayDeque(expectedSize)
     list.builderAction()
     return list
 }
 
-public inline fun LongList(size: Int, init: (index: Int) -> Long): LongList = MutableLongList(size, init)
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun LongList(size: Int, init: (index: Int) -> Long): LongList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+    return MutableLongList(size, init)
+}
 
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun MutableLongList(size: Int, init: (index: Int) -> Long): MutableLongList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+
     val list = LongArrayDeque(size)
     repeat(size) { index -> list.add(init(index)) }
     return list
@@ -79,6 +87,30 @@ public interface LongList : List<Long>, LongCollection {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): LongList
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun <R> LongList.foldRight(initial: R, operation: (Long, accumulated: R) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    val it = listIterator(size)
+    while (it.hasPrevious()) {
+        accumulated = operation(it.previous(), accumulated)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun LongList.reduceRight(operation: (accumulated: Long, Long) -> Long) : Long {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = listIterator(size)
+    var accumulated = it.previousLong()
+    while (it.hasPrevious()) {
+        accumulated = operation(accumulated, it.previousLong())
+    }
+    return accumulated
 }
 
 /**
@@ -183,9 +215,21 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableList<
     public fun shuffle() {
         for (i in lastIndex downTo 1) {
             val j = Random.nextInt(i + 1)
-            val copy = this.getAt(i)
-            this.setAt(i, this.getAt(j))
-            this.setAt(j, copy)
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+        }
+    }
+
+    public fun reverse() {
+        val midPoint = (size / 2)
+        if (midPoint < 1) return
+        var j = size - 1
+        for (i in 0..<midPoint) {
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+            --j
         }
     }
 

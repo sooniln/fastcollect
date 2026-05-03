@@ -37,6 +37,28 @@ public interface LongSet : Set<Long>, LongCollection {
     }
 
     override fun containsAll(elements: Collection<Long>): Boolean = super.containsAll(elements)
+
+    public infix fun union(other: LongSet): LongSet = LongHashSet(this).apply { addAll(other) }
+
+    public infix fun intersect(other: LongSet): LongSet {
+        if (other.size < size) return other.intersect(this)
+
+        val set = LongHashSet(size)
+        for (element in other) {
+            if (contains(element)) set.add(element)
+        }
+        return set
+    }
+
+    public infix fun subtract(other: LongSet): LongSet {
+        if (other.size < size) return other.intersect(this)
+
+        val set = LongHashSet(size)
+        for (element in other) {
+            if (!contains(element)) set.add(element)
+        }
+        return set
+    }
 }
 
 /**

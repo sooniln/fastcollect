@@ -501,39 +501,6 @@ class Long2FloatHashMapTest {
         assertEquals(15f, map.lookup(1L))
     }
 
-    @Test
-    fun filterReturnsEntriesMatchingPredicate() {
-        val map = Long2FloatHashMap()
-        map.putValue(1L, 10f); map.putValue(2L, 20f); map.putValue(3L, 30f)
-        val filtered = map.filter { _, value -> value > 15f }
-        assertFalse(filtered.containsKey(1L))
-        assertTrue(filtered.containsKey(2L))
-        assertTrue(filtered.containsKey(3L))
-        assertEquals(20f, filtered.lookup(2L))
-        assertEquals(30f, filtered.lookup(3L))
-    }
-
-    @Test
-    fun filterDoesNotMutateOriginalMap() {
-        val map = Long2FloatHashMap()
-        map.putValue(1L, 10f); map.putValue(2L, 20f)
-        map.filter { key, _ -> key == 1L }
-        assertEquals(2, map.size)
-    }
-
-    @Test
-    fun filterToAddsToDestination() {
-        val map = Long2FloatHashMap()
-        map.putValue(1L, 10f); map.putValue(2L, 20f); map.putValue(3L, 30f)
-        val dest = Long2FloatHashMap()
-        dest.putValue(9L, 90f)
-        map.filterTo(dest) { _, value -> value >= 20f }
-        assertEquals(3, dest.size)
-        assertTrue(dest.containsKey(2L))
-        assertTrue(dest.containsKey(3L))
-        assertTrue(dest.containsKey(9L))
-    }
-
     // --- equals / hashCode ---
 
     @Test

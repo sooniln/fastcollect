@@ -22,14 +22,22 @@ public fun DoubleArray.asDoubleList(): DoubleList = DoubleArrayListWrapper(this)
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun buildDoubleList(expectedSize: Int = 0, builderAction: MutableDoubleList.() -> Unit): DoubleList {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val list = DoubleArrayDeque(expectedSize)
     list.builderAction()
     return list
 }
 
-public inline fun DoubleList(size: Int, init: (index: Int) -> Double): DoubleList = MutableDoubleList(size, init)
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun DoubleList(size: Int, init: (index: Int) -> Double): DoubleList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+    return MutableDoubleList(size, init)
+}
 
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun MutableDoubleList(size: Int, init: (index: Int) -> Double): MutableDoubleList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+
     val list = DoubleArrayDeque(size)
     repeat(size) { index -> list.add(init(index)) }
     return list
@@ -79,6 +87,30 @@ public interface DoubleList : List<Double>, DoubleCollection {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): DoubleList
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun <R> DoubleList.foldRight(initial: R, operation: (Double, accumulated: R) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    val it = listIterator(size)
+    while (it.hasPrevious()) {
+        accumulated = operation(it.previous(), accumulated)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun DoubleList.reduceRight(operation: (accumulated: Double, Double) -> Double) : Double {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = listIterator(size)
+    var accumulated = it.previousDouble()
+    while (it.hasPrevious()) {
+        accumulated = operation(accumulated, it.previousDouble())
+    }
+    return accumulated
 }
 
 /**
@@ -183,9 +215,21 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
     public fun shuffle() {
         for (i in lastIndex downTo 1) {
             val j = Random.nextInt(i + 1)
-            val copy = this.getAt(i)
-            this.setAt(i, this.getAt(j))
-            this.setAt(j, copy)
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+        }
+    }
+
+    public fun reverse() {
+        val midPoint = (size / 2)
+        if (midPoint < 1) return
+        var j = size - 1
+        for (i in 0..<midPoint) {
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+            --j
         }
     }
 

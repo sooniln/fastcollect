@@ -34,6 +34,7 @@ public fun  mutableInt2LongMapOf(vararg entries: Pair<Int, Long>): MutableInt2Lo
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun  buildInt2LongMap(expectedSize: Int = 0, builderAction: MutableInt2LongMap.() -> Unit): Int2LongMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val map = Int2LongHashMap(expectedSize)
     map.builderAction()
     return map
@@ -144,35 +145,10 @@ public inline fun  Int2LongMap.getValue(key: Int): Long = getOrElse(key) { throw
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2LongMap.getOrElse(key: Int, defaultValue: () -> Long): Long {
-    contract {
-        callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
-    }
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = lookup(key)
     return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun  Int2LongMap.filterTo(destination: MutableInt2LongMap, predicate: (key: Int, value: Long) -> Boolean): MutableInt2LongMap {
-    contract {
-        callsInPlace(predicate, InvocationKind.UNKNOWN)
-    }
-
-    for (entry in primitiveEntries.fastIterator()) {
-        if (predicate(entry.key(), entry.value())) {
-            destination.putValue(entry.key(), entry.value())
-        }
-    }
-    return destination
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun  Int2LongMap.filter(predicate: (key: Int, value: Long) -> Boolean): Int2LongMap {
-    contract {
-        callsInPlace(predicate, InvocationKind.UNKNOWN)
-    }
-
-    return filterTo(Int2LongHashMap(), predicate)
 }
 
 
@@ -251,9 +227,7 @@ public interface MutableInt2LongMap : Int2LongMap, MutableMap<Int, Long> {
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2LongMap.getOrPut(key: Int, defaultValue: () -> Long): Long {
-    contract {
-        callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
-    }
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     var value = lookup(key)
     if (isDefaultValue(value) && !containsKey(key)) {

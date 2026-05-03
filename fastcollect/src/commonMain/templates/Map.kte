@@ -34,6 +34,7 @@ public fun ${Generics} mutable${Name}MapOf(vararg entries: Pair<${KeyType}, ${Va
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun ${Generics} build${Name}Map(expectedSize: Int = 0, builderAction: Mutable${Name}Map${Generics}.() -> Unit): ${Name}Map${Generics} {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val map = ${Name}HashMap${Generics}(expectedSize)
     map.builderAction()
     return map
@@ -150,35 +151,10 @@ public inline fun ${Generics} ${Name}Map${Generics}.getValue(key: ${KeyType}): $
 
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} ${Name}Map${Generics}.getOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
-    contract {
-        callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
-    }
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = lookup(key)
     return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun ${Generics} ${Name}Map${Generics}.filterTo(destination: Mutable${Name}Map${Generics}, predicate: (key: ${KeyType}, value: ${ValueType}) -> Boolean): Mutable${Name}Map${Generics} {
-    contract {
-        callsInPlace(predicate, InvocationKind.UNKNOWN)
-    }
-
-    for (entry in primitiveEntries.fastIterator()) {
-        if (predicate(entry.key(), entry.value())) {
-            destination.putValue(entry.key(), entry.value())
-        }
-    }
-    return destination
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun ${Generics} ${Name}Map${Generics}.filter(predicate: (key: ${KeyType}, value: ${ValueType}) -> Boolean): ${Name}Map${Generics} {
-    contract {
-        callsInPlace(predicate, InvocationKind.UNKNOWN)
-    }
-
-    return filterTo(${Name}HashMap${Generics}(), predicate)
 }
 <% } %>
 
@@ -266,9 +242,7 @@ public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics}, MutableMa
 <% if (!isReferenceValue) { %>
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} Mutable${Name}Map${Generics}.getOrPut(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
-    contract {
-        callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
-    }
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     var value = lookup(key)
     if (isDefaultValue(value) && !containsKey(key)) {

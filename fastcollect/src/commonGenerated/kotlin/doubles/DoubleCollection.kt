@@ -1,5 +1,9 @@
 package io.github.sooniln.fastcollect.doubles
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * A collection of Doubles which inherits from [Collection].
  */
@@ -11,11 +15,8 @@ public interface DoubleCollection : Collection<Double> {
     override fun iterator(): DoubleIterator
 
     override fun contains(element: Double): Boolean {
-        val it = iterator()
-        while (it.hasNext()) {
-            if (it.nextDouble() == element) {
-                return true
-            }
+        for (e in this) {
+            if (e == element) return true
         }
         return false
     }
@@ -43,13 +44,58 @@ public interface DoubleCollection : Collection<Double> {
     }
 
     public fun toDoubleArray(): DoubleArray {
-        val result = DoubleArray(size)
+        val array = DoubleArray(size)
         var index = 0
         for (element in this) {
-            result[index++] = element
+            array[index++] = element
         }
-        return result
+        return array
     }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.any(predicate: (Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+
+    for (element in this) {
+        if (predicate(element)) return true
+    }
+    return false
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.all(predicate: (Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.none(predicate: (Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> DoubleCollection.fold(initial: R, operation: (accumulated: R, Double) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    for (element in this) {
+        accumulated = operation(accumulated, element)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.reduce(operation: (accumulated: Double, Double) -> Double): Double {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var accumulated = it.nextDouble()
+    while (it.hasNext()) {
+        accumulated = operation(accumulated, it.nextDouble())
+    }
+    return accumulated
 }
 
 /**
@@ -89,35 +135,62 @@ public interface MutableDoubleCollection : DoubleCollection, MutableCollection<D
         return modified
     }
 
+    public fun removeAll(elements: DoubleCollection): Boolean = filterInPlace { elements.contains(it) }
     override fun removeAll(elements: Collection<Double>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (elements.contains(it.nextDouble())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is DoubleCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
     }
 
+    public fun retainAll(elements: DoubleCollection): Boolean = filterInPlace { !elements.contains(it) }
     override fun retainAll(elements: Collection<Double>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (!elements.contains(it.nextDouble())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is DoubleCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
+    }
+
+    public operator fun plusAssign(element: Double) {
+        add(element)
+    }
+    public operator fun plusAssign(elements: DoubleCollection) {
+        addAll(elements)
+    }
+    public operator fun plusAssign(elements: Collection<Double>) {
+        addAll(elements)
+    }
+
+    public operator fun minusAssign(element: Double) {
+        remove(element)
+    }
+    public operator fun minusAssign(elements: DoubleCollection) {
+        removeAll(elements)
+    }
+    public operator fun minusAssign(elements: Collection<Double>) {
+        removeAll(elements)
     }
 }
 
-public fun MutableDoubleCollection.removeAll(predicate: (Double) -> Boolean): Boolean = filterInPlace(predicate)
-public fun MutableDoubleCollection.retainAll(predicate: (Double) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableDoubleCollection.removeAll(predicate: (Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
+    var modified = false
+    val it = iterator()
+    while (it.hasNext()) {
+        if (predicate(it.nextDouble())) {
+            it.remove()
+            modified = true
+        }
+    }
+    return modified
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableDoubleCollection.retainAll(predicate: (Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return removeAll { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
 private inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
+    contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
+
     var modified = false
     val it = iterator()
     while (it.hasNext()) {

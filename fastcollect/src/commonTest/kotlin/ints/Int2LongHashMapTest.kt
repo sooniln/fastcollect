@@ -501,39 +501,6 @@ class Int2LongHashMapTest {
         assertEquals(15L, map.lookup(1))
     }
 
-    @Test
-    fun filterReturnsEntriesMatchingPredicate() {
-        val map = Int2LongHashMap()
-        map.putValue(1, 10L); map.putValue(2, 20L); map.putValue(3, 30L)
-        val filtered = map.filter { _, value -> value > 15L }
-        assertFalse(filtered.containsKey(1))
-        assertTrue(filtered.containsKey(2))
-        assertTrue(filtered.containsKey(3))
-        assertEquals(20L, filtered.lookup(2))
-        assertEquals(30L, filtered.lookup(3))
-    }
-
-    @Test
-    fun filterDoesNotMutateOriginalMap() {
-        val map = Int2LongHashMap()
-        map.putValue(1, 10L); map.putValue(2, 20L)
-        map.filter { key, _ -> key == 1 }
-        assertEquals(2, map.size)
-    }
-
-    @Test
-    fun filterToAddsToDestination() {
-        val map = Int2LongHashMap()
-        map.putValue(1, 10L); map.putValue(2, 20L); map.putValue(3, 30L)
-        val dest = Int2LongHashMap()
-        dest.putValue(9, 90L)
-        map.filterTo(dest) { _, value -> value >= 20L }
-        assertEquals(3, dest.size)
-        assertTrue(dest.containsKey(2))
-        assertTrue(dest.containsKey(3))
-        assertTrue(dest.containsKey(9))
-    }
-
     // --- equals / hashCode ---
 
     @Test

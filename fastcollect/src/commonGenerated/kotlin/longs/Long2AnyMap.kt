@@ -29,6 +29,7 @@ public fun <V> mutableLong2AnyMapOf(vararg entries: Pair<Long, V>): MutableLong2
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun <V> buildLong2AnyMap(expectedSize: Int = 0, builderAction: MutableLong2AnyMap<V>.() -> Unit): Long2AnyMap<V> {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val map = Long2AnyHashMap<V>(expectedSize)
     map.builderAction()
     return map

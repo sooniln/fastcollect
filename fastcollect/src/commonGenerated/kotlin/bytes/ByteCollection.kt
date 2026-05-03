@@ -1,5 +1,9 @@
 package io.github.sooniln.fastcollect.bytes
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * A collection of Bytes which inherits from [Collection].
  */
@@ -11,11 +15,8 @@ public interface ByteCollection : Collection<Byte> {
     override fun iterator(): ByteIterator
 
     override fun contains(element: Byte): Boolean {
-        val it = iterator()
-        while (it.hasNext()) {
-            if (it.nextByte() == element) {
-                return true
-            }
+        for (e in this) {
+            if (e == element) return true
         }
         return false
     }
@@ -43,13 +44,58 @@ public interface ByteCollection : Collection<Byte> {
     }
 
     public fun toByteArray(): ByteArray {
-        val result = ByteArray(size)
+        val array = ByteArray(size)
         var index = 0
         for (element in this) {
-            result[index++] = element
+            array[index++] = element
         }
-        return result
+        return array
     }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ByteCollection.any(predicate: (Byte) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+
+    for (element in this) {
+        if (predicate(element)) return true
+    }
+    return false
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ByteCollection.all(predicate: (Byte) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ByteCollection.none(predicate: (Byte) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> ByteCollection.fold(initial: R, operation: (accumulated: R, Byte) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    for (element in this) {
+        accumulated = operation(accumulated, element)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ByteCollection.reduce(operation: (accumulated: Byte, Byte) -> Byte): Byte {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var accumulated = it.nextByte()
+    while (it.hasNext()) {
+        accumulated = operation(accumulated, it.nextByte())
+    }
+    return accumulated
 }
 
 /**
@@ -89,35 +135,62 @@ public interface MutableByteCollection : ByteCollection, MutableCollection<Byte>
         return modified
     }
 
+    public fun removeAll(elements: ByteCollection): Boolean = filterInPlace { elements.contains(it) }
     override fun removeAll(elements: Collection<Byte>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (elements.contains(it.nextByte())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is ByteCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
     }
 
+    public fun retainAll(elements: ByteCollection): Boolean = filterInPlace { !elements.contains(it) }
     override fun retainAll(elements: Collection<Byte>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (!elements.contains(it.nextByte())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is ByteCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
+    }
+
+    public operator fun plusAssign(element: Byte) {
+        add(element)
+    }
+    public operator fun plusAssign(elements: ByteCollection) {
+        addAll(elements)
+    }
+    public operator fun plusAssign(elements: Collection<Byte>) {
+        addAll(elements)
+    }
+
+    public operator fun minusAssign(element: Byte) {
+        remove(element)
+    }
+    public operator fun minusAssign(elements: ByteCollection) {
+        removeAll(elements)
+    }
+    public operator fun minusAssign(elements: Collection<Byte>) {
+        removeAll(elements)
     }
 }
 
-public fun MutableByteCollection.removeAll(predicate: (Byte) -> Boolean): Boolean = filterInPlace(predicate)
-public fun MutableByteCollection.retainAll(predicate: (Byte) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableByteCollection.removeAll(predicate: (Byte) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
+    var modified = false
+    val it = iterator()
+    while (it.hasNext()) {
+        if (predicate(it.nextByte())) {
+            it.remove()
+            modified = true
+        }
+    }
+    return modified
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableByteCollection.retainAll(predicate: (Byte) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return removeAll { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
 private inline fun MutableByteCollection.filterInPlace(removePredicate: (Byte) -> Boolean): Boolean {
+    contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
+
     var modified = false
     val it = iterator()
     while (it.hasNext()) {

@@ -52,21 +52,16 @@ benchmark {
     }
 }
 
-// try to prevent js benchmarks from running out of memory
+// try to prevent js benchmarks from running out of memory - are they leaking?
 tasks.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec>().configureEach {
-    nodeArgs.add("--max-old-space-size=4096")
+    nodeArgs.add("--max-old-space-size=6144")
 }
 
 fun registerMemoryMeasurementTask(name: String, configuration: JavaExec.() -> Unit) = tasks.register<JavaExec>(name) {
     group = "benchmark"
-    //dependsOn(tasks.named("compileKotlinJvm"))
 
     classpath = kotlin.jvm().compilations["main"].runtimeDependencyFiles + kotlin.jvm().compilations["main"].output.allOutputs
-    jvmArgs(
-        "-Djol.skipHotspotSACheck=true", // suppress warnings about HotSpotSA from appearing in stdout
-        "-Djdk.attach.allowAttachSelf=true",
-        //"-javaagent:${jvmMainCompilation.runtimeDependencyFiles.first { it.name.startsWith("jol-core") }}"
-    )
+    jvmArgs("-Djdk.attach.allowAttachSelf=true")
 
     configuration()
 }

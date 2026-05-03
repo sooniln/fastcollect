@@ -7,6 +7,8 @@ import kotlin.contracts.contract
 import kotlin.math.max
 import kotlin.math.min
 
+public typealias ByteArrayList = ByteArrayDeque
+
 /**
  * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing {Byte}s. Can be
  * used in place of the Kotlin standard library [ArrayList] and [ArrayDeque] implementations to improve performance and
@@ -375,6 +377,18 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
     override fun fill(element: Byte) {
         ring.fill(element, 0, size)
         head = 0
+    }
+
+    override fun reverse() {
+        val midPoint = size / 2
+        if (midPoint < 1) return
+        var i = head
+        var j = ring.position(size - 1)
+        repeat(midPoint) {
+            val tmp = ring[i]
+            ring[i--] = ring[j]
+            ring[j--] = tmp
+        }
     }
 
     override fun toByteArray(): ByteArray {

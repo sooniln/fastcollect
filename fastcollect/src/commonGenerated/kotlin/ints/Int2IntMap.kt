@@ -34,6 +34,7 @@ public fun  mutableInt2IntMapOf(vararg entries: Pair<Int, Int>): MutableInt2IntM
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun  buildInt2IntMap(expectedSize: Int = 0, builderAction: MutableInt2IntMap.() -> Unit): Int2IntMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val map = Int2IntHashMap(expectedSize)
     map.builderAction()
     return map
@@ -144,35 +145,10 @@ public inline fun  Int2IntMap.getValue(key: Int): Int = getOrElse(key) { throw N
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2IntMap.getOrElse(key: Int, defaultValue: () -> Int): Int {
-    contract {
-        callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
-    }
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = lookup(key)
     return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun  Int2IntMap.filterTo(destination: MutableInt2IntMap, predicate: (key: Int, value: Int) -> Boolean): MutableInt2IntMap {
-    contract {
-        callsInPlace(predicate, InvocationKind.UNKNOWN)
-    }
-
-    for (entry in primitiveEntries.fastIterator()) {
-        if (predicate(entry.key(), entry.value())) {
-            destination.putValue(entry.key(), entry.value())
-        }
-    }
-    return destination
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun  Int2IntMap.filter(predicate: (key: Int, value: Int) -> Boolean): Int2IntMap {
-    contract {
-        callsInPlace(predicate, InvocationKind.UNKNOWN)
-    }
-
-    return filterTo(Int2IntHashMap(), predicate)
 }
 
 
@@ -251,9 +227,7 @@ public interface MutableInt2IntMap : Int2IntMap, MutableMap<Int, Int> {
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2IntMap.getOrPut(key: Int, defaultValue: () -> Int): Int {
-    contract {
-        callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE)
-    }
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     var value = lookup(key)
     if (isDefaultValue(value) && !containsKey(key)) {

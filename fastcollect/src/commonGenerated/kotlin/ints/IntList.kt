@@ -22,14 +22,22 @@ public fun IntArray.asIntList(): IntList = IntArrayListWrapper(this)
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun buildIntList(expectedSize: Int = 0, builderAction: MutableIntList.() -> Unit): IntList {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val list = IntArrayDeque(expectedSize)
     list.builderAction()
     return list
 }
 
-public inline fun IntList(size: Int, init: (index: Int) -> Int): IntList = MutableIntList(size, init)
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun IntList(size: Int, init: (index: Int) -> Int): IntList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+    return MutableIntList(size, init)
+}
 
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun MutableIntList(size: Int, init: (index: Int) -> Int): MutableIntList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+
     val list = IntArrayDeque(size)
     repeat(size) { index -> list.add(init(index)) }
     return list
@@ -79,6 +87,30 @@ public interface IntList : List<Int>, IntCollection {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): IntList
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun <R> IntList.foldRight(initial: R, operation: (Int, accumulated: R) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    val it = listIterator(size)
+    while (it.hasPrevious()) {
+        accumulated = operation(it.previous(), accumulated)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun IntList.reduceRight(operation: (accumulated: Int, Int) -> Int) : Int {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = listIterator(size)
+    var accumulated = it.previousInt()
+    while (it.hasPrevious()) {
+        accumulated = operation(accumulated, it.previousInt())
+    }
+    return accumulated
 }
 
 /**
@@ -183,9 +215,21 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableList<Int
     public fun shuffle() {
         for (i in lastIndex downTo 1) {
             val j = Random.nextInt(i + 1)
-            val copy = this.getAt(i)
-            this.setAt(i, this.getAt(j))
-            this.setAt(j, copy)
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+        }
+    }
+
+    public fun reverse() {
+        val midPoint = (size / 2)
+        if (midPoint < 1) return
+        var j = size - 1
+        for (i in 0..<midPoint) {
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+            --j
         }
     }
 

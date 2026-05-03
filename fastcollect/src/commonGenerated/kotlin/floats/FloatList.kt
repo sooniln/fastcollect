@@ -22,14 +22,22 @@ public fun FloatArray.asFloatList(): FloatList = FloatArrayListWrapper(this)
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun buildFloatList(expectedSize: Int = 0, builderAction: MutableFloatList.() -> Unit): FloatList {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val list = FloatArrayDeque(expectedSize)
     list.builderAction()
     return list
 }
 
-public inline fun FloatList(size: Int, init: (index: Int) -> Float): FloatList = MutableFloatList(size, init)
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun FloatList(size: Int, init: (index: Int) -> Float): FloatList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+    return MutableFloatList(size, init)
+}
 
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun MutableFloatList(size: Int, init: (index: Int) -> Float): MutableFloatList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+
     val list = FloatArrayDeque(size)
     repeat(size) { index -> list.add(init(index)) }
     return list
@@ -79,6 +87,30 @@ public interface FloatList : List<Float>, FloatCollection {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): FloatList
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun <R> FloatList.foldRight(initial: R, operation: (Float, accumulated: R) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    val it = listIterator(size)
+    while (it.hasPrevious()) {
+        accumulated = operation(it.previous(), accumulated)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun FloatList.reduceRight(operation: (accumulated: Float, Float) -> Float) : Float {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = listIterator(size)
+    var accumulated = it.previousFloat()
+    while (it.hasPrevious()) {
+        accumulated = operation(accumulated, it.previousFloat())
+    }
+    return accumulated
 }
 
 /**
@@ -183,9 +215,21 @@ public interface MutableFloatList : FloatList, MutableFloatCollection, MutableLi
     public fun shuffle() {
         for (i in lastIndex downTo 1) {
             val j = Random.nextInt(i + 1)
-            val copy = this.getAt(i)
-            this.setAt(i, this.getAt(j))
-            this.setAt(j, copy)
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+        }
+    }
+
+    public fun reverse() {
+        val midPoint = (size / 2)
+        if (midPoint < 1) return
+        var j = size - 1
+        for (i in 0..<midPoint) {
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+            --j
         }
     }
 

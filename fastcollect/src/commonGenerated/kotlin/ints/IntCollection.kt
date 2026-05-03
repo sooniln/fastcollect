@@ -1,5 +1,9 @@
 package io.github.sooniln.fastcollect.ints
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * A collection of Ints which inherits from [Collection].
  */
@@ -11,11 +15,8 @@ public interface IntCollection : Collection<Int> {
     override fun iterator(): IntIterator
 
     override fun contains(element: Int): Boolean {
-        val it = iterator()
-        while (it.hasNext()) {
-            if (it.nextInt() == element) {
-                return true
-            }
+        for (e in this) {
+            if (e == element) return true
         }
         return false
     }
@@ -43,13 +44,58 @@ public interface IntCollection : Collection<Int> {
     }
 
     public fun toIntArray(): IntArray {
-        val result = IntArray(size)
+        val array = IntArray(size)
         var index = 0
         for (element in this) {
-            result[index++] = element
+            array[index++] = element
         }
-        return result
+        return array
     }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.any(predicate: (Int) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+
+    for (element in this) {
+        if (predicate(element)) return true
+    }
+    return false
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.all(predicate: (Int) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.none(predicate: (Int) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> IntCollection.fold(initial: R, operation: (accumulated: R, Int) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    for (element in this) {
+        accumulated = operation(accumulated, element)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.reduce(operation: (accumulated: Int, Int) -> Int): Int {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var accumulated = it.nextInt()
+    while (it.hasNext()) {
+        accumulated = operation(accumulated, it.nextInt())
+    }
+    return accumulated
 }
 
 /**
@@ -89,35 +135,62 @@ public interface MutableIntCollection : IntCollection, MutableCollection<Int> {
         return modified
     }
 
+    public fun removeAll(elements: IntCollection): Boolean = filterInPlace { elements.contains(it) }
     override fun removeAll(elements: Collection<Int>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (elements.contains(it.nextInt())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is IntCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
     }
 
+    public fun retainAll(elements: IntCollection): Boolean = filterInPlace { !elements.contains(it) }
     override fun retainAll(elements: Collection<Int>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (!elements.contains(it.nextInt())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is IntCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
+    }
+
+    public operator fun plusAssign(element: Int) {
+        add(element)
+    }
+    public operator fun plusAssign(elements: IntCollection) {
+        addAll(elements)
+    }
+    public operator fun plusAssign(elements: Collection<Int>) {
+        addAll(elements)
+    }
+
+    public operator fun minusAssign(element: Int) {
+        remove(element)
+    }
+    public operator fun minusAssign(elements: IntCollection) {
+        removeAll(elements)
+    }
+    public operator fun minusAssign(elements: Collection<Int>) {
+        removeAll(elements)
     }
 }
 
-public fun MutableIntCollection.removeAll(predicate: (Int) -> Boolean): Boolean = filterInPlace(predicate)
-public fun MutableIntCollection.retainAll(predicate: (Int) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableIntCollection.removeAll(predicate: (Int) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
+    var modified = false
+    val it = iterator()
+    while (it.hasNext()) {
+        if (predicate(it.nextInt())) {
+            it.remove()
+            modified = true
+        }
+    }
+    return modified
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableIntCollection.retainAll(predicate: (Int) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return removeAll { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
 private inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) -> Boolean): Boolean {
+    contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
+
     var modified = false
     val it = iterator()
     while (it.hasNext()) {

@@ -22,14 +22,22 @@ public fun ByteArray.asByteList(): ByteList = ByteArrayListWrapper(this)
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun buildByteList(expectedSize: Int = 0, builderAction: MutableByteList.() -> Unit): ByteList {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val list = ByteArrayDeque(expectedSize)
     list.builderAction()
     return list
 }
 
-public inline fun ByteList(size: Int, init: (index: Int) -> Byte): ByteList = MutableByteList(size, init)
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun ByteList(size: Int, init: (index: Int) -> Byte): ByteList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+    return MutableByteList(size, init)
+}
 
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun MutableByteList(size: Int, init: (index: Int) -> Byte): MutableByteList {
+    contract { callsInPlace(init, InvocationKind.UNKNOWN) }
+
     val list = ByteArrayDeque(size)
     repeat(size) { index -> list.add(init(index)) }
     return list
@@ -79,6 +87,30 @@ public interface ByteList : List<Byte>, ByteCollection {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): ByteList
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun <R> ByteList.foldRight(initial: R, operation: (Byte, accumulated: R) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    val it = listIterator(size)
+    while (it.hasPrevious()) {
+        accumulated = operation(it.previous(), accumulated)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun ByteList.reduceRight(operation: (accumulated: Byte, Byte) -> Byte) : Byte {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = listIterator(size)
+    var accumulated = it.previousByte()
+    while (it.hasPrevious()) {
+        accumulated = operation(accumulated, it.previousByte())
+    }
+    return accumulated
 }
 
 /**
@@ -183,9 +215,21 @@ public interface MutableByteList : ByteList, MutableByteCollection, MutableList<
     public fun shuffle() {
         for (i in lastIndex downTo 1) {
             val j = Random.nextInt(i + 1)
-            val copy = this.getAt(i)
-            this.setAt(i, this.getAt(j))
-            this.setAt(j, copy)
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+        }
+    }
+
+    public fun reverse() {
+        val midPoint = (size / 2)
+        if (midPoint < 1) return
+        var j = size - 1
+        for (i in 0..<midPoint) {
+            val tmp = getAt(i)
+            setAt(i, getAt(j))
+            setAt(j, tmp)
+            --j
         }
     }
 

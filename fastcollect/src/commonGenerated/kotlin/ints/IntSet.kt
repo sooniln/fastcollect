@@ -37,6 +37,28 @@ public interface IntSet : Set<Int>, IntCollection {
     }
 
     override fun containsAll(elements: Collection<Int>): Boolean = super.containsAll(elements)
+
+    public infix fun union(other: IntSet): IntSet = IntHashSet(this).apply { addAll(other) }
+
+    public infix fun intersect(other: IntSet): IntSet {
+        if (other.size < size) return other.intersect(this)
+
+        val set = IntHashSet(size)
+        for (element in other) {
+            if (contains(element)) set.add(element)
+        }
+        return set
+    }
+
+    public infix fun subtract(other: IntSet): IntSet {
+        if (other.size < size) return other.intersect(this)
+
+        val set = IntHashSet(size)
+        for (element in other) {
+            if (!contains(element)) set.add(element)
+        }
+        return set
+    }
 }
 
 /**

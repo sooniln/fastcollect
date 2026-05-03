@@ -29,6 +29,7 @@ public fun <V> mutableInt2AnyMapOf(vararg entries: Pair<Int, V>): MutableInt2Any
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun <V> buildInt2AnyMap(expectedSize: Int = 0, builderAction: MutableInt2AnyMap<V>.() -> Unit): Int2AnyMap<V> {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
     val map = Int2AnyHashMap<V>(expectedSize)
     map.builderAction()
     return map

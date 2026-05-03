@@ -7,6 +7,8 @@ import kotlin.contracts.contract
 import kotlin.math.max
 import kotlin.math.min
 
+public typealias IntArrayList = IntArrayDeque
+
 /**
  * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing {Int}s. Can be
  * used in place of the Kotlin standard library [ArrayList] and [ArrayDeque] implementations to improve performance and
@@ -375,6 +377,18 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
     override fun fill(element: Int) {
         ring.fill(element, 0, size)
         head = 0
+    }
+
+    override fun reverse() {
+        val midPoint = size / 2
+        if (midPoint < 1) return
+        var i = head
+        var j = ring.position(size - 1)
+        repeat(midPoint) {
+            val tmp = ring[i]
+            ring[i--] = ring[j]
+            ring[j--] = tmp
+        }
     }
 
     override fun toIntArray(): IntArray {

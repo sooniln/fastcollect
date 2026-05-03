@@ -1,5 +1,9 @@
 package io.github.sooniln.fastcollect.floats
 
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
 /**
  * A collection of Floats which inherits from [Collection].
  */
@@ -11,11 +15,8 @@ public interface FloatCollection : Collection<Float> {
     override fun iterator(): FloatIterator
 
     override fun contains(element: Float): Boolean {
-        val it = iterator()
-        while (it.hasNext()) {
-            if (it.nextFloat() == element) {
-                return true
-            }
+        for (e in this) {
+            if (e == element) return true
         }
         return false
     }
@@ -43,13 +44,58 @@ public interface FloatCollection : Collection<Float> {
     }
 
     public fun toFloatArray(): FloatArray {
-        val result = FloatArray(size)
+        val array = FloatArray(size)
         var index = 0
         for (element in this) {
-            result[index++] = element
+            array[index++] = element
         }
-        return result
+        return array
     }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.any(predicate: (Float) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+
+    for (element in this) {
+        if (predicate(element)) return true
+    }
+    return false
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.all(predicate: (Float) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.none(predicate: (Float) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> FloatCollection.fold(initial: R, operation: (accumulated: R, Float) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    for (element in this) {
+        accumulated = operation(accumulated, element)
+    }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.reduce(operation: (accumulated: Float, Float) -> Float): Float {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var accumulated = it.nextFloat()
+    while (it.hasNext()) {
+        accumulated = operation(accumulated, it.nextFloat())
+    }
+    return accumulated
 }
 
 /**
@@ -89,35 +135,62 @@ public interface MutableFloatCollection : FloatCollection, MutableCollection<Flo
         return modified
     }
 
+    public fun removeAll(elements: FloatCollection): Boolean = filterInPlace { elements.contains(it) }
     override fun removeAll(elements: Collection<Float>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (elements.contains(it.nextFloat())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is FloatCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
     }
 
+    public fun retainAll(elements: FloatCollection): Boolean = filterInPlace { !elements.contains(it) }
     override fun retainAll(elements: Collection<Float>): Boolean {
-        var modified = false
-        val it = iterator()
-        while (it.hasNext()) {
-            if (!elements.contains(it.nextFloat())) {
-                it.remove()
-                modified = true
-            }
-        }
-        return modified
+        return if (elements is FloatCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
+    }
+
+    public operator fun plusAssign(element: Float) {
+        add(element)
+    }
+    public operator fun plusAssign(elements: FloatCollection) {
+        addAll(elements)
+    }
+    public operator fun plusAssign(elements: Collection<Float>) {
+        addAll(elements)
+    }
+
+    public operator fun minusAssign(element: Float) {
+        remove(element)
+    }
+    public operator fun minusAssign(elements: FloatCollection) {
+        removeAll(elements)
+    }
+    public operator fun minusAssign(elements: Collection<Float>) {
+        removeAll(elements)
     }
 }
 
-public fun MutableFloatCollection.removeAll(predicate: (Float) -> Boolean): Boolean = filterInPlace(predicate)
-public fun MutableFloatCollection.retainAll(predicate: (Float) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableFloatCollection.removeAll(predicate: (Float) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
+    var modified = false
+    val it = iterator()
+    while (it.hasNext()) {
+        if (predicate(it.nextFloat())) {
+            it.remove()
+            modified = true
+        }
+    }
+    return modified
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun MutableFloatCollection.retainAll(predicate: (Float) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return removeAll { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
 private inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float) -> Boolean): Boolean {
+    contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
+
     var modified = false
     val it = iterator()
     while (it.hasNext()) {
