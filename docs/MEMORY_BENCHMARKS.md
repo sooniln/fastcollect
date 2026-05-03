@@ -16,15 +16,15 @@ given that the Kotlin collections store boxed primitives and FastCollect stores 
 
 ### List ###
 
-![List Memory Usage](docs/list_memory.svg)
+![List Memory Usage](list_memory.svg)
 
 ### Set ###
 
-![Set Memory Usage](docs/set_memory.svg)
+![Set Memory Usage](set_memory.svg)
 
 ### Map ###
 
-![Map Memory Usage](docs/map_memory.svg)
+![Map Memory Usage](map_memory.svg)
 
 ## Empty Collection Memory Usage ##
 
@@ -39,15 +39,15 @@ for empty / small collections that programs were running out of memory for reaso
 
 ### List ###
 
-![Empty List Memory Usage](docs/empty_list_memory_split.svg)
+![Empty List Memory Usage](empty_list_memory_split.svg)
 
 ### Set ###
 
-![Empty Set Memory Usage](docs/empty_set_memory_split.svg)
+![Empty Set Memory Usage](empty_set_memory_split.svg)
 
 ### Map ###
 
-![Empty Map Memory Usage](docs/empty_map_memory_split.svg)
+![Empty Map Memory Usage](empty_map_memory_split.svg)
 
 ## Collection Splits Memory Usage ##
 
@@ -64,12 +64,12 @@ factor than fastutils uses by default).
 
 ### List ###
 
-![List Memory Overhead Splits](docs/list_memory_split.svg)
+![List Memory Overhead Splits](list_memory_split.svg)
 
 ### Set ###
 
-![Set Memory Overhead Splits](docs/set_memory_split.svg)
+![Set Memory Overhead Splits](set_memory_split.svg)
 
 ### Map ###
 
-![Map Memory Overhead Splits](docs/map_memory_split.svg)
+![Map Memory Overhead Splits](map_memory_split.svg)
