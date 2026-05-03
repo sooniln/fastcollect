@@ -134,7 +134,7 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableList<Int
     public fun setAt(index: Int, element: Int)
 
     override fun add(element: Int): Boolean {
-        add(size, element)
+        addLast(element)
         return true
     }
 
@@ -149,10 +149,10 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableList<Int
         val index = indexOf(element)
         if (index == -1) {
             return false
+        } else {
+            removeAt(index)
+            return true
         }
-
-        removeAt(index)
-        return true
     }
 
     public fun removeRange(fromIndex: Int, toIndex: Int)

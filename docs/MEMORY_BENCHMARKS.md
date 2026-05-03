@@ -30,8 +30,8 @@ given that the Kotlin collections store boxed primitives and FastCollect stores 
 
 An often overlooked axis in memory benchmarking is testing the overhead of empty collections. Empty (or small sized)
 collections can be very common in many programming scenarios. An 'ideal' empty collection would use no memory since it
-has nothing to store. Obviously this isn't realistic, but here we compare the memory usage of 1,000,000 empty
-collections.
+has nothing to store. Obviously we can't store anything with zero overhead in reality, so here we compare the memory
+usage of 1,000,000 empty collections.
 
 The results show that FastCollect consistently matches Kotlin collections for low overhead. Fastutil and KDS are
 surprisingly bad for Sets and Maps (indeed one of the impetuses for this project was that fastutil wasted enough space

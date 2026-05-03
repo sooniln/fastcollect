@@ -134,7 +134,7 @@ public interface MutableByteList : ByteList, MutableByteCollection, MutableList<
     public fun setAt(index: Int, element: Byte)
 
     override fun add(element: Byte): Boolean {
-        add(size, element)
+        addLast(element)
         return true
     }
 
@@ -149,10 +149,10 @@ public interface MutableByteList : ByteList, MutableByteCollection, MutableList<
         val index = indexOf(element)
         if (index == -1) {
             return false
+        } else {
+            removeAt(index)
+            return true
         }
-
-        removeAt(index)
-        return true
     }
 
     public fun removeRange(fromIndex: Int, toIndex: Int)

@@ -5,18 +5,18 @@
 
 A library for high-performance primitive collections in the Kotlin ecosystem.
 
-FastCollect can be seen as a response to [fastutil](https://github.com/vigna/fastutil) project, but for Kotlin. FastUtil
-has served as the library of choice for representing primitive collections in Java for many years. While it is usable by
-Kotlin on JVM platforms it ends up being awkward, as it does not support many common Kotlin patterns and idioms, and
-also cannot be used outside the JVM ecosystem. FastCollect aims to solve these problems.
+FastCollect can be seen as a response to [fastutil](https://github.com/vigna/fastutil) library, but for Kotlin. FastUtil has served as the primitives
+library of choice in Java for many years. While it is usable by Kotlin on JVM platforms it ends up being awkward, as it
+does not support many common Kotlin patterns and idioms, and also cannot be used outside the JVM ecosystem. FastCollect
+aims to fill this gap.
+
+High level takeaways - FastCollect can pretty much instantly ensure:
+
+  * CPU speedup:
+    * JVM
+  * 4-5x less memory usage than Kotlin collections
 
 ## Quick Start ##
-
-FastCollect can be used as a drop in replacement for Kotlin standard library collections, and should provide immediate
-memory and CPU improvements without any further work. However, many of the Kotlin standard library APIs are not flexible
-enough to properly support primitives without boxing penalties. In order to avoid boxing penalties, FastCollect has
-marked methods that force boxing as deprecated (for visibility in IDEs, the methods will still function exactly as
-expected) and provided alternatives.
 
 You can add FastCollect as a dependency in your project with:
 
@@ -35,6 +35,14 @@ implementation 'io.github.sooniln:fastcollect-kotlin:0.0.1'
     <version>0.0.1</version>
 </dependency>
 ```
+
+FastCollect can be used as a drop in replacement for Kotlin standard library collections, and should provide immediate
+memory and CPU improvements without any further work. However, many of the Kotlin standard library APIs are not flexible
+enough to properly support primitives without risking boxing penalties. Note that on JVM platforms, with tight and
+simple loops the runtime is often intelligent enough to optimize away boxing - however this may not happen with more
+complex loops and logic. In addition, it's unclear to me what the situation is on non-JVM platforms... Thus, in order to
+avoid potential boxing penalties, FastCollect has marked methods that force boxing as deprecated (for visibility in
+IDEs, the methods will still function exactly as expected) and provided alternatives.
 
 Note that it is generally preferable to keep FastCollect collections as specifically typed as possible. I.e. when
 possible, prefer:

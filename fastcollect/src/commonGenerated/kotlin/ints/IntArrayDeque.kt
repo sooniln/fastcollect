@@ -79,100 +79,127 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         ring[ring.position(rangeCheck(index))] = element
     }
 
+    override fun addFirst(element: Int) {
+        val newSize = size + 1
+        ensureCapacity(newSize)
+        head = ring.decrementPosition(head)
+        ring[head] = element
+        size = newSize
+    }
+
+    override fun addLast(element: Int) {
+        val newSize = size + 1
+        ensureCapacity(newSize)
+        ring[ring.position(size)] = element
+        size = newSize
+    }
+
     override fun add(index: Int, element: Int) {
         rangeCheckForAdd(index)
+        when (index) {
+            size -> addLast(element)
+            0 -> addFirst(element)
+            else -> addMiddle(index, element)
+        }
+    }
+
+    private fun addMiddle(index: Int, element: Int) {
         val newSize = size + 1
         ensureCapacity(newSize)
 
-        if (index == size) {
-            ring[ring.position(size)] = element
-        } else if (index == 0) {
-            head = ring.decrementPosition(head)
-            ring[head] = element
-        } else {
-            // attempt to shift a minimal number of elements depending on where position falls within the array
-            val position = ring.position(index)
-            if (index < newSize shr 1) {
-                // shift elements before position
-                val actualPosition = ring.decrementPosition(position)
-                val newHead = ring.decrementPosition(head)
-                if (actualPosition >= head) {
-                    // head before position
-                    ring[newHead] = ring[head]  // first element could possibly roll over to the back of the array
-                    ring.copyInto(ring, head, head + 1, position)
-                } else {
-                    // head after position
-                    ring.copyInto(ring, newHead, head, ring.size) // head can't be zero
-                    ring[ring.size - 1] = ring[0]
-                    ring.copyInto(ring, 0, 1, position)
-                }
-                ring[actualPosition] = element
-                head = newHead
+        // attempt to shift a minimal number of elements depending on where position falls within the array
+        val position = ring.position(index)
+        if (index < newSize shr 1) {
+            // shift elements before position
+            val actualPosition = ring.decrementPosition(position)
+            val newHead = ring.decrementPosition(head)
+            if (actualPosition >= head) {
+                // head before position
+                ring[newHead] = ring[head]  // first element could possibly roll over to the back of the array
+                ring.copyInto(ring, head, head + 1, position)
             } else {
-                // shift elements after position
-                val tail = ring.position(size)
-                if (position < tail) {
-                    // position before tail
-                    ring.copyInto(ring, position + 1, position, tail)
-                } else {
-                    // position after tail
-                    val lastIndex = ring.size - 1
-                    ring.copyInto(ring, 1, 0, tail)
-                    ring[0] = ring[lastIndex]
-                    ring.copyInto(ring, position + 1, position, lastIndex)
-                }
-                ring[position] = element
+                // head after position
+                ring.copyInto(ring, newHead, head, ring.size) // head can't be zero
+                ring[ring.size - 1] = ring[0]
+                ring.copyInto(ring, 0, 1, position)
             }
-            ring[ring.position(index)] = element
+            ring[actualPosition] = element
+            head = newHead
+        } else {
+            // shift elements after position
+            val tail = ring.position(size)
+            if (position < tail) {
+                // position before tail
+                ring.copyInto(ring, position + 1, position, tail)
+            } else {
+                // position after tail
+                val lastIndex = ring.size - 1
+                ring.copyInto(ring, 1, 0, tail)
+                ring[0] = ring[lastIndex]
+                ring.copyInto(ring, position + 1, position, lastIndex)
+            }
+            ring[position] = element
         }
+        ring[ring.position(index)] = element
         size = newSize
+    }
+
+    override fun removeFirst(): Int {
+        if (isEmpty()) throw NoSuchElementException()
+        val element = ring[head]
+        head = ring.incrementPosition(head)
+        --size
+        return element
+    }
+
+    override fun removeLast(): Int {
+        if (isEmpty()) throw NoSuchElementException()
+        return ring[ring.position(--size)]
     }
 
     override fun removeAt(index: Int): Int {
         rangeCheck(index)
 
-        val element: Int
+        return when (index) {
+            lastIndex -> removeLast()
+            0 -> removeFirst()
+            else -> removeMiddle(index)
+        }
+    }
 
-        val lastIndex = size - 1
-        if (index == lastIndex) {
-            element = ring[ring.position(lastIndex)]
-        } else if (index == 0) {
-            element = ring[head]
+    private fun removeMiddle(index: Int): Int {
+        // attempt to shift a minimal number of elements depending on where position falls within the array
+        val position = ring.position(index)
+        val element = ring[position]
+
+        if (index < size shr 1) {
+            // shift elements before position
+            if (position >= head) {
+                // head before position
+                ring.copyInto(ring, head + 1, head, position)
+            } else {
+                // head after position
+                ring.copyInto(ring, 1, 0, position)
+                ring[0] = ring[ring.size - 1]
+                ring.copyInto(ring, head + 1, head, ring.size - 1)
+            }
+
             head = ring.incrementPosition(head)
         } else {
-            // attempt to shift a minimal number of elements depending on where position falls within the array
-            val position = ring.position(index)
-            element = ring[position]
-
-            if (index < size shr 1) {
-                // shift elements before position
-                if (position >= head) {
-                    // head before position
-                    ring.copyInto(ring, head + 1, head, position)
-                } else {
-                    // head after position
-                    ring.copyInto(ring, 1, 0, position)
-                    ring[0] = ring[ring.size - 1]
-                    ring.copyInto(ring, head + 1, head, ring.size - 1)
-                }
-
-                head = ring.incrementPosition(head)
+            // shift elements after position
+            val tail = ring.position(size - 1)
+            if (position <= tail) {
+                // position before tail
+                ring.copyInto(ring, position, position + 1, tail + 1)
             } else {
-                // shift elements after position
-                val tail = ring.position(lastIndex)
-                if (position <= tail) {
-                    // position before tail
-                    ring.copyInto(ring, position, position + 1, tail + 1)
-                } else {
-                    // position after tail
-                    ring.copyInto(ring, position, position + 1, ring.size)
-                    ring[ring.size - 1] = ring[0]
-                    ring.copyInto(ring, 0, 1, tail + 1)
-                }
+                // position after tail
+                ring.copyInto(ring, position, position + 1, ring.size)
+                ring[ring.size - 1] = ring[0]
+                ring.copyInto(ring, 0, 1, tail + 1)
             }
         }
 
-        size--
+        --size
         return element
     }
 

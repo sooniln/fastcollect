@@ -134,7 +134,7 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableList<
     public fun setAt(index: Int, element: Long)
 
     override fun add(element: Long): Boolean {
-        add(size, element)
+        addLast(element)
         return true
     }
 
@@ -149,10 +149,10 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableList<
         val index = indexOf(element)
         if (index == -1) {
             return false
+        } else {
+            removeAt(index)
+            return true
         }
-
-        removeAt(index)
-        return true
     }
 
     public fun removeRange(fromIndex: Int, toIndex: Int)

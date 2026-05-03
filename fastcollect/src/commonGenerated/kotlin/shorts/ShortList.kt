@@ -134,7 +134,7 @@ public interface MutableShortList : ShortList, MutableShortCollection, MutableLi
     public fun setAt(index: Int, element: Short)
 
     override fun add(element: Short): Boolean {
-        add(size, element)
+        addLast(element)
         return true
     }
 
@@ -149,10 +149,10 @@ public interface MutableShortList : ShortList, MutableShortCollection, MutableLi
         val index = indexOf(element)
         if (index == -1) {
             return false
+        } else {
+            removeAt(index)
+            return true
         }
-
-        removeAt(index)
-        return true
     }
 
     public fun removeRange(fromIndex: Int, toIndex: Int)

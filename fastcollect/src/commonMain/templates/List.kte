@@ -134,7 +134,7 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, Mut
     public fun setAt(index: Int, element: ${Type})
 
     override fun add(element: ${Type}): Boolean {
-        add(size, element)
+        addLast(element)
         return true
     }
 
@@ -149,10 +149,10 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, Mut
         val index = indexOf(element)
         if (index == -1) {
             return false
+        } else {
+            removeAt(index)
+            return true
         }
-
-        removeAt(index)
-        return true
     }
 
     public fun removeRange(fromIndex: Int, toIndex: Int)

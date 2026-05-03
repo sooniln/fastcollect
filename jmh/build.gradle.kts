@@ -60,6 +60,18 @@ registerJMHTask("FastCollectSet") {
     includes.set(listOf("SetBenchmark\\.fastcollect"))
 }
 
+registerJMHTask("List") {
+    includes.set(listOf("ListBenchmark\\..+?Add"))
+}
+
+registerJMHTask("Map") {
+    includes.set(listOf("MapBenchmark\\."))
+}
+
+registerJMHTask("Set") {
+    includes.set(listOf("SetBenchmark\\."))
+}
+
 // ensure JMH tasks are never cached
 tasks.withType<JMHTask> {
     outputs.upToDateWhen { false }
