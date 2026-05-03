@@ -25,36 +25,36 @@ fun main() {
 
     emptySplitRow("listFastCollect", totalElements) { IntArrayDeque() }
     emptySplitRow("listFastutil", totalElements) { IntArrayList() }
-    emptySplitRow("listKds", totalElements) { korlibs.datastructure.IntArrayList() }
-    emptySplitRow("listJvm", totalElements) { ArrayList<Int>() }
+    emptySplitRow("listKDS", totalElements) { korlibs.datastructure.IntArrayList() }
+    emptySplitRow("listKotlin", totalElements) { ArrayList<Int>() }
 
     emptySplitRow("setFastCollect", totalElements) { IntHashSet() }
     emptySplitRow("setFastutil", totalElements) { IntOpenHashSet() }
-    emptySplitRow("setKds", totalElements) { IntSet() }
-    emptySplitRow("setJvm", totalElements) { HashSet<Int>() }
+    emptySplitRow("setKDS", totalElements) { IntSet() }
+    emptySplitRow("setKotlin", totalElements) { HashSet<Int>() }
 
     emptySplitRow("mapFastCollect", totalElements) { Int2IntHashMap() }
     emptySplitRow("mapFastutil", totalElements) { Int2IntOpenHashMap() }
-    emptySplitRow("mapKds", totalElements) { IntIntMap() }
-    emptySplitRow("mapJvm", totalElements) { HashMap<Int, Int>() }
+    emptySplitRow("mapKDS", totalElements) { IntIntMap() }
+    emptySplitRow("mapKotlin", totalElements) { HashMap<Int, Int>() }
 
     for (numCollections in growingSplitCounts(totalElements)) {
         val size = totalElements / numCollections
 
         splitRow("listFastCollect", numCollections, IntArrayDeque(size).apply { repeat(size) { add(it + 1) } })
         splitRow("listFastutil", numCollections, IntArrayList(size).apply { repeat(size) { add(it + 1) } })
-        splitRow("listKds", numCollections, korlibs.datastructure.IntArrayList(size).apply { repeat(size) { add(it + 1) } })
-        splitRow("listJvm", numCollections, ArrayList<Int>(size).apply { repeat(size) { add(it + 1) } })
+        splitRow("listKDS", numCollections, korlibs.datastructure.IntArrayList(size).apply { repeat(size) { add(it + 1) } })
+        splitRow("listKotlin", numCollections, ArrayList<Int>(size).apply { repeat(size) { add(it + 1) } })
 
         splitRow("setFastCollect", numCollections, IntHashSet(size).apply { repeat(size) { add(it + 1) } })
         splitRow("setFastutil", numCollections, IntOpenHashSet(size).apply { repeat(size) { add(it + 1) } })
-        splitRow("setKds", numCollections, IntSet().apply { repeat(size) { add(it + 1) } })
-        splitRow("setJvm", numCollections, HashSet<Int>(size).apply { repeat(size) { add(it + 1) } })
+        splitRow("setKDS", numCollections, IntSet().apply { repeat(size) { add(it + 1) } })
+        splitRow("setKotlin", numCollections, HashSet<Int>(size).apply { repeat(size) { add(it + 1) } })
 
         splitRow("mapFastCollect", numCollections, Int2IntHashMap(size).apply { repeat(size) { set(it + 1, it + 1) } })
         splitRow("mapFastutil", numCollections, Int2IntOpenHashMap(size).apply { repeat(size) {set(it + 1, it + 1) } })
-        splitRow("mapKds", numCollections, IntIntMap(size).apply { repeat(size) { set(it + 1, it + 1) } })
-        splitRow("mapJvm", numCollections, HashMap<Int, Int>(size).apply { repeat(size) { set(it + 1, it + 1) } })
+        splitRow("mapKDS", numCollections, IntIntMap(size).apply { repeat(size) { set(it + 1, it + 1) } })
+        splitRow("mapKotlin", numCollections, HashMap<Int, Int>(size).apply { repeat(size) { set(it + 1, it + 1) } })
     }
 }
 

@@ -24,17 +24,17 @@ fun main() {
     val listFastcollect = IntArrayDeque()
     val listFastutil = IntArrayList()
     val listKds = korlibs.datastructure.IntArrayList()
-    val listJvm = ArrayList<Int>()
+    val listKotlin = ArrayList<Int>()
 
     val setFastcollect = IntHashSet()
     val setFastutil = IntOpenHashSet()
     val setKds = IntSet()
-    val setJvm = HashSet<Int>()
+    val setKotlin = HashSet<Int>()
 
     val mapFastcollect = Int2IntHashMap()
     val mapFastutil = Int2IntOpenHashMap()
     val mapKds = IntIntMap()
-    val mapJvm = HashMap<Int, Int>()
+    val mapKotlin = HashMap<Int, Int>()
 
     println("collection,size,bytes")
     var prev = 0
@@ -43,42 +43,41 @@ fun main() {
             listFastcollect.add(i)
             listFastutil.add(i)
             listKds.add(i)
-            listJvm.add(i)
+            listKotlin.add(i)
             setFastcollect.add(i)
             setFastutil.add(i)
             setKds.add(i)
-            setJvm.add(i)
+            setKotlin.add(i)
             mapFastcollect[i] = i
             mapFastutil[i] = i
             mapKds[i] = i
-            mapJvm[i] = i
+            mapKotlin[i] = i
         }
         prev = size
 
         row("listFastCollect", size, listFastcollect)
         row("listFastutil", size, listFastutil)
-        row("listKds", size, listKds)
-        row("listJvm", size, listJvm)
+        row("listKDS", size, listKds)
+        row("listKotlin", size, listKotlin)
         row("setFastCollect", size, setFastcollect)
         row("setFastutil", size, setFastutil)
-        row("setKds", size, setKds)
-        row("setJvm", size, setJvm)
+        row("setKDS", size, setKds)
+        row("setKotlin", size, setKotlin)
         row("mapFastCollect", size, mapFastcollect)
         row("mapFastutil", size, mapFastutil)
-        row("mapKds", size, mapKds)
-        row("mapJvm", size, mapJvm)
+        row("mapKDS", size, mapKds)
+        row("mapKotlin", size, mapKotlin)
     }
 }
 
 private fun row(collection: String, size: Int, obj: Any) = println("$collection,$size,${parseInstance(obj).totalSize()}")
 
-// Generates ~8 sizes per decade on a log scale: 1, 2, 3, 4, 6, 8, 12, 16, ...
 private fun growingSizes(from: Int, to: Int): List<Int> {
     val sizes = mutableListOf<Int>()
     var s = from
     while (s <= to) {
         sizes += s
-        val next = maxOf(s + 1, (s * 1.25).toInt())
+        val next = maxOf(s + 10, (s * 1.1).toInt())
         s = next
     }
     if (sizes.last() != to) sizes += to
