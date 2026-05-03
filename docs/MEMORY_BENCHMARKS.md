@@ -9,7 +9,7 @@ fastutils is not available on other platforms.
 
 Our first benchmarks track how object size grows as the number of elements in a collection increases. From the graphs
 below it is apparent that FastCollect is vastly more memory efficient than standard Kotlin collections, still a decent
-amount more memory efficient than [KDS](https://docs.korge.org/data-structures/), and has general parity with fastutils.
+amount more memory efficient than [KDS](https://docs.korge.org/data-structures/), and is slightly more memory efficient than fastutils.
 
 These results are not terribly surprising (except perhaps that KDS uses more memory than it strictly speaking should),
 given that the Kotlin collections store boxed primitives and FastCollect stores raw primitives.

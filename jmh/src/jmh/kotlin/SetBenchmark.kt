@@ -1,6 +1,8 @@
 package io.github.sooniln.fastcollect
 
+import io.github.sooniln.fastcollect.ints.IntArrayDeque
 import io.github.sooniln.fastcollect.ints.IntHashSet
+import it.unimi.dsi.fastutil.ints.IntArrayList
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet
 import korlibs.datastructure.IntSet
 import org.openjdk.jmh.annotations.Benchmark
@@ -172,6 +174,52 @@ open class SetBenchmark {
     }
 
     @State(Scope.Benchmark)
+    open class KdsAddState {
+        lateinit var kds: IntSet
+
+        @Setup(Level.Iteration)
+        fun setupIteration() {
+            kds = IntSet()
+        }
+    }
+
+    @State(Scope.Benchmark)
+    open class FastutilAddState {
+        lateinit var fastutil: IntOpenHashSet
+
+        @Setup(Level.Iteration)
+        fun setupIteration() {
+            fastutil = IntOpenHashSet()
+            System.gc()
+            Thread.sleep(100)
+        }
+    }
+
+    @State(Scope.Benchmark)
+    open class FastCollectAddState {
+        lateinit var fastcollect: IntHashSet
+
+        @Setup(Level.Iteration)
+        fun setupIteration() {
+            fastcollect = IntHashSet()
+            System.gc()
+            Thread.sleep(100)
+        }
+    }
+
+    @State(Scope.Benchmark)
+    open class KotlinAddState {
+        lateinit var kotlin: HashSet<Int>
+
+        @Setup(Level.Iteration)
+        fun setupIteration() {
+            kotlin = HashSet()
+            System.gc()
+            Thread.sleep(100)
+        }
+    }
+
+    @State(Scope.Benchmark)
     open class KdsPutHitState : BaseState() {
 
         lateinit var kds: IntSet
@@ -219,6 +267,15 @@ open class SetBenchmark {
         }
     }
 
+    @Warmup(iterations = 10, batchSize = 1000000)
+    @Measurement(iterations = 10, batchSize = 1000000)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Benchmark
+    fun fastcollectAdd(s: FastCollectAddState): IntHashSet {
+        s.fastcollect.add(1)
+        return s.fastcollect
+    }
+
     @Benchmark
     fun fastcollectGetHit(s: FastCollectReadState) = s.fastcollect.contains(s.nextInKey())
 
@@ -235,6 +292,15 @@ open class SetBenchmark {
             c += i
         }
         return c
+    }
+
+    @Warmup(iterations = 10, batchSize = 1000000)
+    @Measurement(iterations = 10, batchSize = 1000000)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Benchmark
+    fun kdsAdd(s: KdsAddState): IntSet {
+        s.kds.add(1)
+        return s.kds
     }
 
     @Benchmark
@@ -256,6 +322,15 @@ open class SetBenchmark {
         return c
     }
 
+    @Warmup(iterations = 10, batchSize = 1000000)
+    @Measurement(iterations = 10, batchSize = 1000000)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Benchmark
+    fun fastutilAdd(s: FastutilAddState): IntOpenHashSet {
+        s.fastutil.add(1)
+        return s.fastutil
+    }
+
     @Benchmark
     fun fastutilGetHit(s: FastutilReadState) = s.fastutil.contains(s.nextInKey())
 
@@ -273,6 +348,15 @@ open class SetBenchmark {
             c += it.nextInt()
         }
         return c
+    }
+
+    @Warmup(iterations = 10, batchSize = 1000000)
+    @Measurement(iterations = 10, batchSize = 1000000)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Benchmark
+    fun kotlinAdd(s: KotlinAddState): HashSet<Int> {
+        s.kotlin.add(1)
+        return s.kotlin
     }
 
     @Benchmark

@@ -48,8 +48,12 @@ public class ${Type}ArrayDeque private constructor(array: ${Type}Array, size: In
             max(DEFAULT_CAPACITY, capacity)
         }
 
-        ring = copyFromRing(${Type}Array(newCapacity))
-        head = 0
+        if (head == 0) {
+            ring = ring.copyOf(newCapacity)
+        } else {
+            ring = copyFromRing(${Type}Array(newCapacity))
+            head = 0
+        }
     }
 
     private fun copyFromRing(dest: ${Type}Array): ${Type}Array {
@@ -88,9 +92,10 @@ public class ${Type}ArrayDeque private constructor(array: ${Type}Array, size: In
     }
 
     override fun addLast(element: ${Type}) {
-        val newSize = size + 1
+        val s = size
+        val newSize = s + 1
         ensureCapacity(newSize)
-        ring[ring.position(size)] = element
+        ring[ring.position(s)] = element
         size = newSize
     }
 
@@ -140,7 +145,6 @@ public class ${Type}ArrayDeque private constructor(array: ${Type}Array, size: In
             }
             ring[position] = element
         }
-        ring[ring.position(index)] = element
         size = newSize
     }
 

@@ -48,8 +48,12 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
             max(DEFAULT_CAPACITY, capacity)
         }
 
-        ring = copyFromRing(IntArray(newCapacity))
-        head = 0
+        if (head == 0) {
+            ring = ring.copyOf(newCapacity)
+        } else {
+            ring = copyFromRing(IntArray(newCapacity))
+            head = 0
+        }
     }
 
     private fun copyFromRing(dest: IntArray): IntArray {
@@ -88,9 +92,10 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
     }
 
     override fun addLast(element: Int) {
-        val newSize = size + 1
+        val s = size
+        val newSize = s + 1
         ensureCapacity(newSize)
-        ring[ring.position(size)] = element
+        ring[ring.position(s)] = element
         size = newSize
     }
 
@@ -140,7 +145,6 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
             }
             ring[position] = element
         }
-        ring[ring.position(index)] = element
         size = newSize
     }
 

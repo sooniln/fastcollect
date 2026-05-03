@@ -20,7 +20,7 @@ import kotlin.random.Random
  * performance for comparison across frameworks on specific platforms.
  */
 @Warmup(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
-@Measurement(iterations = 10, time = 2, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 2, timeUnit = BenchmarkTimeUnit.SECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)

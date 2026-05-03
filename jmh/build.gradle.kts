@@ -61,7 +61,7 @@ registerJMHTask("FastCollectSet") {
 }
 
 registerJMHTask("List") {
-    includes.set(listOf("ListBenchmark\\..+?Add"))
+    includes.set(listOf("ListBenchmark\\."))
 }
 
 registerJMHTask("Map") {

@@ -48,8 +48,12 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
             max(DEFAULT_CAPACITY, capacity)
         }
 
-        ring = copyFromRing(ByteArray(newCapacity))
-        head = 0
+        if (head == 0) {
+            ring = ring.copyOf(newCapacity)
+        } else {
+            ring = copyFromRing(ByteArray(newCapacity))
+            head = 0
+        }
     }
 
     private fun copyFromRing(dest: ByteArray): ByteArray {
@@ -88,9 +92,10 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
     }
 
     override fun addLast(element: Byte) {
-        val newSize = size + 1
+        val s = size
+        val newSize = s + 1
         ensureCapacity(newSize)
-        ring[ring.position(size)] = element
+        ring[ring.position(s)] = element
         size = newSize
     }
 
@@ -140,7 +145,6 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
             }
             ring[position] = element
         }
-        ring[ring.position(index)] = element
         size = newSize
     }
 

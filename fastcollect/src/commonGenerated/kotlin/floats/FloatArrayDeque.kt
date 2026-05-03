@@ -48,8 +48,12 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
             max(DEFAULT_CAPACITY, capacity)
         }
 
-        ring = copyFromRing(FloatArray(newCapacity))
-        head = 0
+        if (head == 0) {
+            ring = ring.copyOf(newCapacity)
+        } else {
+            ring = copyFromRing(FloatArray(newCapacity))
+            head = 0
+        }
     }
 
     private fun copyFromRing(dest: FloatArray): FloatArray {
@@ -88,9 +92,10 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
     }
 
     override fun addLast(element: Float) {
-        val newSize = size + 1
+        val s = size
+        val newSize = s + 1
         ensureCapacity(newSize)
-        ring[ring.position(size)] = element
+        ring[ring.position(s)] = element
         size = newSize
     }
 
@@ -140,7 +145,6 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
             }
             ring[position] = element
         }
-        ring[ring.position(index)] = element
         size = newSize
     }
 

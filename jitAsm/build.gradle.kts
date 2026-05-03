@@ -16,6 +16,7 @@ java {
 
 dependencies {
     implementation(project(":fastcollect"))
+    implementation("org.korge:korlibs-datastructure:6.1.0")
 }
 
 private fun registerJitAsm(name: String, configuration: JavaExec.() -> Unit): TaskProvider<JavaExec> = tasks.register<JavaExec>(name) {
@@ -56,5 +57,14 @@ registerJitAsm("jitAsmIntArrayDequeIterate") {
         "-XX:CompileCommand=quiet",
         "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterate",
         "-XX:CompileCommand=print,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterate",
+    )
+}
+
+registerJitAsm("jitAsmIntArrayDequeAdd") {
+    mainClass = "io.github.sooniln.fastcollect.IntArrayDequeAddAsmProbe"
+    jvmArgs(
+        "-XX:CompileCommand=quiet",
+        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.IntArrayDequeAddAsmProbe::add",
+        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.IntArrayDequeAddAsmProbe::add",
     )
 }
