@@ -56,16 +56,16 @@ maps, primtive keys/reference values).
 
 > [!NOTE]
 > FastCollect does not currently support Byte/Short types for HashSet/HashMap, and does not support
-> Float/Double/Reference keys for HashMap. This is done out of a desire to reduce binary size and bloat by eliminating
-> use cases that are unlikely to be very common or useful. If you feel you have a compelling use case that is not
-> currently supported, please reach out.
+> Float/Double/Any keys for HashMap. This is done out of a desire to reduce binary size and bloat by eliminating use
+> cases that are unlikely to be very common or useful. If you feel you have a compelling use case that is not currently
+> supported, please reach out.
 
 ### ConcurrentModificationException ###
 
 The standard Kotlin libraries may make reasonable efforts to throw ConcurrentModificationException if they detect
 collections being modified in inappropriate ways. This already only a best effort, with no guarantees made, but
 FastCollect makes even less of an effort in the interests of performance. Do not expect FastCollect to throw
-ConcurrentModificationException if you are using collections in appropriately except in rare instances.
+ConcurrentModificationException if you are using collections inappropriately, except in rare instances.
 
 ## Performance ##
 

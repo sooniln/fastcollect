@@ -52,7 +52,7 @@ for empty / small collections that programs were running out of memory for reaso
 ## Collection Splits Memory Usage ##
 
 Continuing down this rabbit hole of extra overhead, we now compare the amount of overhead required to store 1,000,000
-Ints in a variety of ways, i.e., 1 collection of 1,000,000 Ints, 2 collections of 500,000 Ints, etc... The theoretical
+Ints in a variety of ways, i.e., 1,000,000 collections of 1 Int, 500,000 collections of 2 Ints, etc... The theoretical
 minimum space required (4 * 1,000,000 = 4,000,000 bytes) is subtracted from the actual space used to obtain the overhead
 displayed below.
 
