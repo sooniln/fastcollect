@@ -1,10 +1,9 @@
 package io.github.sooniln.fastcollect
 
+import io.github.bluuewhale.hashsmith.SwissSet
 import io.github.sooniln.fastcollect.ints.IntHashSet
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet
 import korlibs.datastructure.IntSet
-import korlibs.memory.countTrailingOnes
-import korlibs.memory.countTrailingZeros
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Fork
@@ -26,9 +25,9 @@ import kotlin.random.Random
 /**
  * A JVM specific benchmark which measures the performance of various set libraries.
  */
-@Fork(1)
+@Fork(1, jvmArgsAppend = ["--add-modules", "jdk.incubator.vector"])
 @Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 2000, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 1500, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class SetBenchmark {
@@ -115,10 +114,8 @@ open class SetBenchmark {
         //@Param("seqLow", "seqHigh", "random", "evenLow", "evenHigh", "partitionLow", "partitionHigh", "highBits")
         var order: String = "random"
 
-        //@Param(/*"raw", "xor", */"fib", "fibshift", "phi", "lowbias", "fxhash")
-        //var mixer: String = "raw"
-
-        open val size: Int get() = 5000000
+        @Param("12000", "192000", "1536000", "6272000")
+        open var size: Int = 6272000
 
         var index = 0
         lateinit var inKeys: IntArray
@@ -126,6 +123,7 @@ open class SetBenchmark {
 
         lateinit var fastcollect: IntHashSet
         lateinit var fastutil: IntOpenHashSet
+        lateinit var hashsmith: SwissSet<Int>
         lateinit var kds: IntSet
         lateinit var kotlin: HashSet<Int>
 
@@ -150,19 +148,9 @@ open class SetBenchmark {
         open fun setupTrial() {
             generateInOutKeys(size)
 
-            /*val hashMixer: (Int, Int) -> Int = when (mixer) {
-                "raw" -> { {h, mask -> h} }
-                "xor" -> { {h, mask -> h xor (h ushr 16)} }
-                "fib" -> { {h, mask -> h * -1640531527} }
-                "fibshift" -> { {h, mask -> val x = h * -1640531527; x xor (x ushr 16)} }
-                "phi" -> { {h, mask -> val x = h * -0x61c88647; x xor (x ushr 16)} }
-                "lowbias" -> { {h, mask -> var x = h xor (h shr 16); x *= 0x45d9f3b; x xor (x shr 16)} }
-                "fxhash" -> { {h, mask -> (h * -1814600227).rotateLeft(mask.inv().countTrailingZeroBits()) } }
-                else -> throw IllegalArgumentException("Unknown mixer: $mixer")
-            }*/
-
             fastcollect = IntHashSet(size).apply { for (key in inKeys) add(key) }
             fastutil = IntOpenHashSet(size).apply { for (key in inKeys) add(key) }
+            hashsmith = SwissSet<Int>(size).apply { for (key in inKeys) add(key) }
             kds = IntSet().apply { for (key in inKeys) add(key) }
             kotlin = HashSet<Int>(size).apply { for (key in inKeys) add(key) }
         }
@@ -258,6 +246,35 @@ open class SetBenchmark {
         val it = s.fastutil.iterator()
         while (it.hasNext()) {
             bh.consume(it.nextInt())
+        }
+    }
+
+    @Benchmark
+    fun hashsmithGetHit(s: ReadState) = s.hashsmith.contains(s.nextWrappingInKey())
+
+    @Benchmark
+    fun hashsmithGetMiss(s: ReadState) = s.hashsmith.contains(s.nextWrappingOutKey())
+
+    @Benchmark
+    fun hashsmithPutHit(s: ReadState) = s.hashsmith.add(s.nextWrappingInKey())
+
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 10, batchSize = 5000000)
+    @Measurement(iterations = 20, batchSize = 5000000)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Benchmark
+    fun hashsmithPutMiss(s: EmptyState) = s.hashsmith.add(s.nextInKey())
+
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Benchmark
+    fun hashsmithGrow(s: ReadState) = IntOpenHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
+
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Benchmark
+    fun hashsmithIterate(s: ReadState, bh: Blackhole) {
+        val it = s.hashsmith.iterator()
+        while (it.hasNext()) {
+            bh.consume(it.next())
         }
     }
 

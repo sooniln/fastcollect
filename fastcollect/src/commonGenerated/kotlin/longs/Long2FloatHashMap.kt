@@ -44,13 +44,6 @@ import kotlin.math.min
  * and details.
  *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
- *
- * WARNING: This HashMap is vulnerable to quadratic runtimes for insertion in pathological scenarios (Google "hashtable
- * accidentally quadratic"). Since these scenarios are unlikely to be encountered un-intentionally and can usually be
- * ameliorated client side (via resizing prior to insertion), and since the fix would impose a substantial performance
- * penalty on either iteration or insertion, this behavior is currently not solved. If this is a blocking issue for you
- * or you know of a solution that would not entail unacceptable performance losses in the general case, please reach
- * out.
  */
 public class Long2FloatHashMap @JvmOverloads constructor(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
@@ -198,7 +191,7 @@ public class Long2FloatHashMap @JvmOverloads constructor(
             }
 
             // do not bother to compare slot distances to break out of the loop - in benchmarking this has not proved
-            // worth it. the calculation overhead is likely too high since we don't cache hash/psls. worsened latency in
+            // worth it. the calculation overhead is likely too high since we don't cache hash/DIBs. worsened latency in
             // lookup hits is ~4x the improved latency in lookup misses on average...
 
             slot = slot.nextSlot(mask)

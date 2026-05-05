@@ -10,14 +10,11 @@ repositories {
     mavenCentral()
 }
 
-kotlin {
-    jvmToolchain(17)
-}
-
 dependencies {
     jmhImplementation(project(":fastcollect"))
     jmhImplementation("it.unimi.dsi:fastutil:8.5.18")
     jmhImplementation("org.korge:korlibs-datastructure:6.1.0")
+    jmhImplementation("io.github.bluuewhale:hashsmith:0.2.0")
 }
 
 jmh {
