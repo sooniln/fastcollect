@@ -1,6 +1,7 @@
 package io.github.sooniln.fastcollect
 
 import io.github.sooniln.fastcollect.ints.Int2IntHashMap
+import korlibs.datastructure.IntArrayList
 import korlibs.datastructure.IntIntMap
 import kotlinx.benchmark.Benchmark
 import kotlinx.benchmark.BenchmarkMode
@@ -19,8 +20,8 @@ import kotlin.random.Random
  * A generalized benchmark which does not measure the performance of any particular APIs, but measures generalized
  * performance for comparison across frameworks on specific platforms.
  */
-@Warmup(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 2, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Warmup(iterations = 4, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
@@ -67,12 +68,31 @@ open class MapBenchmark {
     }
 
     @Benchmark
-    fun fastcollectAdd(): Int2IntHashMap {
+    fun fastcollectGrow(): Int2IntHashMap {
         val map = Int2IntHashMap()
         for (e in inKeys) {
             map[e] = 1
         }
         return map
+    }
+
+    @Benchmark
+    fun fastcollectAdd(): Int2IntHashMap {
+        val map = Int2IntHashMap(inKeys.size)
+        for (e in inKeys) {
+            map[e] = 1
+        }
+        return map
+    }
+
+    @Benchmark
+    fun fastcollectRemove(): Int2IntHashMap {
+        val it = fastcollect.iterator()
+        while (it.hasNext()) {
+            it.next()
+            it.remove()
+        }
+        return fastcollect
     }
 
     @Benchmark
@@ -130,12 +150,32 @@ open class MapBenchmark {
     }
 
     @Benchmark
-    fun kdsAdd(): IntIntMap {
+    fun kdsGrow(): IntIntMap {
         val map = IntIntMap()
         for (e in inKeys) {
             map[e] = 1
         }
         return map
+    }
+
+    @Benchmark
+    fun kdsAdd(): IntIntMap {
+        val map = IntIntMap(inKeys.size)
+        for (e in inKeys) {
+            map[e] = 1
+        }
+        return map
+    }
+
+    @Benchmark
+    fun kdsRemove(): IntIntMap {
+        val k = IntArrayList(kds.size)
+        k.add(kds.keys)
+        val it = k.iterator()
+        while (it.hasNext()) {
+            kds.remove(it.next())
+        }
+        return kds
     }
 
     @Benchmark
@@ -184,12 +224,31 @@ open class MapBenchmark {
     }
 
     @Benchmark
-    fun kotlinAdd(): HashMap<Int, Int> {
+    fun kotlinGrow(): HashMap<Int, Int> {
         val map = HashMap<Int, Int>()
         for (e in inKeys) {
             map[e] = 1
         }
         return map
+    }
+
+    @Benchmark
+    fun kotlinAdd(): HashMap<Int, Int> {
+        val map = HashMap<Int, Int>(inKeys.size)
+        for (e in inKeys) {
+            map[e] = 1
+        }
+        return map
+    }
+
+    @Benchmark
+    fun kotlinRemove(): HashMap<Int, Int> {
+        val it = kotlin.iterator()
+        while (it.hasNext()) {
+            it.next()
+            it.remove()
+        }
+        return kotlin
     }
 
     @Benchmark

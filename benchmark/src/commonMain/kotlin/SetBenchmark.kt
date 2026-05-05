@@ -19,8 +19,8 @@ import kotlin.random.Random
  * A generalized benchmark which does not measure the performance of any particular APIs, but measures generalized
  * performance for comparison across frameworks on specific platforms.
  */
-@Warmup(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 2, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Warmup(iterations = 4, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
@@ -66,12 +66,31 @@ open class SetBenchmark {
     }
 
     @Benchmark
-    fun fastcollectAdd(): IntHashSet {
+    fun fastcollectGrow(): IntHashSet {
         val set = IntHashSet()
         for (e in inKeys) {
             set.add(e)
         }
         return set
+    }
+
+    @Benchmark
+    fun fastcollectAdd(): IntHashSet {
+        val set = IntHashSet(inKeys.size)
+        for (e in inKeys) {
+            set.add(e)
+        }
+        return set
+    }
+
+    @Benchmark
+    fun fastcollectRemove(): IntHashSet {
+        val it = fastcollect.iterator()
+        while (it.hasNext()) {
+            it.next()
+            it.remove()
+        }
+        return fastcollect
     }
 
     @Benchmark
@@ -102,12 +121,31 @@ open class SetBenchmark {
     }
 
     @Benchmark
+    fun kdsGrow(): IntSet {
+        val set = IntSet()
+        for (e in inKeys) {
+            set.add(e)
+        }
+        return set
+    }
+
+    @Benchmark
     fun kdsAdd(): IntSet {
         val set = IntSet()
         for (e in inKeys) {
             set.add(e)
         }
         return set
+    }
+
+    @Benchmark
+    fun kdsRemove(): IntSet {
+        val it = kds.iterator()
+        while (it.hasNext()) {
+            it.next()
+            it.remove()
+        }
+        return kds
     }
 
     @Benchmark
@@ -138,12 +176,31 @@ open class SetBenchmark {
     }
 
     @Benchmark
-    fun kotlinAdd(): HashSet<Int> {
+    fun kotlinGrow(): HashSet<Int> {
         val set = HashSet<Int>()
         for (e in inKeys) {
             set.add(e)
         }
         return set
+    }
+
+    @Benchmark
+    fun kotlinAdd(): HashSet<Int> {
+        val set = HashSet<Int>(inKeys.size)
+        for (e in inKeys) {
+            set.add(e)
+        }
+        return set
+    }
+
+    @Benchmark
+    fun kotlinRemove(): HashSet<Int> {
+        val it = kotlin.iterator()
+        while (it.hasNext()) {
+            it.next()
+            it.remove()
+        }
+        return kotlin
     }
 
     @Benchmark

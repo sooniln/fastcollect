@@ -6,17 +6,18 @@ import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.MutableFastIterator
 
+import kotlin.jvm.JvmOverloads
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * A [HashMap](https://en.wikipedia.org/wiki/Hash_table) implementation for storing Long to V
  * relationships. Can be used in place of the Kotlin standard library [HashMap] implementations to improve performance
  * and memory usage. Has the same API contracts as the standard library [HashMap] unless noted otherwise.
  *
- * This implementation differs in behavior from common hash maps in that at low capacity numbers it will simply store
- * elements linearly (similarly to how common ArrayMap implementations work). This may improve performance slightly at
- * low capacities, or at worst will be only a small performance penalty - however it will substantially reduce memory
- * requirements at low capacities.
+ * This implementation differs in behavior from common hash sets in that at low capacity numbers it will effectively
+ * force a loadFactor of 1. This may improve performance slightly at low capacities, or at worst will be only a small
+ * performance penalty - however it will substantially reduce memory requirements at low capacities.
  *
 
  *
@@ -30,8 +31,15 @@ import kotlin.math.max
  * and details.
  *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
+ *
+ * WARNING: This HashMap is vulnerable to quadratic runtimes for insertion in pathological scenarios (Google "hashtable
+ * accidentally quadratic"). Since these scenarios are unlikely to be encountered un-intentionally and can usually be
+ * ameliorated client side (via resizing prior to insertion), and since the fix would impose a substantial performance
+ * penalty on either iteration or insertion, this behavior is currently not solved. If this is a blocking issue for you
+ * or you know of a solution that would not entail unacceptable performance losses in the general case, please reach
+ * out.
  */
-public class Long2AnyHashMap<V>(
+public class Long2AnyHashMap<V> @JvmOverloads constructor(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
     private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
 
@@ -62,7 +70,7 @@ public class Long2AnyHashMap<V>(
     override var size: Int = 0
         private set
 
-    // use threshold to store the initial size before we allocate anything
+    // use threshold to store the initial size before we allocate anything, after that it's the size at which we rehash
     private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
 
     /**
@@ -71,10 +79,10 @@ public class Long2AnyHashMap<V>(
      */
     public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
-        if (keysArr.isEmpty()) {
+        if (keysArr === EMPTY_KEY_ARRAY) {
             threshold = capacity
-        } else {
-            growTo(capacity)
+        } else if (capacity > threshold) {
+            rehash(capacity)
         }
     }
 
@@ -83,65 +91,12 @@ public class Long2AnyHashMap<V>(
      */
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     public fun trimToSize() {
-        val newLength = arraySize(size, loadFactor)
-        if (keysArr.size <= newLength) {
-            return
-        } else if (newLength == 0) {
-            keysArr = EMPTY_KEY_ARRAY
-
-            valuesArr = EMPTY_VALUE_ARRAY as Array<V?>
-
-            threshold = DEFAULT_INITIAL_CAPACITY
-            return
-        }
-
-        if (!keysArr.isHashing()) {
-            keysArr = keysArr.copyOf(newLength)
-            valuesArr = valuesArr.copyOf(newLength)
-            threshold = newLength
-            return
-        }
-
-        val oldKeys = keysArr
-        val oldValues = valuesArr
-        val oldSize = size
-        val oldEndSlot = oldKeys.endSlot()
-
-        keysArr = LongArray(newLength)
-
-        valuesArr = arrayOfNulls<Any>(newLength) as Array<V?>
-
-        size = 0
-
-        if (newLength > HASHIFY_THRESHOLD) {
-            val endSlot = keysArr.endSlot()
-            threshold = (endSlot * loadFactor).toInt()
-
-            keysArr[endSlot] = oldKeys[oldEndSlot]
-            valuesArr[endSlot] = oldValues[oldEndSlot]
-        } else {
-            threshold = newLength
-            if (oldKeys[oldEndSlot] == ZERO) {
-                putArray(ZERO, oldValues[oldEndSlot] as V)
-            }
-        }
-
-        for (slot in 0..<oldEndSlot) {
-            val key = oldKeys[slot]
-            if (key != ZERO) {
-                putHashing(key, oldValues[slot] as V)
-            }
-        }
-
-        size = oldSize
+        rehash(size)
     }
 
     override fun putValue(key: Long, value: V): V? {
         resizeIfNecessary()
-        return if (isHashing()) putHashing(key, value) else putArray(key, value)
-    }
 
-    private fun putHashing(key: Long, value: V): V? {
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -194,24 +149,6 @@ public class Long2AnyHashMap<V>(
         }
     }
 
-    private fun putArray(key: Long, value: V): V? {
-        var slot = 0
-        while (slot < size) {
-            if (keysArr[slot] == key) {
-                val oldValue = valuesArr[slot]
-                valuesArr[slot] = value
-                return oldValue
-            }
-
-            ++slot
-        }
-
-        keysArr[slot] = key
-        valuesArr[slot] = value
-        ++size
-        return defaultValue
-    }
-
     override fun removeKey(key: Long): V? {
         val slot = findSlot(key)
         if (slot >= 0) {
@@ -224,21 +161,17 @@ public class Long2AnyHashMap<V>(
     }
 
     override fun clear() {
-        keysArr.fill(ZERO)
+        if (keysArr !== EMPTY_KEY_ARRAY) {
+            keysArr.fill(ZERO)
 
-        valuesArr.fill(null)
+            valuesArr.fill(null)
 
-        if (keysArr.isHashing()) {
             keysArr[keysArr.endSlot()] = NONZERO
         }
         size = 0
     }
 
     private fun findSlot(key: Long): Int {
-        return if (isHashing()) findSlotHashing(key) else findSlotArray(key)
-    }
-
-    private fun findSlotHashing(key: Long): Int {
         val keysArr = keysArr
 
         if (key == ZERO) {
@@ -255,32 +188,16 @@ public class Long2AnyHashMap<V>(
             } else if (currKey == ZERO) {
                 return -1
             }
-            // do not bother to compare slot distances to break out of the loop - the additional cost is usually more
-            // expensive than a couple extra iterations.
+
+            // do not bother to compare slot distances to break out of the loop - in benchmarking this has not proved
+            // worth it. the calculation overhead is likely too high since we don't cache hash/psls. worsened latency in
+            // lookup hits is ~4x the improved latency in lookup misses on average...
+
             slot = slot.nextSlot(mask)
         }
     }
 
-    private fun findSlotArray(key: Long): Int {
-        val keysArr = keysArr
-
-        // iterate backwards under assumption more recently added values are more likely to be queried
-        var slot = size - 1
-        while (slot >= 0) {
-            if (keysArr[slot] == key) {
-                return slot
-            }
-            --slot
-        }
-
-        return -1
-    }
-
     private fun removeSlot(slot: Int) {
-        if (isHashing()) removeSlotHashing(slot) else removeSlotArray(slot)
-    }
-
-    private fun removeSlotHashing(slot: Int) {
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -317,19 +234,8 @@ public class Long2AnyHashMap<V>(
         --size
     }
 
-    private fun removeSlotArray(slot: Int) {
-        val lastIndex = --size
-        if (slot < lastIndex) {
-            keysArr[slot] = keysArr[lastIndex]
-            valuesArr[slot] = valuesArr[lastIndex]
-
-            valuesArr[lastIndex] = null
-
-        }
-    }
-
     override fun putAll(from: Map<out Long, V>) {
-        ensureCapacity(from.size)
+        ensureCapacity(max(size + (from.size shr 1), from.size))
 
         if (from is Long2AnyMap) {
             for (entry in from.fastIterator()) {
@@ -395,10 +301,6 @@ public class Long2AnyHashMap<V>(
     }
 
     override fun containsValue(value: V): Boolean {
-        return if (isHashing()) containsValueHashing(value) else containsValueArray(value)
-    }
-
-    private fun containsValueHashing(value: V): Boolean {
         val endSlot = keysArr.endSlot()
         if (valuesArr[endSlot] == value && keysArr[endSlot] == ZERO) return true
 
@@ -410,15 +312,6 @@ public class Long2AnyHashMap<V>(
         return false
     }
 
-    private fun containsValueArray(value: V): Boolean {
-        var slot = size - 1
-        while (slot >= 0) {
-            if (valuesArr[slot] == value) return true
-            --slot
-        }
-        return false
-    }
-
     override fun lookup(key: Long): V? {
         val valuesArr = valuesArr
         val slot = findSlot(key)
@@ -426,68 +319,88 @@ public class Long2AnyHashMap<V>(
     }
 
     private fun resizeIfNecessary() {
-        if (keysArr.isEmpty()) {
-            growTo(threshold)
+        if (keysArr === EMPTY_KEY_ARRAY) {
+            rehash(threshold)
         } else if (size >= threshold) {
-            growTo(threshold shl 1)
+            rehash(threshold shl 1)
         }
     }
 
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    private fun growTo(capacity: Int) {
-        val newLength = arraySize(capacity, loadFactor)
-        if (keysArr.size >= newLength) {
+    private fun rehash(capacity: Int) {
+        check(capacity >= size)
+
+        if (capacity == 0 && keysArr !== EMPTY_KEY_ARRAY) {
+            keysArr = EMPTY_KEY_ARRAY
+
+            valuesArr = EMPTY_VALUE_ARRAY as Array<V?>
+
+            threshold = DEFAULT_INITIAL_CAPACITY
             return
         }
 
-        if (newLength <= HASHIFY_THRESHOLD) {
-            keysArr = keysArr.copyOf(newLength)
-            valuesArr = valuesArr.copyOf(newLength)
-            threshold = newLength
-            return
+        // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
+        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1f else loadFactor
+
+        val newLength = arraySize(capacity, actualLoadFactor)
+        if (keysArr.size == newLength) return
+
+        val newKeysArr = LongArray(newLength)
+
+        val newValuesArr = arrayOfNulls<Any>(newLength) as Array<V?>
+
+        val newMask = newKeysArr.mask()
+        val newEndSlot = newKeysArr.endSlot()
+
+        val oldEndSlot = keysArr.endSlot()
+        for (slot in 0..<oldEndSlot) {
+            val key = keysArr[slot]
+            if (key != ZERO) putRehashing(newKeysArr, newValuesArr, newMask, key, valuesArr[slot])
         }
+        newKeysArr[newEndSlot] = keysArr[oldEndSlot]
+        newValuesArr[newEndSlot] = valuesArr[oldEndSlot]
 
-        val oldKeys = keysArr
-        val oldValues = valuesArr
-        val oldSize = size
+        keysArr = newKeysArr
+        valuesArr = newValuesArr
 
-        keysArr = LongArray(newLength)
-
-        valuesArr = arrayOfNulls<Any>(newLength) as Array<V?>
-
-        size = 0
-
-        val endSlot = keysArr.endSlot()
-        threshold = (endSlot * loadFactor).toInt()
-
-        if (!oldKeys.isHashing()) {
-            keysArr[endSlot] = NONZERO
-
-            var slot = 0
-            while (slot < oldSize) {
-                putHashing(oldKeys[slot], oldValues[slot] as V)
-                ++slot
-            }
-        } else {
-            // TODO: better algorithm?
-            val oldEndSlot = oldKeys.endSlot()
-            for (slot in 0..<oldEndSlot) {
-                val key = oldKeys[slot]
-                if (key != ZERO) {
-                    putHashing(key, oldValues[slot] as V)
-                }
-            }
-
-            keysArr[endSlot] = oldKeys[oldEndSlot]
-            valuesArr[endSlot] = oldValues[oldEndSlot]
-        }
-
-        size = oldSize
+        // threshold must always maintain the invariant of at least 1 slot being open
+        threshold = min((newEndSlot * actualLoadFactor).toInt(), newEndSlot - 1)
     }
 
-    override operator fun iterator(): Iterator<Long2AnyMap.Entry<V>> = EntryIterator()
+    // we can assume key doesn't exist in array and that we never insert zero
 
-    override fun fastIterator(): FastIterator<Long2AnyMap.Entry<V>> = FastEntryIterator()
+    private fun putRehashing(keysArr: LongArray, valuesArr: Array<V?>, mask: Int, key: Long, value: V?) {
+
+        var slot = key.slot(mask)
+        var newKey = key
+        var newValue = value
+        var newKeySlotDistance = 0
+        while (true) {
+            val currKey = keysArr[slot]
+            if (currKey == ZERO) {
+                keysArr[slot] = newKey
+                valuesArr[slot] = newValue
+                return
+            }
+
+            val currKeySlotDistance = currKey.slotDistance(slot, mask)
+            if (newKeySlotDistance > currKeySlotDistance) {
+                keysArr[slot] = newKey
+                newKey = currKey
+                val currValue = valuesArr[slot]
+                valuesArr[slot] = newValue
+                newValue = currValue
+                newKeySlotDistance = currKeySlotDistance
+            }
+
+            slot = slot.nextSlot(mask)
+            ++newKeySlotDistance
+        }
+    }
+
+    override operator fun iterator(): MutableIterator<MutableLong2AnyMap.MutableEntry<V>> = EntryIterator()
+
+    override fun fastIterator(): MutableFastIterator<MutableLong2AnyMap.MutableEntry<V>> = FastEntryIterator()
 
     private open inner class SlotIterator {
         val keysArr = this@Long2AnyHashMap.keysArr
@@ -496,17 +409,12 @@ public class Long2AnyHashMap<V>(
         private var slotsLeft = size
         private val mask = keysArr.mask()
 
-        private var slot: Int
+        private var slot = keysArr.endSlot()
         private var previousSlot = -1
 
         init {
-            if (keysArr.isHashing()) {
-                slot = keysArr.endSlot()
-                if (keysArr[slot] != ZERO && slotsLeft > 0) {
-                    decrement()
-                }
-            } else {
-                slot = size - 1
+            if (keysArr[slot] != ZERO && slotsLeft > 0) {
+                decrement()
             }
         }
 
@@ -540,16 +448,12 @@ public class Long2AnyHashMap<V>(
         }
 
         private fun decrement() {
-            if (keysArr.isHashing()) {
-                // deliberate local variable so JIT can optimize better
-                var s = (slot - 1) and mask
-                while (keysArr[s] == ZERO) {
-                    s = (s - 1) and mask
-                }
-                slot = s
-            } else {
-                --slot
-            }
+            // see the similar function within HashSet for an explanation and discussion of why we stride by 17 here
+            var s = slot
+            do {
+                s = (s - 17) and mask
+            } while (keysArr[s] == ZERO)
+            slot = s
         }
     }
 
@@ -616,28 +520,34 @@ public class Long2AnyHashMap<V>(
         }
     }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.isHashing(): Boolean = (size - 1) > HASHIFY_THRESHOLD
-
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun isHashing(): Boolean = keysArr.isHashing()
-
     // the slot at the end of slot iteration (exclusive), also the slot that stores the zero value
     @Suppress("NOTHING_TO_INLINE")
     private inline fun LongArray.endSlot(): Int = size - 1
 
+    // caching the mask in a member var can shave a little off get miss latency - at the cost of +4 bytes per instance
     @Suppress("NOTHING_TO_INLINE")
     private inline fun LongArray.mask() = size - 2
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun mixHash(hashcode: Int): Int {
-        val h = hashcode * INT_PHI
-        return h xor (h ushr 16)
+    private inline fun mixHash(hashcode: Int, mask: Int): Int {
+        // hash smear based on rustc-hash, the hashing function used internally within the rust compiler. this has a
+        // couple advantages for our use case. 1) it's fast 2) it's not a super strong hash function, but we're using it
+        // as a smear... 3) it's a multiplicative hash which means it tends to concentrate entropy in the high bits
+        // (where they're not terribly useful for our needs) - but we can rotate by the table size which concentrates
+        // the entropy in the low bits exactly where we need them! taking the table size into account means that the
+        // hashcode changes every time the table size does, which for a normal robin hood implementation would break
+        // hashcode caching. since we don't cache hashcodes however, this is actually a win for us.
+
+        // this smear also performed quite favorably in testing against a variety of adversarial inputs - but that said
+        // I am definitely not a hashing expert and would not claim this smear is very DOS resistant. if you see
+        // weaknesses, please say something.
+
+        return (hashcode * K).rotateLeft(mask.inv().countTrailingZeroBits())
     }
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun Long.slot(mask: Int): Int {
-        return mixHash(this.hashCode()) and mask
+        return mixHash(this.hashCode(), mask) and mask
     }
 
     @Suppress("NOTHING_TO_INLINE")
@@ -651,35 +561,35 @@ public class Long2AnyHashMap<V>(
     }
 
     private companion object {
-
-        private val EMPTY_KEY_ARRAY = LongArray(0)
-
-        private val EMPTY_VALUE_ARRAY = emptyArray<Any?>()
-
-
         // the value of a field in an uninitialized primitive array
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
         private const val ZERO: Long = 0.toLong()
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
         private const val NONZERO: Long = 1.toLong()
 
-        /** 2<sup>32</sup> &middot; &phi;, &phi; = (&#x221A;5 &minus; 1)/2. */
-        private const val INT_PHI: Int = -0x61c88647
+        private val EMPTY_KEY_ARRAY = longArrayOf(ZERO, NONZERO)
+
+        private val EMPTY_VALUE_ARRAY = arrayOfNulls<Any?>(2)
+
+
+        // Constant taken from:
+        //     "Computationally Easy, Spectrally Good Multipliers for Congruential
+        //     Pseudorandom Number Generators" by Guy Steele and Sebastiano Vigna.
+        private const val K: Int = 0x93d765dd.toInt()
 
         private const val DEFAULT_LOAD_FACTOR = .85f
         private const val DEFAULT_INITIAL_CAPACITY = 1 shl 2  // must be power of two
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two
-        private const val HASHIFY_THRESHOLD: Int = 1 shl 5 // must be power of two
-        private const val MIN_HASH_CAPACITY = HASHIFY_THRESHOLD shr 1 // must be power of two
+
+        // we force the load factor to 1.0 up to the size of two cache lines (which we assume are 64 bytes each)
+        private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * 64 / Long.SIZE_BYTES
 
         private fun arraySize(capacity: Int, loadFactor: Float): Int {
             check(capacity >= 0)
-            return if (capacity <= HASHIFY_THRESHOLD) {
-                capacity
-            } else {
-                // add extra slot to hold zero value at the end
-                max(minPowerOfTwo((capacity / loadFactor).toInt()), MIN_HASH_CAPACITY) + 1
-            }
+            // array must always maintain the invariant of at least one slot remaining open
+            val requiredArraySize = max((capacity / loadFactor).toInt(), capacity + 1)
+            // add extra slot to hold zero value at the end
+            return minPowerOfTwo(requiredArraySize) + 1
         }
 
         private fun minPowerOfTwo(cap: Int): Int {

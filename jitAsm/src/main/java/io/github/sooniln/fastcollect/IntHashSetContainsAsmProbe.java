@@ -13,7 +13,7 @@ public final class IntHashSetContainsAsmProbe {
 
     public static void main(String[] args) {
         Random rnd = new Random();
-        IntHashSet m = new IntHashSet(N_KEYS, 0.75f);
+        IntHashSet m = new IntHashSet(N_KEYS);
         int[] inElements = new int[N_KEYS];
         int[] outElements = new int[N_KEYS];
 

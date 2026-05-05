@@ -5,17 +5,18 @@ import io.github.sooniln.fastcollect.ints.IntHashSet
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
-import org.openjdk.jmh.annotations.CompilerControl
 import org.openjdk.jmh.annotations.Fork
 import org.openjdk.jmh.annotations.Level
 import org.openjdk.jmh.annotations.Measurement
 import org.openjdk.jmh.annotations.Mode
+import org.openjdk.jmh.annotations.OperationsPerInvocation
 import org.openjdk.jmh.annotations.OutputTimeUnit
-import org.openjdk.jmh.annotations.Param
 import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.Setup
 import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.annotations.Warmup
+import org.openjdk.jmh.infra.Blackhole
+import org.openjdk.jmh.infra.IterationParams
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -24,8 +25,8 @@ import kotlin.random.Random
  * A JVM specific benchmark which measures the performance of various list libraries.
  */
 @Fork(1)
-@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class ListBenchmark {
@@ -45,22 +46,40 @@ open class ListBenchmark {
 
     @Suppress("NOTHING_TO_INLINE")
     @State(Scope.Benchmark)
-    open class BaseState {
+    open class ReadState {
         protected val rnd = Random(123)
 
-        @Param("16", "100", "10000", "1000000")
-        var size: Int = 0
+        open val size: Int get() = 5000000
 
         var index = 0
         lateinit var inElements: IntArray
 
+        lateinit var fastcollect: IntArrayDeque
+        lateinit var fastutil: IntArrayList
+        lateinit var kds: korlibs.datastructure.IntArrayList
+        lateinit var kotlin: ArrayList<Int>
+
+        private fun generateInElements(size: Int) {
+            inElements = IntArray(size)
+            generateRandomInElements(rnd, inElements)
+        }
+
         @Setup(Level.Trial)
         open fun setupTrial() {
-            inElements = IntArray(size)
+            generateInElements(size)
+
+            fastcollect = IntArrayDeque(size).apply { for (e in inElements) add(e) }
+            fastutil = IntArrayList(size).apply { for (e in inElements) add(e) }
+            kds = korlibs.datastructure.IntArrayList().apply { for (e in inElements) add(e) }
+            kotlin = ArrayList<Int>(size).apply { for (e in inElements) add(e) }
         }
 
         @Setup(Level.Iteration)
-        open fun setupIteration() {
+        open fun setupIteration(params: IterationParams) {
+            if (params.batchSize > inElements.size) {
+                generateInElements(params.batchSize)
+            }
+
             index = 0
         }
 
@@ -74,195 +93,124 @@ open class ListBenchmark {
             return i
         }
 
-        inline fun nextInElement() = inElements[nextIndex()]
+        inline fun nextInKey() = inElements[index++]
+        inline fun nextWrappingInKey() = inElements[nextIndex()]
     }
 
     @State(Scope.Benchmark)
-    open class KdsReadState : BaseState() {
-        lateinit var kds: korlibs.datastructure.IntArrayList
-
-        @Setup(Level.Trial)
-        override fun setupTrial() {
-            super.setupTrial()
-            generateRandomInElements(rnd, inElements)
-            kds = korlibs.datastructure.IntArrayList().apply { for (key in inElements) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class FastutilReadState : BaseState() {
-        lateinit var fastutil: IntArrayList
-
-        @Setup(Level.Trial)
-        override fun setupTrial() {
-            super.setupTrial()
-            generateRandomInElements(rnd, inElements)
-            fastutil = IntArrayList(size).apply { for (key in inElements) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class FastCollectReadState : BaseState() {
-        lateinit var fastcollect: IntArrayDeque
-
-        @Setup(Level.Trial)
-        override fun setupTrial() {
-            super.setupTrial()
-            generateRandomInElements(rnd, inElements)
-            fastcollect = IntArrayDeque(size).apply { for (key in inElements) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class KotlinReadState : BaseState() {
-        lateinit var kotlin: ArrayList<Int>
-
-        @Setup(Level.Trial)
-        override fun setupTrial() {
-            super.setupTrial()
-            generateRandomInElements(rnd, inElements)
-            kotlin = ArrayList<Int>(size).apply { for (key in inElements) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class KdsAddState {
-        lateinit var kds: korlibs.datastructure.IntArrayList
-
+    open class EmptyState : ReadState() {
         @Setup(Level.Iteration)
-        fun setupIteration() {
-            kds = korlibs.datastructure.IntArrayList()
+        override fun setupIteration(params: IterationParams) {
+            super.setupIteration(params)
+            fastcollect.clear()
+            fastutil.clear()
+            kds.clear()
+            kotlin.clear()
         }
     }
 
-    @State(Scope.Benchmark)
-    open class FastutilAddState {
-        lateinit var fastutil: IntArrayList
-
-        @Setup(Level.Iteration)
-        fun setupIteration() {
-            fastutil = IntArrayList()
-            System.gc()
-            Thread.sleep(100)
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class FastCollectAddState {
-        lateinit var fastcollect: IntArrayDeque
-
-        @Setup(Level.Iteration)
-        fun setupIteration() {
-            fastcollect = IntArrayDeque()
-            System.gc()
-            Thread.sleep(100)
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class KotlinAddState {
-        lateinit var kotlin: ArrayList<Int>
-
-        @Setup(Level.Iteration)
-        fun setupIteration() {
-            kotlin = ArrayList()
-            System.gc()
-            Thread.sleep(100)
-        }
-    }
-
-    @Warmup(iterations = 10, batchSize = 1000000)
-    @Measurement(iterations = 10, batchSize = 1000000)
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 20, batchSize = 5000000)
+    @Measurement(iterations = 40, batchSize = 5000000)
     @BenchmarkMode(Mode.SingleShotTime)
     @Benchmark
-    fun fastcollectAdd(s: FastCollectAddState): IntArrayDeque {
-        s.fastcollect.add(1)
-        return s.fastcollect
-    }
+    fun fastcollectAdd(s: EmptyState) = s.fastcollect.add(s.nextInKey())
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun fastcollectSearch(s: FastCollectReadState): Int {
-        val element = s.nextInElement()
+    fun fastcollectGrow(s: ReadState) = IntArrayDeque().apply { repeat(s.size) { add(s.inElements[it]) } }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun fastcollectSearch(s: ReadState): Int {
+        val element = s.nextWrappingInKey()
         return s.fastcollect.indexOf(element) + s.fastcollect.lastIndexOf(element)
     }
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun fastcollectIterate(s: FastCollectReadState) {
+    fun fastcollectIterate(s: ReadState, bh: Blackhole) {
         for (v in s.fastcollect) {
-            sink(v)
+            bh.consume(v)
         }
     }
 
-    @Warmup(iterations = 10, batchSize = 1000000)
-    @Measurement(iterations = 10, batchSize = 1000000)
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 20, batchSize = 5000000)
+    @Measurement(iterations = 40, batchSize = 5000000)
     @BenchmarkMode(Mode.SingleShotTime)
     @Benchmark
-    fun kdsAdd(s: KdsAddState): korlibs.datastructure.IntArrayList {
-        s.kds.add(1)
-        return s.kds
-    }
+    fun fastutilAdd(s: EmptyState) = s.fastutil.add(s.nextInKey())
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun kdsSearch(s: KdsReadState): Int {
-        val element = s.nextInElement()
-        return s.kds.indexOf(element) + s.kds.lastIndexOf(element)
-    }
+    fun fastutilGrow(s: ReadState) = IntArrayList().apply { repeat(s.size) { add(s.inElements[it]) } }
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun kdsIterate(s: KdsReadState) {
-        for (v in s.kds) {
-            sink(v)
-        }
-    }
-
-    @Warmup(iterations = 10, batchSize = 1000000)
-    @Measurement(iterations = 10, batchSize = 1000000)
-    @BenchmarkMode(Mode.SingleShotTime)
-    @Benchmark
-    fun fastutilAdd(s: FastutilAddState): IntArrayList {
-        s.fastutil.add(1)
-        return s.fastutil
-    }
-
-    @Benchmark
-    fun fastutilSearch(s: FastutilReadState): Int {
-        val element = s.nextInElement()
+    fun fastutilSearch(s: ReadState): Int {
+        val element = s.nextWrappingInKey()
         return s.fastutil.indexOf(element) + s.fastutil.lastIndexOf(element)
     }
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun fastutilIterate(s: FastutilReadState) {
+    fun fastutilIterate(s: ReadState, bh: Blackhole) {
         val it = s.fastutil.iterator()
         while (it.hasNext()) {
-            sink(it.nextInt())
+            bh.consume(it.nextInt())
         }
     }
 
-    @Warmup(iterations = 10, batchSize = 1000000)
-    @Measurement(iterations = 10, batchSize = 1000000)
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 20, batchSize = 5000000)
+    @Measurement(iterations = 40, batchSize = 5000000)
     @BenchmarkMode(Mode.SingleShotTime)
     @Benchmark
-    fun kotlinAdd(s: KotlinAddState): ArrayList<Int> {
-        s.kotlin.add(1)
-        return s.kotlin
+    fun kdsAdd(s: EmptyState) = s.kds.add(s.nextInKey())
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun kdsGrow(s: ReadState) = korlibs.datastructure.IntArrayList().apply { repeat(s.size) { add(s.inElements[it]) } }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun kdsSearch(s: ReadState): Int {
+        val element = s.nextWrappingInKey()
+        return s.kds.indexOf(element) + s.kds.lastIndexOf(element)
     }
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun kotlinSearch(s: KotlinReadState): Int {
-        val element = s.nextInElement()
+    fun kdsIterate(s: ReadState, bh: Blackhole) {
+        for (v in s.kds) {
+            bh.consume(v)
+        }
+    }
+
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 20, batchSize = 5000000)
+    @Measurement(iterations = 40, batchSize = 5000000)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Benchmark
+    fun kotlinAdd(s: EmptyState) = s.kotlin.add(s.nextInKey())
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun kotlinGrow(s: ReadState) = ArrayList<Int>().apply { repeat(s.size) { add(s.inElements[it]) } }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun kotlinSearch(s: ReadState): Int {
+        val element = s.nextWrappingInKey()
         return s.kotlin.indexOf(element) + s.kotlin.lastIndexOf(element)
     }
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun kotlinIterate(s: KotlinReadState) {
+    fun kotlinIterate(s: ReadState, bh: Blackhole) {
         for (v in s.kotlin) {
-            sink(v)
+            bh.consume(v)
         }
-    }
-
-    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    fun sink(v: Int) {
-        // IT IS VERY IMPORTANT TO MATCH THE SIGNATURE TO AVOID AUTOBOXING.
-        // The method intentionally does nothing.
     }
 }

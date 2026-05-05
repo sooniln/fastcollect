@@ -20,8 +20,8 @@ import kotlin.random.Random
  * A generalized benchmark which does not measure the performance of any particular APIs, but measures generalized
  * performance for comparison across frameworks on specific platforms.
  */
-@Warmup(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 2, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Warmup(iterations = 4, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
+@Measurement(iterations = 5, time = 1, timeUnit = BenchmarkTimeUnit.SECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(BenchmarkTimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
@@ -60,8 +60,17 @@ open class ListBenchmark {
     }
 
     @Benchmark
-    fun fastcollectAdd(): IntArrayDeque {
+    fun fastcollectGrow(): IntArrayDeque {
         val list = IntArrayDeque()
+        for (e in inElements) {
+            list.add(e)
+        }
+        return list
+    }
+
+    @Benchmark
+    fun fastcollectAdd(): IntArrayDeque {
+        val list = IntArrayDeque(inElements.size)
         for (e in inElements) {
             list.add(e)
         }
@@ -87,8 +96,17 @@ open class ListBenchmark {
     }
 
     @Benchmark
-    fun kdsAdd(): IntArrayList {
+    fun kdsGrow(): IntArrayList {
         val list = IntArrayList()
+        for (e in inElements) {
+            list.add(e)
+        }
+        return list
+    }
+
+    @Benchmark
+    fun kdsAdd(): IntArrayList {
+        val list = IntArrayList(inElements.size)
         for (e in inElements) {
             list.add(e)
         }
@@ -114,8 +132,17 @@ open class ListBenchmark {
     }
 
     @Benchmark
-    fun kotlinAdd(): ArrayList<Int> {
+    fun kotlinGrow(): ArrayList<Int> {
         val list = ArrayList<Int>()
+        for (e in inElements) {
+            list.add(e)
+        }
+        return list
+    }
+
+    @Benchmark
+    fun kotlinAdd(): ArrayList<Int> {
+        val list = ArrayList<Int>(inElements.size)
         for (e in inElements) {
             list.add(e)
         }

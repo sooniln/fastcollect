@@ -1,22 +1,25 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.ints.IntArrayDeque
 import io.github.sooniln.fastcollect.ints.IntHashSet
-import it.unimi.dsi.fastutil.ints.IntArrayList
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet
 import korlibs.datastructure.IntSet
+import korlibs.memory.countTrailingOnes
+import korlibs.memory.countTrailingZeros
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Fork
 import org.openjdk.jmh.annotations.Level
 import org.openjdk.jmh.annotations.Measurement
 import org.openjdk.jmh.annotations.Mode
+import org.openjdk.jmh.annotations.OperationsPerInvocation
 import org.openjdk.jmh.annotations.OutputTimeUnit
 import org.openjdk.jmh.annotations.Param
 import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.Setup
 import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.annotations.Warmup
+import org.openjdk.jmh.infra.Blackhole
+import org.openjdk.jmh.infra.IterationParams
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -24,8 +27,8 @@ import kotlin.random.Random
  * A JVM specific benchmark which measures the performance of various set libraries.
  */
 @Fork(1)
-@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 2000, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class SetBenchmark {
@@ -34,7 +37,7 @@ open class SetBenchmark {
         private fun generateRandomInOutKeys(rnd: Random, inKeys: IntArray, outKeys: IntArray) {
             check(inKeys.size == outKeys.size)
 
-            val inSet = IntHashSet(inKeys.size)
+            val inSet = IntOpenHashSet(inKeys.size)
             while (inSet.size < inKeys.size) {
                 val key = rnd.nextInt()
                 if (!inSet.contains(key)) {
@@ -52,34 +55,124 @@ open class SetBenchmark {
             }
         }
 
-        private fun generateSequentialInOutKeys(inKeys: IntArray, outKeys: IntArray) {
+        private fun generateSequentialLowInOutKeys(inKeys: IntArray, outKeys: IntArray) {
             check(inKeys.size == outKeys.size)
 
             repeat(inKeys.size) { inKeys[it] = it + 1 }
-            repeat(outKeys.size) { outKeys[it] = inKeys[it] + inKeys.size }
+            repeat(outKeys.size) { outKeys[it] = inKeys[it] + inKeys.size + 1 }
+        }
+
+        private fun generateSequentialHighInOutKeys(inKeys: IntArray, outKeys: IntArray) {
+            check(inKeys.size == outKeys.size)
+
+            repeat(inKeys.size) { inKeys[it] = Int.MAX_VALUE - it }
+            repeat(outKeys.size) { outKeys[it] = inKeys[it] - inKeys.size - 1 }
+        }
+
+        private fun generateEvenLowInOutKeys(inKeys: IntArray, outKeys: IntArray) {
+            check(inKeys.size == outKeys.size)
+
+            repeat(inKeys.size) { inKeys[it] = 2*it + 2 }
+            repeat(outKeys.size) { outKeys[it] = 2*it + 1 }
+        }
+
+        private fun generateEvenHighInOutKeys(inKeys: IntArray, outKeys: IntArray) {
+            check(inKeys.size == outKeys.size)
+
+            repeat(inKeys.size) { inKeys[it] = Int.MAX_VALUE - 1 - 2*it }
+            repeat(outKeys.size) { outKeys[it] = Int.MAX_VALUE - 2*it }
+        }
+
+        private fun generatePartitionLowInOutKeys(inKeys: IntArray, outKeys: IntArray) {
+            check(inKeys.size == outKeys.size)
+
+            repeat(inKeys.size/2) { inKeys[it] = 2*it + 2 }
+            repeat(inKeys.size/2) { inKeys[it] = 2*it + 1 }
+            repeat(outKeys.size) { outKeys[it] = Int.MAX_VALUE - it }
+        }
+
+        private fun generatePartitionHighInOutKeys(inKeys: IntArray, outKeys: IntArray) {
+            check(inKeys.size == outKeys.size)
+
+            repeat(inKeys.size/2) { inKeys[it] = Int.MAX_VALUE - 2*it }
+            repeat(inKeys.size/2) { inKeys[it] = Int.MAX_VALUE - 2*it - 1 }
+            repeat(outKeys.size) { outKeys[it] = it + 1 }
+        }
+
+        private fun generateHighBitsInOutKeys(inKeys: IntArray, outKeys: IntArray) {
+            check(inKeys.size == outKeys.size)
+
+            repeat(inKeys.size) { inKeys[it] = Integer.reverse(it + 1) }
+            repeat(outKeys.size) { outKeys[it] = Integer.reverse(it + inKeys.size + 2) }
         }
     }
 
     @Suppress("NOTHING_TO_INLINE")
     @State(Scope.Benchmark)
-    open class BaseState {
-        protected val rnd = Random(123)
+    open class ReadState {
+        protected val rnd = Random(101)
 
-        @Param("16", "100", "10000", "1000000")
-        var size: Int = 0
+        //@Param("seqLow", "seqHigh", "random", "evenLow", "evenHigh", "partitionLow", "partitionHigh", "highBits")
+        var order: String = "random"
+
+        //@Param(/*"raw", "xor", */"fib", "fibshift", "phi", "lowbias", "fxhash")
+        //var mixer: String = "raw"
+
+        open val size: Int get() = 5000000
 
         var index = 0
         lateinit var inKeys: IntArray
         lateinit var outKeys: IntArray
 
-        @Setup(Level.Trial)
-        open fun setupTrial() {
+        lateinit var fastcollect: IntHashSet
+        lateinit var fastutil: IntOpenHashSet
+        lateinit var kds: IntSet
+        lateinit var kotlin: HashSet<Int>
+
+        private fun generateInOutKeys(size: Int) {
             inKeys = IntArray(size)
             outKeys = IntArray(size)
+
+            when(order) {
+                "seqLow" -> generateSequentialLowInOutKeys(inKeys, outKeys)
+                "seqHigh" -> generateSequentialHighInOutKeys(inKeys, outKeys)
+                "random" -> generateRandomInOutKeys(rnd, inKeys, outKeys)
+                "evenLow" -> generateEvenLowInOutKeys(inKeys, outKeys)
+                "evenHigh" -> generateEvenHighInOutKeys(inKeys, outKeys)
+                "partitionLow" -> generatePartitionLowInOutKeys(inKeys, outKeys)
+                "partitionHigh" -> generatePartitionHighInOutKeys(inKeys, outKeys)
+                "highBits" -> generateHighBitsInOutKeys(inKeys, outKeys)
+                else -> throw IllegalArgumentException("Unexpected order: $order")
+            }
+        }
+
+        @Setup(Level.Trial)
+        open fun setupTrial() {
+            generateInOutKeys(size)
+
+            /*val hashMixer: (Int, Int) -> Int = when (mixer) {
+                "raw" -> { {h, mask -> h} }
+                "xor" -> { {h, mask -> h xor (h ushr 16)} }
+                "fib" -> { {h, mask -> h * -1640531527} }
+                "fibshift" -> { {h, mask -> val x = h * -1640531527; x xor (x ushr 16)} }
+                "phi" -> { {h, mask -> val x = h * -0x61c88647; x xor (x ushr 16)} }
+                "lowbias" -> { {h, mask -> var x = h xor (h shr 16); x *= 0x45d9f3b; x xor (x shr 16)} }
+                "fxhash" -> { {h, mask -> (h * -1814600227).rotateLeft(mask.inv().countTrailingZeroBits()) } }
+                else -> throw IllegalArgumentException("Unknown mixer: $mixer")
+            }*/
+
+            fastcollect = IntHashSet(size).apply { for (key in inKeys) add(key) }
+            fastutil = IntOpenHashSet(size).apply { for (key in inKeys) add(key) }
+            kds = IntSet().apply { for (key in inKeys) add(key) }
+            kotlin = HashSet<Int>(size).apply { for (key in inKeys) add(key) }
         }
 
         @Setup(Level.Iteration)
-        open fun setupIteration() {
+        open fun setupIteration(params: IterationParams) {
+            if (params.batchSize > inKeys.size) {
+                generateInOutKeys(params.batchSize)
+            }
+
             index = 0
         }
 
@@ -93,287 +186,135 @@ open class SetBenchmark {
             return i
         }
 
-        inline fun nextInKey() = inKeys[nextIndex()]
-        inline fun nextOutKey() = outKeys[nextIndex()]
+        inline fun nextInKey() = inKeys[index++]
+        inline fun nextOutKey() = outKeys[index++]
+        inline fun nextWrappingInKey() = inKeys[nextIndex()]
+        inline fun nextWrappingOutKey() = outKeys[nextIndex()]
     }
 
     @State(Scope.Benchmark)
-    open class KdsReadState : BaseState() {
-        lateinit var kds: IntSet
-
-        @Param("true", "false")
-        var sequential: Boolean = false
-
-        @Setup(Level.Trial)
-        override fun setupTrial() {
-            super.setupTrial()
-            if (sequential) {
-                generateSequentialInOutKeys(inKeys, outKeys)
-            } else {
-                generateRandomInOutKeys(rnd, inKeys, outKeys)
-            }
-            kds = IntSet().apply { for (key in inKeys) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class FastutilReadState : BaseState() {
-        lateinit var fastutil: IntOpenHashSet
-
-        @Param("true", "false")
-        var sequential: Boolean = false
-
-        @Setup(Level.Trial)
-        override fun setupTrial() {
-            super.setupTrial()
-            if (sequential) {
-                generateSequentialInOutKeys(inKeys, outKeys)
-            } else {
-                generateRandomInOutKeys(rnd, inKeys, outKeys)
-            }
-            fastutil = IntOpenHashSet(size).apply { for (key in inKeys) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class FastCollectReadState : BaseState() {
-        lateinit var fastcollect: IntHashSet
-
-        @Param("true", "false")
-        var sequential: Boolean = false
-
-        @Setup(Level.Trial)
-        override fun setupTrial() {
-            super.setupTrial()
-            if (sequential) {
-                generateSequentialInOutKeys(inKeys, outKeys)
-            } else {
-                generateRandomInOutKeys(rnd, inKeys, outKeys)
-            }
-            fastcollect = IntHashSet(size).apply { for (key in inKeys) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class KotlinReadState : BaseState() {
-        lateinit var kotlin: HashSet<Int>
-
-        @Param("true", "false")
-        var sequential: Boolean = false
-
-        @Setup(Level.Trial)
-        override fun setupTrial() {
-            super.setupTrial()
-            if (sequential) {
-                generateSequentialInOutKeys(inKeys, outKeys)
-            } else {
-                generateRandomInOutKeys(rnd, inKeys, outKeys)
-            }
-            kotlin = HashSet<Int>(size).apply { for (key in inKeys) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class KdsAddState {
-        lateinit var kds: IntSet
-
+    open class EmptyState: ReadState() {
         @Setup(Level.Iteration)
-        fun setupIteration() {
-            kds = IntSet()
+        override fun setupIteration(params: IterationParams) {
+            super.setupIteration(params)
+            fastcollect.clear()
+            fastutil.clear()
+            kds.clear()
+            kotlin.clear()
         }
     }
 
-    @State(Scope.Benchmark)
-    open class FastutilAddState {
-        lateinit var fastutil: IntOpenHashSet
+    @Benchmark
+    fun fastcollectGetHit(s: ReadState) = s.fastcollect.contains(s.nextWrappingInKey())
 
-        @Setup(Level.Iteration)
-        fun setupIteration() {
-            fastutil = IntOpenHashSet()
-            System.gc()
-            Thread.sleep(100)
-        }
-    }
+    @Benchmark
+    fun fastcollectGetMiss(s: ReadState) = s.fastcollect.contains(s.nextWrappingOutKey())
 
-    @State(Scope.Benchmark)
-    open class FastCollectAddState {
-        lateinit var fastcollect: IntHashSet
+    @Benchmark
+    fun fastcollectPutHit(s: ReadState) = s.fastcollect.add(s.nextWrappingInKey())
 
-        @Setup(Level.Iteration)
-        fun setupIteration() {
-            fastcollect = IntHashSet()
-            System.gc()
-            Thread.sleep(100)
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class KotlinAddState {
-        lateinit var kotlin: HashSet<Int>
-
-        @Setup(Level.Iteration)
-        fun setupIteration() {
-            kotlin = HashSet()
-            System.gc()
-            Thread.sleep(100)
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class KdsPutHitState : BaseState() {
-
-        lateinit var kds: IntSet
-
-        @Setup(Level.Iteration)
-        override fun setupIteration() {
-            super.setupIteration()
-            kds = IntSet().apply { for (key in inKeys) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class FastutilPutHitState : BaseState() {
-
-        lateinit var fastutil: IntOpenHashSet
-
-        @Setup(Level.Iteration)
-        override fun setupIteration() {
-            super.setupIteration()
-            fastutil = IntOpenHashSet(size).apply { for (key in inKeys) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class FastCollectPutHitState : BaseState() {
-
-        lateinit var fastcollect: IntHashSet
-
-        @Setup(Level.Iteration)
-        override fun setupIteration() {
-            super.setupIteration()
-            fastcollect = IntHashSet(size).apply { for (key in inKeys) add(key) }
-        }
-    }
-
-    @State(Scope.Benchmark)
-    open class KotlinPutHitState : BaseState() {
-
-        lateinit var kotlin: HashSet<Int>
-
-        @Setup(Level.Iteration)
-        override fun setupIteration() {
-            super.setupIteration()
-            kotlin = HashSet<Int>(size).apply { for (key in inKeys) add(key) }
-        }
-    }
-
-    @Warmup(iterations = 10, batchSize = 1000000)
-    @Measurement(iterations = 10, batchSize = 1000000)
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 10, batchSize = 5000000)
+    @Measurement(iterations = 20, batchSize = 5000000)
     @BenchmarkMode(Mode.SingleShotTime)
     @Benchmark
-    fun fastcollectAdd(s: FastCollectAddState): IntHashSet {
-        s.fastcollect.add(1)
-        return s.fastcollect
-    }
+    fun fastcollectPutMiss(s: EmptyState) = s.fastcollect.add(s.nextInKey())
 
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
-    fun fastcollectGetHit(s: FastCollectReadState) = s.fastcollect.contains(s.nextInKey())
+    fun fastcollectGrow(s: ReadState) = IntHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
-    fun fastcollectGetMiss(s: FastCollectReadState) = s.fastcollect.contains(s.nextOutKey())
-
-    @Benchmark
-    fun fastcollectPutHit(s: FastCollectPutHitState) = s.fastcollect.add(s.nextInKey())
-
-    @Benchmark
-    fun fastcollectIterate(s: FastCollectReadState): Int {
-        var c = 0
+    fun fastcollectIterate(s: ReadState, bh: Blackhole) {
         for (i in s.fastcollect) {
-            c += i
+            bh.consume(i)
         }
-        return c
     }
 
-    @Warmup(iterations = 10, batchSize = 1000000)
-    @Measurement(iterations = 10, batchSize = 1000000)
+    @Benchmark
+    fun fastutilGetHit(s: ReadState) = s.fastutil.contains(s.nextWrappingInKey())
+
+    @Benchmark
+    fun fastutilGetMiss(s: ReadState) = s.fastutil.contains(s.nextWrappingOutKey())
+
+    @Benchmark
+    fun fastutilPutHit(s: ReadState) = s.fastutil.add(s.nextWrappingInKey())
+
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 10, batchSize = 5000000)
+    @Measurement(iterations = 20, batchSize = 5000000)
     @BenchmarkMode(Mode.SingleShotTime)
     @Benchmark
-    fun kdsAdd(s: KdsAddState): IntSet {
-        s.kds.add(1)
-        return s.kds
-    }
+    fun fastutilPutMiss(s: EmptyState) = s.fastutil.add(s.nextInKey())
 
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
-    fun kdsGetHit(s: KdsReadState) = s.kds.contains(s.nextInKey())
+    fun fastutilGrow(s: ReadState) = IntOpenHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
-    fun kdsGetMiss(s: KdsReadState) = s.kds.contains(s.nextOutKey())
-
-    @Benchmark
-    fun kdsPutHit(s: KdsPutHitState) = s.kds.add(s.nextInKey())
-
-    @Benchmark
-    fun kdsIterate(s: KdsReadState): Int {
-        var c = 0
-        val it = s.kds.iterator()
-        while (it.hasNext()) {
-            c += it.next()
-        }
-        return c
-    }
-
-    @Warmup(iterations = 10, batchSize = 1000000)
-    @Measurement(iterations = 10, batchSize = 1000000)
-    @BenchmarkMode(Mode.SingleShotTime)
-    @Benchmark
-    fun fastutilAdd(s: FastutilAddState): IntOpenHashSet {
-        s.fastutil.add(1)
-        return s.fastutil
-    }
-
-    @Benchmark
-    fun fastutilGetHit(s: FastutilReadState) = s.fastutil.contains(s.nextInKey())
-
-    @Benchmark
-    fun fastutilGetMiss(s: FastutilReadState) = s.fastutil.contains(s.nextOutKey())
-
-    @Benchmark
-    fun fastutilPutHit(s: FastutilPutHitState) = s.fastutil.add(s.nextInKey())
-
-    @Benchmark
-    fun fastutilIterate(s: FastutilReadState): Int {
-        var c = 0
+    fun fastutilIterate(s: ReadState, bh: Blackhole) {
         val it = s.fastutil.iterator()
         while (it.hasNext()) {
-            c += it.nextInt()
+            bh.consume(it.nextInt())
         }
-        return c
     }
 
-    @Warmup(iterations = 10, batchSize = 1000000)
-    @Measurement(iterations = 10, batchSize = 1000000)
+    @Benchmark
+    fun kdsGetHit(s: ReadState) = s.kds.contains(s.nextWrappingInKey())
+
+    @Benchmark
+    fun kdsGetMiss(s: ReadState) = s.kds.contains(s.nextWrappingOutKey())
+
+    @Benchmark
+    fun kdsPutHit(s: ReadState) = s.kds.add(s.nextWrappingInKey())
+
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 10, batchSize = 5000000)
+    @Measurement(iterations = 20, batchSize = 5000000)
     @BenchmarkMode(Mode.SingleShotTime)
     @Benchmark
-    fun kotlinAdd(s: KotlinAddState): HashSet<Int> {
-        s.kotlin.add(1)
-        return s.kotlin
+    fun kdsPutMiss(s: EmptyState) = s.kds.add(s.nextInKey())
+
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Benchmark
+    fun kdsGrow(s: ReadState) = IntSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
+
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Benchmark
+    fun kdsIterate(s: ReadState, bh: Blackhole) {
+        val it = s.kds.iterator()
+        while (it.hasNext()) {
+            bh.consume(it.next())
+        }
     }
 
     @Benchmark
-    fun kotlinGetHit(s: KotlinReadState) = s.kotlin.contains(s.nextInKey())
+    fun kotlinGetHit(s: ReadState) = s.kotlin.contains(s.nextWrappingInKey())
 
     @Benchmark
-    fun kotlinGetMiss(s: KotlinReadState) = s.kotlin.contains(s.nextOutKey())
+    fun kotlinGetMiss(s: ReadState) = s.kotlin.contains(s.nextWrappingOutKey())
 
     @Benchmark
-    fun kotlinPutHit(s: KotlinPutHitState) = s.kotlin.add(s.nextInKey())
+    fun kotlinPutHit(s: ReadState) = s.kotlin.add(s.nextWrappingInKey())
 
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 10, batchSize = 5000000)
+    @Measurement(iterations = 20, batchSize = 5000000)
+    @BenchmarkMode(Mode.SingleShotTime)
     @Benchmark
-    fun kotlinIterate(s: KotlinReadState): Int {
-        var c = 0
+    fun kotlinPutMiss(s: EmptyState) = s.kotlin.add(s.nextInKey())
+
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Benchmark
+    fun kotlinGrow(s: ReadState) = HashSet<Int>().apply { repeat(s.size) { add(s.inKeys[it]) } }
+
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Benchmark
+    fun kotlinIterate(s: ReadState, bh: Blackhole) {
         for (i in s.kotlin) {
-            c += i
+            bh.consume(i)
         }
-        return c
     }
 }

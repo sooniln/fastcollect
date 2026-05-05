@@ -6,6 +6,7 @@ import io.github.sooniln.fastcollect.assertBoxing
 import io.github.sooniln.fastcollect.EntrySet
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
+import io.github.sooniln.fastcollect.MutableFastIterator
 import io.github.sooniln.fastcollect.emptyEntrySet
 import io.github.sooniln.fastcollect.entrySetOf
 
@@ -222,6 +223,10 @@ public interface MutableInt2LongMap : Int2LongMap, MutableMap<Int, Long> {
     override val primitiveEntries: MutableEntrySet<MutableEntry>
 
     public interface MutableEntry : Int2LongMap.Entry, MutableMap.MutableEntry<Int, Long>
+
+    override operator fun iterator(): MutableIterator<MutableEntry> = primitiveEntries.iterator()
+
+    override fun fastIterator(): MutableFastIterator<MutableEntry> = primitiveEntries.fastIterator()
 }
 
 

@@ -6,6 +6,7 @@ import io.github.sooniln.fastcollect.assertBoxing
 import io.github.sooniln.fastcollect.EntrySet
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableEntrySet
+import io.github.sooniln.fastcollect.MutableFastIterator
 import io.github.sooniln.fastcollect.emptyEntrySet
 import io.github.sooniln.fastcollect.entrySetOf
 <% if (!isReferenceValue) { %>
@@ -237,6 +238,10 @@ public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics}, MutableMa
     override val primitiveEntries: MutableEntrySet<MutableEntry${Generics}>
 
     public interface MutableEntry${Generics} : ${Name}Map.Entry${Generics}, MutableMap.MutableEntry<${KeyType}, ${ValueType}>
+
+    override operator fun iterator(): MutableIterator<MutableEntry${Generics}> = primitiveEntries.iterator()
+
+    override fun fastIterator(): MutableFastIterator<MutableEntry${Generics}> = primitiveEntries.fastIterator()
 }
 
 <% if (!isReferenceValue) { %>

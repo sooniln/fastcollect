@@ -3,6 +3,7 @@ package io.github.sooniln.fastcollect
 import io.github.sooniln.fastcollect.ints.Int2IntHashMap
 import io.github.sooniln.fastcollect.ints.IntHashSet
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet
 import korlibs.datastructure.IntIntMap
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
@@ -315,5 +316,28 @@ open class MapBenchmark {
             c += e.key + e.value
         }
         return c
+    }
+
+    @Benchmark
+    fun insertAndReinsertTimings() {
+        val n = 500000
+
+        val insertStart = System.nanoTime()
+        val one = IntHashSet(n)
+        for (i in 1..n) {
+            one.add(i)
+        }
+        val insertEnd = System.nanoTime()
+
+        val reinsertStart = System.nanoTime()
+        val two = IntHashSet(n/2)
+        for (e in one) {
+            two.add(e)
+        }
+        val reinsertEnd = System.nanoTime()
+
+        val insertMs = (insertEnd - insertStart) / 1000000.0
+        val reinsertMs = (reinsertEnd - reinsertStart) / 1000000.0
+        System.out.printf("insert %,d entries: %.2f ms, reinsert: %.2f ms%n", n, insertMs, reinsertMs)
     }
 }

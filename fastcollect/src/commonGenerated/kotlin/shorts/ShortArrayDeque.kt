@@ -164,47 +164,44 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
     override fun removeAt(index: Int): Short {
         rangeCheck(index)
 
-        return when (index) {
-            lastIndex -> removeLast()
-            0 -> removeFirst()
-            else -> removeMiddle(index)
-        }
-    }
-
-    private fun removeMiddle(index: Int): Short {
-        // attempt to shift a minimal number of elements depending on where position falls within the array
         val position = ring.position(index)
         val element = ring[position]
+        removeAtInternal(position)
+        return element
+    }
 
-        if (index < size shr 1) {
-            // shift elements before position
-            if (position >= head) {
-                // head before position
+    // returns -1 if the back half was shifted left and 0 if the front half was shifted right
+    private fun removeAtInternal(position: Int): Int {
+        // attempt to shift a minimal number of elements depending on where position falls within the array
+        if (ring.index(position) < size shr 1) {
+            // shift front half right, then advance head
+            if (position > head) {
                 ring.copyInto(ring, head + 1, head, position)
-            } else {
-                // head after position
+            } else if (position < head) {
+                // wrapped: position is in the lower part of the ring
                 ring.copyInto(ring, 1, 0, position)
                 ring[0] = ring[ring.size - 1]
                 ring.copyInto(ring, head + 1, head, ring.size - 1)
             }
-
+            // else: position == head (first element), no copy needed
             head = ring.incrementPosition(head)
+            --size
+            return 0
         } else {
-            // shift elements after position
+            // shift back half left
             val tail = ring.position(size - 1)
-            if (position <= tail) {
-                // position before tail
+            if (position < tail) {
                 ring.copyInto(ring, position, position + 1, tail + 1)
-            } else {
-                // position after tail
+            } else if (position > tail) {
+                // wrapped: position is in the upper part of the ring
                 ring.copyInto(ring, position, position + 1, ring.size)
                 ring[ring.size - 1] = ring[0]
                 ring.copyInto(ring, 0, 1, tail + 1)
             }
+            // else: position == tail (last element), no copy needed
+            --size
+            return -1
         }
-
-        --size
-        return element
     }
 
     override fun removeRange(fromIndex: Int, toIndex: Int) {
@@ -237,17 +234,22 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
 
     override fun indexOf(element: Short): Int {
         val tail = head + size
-        if (tail <= ring.size) {
-            for (i in head..<tail) {
-                if (ring[i] == element) return i - head
-            }
-        } else {
-            for (i in head..<ring.size) {
-                if (ring[i] == element) return i - head
-            }
-            for (i in 0..<ring.positiveMod(tail)) {
-                if (ring[i] == element) return i + ring.size - head
-            }
+        return if (tail <= ring.size) indexOfContinuous(tail, element) else indexOfDiscrete(tail, element)
+    }
+
+    private fun indexOfContinuous(tail: Int, element: Short): Int {
+        for (i in head..<tail) {
+            if (ring[i] == element) return i - head
+        }
+        return -1
+    }
+
+    private fun indexOfDiscrete(tail: Int, element: Short): Int {
+        for (i in head..<ring.size) {
+            if (ring[i] == element) return i - head
+        }
+        for (i in 0..<ring.positiveMod(tail)) {
+            if (ring[i] == element) return i + ring.size - head
         }
         return -1
     }
@@ -262,26 +264,28 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
     }
 
     private fun lastIndexOfContinuous(tail: Int, element: Short): Int {
+        // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
         val head = head
         var i = tail
         while (i >= head) {
             if (ring[i] == element) return i - head
-            i--
+            --i
         }
         return -1
     }
 
     private fun lastIndexOfDiscrete(tail: Int, element: Short): Int {
+        // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
         val head = head
         var i = ring.positiveMod(tail)
         while (i >= 0) {
             if (ring[i] == element) return i + ring.size - head
-            i--
+            --i
         }
         i = ring.size - 1
         while (i >= head) {
             if (ring[i] == element) return i - head
-            i--
+            --i
         }
         return -1
     }
@@ -426,7 +430,14 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
         return copyFromRing(ShortArray(size))
     }
 
-    override fun iterator(): MutableShortIterator = DequeIterator()
+    override fun iterator(): MutableShortIterator {
+        val tail = head + size
+        return if (tail > ring.size) {
+            DiscreteIterator()
+        } else {
+            ContinuousIterator(tail)
+        }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -466,12 +477,42 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
         return hashCode
     }
 
-    private inner class DequeIterator : MutableShortIterator() {
+    private inner class ContinuousIterator(private var tail: Int) : MutableShortIterator() {
         private val ring = this@ShortArrayDeque.ring
 
-        protected var remaining = size
-        protected var position = head
-        protected var previousPosition = -1
+        private var position = head
+        private var previousPosition = -1
+
+        init {
+            check(tail <= ring.size)
+        }
+
+        override fun hasNext() = position < tail
+
+        override fun nextShort(): Short {
+            if (position >= tail) throw NoSuchElementException()
+
+            previousPosition = position++
+            return ring[previousPosition]
+        }
+
+        override fun remove() {
+            if (ring !== this@ShortArrayDeque.ring) throw ConcurrentModificationException()
+            check(previousPosition != -1)
+
+            val d = removeAtInternal(previousPosition)
+            tail = tail + d
+            position = ring.negativeMod(position + d)
+            previousPosition = -1
+        }
+    }
+
+    private inner class DiscreteIterator : MutableShortIterator() {
+        private val ring = this@ShortArrayDeque.ring
+
+        private var remaining = size
+        private var position = head
+        private var previousPosition = -1
 
         override fun hasNext() = remaining > 0
 
@@ -488,9 +529,8 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
             if (ring !== this@ShortArrayDeque.ring) throw ConcurrentModificationException()
             check(previousPosition != -1)
 
-            val removedIndex = ring.index(previousPosition)
-            removeAt(removedIndex)
-            position = ring.position(removedIndex)
+            val d = removeAtInternal(previousPosition)
+            position = ring.negativeMod(position + d)
             previousPosition = -1
         }
     }
