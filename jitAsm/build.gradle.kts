@@ -55,7 +55,9 @@ registerJitAsm("jitAsmIntArrayDequeIterate") {
     mainClass = "io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe"
     jvmArgs(
         "-XX:CompileCommand=quiet",
-        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterate",
-        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterate",
+        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastCollect",
+        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastCollect",
+        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastutil",
+        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastutil",
     )
 }

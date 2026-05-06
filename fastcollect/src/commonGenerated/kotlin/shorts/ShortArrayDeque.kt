@@ -490,7 +490,7 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
         override fun hasNext() = position < tail
 
         override fun nextShort(): Short {
-            if (position >= tail) throw NoSuchElementException()
+            if (!hasNext()) throw NoSuchElementException()
 
             previousPosition = position++
             return ring[previousPosition]
@@ -517,7 +517,7 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
         override fun hasNext() = remaining > 0
 
         override fun nextShort(): Short {
-            if (remaining == 0) throw NoSuchElementException()
+            if (!hasNext()) throw NoSuchElementException()
 
             --remaining
             previousPosition = position

@@ -490,7 +490,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         override fun hasNext() = position < tail
 
         override fun nextByte(): Byte {
-            if (position >= tail) throw NoSuchElementException()
+            if (!hasNext()) throw NoSuchElementException()
 
             previousPosition = position++
             return ring[previousPosition]
@@ -517,7 +517,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         override fun hasNext() = remaining > 0
 
         override fun nextByte(): Byte {
-            if (remaining == 0) throw NoSuchElementException()
+            if (!hasNext()) throw NoSuchElementException()
 
             --remaining
             previousPosition = position

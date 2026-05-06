@@ -1,5 +1,5 @@
-[![Maven Central Version](https://img.shields.io/maven-central/v/io.github.sooniln/fastcollect)](https://central.sonatype.com/artifact/io.github.sooniln/fastcollect)
-[![javadoc](https://javadoc.io/badge2/io.github.sooniln/fastcollect/javadoc.svg)](https://javadoc.io/doc/io.github.sooniln/fastcollect)
+[![Maven Central Version](https://img.shields.io/maven-central/v/io.github.sooniln/fastcollect-kotlin)](https://central.sonatype.com/artifact/io.github.sooniln/fastcollect-kotlin)
+[![javadoc](https://javadoc.io/badge2/io.github.sooniln/fastcollect-kotlin/javadoc.svg)](https://javadoc.io/doc/io.github.sooniln/fastcollect-kotlin)
 
 # FastCollect
 
@@ -10,7 +10,7 @@ improves CPU performance by 2-4× (and perhaps >10× on some iteration heavy wor
 available in the performance section below.
 
 FastCollect currently supports the following major platforms (minor platforms have not been listed for brevity, the
-gradle build files are the source of truth):
+Gradle build files are the source of truth):
 
 * jvm
 * js (nodeJs)
@@ -96,7 +96,7 @@ Other JVM-only collection libraries include:
 
 * [fastutil](https://github.com/vigna/fastutil) - the Java standard for primitive collections, supporting a wide variety
   of scientific computing use cases.
-* [Eclipse Collections](https://github.com/eclipse-collections/eclipse-collections) - a large multi-purpose collections
+* [Eclipse Collections](https://github.com/eclipse-collections/eclipse-collections) - a large multipurpose collections
   library that also includes primitive specific collections.
 * [HashSmith](https://github.com/bluuewhale/hash-smith) - a relatively new but fast HashSet/HashMap library for
   reference values (not primitives). Included in benchmarks to test comparison against a modern Swiss table with
