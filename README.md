@@ -5,8 +5,9 @@
 
 A library for high-performance primitive collections in the Kotlin ecosystem.
 
-As a drop-in replacement for standard Kotlin collections, FastCollect typically reduces memory usage by 4–5× and
-improves CPU performance, particularly on JVM. Details and benchmarks are available in the Performance section below.
+As a drop-in replacement for standard Kotlin collections, FastCollect generally reduces memory usage by 4–5× and
+improves CPU performance by 2-4× (and perhaps >10× on some iteration heavy workloads). Details and benchmarks are
+available in the performance section below.
 
 FastCollect currently supports the following major platforms (minor platforms have not been listed for brevity, the
 gradle build files are the source of truth):
@@ -106,7 +107,7 @@ etc...)
 
 ## Performance ##
 
-A more detailed examination of performance can e found in the [Performance Benchmarks](docs/PERFORMANCE_BENCHMARKS.md)
+A more detailed examination of performance can be found in the [Performance Benchmarks](docs/PERFORMANCE_BENCHMARKS.md)
 doc. In benchmarking, FastCollect unsurprisingly outperforms standard Kotlin collections by orders of magnitude (as
 expected since FastCollect stores primitives, not boxed types). Performance is very comparable to fastutil, with slight
 variations in who takes the top spot, though the differences are small enough they are unlikely to be significant except

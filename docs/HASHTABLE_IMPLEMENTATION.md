@@ -102,7 +102,8 @@ A simpler and faster solution exists that takes advantage of the Robin Hood inva
 
 When analyzing the distribution of DIBs in a Robin Hood table (i.e. how far any element is from its home slot), this
 grows logarithmically with respect to the table size. Further, for any 32-bit signed addressable table (i.e. all
-platforms supported by FastCollect), the 99th percentile DIB is ≤ 17. So by simply choosing a constant step of 17 in
-the iteration method, consecutive returned elements are effectively guaranteed to fall in different home clusters for
-any table of reasonable size, but may still be close enough to take advantage of cache locality. This is considerably
-faster and less complex than selecting a random start and step, and performs better in practice as well.
+platforms supported by FastCollect), the 99th percentile DIB is ≤ 17. So by simply choosing a constant step of 17 (and
+17 is odd of course) in the iteration method, consecutive returned elements are effectively guaranteed to fall in
+different home clusters for any table of reasonable size, but may still be close enough to take advantage of cache
+locality. This is considerably faster and less complex than selecting a random start and step, and performs better in
+practice as well.

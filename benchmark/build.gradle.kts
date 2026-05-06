@@ -33,6 +33,7 @@ kotlin {
             dependencies {
                 implementation("org.openjdk.jol:jol-core:0.17")
                 implementation("it.unimi.dsi:fastutil:8.5.18")
+                implementation("org.eclipse.collections:eclipse-collections:13.0.0")
             }
         }
     }

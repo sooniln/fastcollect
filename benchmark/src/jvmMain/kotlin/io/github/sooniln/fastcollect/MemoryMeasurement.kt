@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet
 import korlibs.datastructure.IntIntMap
 import korlibs.datastructure.IntSet
+import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap
 import org.openjdk.jol.info.GraphLayout.parseInstance
 
 /**
@@ -23,16 +24,19 @@ fun main() {
 
     val listFastcollect = IntArrayDeque()
     val listFastutil = IntArrayList()
+    val listEclipse = org.eclipse.collections.impl.list.mutable.primitive.IntArrayList()
     val listKds = korlibs.datastructure.IntArrayList()
     val listKotlin = ArrayList<Int>()
 
     val setFastcollect = IntHashSet()
     val setFastutil = IntOpenHashSet()
+    val setEclipse = org.eclipse.collections.impl.set.mutable.primitive.IntHashSet()
     val setKds = IntSet()
     val setKotlin = HashSet<Int>()
 
     val mapFastcollect = Int2IntHashMap()
     val mapFastutil = Int2IntOpenHashMap()
+    val mapEclipse = IntIntHashMap()
     val mapKds = IntIntMap()
     val mapKotlin = HashMap<Int, Int>()
 
@@ -42,14 +46,17 @@ fun main() {
         for (i in prev until size) {
             listFastcollect.add(i)
             listFastutil.add(i)
+            listEclipse.add(i)
             listKds.add(i)
             listKotlin.add(i)
             setFastcollect.add(i)
             setFastutil.add(i)
+            setEclipse.add(i)
             setKds.add(i)
             setKotlin.add(i)
             mapFastcollect[i] = i
             mapFastutil[i] = i
+            mapEclipse.put(i, i)
             mapKds[i] = i
             mapKotlin[i] = i
         }
@@ -57,14 +64,17 @@ fun main() {
 
         row("listFastCollect", size, listFastcollect)
         row("listFastutil", size, listFastutil)
+        row("listEclipse", size, listEclipse)
         row("listKDS", size, listKds)
         row("listKotlin", size, listKotlin)
         row("setFastCollect", size, setFastcollect)
         row("setFastutil", size, setFastutil)
+        row("setEclipse", size, setEclipse)
         row("setKDS", size, setKds)
         row("setKotlin", size, setKotlin)
         row("mapFastCollect", size, mapFastcollect)
         row("mapFastutil", size, mapFastutil)
+        row("mapEclipse", size, mapEclipse)
         row("mapKDS", size, mapKds)
         row("mapKotlin", size, mapKotlin)
     }

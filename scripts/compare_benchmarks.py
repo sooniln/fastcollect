@@ -100,6 +100,10 @@ def unit_for(results: dict, bench_type: str, op: str) -> str:
 UNIT_SUFFIX = {'ns/op': 'ns', 'us/op': 'us', 'ms/op': 'ms'}
 
 
+def to_ns(score: float, unit: str) -> float:
+    return score * {'ns/op': 1.0, 'us/op': 1e3, 'ms/op': 1e6}.get(unit, 1.0)
+
+
 def fmt(score: float, unit: str) -> str:
     return f"`{score:.3f} {UNIT_SUFFIX.get(unit, unit)}`"
 
