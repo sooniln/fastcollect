@@ -28,8 +28,8 @@ import kotlin.random.Random
  * A JVM specific benchmark which measures the performance of various map libraries.
  */
 @Fork(1, jvmArgsAppend = ["--add-modules", "jdk.incubator.vector"])
-@Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 1500, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class MapBenchmark {
