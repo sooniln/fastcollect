@@ -25,6 +25,8 @@ JMH. It's also usually more efficient to filter benchmarks to only the relevant 
 * Use "./gradlew jmh -PjmhIncludes='<regex>'" to run only JVM JMH benchmarks which match the regular expression given
   by <regex>.
 
+All JMH benchmark results are stored in JSON format in a timestamped file in the jmh/benchmark-results directory.
+
 ## JIT-ASM
 
 The jitAsm subproject holds harnesses that can be run to output JIT ASM for interesting methods to allow for detailed

@@ -50,6 +50,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
     // when used in hashing mode, the last slot in the array is used to store the zero key/value respectively. when used
     // in array mode, there is no special handling for zero.
     private var keysArr = EMPTY_KEY_ARRAY
+    private var mask = keysArr.mask()
 
     @Suppress("UNCHECKED_CAST")
     private var valuesArr = EMPTY_VALUE_ARRAY as Array<V?>
@@ -106,7 +107,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
             return oldValue
         }
 
-        val mask = keysArr.mask()
+        val mask = mask
         var slot = key.slot(mask)
         var newKey = key
         var newValue: V? = value
@@ -172,7 +173,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
             return if (keysArr[endSlot] != ZERO) -1 else endSlot
         }
 
-        val mask = keysArr.mask()
+        val mask = mask
         var slot = key.slot(mask)
         while (true) {
             val currKey = keysArr[slot]
@@ -204,7 +205,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
             return
         }
 
-        val mask = keysArr.mask()
+        val mask = mask
 
         // move all slots left until we hit a zero slot
         var currSlot = slot
@@ -325,6 +326,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
 
         if (capacity == 0 && keysArr !== EMPTY_KEY_ARRAY) {
             keysArr = EMPTY_KEY_ARRAY
+            mask = keysArr.mask()
 
             valuesArr = EMPTY_VALUE_ARRAY as Array<V?>
 
@@ -345,15 +347,17 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
         val newMask = newKeysArr.mask()
         val newEndSlot = newKeysArr.endSlot()
 
+        val newRotVal = newMask.rotVal()
         val oldEndSlot = keysArr.endSlot()
         for (slot in 0..<oldEndSlot) {
             val key = keysArr[slot]
-            if (key != ZERO) putRehashing(newKeysArr, newValuesArr, newMask, key, valuesArr[slot])
+            if (key != ZERO) putRehashing(newKeysArr, newValuesArr, newMask, newRotVal, key, valuesArr[slot])
         }
         newKeysArr[newEndSlot] = keysArr[oldEndSlot]
         newValuesArr[newEndSlot] = valuesArr[oldEndSlot]
 
         keysArr = newKeysArr
+        mask = newMask
         valuesArr = newValuesArr
 
         // threshold must always maintain the invariant of at least 1 slot being open
@@ -362,9 +366,9 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
 
     // we can assume key doesn't exist in array and that we never insert zero
 
-    private fun putRehashing(keysArr: LongArray, valuesArr: Array<V?>, mask: Int, key: Long, value: V?) {
+    private fun putRehashing(keysArr: LongArray, valuesArr: Array<V?>, mask: Int, rotVal: Int, key: Long, value: V?) {
 
-        var slot = key.slot(mask)
+        var slot = key.slot(mask, rotVal)
         var newKey = key
         var newValue = value
         var newKeySlotDistance = 0
@@ -397,10 +401,10 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
 
     private open inner class SlotIterator {
         val keysArr = this@Long2AnyHashMap.keysArr
+        private val mask = this@Long2AnyHashMap.mask
         val valuesArr = this@Long2AnyHashMap.valuesArr
 
         private var slotsLeft = size
-        private val mask = keysArr.mask()
 
         private var slot = keysArr.endSlot()
         private var previousSlot = -1
@@ -522,25 +526,17 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
     private inline fun LongArray.mask() = size - 2
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun mixHash(hashcode: Int, mask: Int): Int {
-        // hash smear based on rustc-hash, the hashing function used internally within the rust compiler. this has a
-        // couple advantages for our use case. 1) it's fast 2) it's not a super strong hash function, but we're using it
-        // as a smear... 3) it's a multiplicative hash which means it tends to concentrate entropy in the high bits
-        // (where they're not terribly useful for our needs) - but we can rotate by the table size which concentrates
-        // the entropy in the low bits exactly where we need them! taking the table size into account means that the
-        // hashcode changes every time the table size does, which for a normal robin hood implementation would break
-        // hashcode caching. since we don't cache hashcodes however, this is actually a win for us.
+    private inline fun Int.rotVal(): Int = countOneBits()
 
-        // this smear also performed quite favorably in testing against a variety of adversarial inputs - but that said
-        // I am definitely not a hashing expert and would not claim this smear is very DOS resistant. if you see
-        // weaknesses, please say something.
-
-        return (hashcode * K).rotateLeft(mask.inv().countTrailingZeroBits())
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun mixHash(hashcode: Int, mask: Int, rotVal: Int): Int {
+        // see equivalent function in HashSet for explanation and commentary
+        return (hashcode * K).rotateLeft(rotVal)
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun Long.slot(mask: Int): Int {
-        return mixHash(this.hashCode(), mask) and mask
+    private inline fun Long.slot(mask: Int, rotVal: Int = mask.rotVal()): Int {
+        return mixHash(this.hashCode(), mask, rotVal) and mask
     }
 
     @Suppress("NOTHING_TO_INLINE")

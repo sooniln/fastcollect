@@ -11,6 +11,7 @@ import org.openjdk.jmh.annotations.Measurement
 import org.openjdk.jmh.annotations.Mode
 import org.openjdk.jmh.annotations.OperationsPerInvocation
 import org.openjdk.jmh.annotations.OutputTimeUnit
+import org.openjdk.jmh.annotations.Param
 import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.Setup
 import org.openjdk.jmh.annotations.State
@@ -49,7 +50,8 @@ open class ListBenchmark {
     open class ReadState {
         protected val rnd = Random(123)
 
-        open val size: Int get() = 5000000
+        @Param("12000", "192000", "1536000", "6272000")
+        open var size: Int = 6272000
 
         var index = 0
         lateinit var inElements: IntArray

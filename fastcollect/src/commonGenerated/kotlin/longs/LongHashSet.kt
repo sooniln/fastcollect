@@ -32,6 +32,7 @@ public class LongHashSet @JvmOverloads constructor(
     // when used in hashing mode, the last slot in the array is used to store the zero key. when used in array mode,
     // there is no special handling for zero.
     private var keysArr = EMPTY_ARRAY
+    private var mask = keysArr.mask()
 
     override var size: Int = 0
         private set
@@ -75,7 +76,7 @@ public class LongHashSet @JvmOverloads constructor(
             }
         }
 
-        val mask = keysArr.mask()
+        val mask = mask
         var slot = element.slot(mask)
         var newKey = element
         var newKeySlotDistance = 0
@@ -130,7 +131,7 @@ public class LongHashSet @JvmOverloads constructor(
             return if (keysArr[endSlot] != ZERO) -1 else endSlot
         }
 
-        val mask = keysArr.mask()
+        val mask = mask
         var slot = key.slot(mask)
         //var slotDistance = 0
         while (true) {
@@ -160,7 +161,7 @@ public class LongHashSet @JvmOverloads constructor(
             return
         }
 
-        val mask = keysArr.mask()
+        val mask = mask
 
         // move all slots left until we hit a zero slot
         var currSlot = slot
@@ -210,6 +211,7 @@ public class LongHashSet @JvmOverloads constructor(
 
         if (capacity == 0 && keysArr !== EMPTY_ARRAY) {
             keysArr = EMPTY_ARRAY
+            mask = keysArr.mask()
             threshold = DEFAULT_INITIAL_CAPACITY
             return
         }
@@ -224,22 +226,24 @@ public class LongHashSet @JvmOverloads constructor(
         val newMask = newKeysArr.mask()
         val newEndSlot = newKeysArr.endSlot()
 
+        val newRotVal = newMask.rotVal()
         val oldEndSlot = keysArr.endSlot()
         for (slot in 0..<oldEndSlot) {
             val key = keysArr[slot]
-            if (key != ZERO) addRehashing(newKeysArr, newMask, key)
+            if (key != ZERO) addRehashing(newKeysArr, newMask, newRotVal, key)
         }
         newKeysArr[newEndSlot] = keysArr[oldEndSlot]
 
         keysArr = newKeysArr
+        mask = newMask
 
         // threshold must always maintain the invariant of at least 1 slot being open
         threshold = min((newEndSlot * actualLoadFactor).toInt(), newEndSlot - 1)
     }
 
     // we can assume element doesn't exist in array and that we never insert zero
-    private fun addRehashing(keysArr: LongArray, mask: Int, element: Long) {
-        var slot = element.slot(mask)
+    private fun addRehashing(keysArr: LongArray, mask: Int, rotVal: Int, element: Long) {
+        var slot = element.slot(mask, rotVal)
         var newKey = element
         var newKeySlotDistance = 0
         while (true) {
@@ -265,9 +269,9 @@ public class LongHashSet @JvmOverloads constructor(
 
     private inner class Iterator : MutableLongIterator() {
         private val keysArr = this@LongHashSet.keysArr
+        private val mask = this@LongHashSet.mask
 
         private var slotsLeft = size
-        private val mask = keysArr.mask()
 
         private var slot = keysArr.endSlot()
         private var previousSlot = -1
@@ -317,7 +321,8 @@ public class LongHashSet @JvmOverloads constructor(
             //
             // and of course subtracting a simple constant here is far cheaper than the other solutions considered
             // (random seed in hash smearing - requires an extra 4 bytes per instance to store the seed and an extra
-            // operation within the smear which is our most performance sensitive inner loop code).
+            // operation within the smear which is our most performance sensitive inner loop code, also far less cache
+            // hits).
             //
             // note that this is not a defense against dedicated adversarial attacks - the original sequence is
             // trivially reconstructable, but we are not using a smear that's terribly secure anyway, and the overall
@@ -340,7 +345,10 @@ public class LongHashSet @JvmOverloads constructor(
     private inline fun LongArray.mask(): Int = size - 2
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun mixHash(hashcode: Int, mask: Int): Int {
+    private inline fun Int.rotVal(): Int = countOneBits()
+
+    @Suppress("NOTHING_TO_INLINE")
+    private inline fun mixHash(hashcode: Int, rotVal: Int): Int {
         // hash smear based on rustc-hash, the hashing function used internally within the rust compiler. this has a
         // couple advantages for our use case. 1) it's fast 2) it's not a super strong hash function, but we're using it
         // as a smear... 3) it's a multiplicative hash which means it tends to concentrate entropy in the high bits
@@ -353,12 +361,12 @@ public class LongHashSet @JvmOverloads constructor(
         // I am definitely not a hashing expert and would not claim this smear is very DOS resistant. if you see
         // weaknesses, please say something.
 
-        return (hashcode * K).rotateLeft(mask.inv().countTrailingZeroBits())
+        return (hashcode * K).rotateLeft(rotVal)
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun Long.slot(mask: Int): Int {
-        return mixHash(this.hashCode(), mask) and mask
+    private inline fun Long.slot(mask: Int, rotVal: Int = mask.rotVal()): Int {
+        return mixHash(this.hashCode(), rotVal) and mask
     }
 
     @Suppress("NOTHING_TO_INLINE")

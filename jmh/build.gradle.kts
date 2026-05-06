@@ -1,5 +1,7 @@
 import me.champeau.jmh.JMHTask
 import org.gradle.kotlin.dsl.kotlin
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 plugins {
     kotlin("jvm")
@@ -21,6 +23,7 @@ jmh {
     includeTests = false
     verbosity = "EXTRA"
     failOnError = true
+    resultFormat = "JSON"
 
     // if a jmhIncludes property is set, forward it to JMH
     findProperty("jmhIncludes")?.also { includes.set(listOf(it as String)) }
@@ -33,6 +36,7 @@ private fun registerJMHTask(name: String, configuration: JMHTask.()->Unit): Task
     includeTests = false
     verbosity = "EXTRA"
     failOnError = true
+    resultFormat = "JSON"
 
     val baseTask = tasks.named<JMHTask>("jmh")
 
@@ -66,10 +70,22 @@ registerJMHTask("Map") {
 }
 
 registerJMHTask("Set") {
-    includes.set(listOf("SetBenchmark\\."))
+    includes.set(listOf("SetBenchmark\\"))
 }
 
-// ensure JMH tasks are never cached
+val copyTask = tasks.register<Copy>("CopyJmhResults") {
+    description = "Copy last JMH results into benchmark-results directory."
+
+    from("build/results/jmh/results.json")
+    into("benchmark-results")
+    rename { "${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))}.json" }
+}
+
 tasks.withType<JMHTask> {
+    // ensure JMH tasks are never cached
+    outputs.cacheIf { false }
     outputs.upToDateWhen { false }
+
+    // save all benchmark data
+    finalizedBy(copyTask)
 }

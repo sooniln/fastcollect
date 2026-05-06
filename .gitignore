@@ -45,5 +45,8 @@ bin/
 .claude
 CLAUDE.local.md
 
+### JMH ###
+benchmark-results
+
 ### hsdis ###
 hsdis-*.dll
