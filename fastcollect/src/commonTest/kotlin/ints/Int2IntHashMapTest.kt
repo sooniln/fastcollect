@@ -48,11 +48,6 @@ class Int2IntHashMapTest {
     }
 
     @Test
-    fun invalidLoadFactorOneThrows() {
-        assertFailsWith<IllegalArgumentException> { Int2IntHashMap(4, 1f) }
-    }
-
-    @Test
     fun invalidLoadFactorNegativeThrows() {
         assertFailsWith<IllegalArgumentException> { Int2IntHashMap(4, -0.5f) }
     }

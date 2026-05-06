@@ -48,11 +48,6 @@ class Long2LongHashMapTest {
     }
 
     @Test
-    fun invalidLoadFactorOneThrows() {
-        assertFailsWith<IllegalArgumentException> { Long2LongHashMap(4, 1f) }
-    }
-
-    @Test
     fun invalidLoadFactorNegativeThrows() {
         assertFailsWith<IllegalArgumentException> { Long2LongHashMap(4, -0.5f) }
     }

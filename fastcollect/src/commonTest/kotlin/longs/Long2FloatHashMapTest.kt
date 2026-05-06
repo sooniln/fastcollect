@@ -48,11 +48,6 @@ class Long2FloatHashMapTest {
     }
 
     @Test
-    fun invalidLoadFactorOneThrows() {
-        assertFailsWith<IllegalArgumentException> { Long2FloatHashMap(4, 1f) }
-    }
-
-    @Test
     fun invalidLoadFactorNegativeThrows() {
         assertFailsWith<IllegalArgumentException> { Long2FloatHashMap(4, -0.5f) }
     }

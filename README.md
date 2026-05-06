@@ -28,7 +28,7 @@ You can add FastCollect as a dependency in your project with:
 #### Gradle ####
 
 ```groovy
-implementation 'io.github.sooniln:fastcollect-kotlin:0.0.1'
+implementation 'io.github.sooniln:fastcollect-kotlin:1.0.0'
 ```
 
 #### Maven ####
@@ -37,7 +37,7 @@ implementation 'io.github.sooniln:fastcollect-kotlin:0.0.1'
 <dependency>
     <groupId>io.github.sooniln</groupId>
     <artifactId>fastcollect-kotlin</artifactId>
-    <version>0.0.1</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
