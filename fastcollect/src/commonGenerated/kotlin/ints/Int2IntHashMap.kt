@@ -44,6 +44,9 @@ import kotlin.math.min
  * and details.
  *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
+ *
+ * Note that a load factor of 1.0 is accepted, unlike many HashMaps - this is interpreted to mean that only 1 slot need
+ * ever remain free (i.e. the actual load factor is (capacity - 1)/capacity).
  */
 public class Int2IntHashMap @JvmOverloads constructor(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
@@ -55,8 +58,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
 ) : AbstractMutableInt2IntMap() {
 
     init {
-        require(loadFactor > 0 && loadFactor < 1) { "Load factor must be greater than 0 and smaller than 1" }
-        require(capacity >= 0) { "The expected number of elements must be nonnegative" }
+        require(loadFactor > 0 && loadFactor <= 1) { "Load factor must be > 0 and <= 1" }
+        require(capacity >= 0) { "Capacity must be >= 0" }
     }
 
     public constructor(map: Map<Int, Int>): this(map.size) {
