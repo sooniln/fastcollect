@@ -211,11 +211,11 @@ open class SetBenchmark {
     @Benchmark
     fun fastcollectPutMiss(s: EmptyState) = s.fastcollect.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastcollectGrow(s: ReadState) = IntHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastcollectIterate(s: ReadState, bh: Blackhole) {
         for (i in s.fastcollect) {
@@ -239,11 +239,11 @@ open class SetBenchmark {
     @Benchmark
     fun fastutilPutMiss(s: EmptyState) = s.fastutil.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastutilGrow(s: ReadState) = IntOpenHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastutilIterate(s: ReadState, bh: Blackhole) {
         val it = s.fastutil.iterator()
@@ -268,11 +268,11 @@ open class SetBenchmark {
     @Benchmark
     fun eclipsePutMiss(s: EmptyState) = s.eclipse.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun eclipseGrow(s: ReadState) = org.eclipse.collections.impl.set.mutable.primitive.IntHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun eclipseIterate(s: ReadState, bh: Blackhole) {
         val it = s.eclipse.intIterator()
@@ -297,11 +297,11 @@ open class SetBenchmark {
     @Benchmark
     fun hashsmithPutMiss(s: EmptyState) = s.hashsmith.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun hashsmithGrow(s: ReadState) = IntOpenHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun hashsmithIterate(s: ReadState, bh: Blackhole) {
         val it = s.hashsmith.iterator()
@@ -326,11 +326,11 @@ open class SetBenchmark {
     @Benchmark
     fun kdsPutMiss(s: EmptyState) = s.kds.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kdsGrow(s: ReadState) = IntSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kdsIterate(s: ReadState, bh: Blackhole) {
         val it = s.kds.iterator()
@@ -355,11 +355,11 @@ open class SetBenchmark {
     @Benchmark
     fun kotlinPutMiss(s: EmptyState) = s.kotlin.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kotlinGrow(s: ReadState) = HashSet<Int>().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kotlinIterate(s: ReadState, bh: Blackhole) {
         for (i in s.kotlin) {

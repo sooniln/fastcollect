@@ -121,6 +121,7 @@ public class Int2DoubleHashMap @JvmOverloads constructor(
         }
 
         val mask = mask
+        val rotVal = mask.rotVal()
         var slot = key.slot(mask)
         var newKey = key
         var newValue: Double = value
@@ -139,7 +140,7 @@ public class Int2DoubleHashMap @JvmOverloads constructor(
                     return defaultValue
                 }
                 else -> {
-                    val currKeySlotDistance = currKey.slotDistance(slot, mask)
+                    val currKeySlotDistance = currKey.slotDistance(slot, mask, rotVal)
                     if (newKeySlotDistance > currKeySlotDistance) {
                         val currValue = valuesArr[slot]
                         keysArr[slot] = newKey
@@ -215,13 +216,14 @@ public class Int2DoubleHashMap @JvmOverloads constructor(
         }
 
         val mask = mask
+        val rotVal = mask.rotVal()
 
         // move all slots left until we hit a zero slot
         var currSlot = slot
         var nextSlot = currSlot.nextSlot(mask)
         var nextKey = keysArr[nextSlot]
         var nextValue = valuesArr[nextSlot]
-        while (nextKey != ZERO && nextKey.slotDistance(nextSlot, mask) > 0) {
+        while (nextKey != ZERO && nextKey.slotDistance(nextSlot, mask, rotVal) > 0) {
             keysArr[currSlot] = nextKey
             valuesArr[currSlot] = nextValue
 
@@ -387,7 +389,7 @@ public class Int2DoubleHashMap @JvmOverloads constructor(
                 return
             }
 
-            val currKeySlotDistance = currKey.slotDistance(slot, mask)
+            val currKeySlotDistance = currKey.slotDistance(slot, mask, rotVal)
             if (newKeySlotDistance > currKeySlotDistance) {
                 keysArr[slot] = newKey
                 newKey = currKey
@@ -552,8 +554,8 @@ public class Int2DoubleHashMap @JvmOverloads constructor(
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun Int.slotDistance(slot: Int, mask: Int): Int {
-        return (slot - slot(mask)) and mask
+    private inline fun Int.slotDistance(slot: Int, mask: Int, rotVal: Int = mask.rotVal()): Int {
+        return (slot - slot(mask, rotVal)) and mask
     }
 
     private companion object {

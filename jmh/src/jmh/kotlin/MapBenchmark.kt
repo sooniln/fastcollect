@@ -158,11 +158,11 @@ open class MapBenchmark {
         s.fastcollect[k] = k
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastcollectGrow(s: ReadState) = Int2IntHashMap().apply { repeat(s.size) { set(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastcollectIterateKeys(s: ReadState, bh: Blackhole) {
         for (e in s.fastcollect.keys) {
@@ -170,7 +170,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastcollectIterateValues(s: ReadState, bh: Blackhole) {
         for (e in s.fastcollect.values) {
@@ -178,7 +178,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastcollectIterate(s: ReadState, bh: Blackhole) {
         for (e in s.fastcollect) {
@@ -187,7 +187,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastcollectIterateFast(s: ReadState, bh: Blackhole) {
         for (e in s.fastcollect.fastIterator()) {
@@ -222,7 +222,7 @@ open class MapBenchmark {
     @Benchmark
     fun fastutilGrow(s: ReadState) = Int2IntOpenHashMap().apply { repeat(s.size) { set(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastutilIterateKeys(s: ReadState, bh: Blackhole) {
         val it = s.fastutil.keys.iterator()
@@ -231,7 +231,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastutilIterateValues(s: ReadState, bh: Blackhole) {
         val it = s.fastutil.values.iterator()
@@ -240,7 +240,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastutilIterate(s: ReadState, bh: Blackhole) {
         for (e in s.fastutil.int2IntEntrySet()) {
@@ -249,7 +249,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun fastutilIterateFast(s: ReadState, bh: Blackhole) {
         for (e in s.fastutil.int2IntEntrySet().fastIterator()) {
@@ -280,11 +280,11 @@ open class MapBenchmark {
         s.eclipse.put(k, k)
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun eclipseGrow(s: ReadState) = IntIntHashMap().apply { repeat(s.size) { put(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun eclipseIterateKeys(s: ReadState, bh: Blackhole) {
         val it = s.eclipse.keySet().intIterator()
@@ -293,7 +293,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun eclipseIterateValues(s: ReadState, bh: Blackhole) {
         val it = s.eclipse.values().intIterator()
@@ -302,7 +302,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun eclipseIterate(s: ReadState, bh: Blackhole) {
         val it = s.eclipse.keyValuesView().iterator()
@@ -335,11 +335,11 @@ open class MapBenchmark {
         s.hashsmith[k] = k
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun hashsmithGrow(s: ReadState) = SwissMap<Int, Int>().apply { repeat(s.size) { set(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun hashsmithIterateKeys(s: ReadState, bh: Blackhole) {
         for (e in s.hashsmith.keys) {
@@ -347,7 +347,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun hashsmithIterateValues(s: ReadState, bh: Blackhole) {
         for (e in s.hashsmith.values) {
@@ -355,7 +355,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun hashsmithIterate(s: ReadState, bh: Blackhole) {
         for (e in s.hashsmith) {
@@ -386,11 +386,11 @@ open class MapBenchmark {
         s.kds[k] = k
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kdsGrow(s: ReadState) = IntIntMap().apply { repeat(s.size) { set(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kdsIterateKeys(s: ReadState, bh: Blackhole) {
         for (e in s.kds.keys) {
@@ -398,7 +398,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kdsIterateValues(s: ReadState, bh: Blackhole) {
         for (e in s.kds.values) {
@@ -406,7 +406,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kdsIterate(s: ReadState, bh: Blackhole) {
         for (e in s.kds.entries) {
@@ -437,11 +437,11 @@ open class MapBenchmark {
         s.kotlin[k] = k
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kotlinGrow(s: ReadState) = HashMap<Int, Int>().apply { repeat(s.size) { set(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kotlinIterateKeys(s: ReadState, bh: Blackhole) {
         for (e in s.kotlin.keys) {
@@ -449,7 +449,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kotlinIterateValues(s: ReadState, bh: Blackhole) {
         for (e in s.kotlin.values) {
@@ -457,7 +457,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     @Benchmark
     fun kotlinIterate(s: ReadState, bh: Blackhole) {
         for (e in s.kotlin.entries) {

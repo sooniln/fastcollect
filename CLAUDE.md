@@ -25,7 +25,7 @@ Use the "jmh" task to run all JMH benchmarks. Flags to control JMH:
 * -P-i=<number> to set the number of iterations
 * -P-wi=<number> to set the number of warmup iterations
 
-All JMH benchmark results are stored in JSON format in a timestamped file in the jmh/benchmark-results directory.
+Previous JMH benchmark results are stored in JSON format in a timestamped file in the jmh/benchmark-results directory.
 
 ## JIT-ASM
 

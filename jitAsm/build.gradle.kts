@@ -42,6 +42,17 @@ private fun registerJitAsm(name: String, configuration: JavaExec.() -> Unit): Ta
     configuration()
 }
 
+registerJitAsm("jitAsmIntArrayDequeIterate") {
+    mainClass = "io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe"
+    jvmArgs(
+        "-XX:CompileCommand=quiet",
+        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastCollect",
+        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastCollect",
+        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastutil",
+        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastutil",
+    )
+}
+
 registerJitAsm("jitAsmIntHashSetContains") {
     mainClass = "io.github.sooniln.fastcollect.IntHashSetContainsAsmProbe"
     jvmArgs(
@@ -51,13 +62,13 @@ registerJitAsm("jitAsmIntHashSetContains") {
     )
 }
 
-registerJitAsm("jitAsmIntArrayDequeIterate") {
-    mainClass = "io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe"
+registerJitAsm("jitAsmIntHashSetGrow") {
+    mainClass = "io.github.sooniln.fastcollect.IntHashSetGrowAsmProbe"
     jvmArgs(
         "-XX:CompileCommand=quiet",
-        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastCollect",
-        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastCollect",
-        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastutil",
-        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.IntArrayDequeIterateAsmProbe::iterateFastutil",
+        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.ints.IntHashSet::rehash",
+        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.ints.IntHashSet::rehash",
+        "-XX:CompileCommand=compileonly,it.unimi.dsi.fastutil.ints.IntOpenHashSet::rehash",
+        "-XX:CompileCommand=print,it.unimi.dsi.fastutil.ints.IntOpenHashSet::rehash",
     )
 }
