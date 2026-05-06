@@ -89,8 +89,7 @@ Other multiplatform collection libraries include:
 
 * Kotlin standard library collections
 * [KorGE Data Structures](https://docs.korge.org/data-structures/) (KDS) - a primitive collections library that is part
-  of a larger game development library. (Note: KDS has been excluded from several benchmark graphs because its performance
-  was so poor it harms visual comparison between other libraries. Benchmark data is still included in the raw results.)
+  of a larger game development library.
 
 Other JVM-only collection libraries include:
 

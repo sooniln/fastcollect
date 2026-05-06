@@ -17,13 +17,13 @@ Prefer to run only JVM tests for speed (unless there is a good reason to run tes
 
 ## Benchmarking
 
-The benchmark subproject is used for general benchmarks across multiple platforms and there is little reason to use it
-normally. Local benchmarking for development should use tasks from the jmh subproject which run JVM benchmarks using
-JMH. It's also usually more efficient to filter benchmarks to only the relevant classes and/or methods.
+Local benchmarking for development should use tasks from the jmh subproject which run JVM benchmarks using JMH. It's
+also usually more efficient to filter benchmarks to only the relevant classes and/or methods.
 
-* Use "./gradlew jmh" to run all JVM JMH benchmarks.
-* Use "./gradlew jmh -PjmhIncludes='<regex>'" to run only JVM JMH benchmarks which match the regular expression given
-  by <regex>.
+Use the "jmh" task to run all JMH benchmarks. Flags to control JMH:
+* -PjmhIncludes='<regex>' to run only benchmarks which match the regular expression
+* -P-i=<number> to set the number of iterations
+* -P-wi=<number> to set the number of warmup iterations
 
 All JMH benchmark results are stored in JSON format in a timestamped file in the jmh/benchmark-results directory.
 
