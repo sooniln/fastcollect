@@ -17,6 +17,7 @@ dependencies {
     jmhImplementation("it.unimi.dsi:fastutil:8.5.18")
     jmhImplementation("org.korge:korlibs-datastructure:6.1.0")
     jmhImplementation("io.github.bluuewhale:hashsmith:0.2.0")
+    jmhImplementation("org.eclipse.collections:eclipse-collections:13.0.0")
 }
 
 jmh {
@@ -70,10 +71,10 @@ registerJMHTask("Map") {
 }
 
 registerJMHTask("Set") {
-    includes.set(listOf("SetBenchmark\\"))
+    includes.set(listOf("SetBenchmark\\."))
 }
 
-val copyTask = tasks.register<Copy>("CopyJmhResults") {
+private val copyTask = tasks.register<Copy>("CopyJmhResults") {
     description = "Copy last JMH results into benchmark-results directory."
 
     from("build/results/jmh/results.json")
@@ -81,10 +82,18 @@ val copyTask = tasks.register<Copy>("CopyJmhResults") {
     rename { "${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))}.json" }
 }
 
+private abstract class ExclusiveTaskService : BuildService<BuildServiceParameters.None>
+private val exclusiveServiceProvider = gradle.sharedServices.registerIfAbsent("exclusiveTask", ExclusiveTaskService::class.java) {
+    maxParallelUsages.set(1)
+}
+
 tasks.withType<JMHTask> {
     // ensure JMH tasks are never cached
     outputs.cacheIf { false }
     outputs.upToDateWhen { false }
+
+    // ensure jmh tasks cannot run in parallel
+    usesService(exclusiveServiceProvider)
 
     // save all benchmark data
     finalizedBy(copyTask)

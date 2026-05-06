@@ -50,14 +50,15 @@ open class ListBenchmark {
     open class ReadState {
         protected val rnd = Random(123)
 
-        @Param("12000", "192000", "1536000", "6272000")
-        open var size: Int = 6272000
+        @Param("3000", "12000", "48000", "192000", "768000", "3072000")
+        open var size: Int = 192000
 
         var index = 0
         lateinit var inElements: IntArray
 
         lateinit var fastcollect: IntArrayDeque
         lateinit var fastutil: IntArrayList
+        lateinit var eclipse: org.eclipse.collections.impl.list.mutable.primitive.IntArrayList
         lateinit var kds: korlibs.datastructure.IntArrayList
         lateinit var kotlin: ArrayList<Int>
 
@@ -72,6 +73,7 @@ open class ListBenchmark {
 
             fastcollect = IntArrayDeque(size).apply { for (e in inElements) add(e) }
             fastutil = IntArrayList(size).apply { for (e in inElements) add(e) }
+            eclipse = org.eclipse.collections.impl.list.mutable.primitive.IntArrayList(size).apply { for (e in inElements) add(e) }
             kds = korlibs.datastructure.IntArrayList().apply { for (e in inElements) add(e) }
             kotlin = ArrayList<Int>(size).apply { for (e in inElements) add(e) }
         }
@@ -106,6 +108,7 @@ open class ListBenchmark {
             super.setupIteration(params)
             fastcollect.clear()
             fastutil.clear()
+            eclipse.clear()
             kds.clear()
             kotlin.clear()
         }
@@ -161,6 +164,33 @@ open class ListBenchmark {
         val it = s.fastutil.iterator()
         while (it.hasNext()) {
             bh.consume(it.nextInt())
+        }
+    }
+
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 20, batchSize = 5000000)
+    @Measurement(iterations = 40, batchSize = 5000000)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Benchmark
+    fun eclipseAdd(s: EmptyState) = s.eclipse.add(s.nextInKey())
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun eclipseGrow(s: ReadState) = org.eclipse.collections.impl.list.mutable.primitive.IntArrayList().apply { repeat(s.size) { add(s.inElements[it]) } }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun eclipseSearch(s: ReadState): Int {
+        val element = s.nextWrappingInKey()
+        return s.eclipse.indexOf(element) + s.eclipse.lastIndexOf(element)
+    }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun eclipseIterate(s: ReadState, bh: Blackhole) {
+        val it = s.eclipse.intIterator()
+        while (it.hasNext()) {
+            bh.consume(it.next())
         }
     }
 

@@ -10,117 +10,117 @@
 text {
    text-rendering: optimizeLegibility;
 }
-#pRztSgT .plot-title {
+#pxIG6iq .plot-title {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 16.0px;
 
 }
-#pRztSgT .plot-subtitle {
+#pxIG6iq .plot-subtitle {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pRztSgT .plot-caption {
+#pxIG6iq .plot-caption {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pRztSgT .hyperlink-element {
+#pxIG6iq .hyperlink-element {
 fill: #118ed8;
 font-weight: normal;
    font-style: normal;
 }
-#pRztSgT .legend-title {
+#pxIG6iq .legend-title {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pRztSgT .legend-item {
+#pxIG6iq .legend-item {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pRztSgT .axis-title-x {
+#pxIG6iq .axis-title-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pRztSgT .axis-text-x {
+#pxIG6iq .axis-text-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dxpnkwb .axis-tooltip-text-x {
+#dUUvRAt .axis-tooltip-text-x {
 fill: #303030;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pRztSgT .axis-title-y {
+#pxIG6iq .axis-title-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pRztSgT .axis-text-y {
+#pxIG6iq .axis-text-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dxpnkwb .axis-tooltip-text-y {
+#dUUvRAt .axis-tooltip-text-y {
 fill: #303030;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pRztSgT .facet-strip-text-x {
+#pxIG6iq .facet-strip-text-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pRztSgT .facet-strip-text-y {
+#pxIG6iq .facet-strip-text-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dxpnkwb .tooltip-text {
+#dUUvRAt .tooltip-text {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dxpnkwb .tooltip-title {
+#dUUvRAt .tooltip-title {
 fill: #bbbbbb;
 font-weight: bold;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dxpnkwb .tooltip-label {
+#dUUvRAt .tooltip-label {
 fill: #bbbbbb;
 font-weight: bold;
    font-style: normal;font-family: sans-serif;
@@ -129,7 +129,7 @@ font-size: 13.0px;
 }
 
   </style>
-  <g id="pRztSgT">
+  <g id="pxIG6iq">
     <path fill-rule="evenodd" fill="rgb(48,48,48)" fill-opacity="1.0" d="M0.0 0.0 L0.0 800.0 L894.0 800.0 L894.0 0.0 Z">
     </path>
     <g transform="translate(21.0 22.0 ) ">
@@ -181,7 +181,7 @@ font-size: 13.0px;
           </g>
         </g>
       </g>
-      <g clip-path="url(#c50Q2kH)" clip-bounds-jfx="[rect (25.941816366404606, 0.0), (726.0427250926342, 751.0)]">
+      <g clip-path="url(#c1eVtU5)" clip-bounds-jfx="[rect (25.941816366404606, 0.0), (726.0427250926342, 751.0)]">
         <g transform="translate(25.941816366404606 0.0 ) ">
           <g>
             <g>
@@ -191,13 +191,13 @@ font-size: 13.0px;
               </rect>
               <rect x="237.36012166489962" y="35.7619047619047" height="715.2380952380953" width="125.66124088141743" stroke="rgb(48,48,48)" stroke-opacity="1.0" fill="rgb(84,112,198)" fill-opacity="1.0" stroke-width="1.6500000000000001">
               </rect>
-              <rect x="111.69888078348217" y="657.7080123395446" height="93.29198766045545" width="125.6612408814174" stroke="rgb(48,48,48)" stroke-opacity="1.0" fill="rgb(238,102,102)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+              <rect x="111.69888078348217" y="642.1593269979296" height="108.84067300207039" width="125.6612408814174" stroke="rgb(48,48,48)" stroke-opacity="1.0" fill="rgb(238,102,102)" fill-opacity="1.0" stroke-width="1.6500000000000001">
               </rect>
             </g>
           </g>
         </g>
         <defs>
-          <clipPath id="c50Q2kH">
+          <clipPath id="c1eVtU5">
             <rect x="25.941816366404606" y="0.0" width="726.0427250926342" height="751.0">
             </rect>
           </clipPath>
@@ -347,7 +347,7 @@ font-size: 13.0px;
     </g>
     <g transform="translate(46.94181636640461 15.8 ) ">
       <text class="plot-title" y="0.0">
-        <tspan>1 Million Empty Collections Overhead</tspan>
+        <tspan>1 Million Empty Maps Overhead</tspan>
       </text>
     </g>
     <g transform="translate(15.0 397.5 ) rotate(-90.0 ) ">
@@ -428,6 +428,6 @@ font-size: 13.0px;
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(187,187,187)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 800.0 L894.0 800.0 L894.0 0.0 Z" pointer-events="none">
     </path>
   </g>
-  <g id="dxpnkwb">
+  <g id="dUUvRAt">
   </g>
 </svg>

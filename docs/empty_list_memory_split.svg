@@ -10,117 +10,117 @@
 text {
    text-rendering: optimizeLegibility;
 }
-#pnJiQdO .plot-title {
+#p3LgPsu .plot-title {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 16.0px;
 
 }
-#pnJiQdO .plot-subtitle {
+#p3LgPsu .plot-subtitle {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pnJiQdO .plot-caption {
+#p3LgPsu .plot-caption {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pnJiQdO .hyperlink-element {
+#p3LgPsu .hyperlink-element {
 fill: #118ed8;
 font-weight: normal;
    font-style: normal;
 }
-#pnJiQdO .legend-title {
+#p3LgPsu .legend-title {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pnJiQdO .legend-item {
+#p3LgPsu .legend-item {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pnJiQdO .axis-title-x {
+#p3LgPsu .axis-title-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pnJiQdO .axis-text-x {
+#p3LgPsu .axis-text-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#d5kKiBT .axis-tooltip-text-x {
+#dmTDk4M .axis-tooltip-text-x {
 fill: #303030;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pnJiQdO .axis-title-y {
+#p3LgPsu .axis-title-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pnJiQdO .axis-text-y {
+#p3LgPsu .axis-text-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#d5kKiBT .axis-tooltip-text-y {
+#dmTDk4M .axis-tooltip-text-y {
 fill: #303030;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pnJiQdO .facet-strip-text-x {
+#p3LgPsu .facet-strip-text-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pnJiQdO .facet-strip-text-y {
+#p3LgPsu .facet-strip-text-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#d5kKiBT .tooltip-text {
+#dmTDk4M .tooltip-text {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#d5kKiBT .tooltip-title {
+#dmTDk4M .tooltip-title {
 fill: #bbbbbb;
 font-weight: bold;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#d5kKiBT .tooltip-label {
+#dmTDk4M .tooltip-label {
 fill: #bbbbbb;
 font-weight: bold;
    font-style: normal;font-family: sans-serif;
@@ -129,7 +129,7 @@ font-size: 13.0px;
 }
 
   </style>
-  <g id="pnJiQdO">
+  <g id="p3LgPsu">
     <path fill-rule="evenodd" fill="rgb(48,48,48)" fill-opacity="1.0" d="M0.0 0.0 L0.0 800.0 L894.0 800.0 L894.0 0.0 Z">
     </path>
     <g transform="translate(21.0 22.0 ) ">
@@ -173,7 +173,7 @@ font-size: 13.0px;
           </g>
         </g>
       </g>
-      <g clip-path="url(#c5grnvb)" clip-bounds-jfx="[rect (17.961210910936405, 0.0), (734.0233305481024, 751.0)]">
+      <g clip-path="url(#cnOi2KP)" clip-bounds-jfx="[rect (17.961210910936405, 0.0), (734.0233305481024, 751.0)]">
         <g transform="translate(17.961210910936405 0.0 ) ">
           <g>
             <g>
@@ -189,7 +189,7 @@ font-size: 13.0px;
           </g>
         </g>
         <defs>
-          <clipPath id="c5grnvb">
+          <clipPath id="cnOi2KP">
             <rect x="17.961210910936405" y="0.0" width="734.0233305481024" height="751.0">
             </rect>
           </clipPath>
@@ -311,7 +311,7 @@ font-size: 13.0px;
     </g>
     <g transform="translate(38.9612109109364 15.8 ) ">
       <text class="plot-title" y="0.0">
-        <tspan>1 Million Empty Collections Overhead</tspan>
+        <tspan>1 Million Empty Lists Overhead</tspan>
       </text>
     </g>
     <g transform="translate(15.0 397.5 ) rotate(-90.0 ) ">
@@ -392,6 +392,6 @@ font-size: 13.0px;
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(187,187,187)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 800.0 L894.0 800.0 L894.0 0.0 Z" pointer-events="none">
     </path>
   </g>
-  <g id="d5kKiBT">
+  <g id="dmTDk4M">
   </g>
 </svg>

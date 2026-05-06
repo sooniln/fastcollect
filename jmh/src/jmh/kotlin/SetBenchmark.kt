@@ -114,8 +114,8 @@ open class SetBenchmark {
         //@Param("seqLow", "seqHigh", "random", "evenLow", "evenHigh", "partitionLow", "partitionHigh", "highBits")
         var order: String = "random"
 
-        @Param("12000", "192000", "1536000", "6272000")
-        open var size: Int = 6272000
+        @Param("3000", "12000", "48000", "192000", "768000", "3072000")
+        open var size: Int = 192000
 
         var index = 0
         lateinit var inKeys: IntArray
@@ -123,6 +123,7 @@ open class SetBenchmark {
 
         lateinit var fastcollect: IntHashSet
         lateinit var fastutil: IntOpenHashSet
+        lateinit var eclipse: org.eclipse.collections.impl.set.mutable.primitive.IntHashSet
         lateinit var hashsmith: SwissSet<Int>
         lateinit var kds: IntSet
         lateinit var kotlin: HashSet<Int>
@@ -150,6 +151,7 @@ open class SetBenchmark {
 
             fastcollect = IntHashSet(size).apply { for (key in inKeys) add(key) }
             fastutil = IntOpenHashSet(size).apply { for (key in inKeys) add(key) }
+            eclipse = org.eclipse.collections.impl.set.mutable.primitive.IntHashSet(size).apply { for (key in outKeys) add(key) }
             hashsmith = SwissSet<Int>(size).apply { for (key in inKeys) add(key) }
             kds = IntSet().apply { for (key in inKeys) add(key) }
             kotlin = HashSet<Int>(size).apply { for (key in inKeys) add(key) }
@@ -187,6 +189,7 @@ open class SetBenchmark {
             super.setupIteration(params)
             fastcollect.clear()
             fastutil.clear()
+            eclipse.clear()
             kds.clear()
             kotlin.clear()
         }
@@ -246,6 +249,35 @@ open class SetBenchmark {
         val it = s.fastutil.iterator()
         while (it.hasNext()) {
             bh.consume(it.nextInt())
+        }
+    }
+
+    @Benchmark
+    fun eclipseGetHit(s: ReadState) = s.eclipse.contains(s.nextWrappingInKey())
+
+    @Benchmark
+    fun eclipseGetMiss(s: ReadState) = s.eclipse.contains(s.nextWrappingOutKey())
+
+    @Benchmark
+    fun eclipsePutHit(s: ReadState) = s.eclipse.add(s.nextWrappingInKey())
+
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 10, batchSize = 5000000)
+    @Measurement(iterations = 20, batchSize = 5000000)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Benchmark
+    fun eclipsePutMiss(s: EmptyState) = s.eclipse.add(s.nextInKey())
+
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Benchmark
+    fun eclipseGrow(s: ReadState) = org.eclipse.collections.impl.set.mutable.primitive.IntHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
+
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @Benchmark
+    fun eclipseIterate(s: ReadState, bh: Blackhole) {
+        val it = s.eclipse.intIterator()
+        while (it.hasNext()) {
+            bh.consume(it.next())
         }
     }
 
