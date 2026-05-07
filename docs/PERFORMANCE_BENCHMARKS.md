@@ -21,9 +21,6 @@ implementations which have significant feature overlap). This does introduce a s
 bounds checking and logic is more complex than ArrayList, but difference is small enough that the decision seems
 justified.
 
-Overall performance is pretty tight between FastCollect, fastutil, and Eclipse - a good showing considering FastCollect
-ArrayDeques have slightly more complex logic.
-
 ### Add (pre-size list with single allocation and then build to size by repeated single adds)
 
 | Library / Size |      3,000 |     12,000 |     48,000 |    192,000 |    768,000 |  3,072,000 |
@@ -68,12 +65,6 @@ ArrayDeques have slightly more complex logic.
 
 ## Map (Int2IntHashMap or equivalent)
 
-Again performance is relatively tight between FastCollect, fastutil, and Eclipse, with the top spot usually going to
-Eclipse. This appears to be due to Eclipse using a cuckoo hashing variant which performs strongly against random data.
-It needs testing against more adversarial and non-random data to see if the benefits can hold up in real world
-situations. Performance differences are likely also due to the particular hash smearing methods used by each map,
-although this bears further investigation. Kotlin is quite competitive on Gets, but falls apart a bit on Puts.
-
 ### GetHit (retrieve a key present in the table)
 
 | Library / Size |      3,000 |     12,000 |     48,000 |     192,000 |     768,000 |   3,072,000 |
@@ -98,8 +89,6 @@ although this bears further investigation. Kotlin is quite competitive on Gets, 
 
 ### PutHit (update a key already present in the table)
 
-HashSmith appears to perform rather badly at higher collection sizes, which is surprising.
-
 | Library / Size |      3,000 |      12,000 |      48,000 |     192,000 |     768,000 |   3,072,000 |
 |:---------------|-----------:|------------:|------------:|------------:|------------:|------------:|
 | `fastcollect`  | `3.101 ns` |  `3.727 ns` | `11.434 ns` | `13.755 ns` | `14.501 ns` | `23.717 ns` |
@@ -122,9 +111,6 @@ HashSmith appears to perform rather badly at higher collection sizes, which is s
 
 ### Grow (build map to size from empty by repeated insertions)
 
-FastCollect falls behind fastutil and Eclipse here - it's more complex to maintain Robin Hood invariants through
-rehashing, but still comfortably beats all the other collections. HashSmith again degrades at large sizes.
-
 | Library / Size |       3,000 |       12,000 |        48,000 |       192,000 |          768,000 |       3,072,000 |
 |:---------------|------------:|-------------:|--------------:|--------------:|-----------------:|----------------:|
 | `fastcollect`  | `24.797 us` | `248.097 us` | `1297.784 us` | `5595.212 us` |   `24408.432 us` | `133225.559 us` |
@@ -136,9 +122,6 @@ rehashing, but still comfortably beats all the other collections. HashSmith agai
 
 ### Iterate (iterate over every key/value pair in the map)
 
-FastCollect dominates entry iteration but is mostly neck and neck with fastutil for other types of iterations, with
-other collections dropping behind these two.
-
 | Library / Size |      3,000 |      12,000 |       48,000 |       192,000 |        768,000 |      3,072,000 |
 |:---------------|-----------:|------------:|-------------:|--------------:|---------------:|---------------:|
 | `fastcollect`  | `1.796 us` |  `8.631 us` |  `35.387 us` |  `548.023 us` |  `2280.346 us` |  `9867.332 us` |
@@ -149,10 +132,6 @@ other collections dropping behind these two.
 | `hashsmith`    | `4.788 us` | `21.937 us` | `128.313 us` | `1040.114 us` | `11268.538 us` | `91183.476 us` |
 
 ### IterateFast (iterate without any allocations)
-
-Not much substantial differences for FastCollect, but fastutil is much improved. This likely indicates that FastCollect
-iteration was already being inlined, and the JVM was already able to eliminate the allocation completely through escape
-analysis and scalar replacement... Fastutil iteration was likely too complex to be easily inlined?
 
 | Library / Size |      3,000 |     12,000 |      48,000 |      192,000 |       768,000 |     3,072,000 |
 |:---------------|-----------:|-----------:|------------:|-------------:|--------------:|--------------:|
@@ -184,9 +163,6 @@ analysis and scalar replacement... Fastutil iteration was likely too complex to 
 ---
 
 ## Set (IntHashSet or equivalent)
-
-Set performance is generally expected to mirror Map performance, given that they are usually based on the exact same
-algorithms.
 
 ### GetHit (retrieve a key present in the table)
 
