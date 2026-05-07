@@ -1,5 +1,7 @@
 package io.github.sooniln.fastcollect
 
+import androidx.collection.IntList
+import androidx.collection.MutableIntList
 import io.github.sooniln.fastcollect.ints.IntArrayDeque
 import io.github.sooniln.fastcollect.ints.IntHashSet
 import it.unimi.dsi.fastutil.ints.IntArrayList
@@ -59,7 +61,7 @@ open class ListBenchmark {
         lateinit var fastcollect: IntArrayDeque
         lateinit var fastutil: IntArrayList
         lateinit var eclipse: org.eclipse.collections.impl.list.mutable.primitive.IntArrayList
-        lateinit var kds: korlibs.datastructure.IntArrayList
+        lateinit var androidx: MutableIntList
         lateinit var kotlin: ArrayList<Int>
 
         private fun generateInElements(size: Int) {
@@ -74,7 +76,7 @@ open class ListBenchmark {
             fastcollect = IntArrayDeque(size).apply { for (e in inElements) add(e) }
             fastutil = IntArrayList(size).apply { for (e in inElements) add(e) }
             eclipse = org.eclipse.collections.impl.list.mutable.primitive.IntArrayList(size).apply { for (e in inElements) add(e) }
-            kds = korlibs.datastructure.IntArrayList().apply { for (e in inElements) add(e) }
+            androidx = MutableIntList(size).apply { for (e in inElements) add(e) }
             kotlin = ArrayList<Int>(size).apply { for (e in inElements) add(e) }
         }
 
@@ -109,7 +111,7 @@ open class ListBenchmark {
             fastcollect.clear()
             fastutil.clear()
             eclipse.clear()
-            kds.clear()
+            androidx.clear()
             kotlin.clear()
         }
     }
@@ -199,24 +201,24 @@ open class ListBenchmark {
     @Measurement(iterations = 40, batchSize = 5000000)
     @BenchmarkMode(Mode.SingleShotTime)
     @Benchmark
-    fun kdsAdd(s: EmptyState) = s.kds.add(s.nextInKey())
+    fun androidxAdd(s: EmptyState) = s.androidx.add(s.nextInKey())
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun kdsGrow(s: ReadState) = korlibs.datastructure.IntArrayList().apply { repeat(s.size) { add(s.inElements[it]) } }
+    fun androidxGrow(s: ReadState) = MutableIntList().apply { repeat(s.size) { add(s.inElements[it]) } }
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun kdsSearch(s: ReadState): Int {
+    fun androidxSearch(s: ReadState): Int {
         val element = s.nextWrappingInKey()
-        return s.kds.indexOf(element) + s.kds.lastIndexOf(element)
+        return s.androidx.indexOf(element) + s.androidx.lastIndexOf(element)
     }
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun kdsIterate(s: ReadState, bh: Blackhole) {
-        for (v in s.kds) {
-            bh.consume(v)
+    fun androidxIterate(s: ReadState, bh: Blackhole) {
+        for (i in s.androidx.indices) {
+            bh.consume(s.androidx[i])
         }
     }
 

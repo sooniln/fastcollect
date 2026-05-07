@@ -1,9 +1,9 @@
 package io.github.sooniln.fastcollect
 
+import androidx.collection.MutableIntSet
 import io.github.bluuewhale.hashsmith.SwissSet
 import io.github.sooniln.fastcollect.ints.IntHashSet
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet
-import korlibs.datastructure.IntSet
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Fork
@@ -26,8 +26,8 @@ import kotlin.random.Random
  * A JVM specific benchmark which measures the performance of various set libraries.
  */
 @Fork(1, jvmArgsAppend = ["--add-modules", "jdk.incubator.vector"])
-@Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 1500, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MICROSECONDS)
+@Measurement(iterations = 5, time = 1500, timeUnit = TimeUnit.MICROSECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class SetBenchmark {
@@ -124,8 +124,8 @@ open class SetBenchmark {
         lateinit var fastcollect: IntHashSet
         lateinit var fastutil: IntOpenHashSet
         lateinit var eclipse: org.eclipse.collections.impl.set.mutable.primitive.IntHashSet
+        lateinit var androidx: MutableIntSet
         lateinit var hashsmith: SwissSet<Int>
-        lateinit var kds: IntSet
         lateinit var kotlin: HashSet<Int>
 
         private fun generateInOutKeys(size: Int) {
@@ -152,8 +152,8 @@ open class SetBenchmark {
             fastcollect = IntHashSet(size).apply { for (key in inKeys) add(key) }
             fastutil = IntOpenHashSet(size).apply { for (key in inKeys) add(key) }
             eclipse = org.eclipse.collections.impl.set.mutable.primitive.IntHashSet(size).apply { for (key in outKeys) add(key) }
+            androidx = MutableIntSet(size).apply { for (key in inKeys) add(key) }
             hashsmith = SwissSet<Int>(size).apply { for (key in inKeys) add(key) }
-            kds = IntSet().apply { for (key in inKeys) add(key) }
             kotlin = HashSet<Int>(size).apply { for (key in inKeys) add(key) }
         }
 
@@ -189,8 +189,8 @@ open class SetBenchmark {
             super.setupIteration(params)
             fastcollect.clear()
             fastutil.clear()
+            androidx.clear()
             eclipse.clear()
-            kds.clear()
             kotlin.clear()
         }
     }
@@ -211,11 +211,11 @@ open class SetBenchmark {
     @Benchmark
     fun fastcollectPutMiss(s: EmptyState) = s.fastcollect.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastcollectGrow(s: ReadState) = IntHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastcollectIterate(s: ReadState, bh: Blackhole) {
         for (i in s.fastcollect) {
@@ -239,11 +239,11 @@ open class SetBenchmark {
     @Benchmark
     fun fastutilPutMiss(s: EmptyState) = s.fastutil.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastutilGrow(s: ReadState) = IntOpenHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastutilIterate(s: ReadState, bh: Blackhole) {
         val it = s.fastutil.iterator()
@@ -268,17 +268,45 @@ open class SetBenchmark {
     @Benchmark
     fun eclipsePutMiss(s: EmptyState) = s.eclipse.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun eclipseGrow(s: ReadState) = org.eclipse.collections.impl.set.mutable.primitive.IntHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun eclipseIterate(s: ReadState, bh: Blackhole) {
         val it = s.eclipse.intIterator()
         while (it.hasNext()) {
             bh.consume(it.next())
         }
+    }
+
+    @Benchmark
+    fun androidxGetHit(s: ReadState) = s.androidx.contains(s.nextWrappingInKey())
+
+    @Benchmark
+    fun androidxGetMiss(s: ReadState) = s.androidx.contains(s.nextWrappingOutKey())
+
+    @Benchmark
+    fun androidxPutHit(s: ReadState) = s.androidx.add(s.nextWrappingInKey())
+
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 10, batchSize = 5000000)
+    @Measurement(iterations = 20, batchSize = 5000000)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Benchmark
+    fun androidxPutMiss(s: EmptyState) = s.androidx.add(s.nextInKey())
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun androidxGrow(s: ReadState) = MutableIntSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun androidxIterate(s: ReadState): Int {
+        var value = 0
+        s.androidx.forEach { value = value xor it }
+        return value
     }
 
     @Benchmark
@@ -297,43 +325,14 @@ open class SetBenchmark {
     @Benchmark
     fun hashsmithPutMiss(s: EmptyState) = s.hashsmith.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun hashsmithGrow(s: ReadState) = IntOpenHashSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun hashsmithIterate(s: ReadState, bh: Blackhole) {
         val it = s.hashsmith.iterator()
-        while (it.hasNext()) {
-            bh.consume(it.next())
-        }
-    }
-
-    @Benchmark
-    fun kdsGetHit(s: ReadState) = s.kds.contains(s.nextWrappingInKey())
-
-    @Benchmark
-    fun kdsGetMiss(s: ReadState) = s.kds.contains(s.nextWrappingOutKey())
-
-    @Benchmark
-    fun kdsPutHit(s: ReadState) = s.kds.add(s.nextWrappingInKey())
-
-    @OperationsPerInvocation(5000000)
-    @Warmup(iterations = 10, batchSize = 5000000)
-    @Measurement(iterations = 20, batchSize = 5000000)
-    @BenchmarkMode(Mode.SingleShotTime)
-    @Benchmark
-    fun kdsPutMiss(s: EmptyState) = s.kds.add(s.nextInKey())
-
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Benchmark
-    fun kdsGrow(s: ReadState) = IntSet().apply { repeat(s.size) { add(s.inKeys[it]) } }
-
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Benchmark
-    fun kdsIterate(s: ReadState, bh: Blackhole) {
-        val it = s.kds.iterator()
         while (it.hasNext()) {
             bh.consume(it.next())
         }
@@ -355,11 +354,11 @@ open class SetBenchmark {
     @Benchmark
     fun kotlinPutMiss(s: EmptyState) = s.kotlin.add(s.nextInKey())
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun kotlinGrow(s: ReadState) = HashSet<Int>().apply { repeat(s.size) { add(s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun kotlinIterate(s: ReadState, bh: Blackhole) {
         for (i in s.kotlin) {

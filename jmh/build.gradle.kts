@@ -10,14 +10,15 @@ plugins {
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
     jmhImplementation(project(":fastcollect"))
     jmhImplementation("it.unimi.dsi:fastutil:8.5.18")
-    jmhImplementation("org.korge:korlibs-datastructure:6.1.0")
     jmhImplementation("io.github.bluuewhale:hashsmith:0.2.0")
     jmhImplementation("org.eclipse.collections:eclipse-collections:13.0.0")
+    jmhImplementation("androidx.collection:collection:1.6.0")
 }
 
 jmh {

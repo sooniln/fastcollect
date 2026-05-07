@@ -10,117 +10,117 @@
 text {
    text-rendering: optimizeLegibility;
 }
-#pAvN6tB .plot-title {
+#p9MZUc9 .plot-title {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 16.0px;
 
 }
-#pAvN6tB .plot-subtitle {
+#p9MZUc9 .plot-subtitle {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pAvN6tB .plot-caption {
+#p9MZUc9 .plot-caption {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pAvN6tB .hyperlink-element {
+#p9MZUc9 .hyperlink-element {
 fill: #118ed8;
 font-weight: normal;
    font-style: normal;
 }
-#pAvN6tB .legend-title {
+#p9MZUc9 .legend-title {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pAvN6tB .legend-item {
+#p9MZUc9 .legend-item {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pAvN6tB .axis-title-x {
+#p9MZUc9 .axis-title-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pAvN6tB .axis-text-x {
+#p9MZUc9 .axis-text-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dmxBR7i .axis-tooltip-text-x {
+#dPOtJm1 .axis-tooltip-text-x {
 fill: #303030;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pAvN6tB .axis-title-y {
+#p9MZUc9 .axis-title-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pAvN6tB .axis-text-y {
+#p9MZUc9 .axis-text-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dmxBR7i .axis-tooltip-text-y {
+#dPOtJm1 .axis-tooltip-text-y {
 fill: #303030;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pAvN6tB .facet-strip-text-x {
+#p9MZUc9 .facet-strip-text-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pAvN6tB .facet-strip-text-y {
+#p9MZUc9 .facet-strip-text-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dmxBR7i .tooltip-text {
+#dPOtJm1 .tooltip-text {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dmxBR7i .tooltip-title {
+#dPOtJm1 .tooltip-title {
 fill: #bbbbbb;
 font-weight: bold;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dmxBR7i .tooltip-label {
+#dPOtJm1 .tooltip-label {
 fill: #bbbbbb;
 font-weight: bold;
    font-style: normal;font-family: sans-serif;
@@ -129,7 +129,7 @@ font-size: 13.0px;
 }
 
   </style>
-  <g id="pAvN6tB">
+  <g id="p9MZUc9">
     <path fill-rule="evenodd" fill="rgb(48,48,48)" fill-opacity="1.0" d="M0.0 0.0 L0.0 800.0 L894.0 800.0 L894.0 0.0 Z">
     </path>
     <g transform="translate(21.0 22.0 ) ">
@@ -181,13 +181,13 @@ font-size: 13.0px;
           </g>
         </g>
       </g>
-      <g clip-path="url(#cTX9VSe)" clip-bounds-jfx="[rect (25.941816366404606, 0.0), (726.0427250926342, 751.0)]">
+      <g clip-path="url(#cOkQfam)" clip-bounds-jfx="[rect (25.941816366404606, 0.0), (726.0427250926342, 751.0)]">
         <g transform="translate(25.941816366404606 0.0 ) ">
           <g>
             <g>
               <rect x="513.814851604018" y="657.7080745341615" height="93.29192546583852" width="100.52899270513387" stroke="rgb(48,48,48)" stroke-opacity="1.0" fill="rgb(154,96,180)" fill-opacity="1.0" stroke-width="1.6500000000000001">
               </rect>
-              <rect x="413.28585889888404" y="35.7619047619047" height="715.2380952380953" width="100.52899270513399" stroke="rgb(48,48,48)" stroke-opacity="1.0" fill="rgb(59,162,114)" fill-opacity="1.0" stroke-width="1.6500000000000001">
+              <rect x="413.28585889888404" y="424.4782608695652" height="326.5217391304348" width="100.52899270513399" stroke="rgb(48,48,48)" stroke-opacity="1.0" fill="rgb(59,162,114)" fill-opacity="1.0" stroke-width="1.6500000000000001">
               </rect>
               <rect x="312.75686619375006" y="408.92960662525877" height="342.07039337474123" width="100.52899270513399" stroke="rgb(48,48,48)" stroke-opacity="1.0" fill="rgb(255,255,255)" fill-opacity="1.0" stroke-width="1.6500000000000001">
               </rect>
@@ -199,7 +199,7 @@ font-size: 13.0px;
           </g>
         </g>
         <defs>
-          <clipPath id="cTX9VSe">
+          <clipPath id="cOkQfam">
             <rect x="25.941816366404606" y="0.0" width="726.0427250926342" height="751.0">
             </rect>
           </clipPath>
@@ -420,7 +420,7 @@ font-size: 13.0px;
             </g>
             <g transform="translate(26.9903027277341 11.5 ) ">
               <text class="legend-item" y="0.0" dy="0.35em">
-                <tspan>KDS</tspan>
+                <tspan>AndroidX</tspan>
               </text>
             </g>
           </g>
@@ -445,6 +445,6 @@ font-size: 13.0px;
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(187,187,187)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 800.0 L894.0 800.0 L894.0 0.0 Z" pointer-events="none">
     </path>
   </g>
-  <g id="dmxBR7i">
+  <g id="dPOtJm1">
   </g>
 </svg>

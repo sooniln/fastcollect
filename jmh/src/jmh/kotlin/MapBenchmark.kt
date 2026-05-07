@@ -1,10 +1,11 @@
 package io.github.sooniln.fastcollect
 
+import androidx.collection.IntIntMap
+import androidx.collection.MutableIntIntMap
 import io.github.bluuewhale.hashsmith.SwissMap
 import io.github.sooniln.fastcollect.ints.Int2IntHashMap
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet
-import korlibs.datastructure.IntIntMap
 import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
@@ -28,8 +29,8 @@ import kotlin.random.Random
  * A JVM specific benchmark which measures the performance of various map libraries.
  */
 @Fork(1, jvmArgsAppend = ["--add-modules", "jdk.incubator.vector"])
-@Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 5, time = 1500, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MICROSECONDS)
+@Measurement(iterations = 5, time = 1500, timeUnit = TimeUnit.MICROSECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class MapBenchmark {
@@ -75,8 +76,8 @@ open class MapBenchmark {
         lateinit var fastcollect: Int2IntHashMap
         lateinit var fastutil: Int2IntOpenHashMap
         lateinit var eclipse: IntIntHashMap
+        lateinit var androidx: MutableIntIntMap
         lateinit var hashsmith: SwissMap<Int, Int>
-        lateinit var kds: IntIntMap
         lateinit var kotlin: HashMap<Int, Int>
 
         private fun generateInOutKeys(size: Int) {
@@ -93,8 +94,8 @@ open class MapBenchmark {
             fastcollect = Int2IntHashMap(size).apply { for (key in inKeys) set(key, key) }
             fastutil = Int2IntOpenHashMap(size).apply { for (key in inKeys) set(key, key) }
             eclipse = IntIntHashMap(size).apply { for(key in inKeys) put(key, key) }
+            androidx = MutableIntIntMap(size).apply { for(key in inKeys) put(key, key) }
             hashsmith = SwissMap<Int, Int>(size).apply { for (key in inKeys) set(key, key) }
-            kds = IntIntMap(size).apply { for (key in inKeys) set(key, key) }
             kotlin = HashMap<Int, Int>(size).apply { for (key in inKeys) set(key, key) }
         }
 
@@ -131,7 +132,7 @@ open class MapBenchmark {
             fastcollect.clear()
             fastutil.clear()
             eclipse.clear()
-            kds.clear()
+            androidx.clear()
             kotlin.clear()
         }
     }
@@ -158,11 +159,11 @@ open class MapBenchmark {
         s.fastcollect[k] = k
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastcollectGrow(s: ReadState) = Int2IntHashMap().apply { repeat(s.size) { set(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastcollectIterateKeys(s: ReadState, bh: Blackhole) {
         for (e in s.fastcollect.keys) {
@@ -170,7 +171,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastcollectIterateValues(s: ReadState, bh: Blackhole) {
         for (e in s.fastcollect.values) {
@@ -178,7 +179,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastcollectIterate(s: ReadState, bh: Blackhole) {
         for (e in s.fastcollect) {
@@ -187,7 +188,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastcollectIterateFast(s: ReadState, bh: Blackhole) {
         for (e in s.fastcollect.fastIterator()) {
@@ -222,7 +223,7 @@ open class MapBenchmark {
     @Benchmark
     fun fastutilGrow(s: ReadState) = Int2IntOpenHashMap().apply { repeat(s.size) { set(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastutilIterateKeys(s: ReadState, bh: Blackhole) {
         val it = s.fastutil.keys.iterator()
@@ -231,7 +232,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastutilIterateValues(s: ReadState, bh: Blackhole) {
         val it = s.fastutil.values.iterator()
@@ -240,7 +241,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastutilIterate(s: ReadState, bh: Blackhole) {
         for (e in s.fastutil.int2IntEntrySet()) {
@@ -249,7 +250,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun fastutilIterateFast(s: ReadState, bh: Blackhole) {
         for (e in s.fastutil.int2IntEntrySet().fastIterator()) {
@@ -280,11 +281,11 @@ open class MapBenchmark {
         s.eclipse.put(k, k)
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun eclipseGrow(s: ReadState) = IntIntHashMap().apply { repeat(s.size) { put(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun eclipseIterateKeys(s: ReadState, bh: Blackhole) {
         val it = s.eclipse.keySet().intIterator()
@@ -293,7 +294,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun eclipseIterateValues(s: ReadState, bh: Blackhole) {
         val it = s.eclipse.values().intIterator()
@@ -302,7 +303,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun eclipseIterate(s: ReadState, bh: Blackhole) {
         val it = s.eclipse.keyValuesView().iterator()
@@ -311,6 +312,56 @@ open class MapBenchmark {
             bh.consume(pair.one)
             bh.consume(pair.two)
         }
+    }
+
+    @Benchmark
+    fun androidxGetHit(s: ReadState) = s.androidx[s.nextWrappingInKey()]
+
+    @Benchmark
+    fun androidxGetMiss(s: ReadState) = s.androidx.containsKey(s.nextWrappingOutKey())
+
+    @Benchmark
+    fun androidxPutHit(s: ReadState) {
+        val k = s.nextWrappingInKey()
+        s.androidx.put(k, k)
+    }
+
+    @OperationsPerInvocation(5000000)
+    @Warmup(iterations = 10, batchSize = 5000000)
+    @Measurement(iterations = 20, batchSize = 5000000)
+    @BenchmarkMode(Mode.SingleShotTime)
+    @Benchmark
+    fun androidxPutMiss(s: EmptyState) {
+        val k = s.nextInKey()
+        s.androidx.put(k, k)
+    }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun androidxGrow(s: ReadState) = MutableIntIntMap().apply { repeat(s.size) { put(s.inKeys[it], s.inKeys[it]) } }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun androidxIterateKeys(s: ReadState): Int {
+        var value = 0
+        s.androidx.forEachKey { value = value xor it }
+        return value
+    }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun androidxIterateValues(s: ReadState): Int {
+        var value = 0
+        s.androidx.forEachValue { value = value xor it }
+        return value
+    }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun androidxIterate(s: ReadState): Int {
+        var value = 0
+        s.androidx.forEach { k, v -> value = value xor k xor v }
+        return value
     }
 
     @Benchmark
@@ -335,11 +386,11 @@ open class MapBenchmark {
         s.hashsmith[k] = k
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun hashsmithGrow(s: ReadState) = SwissMap<Int, Int>().apply { repeat(s.size) { set(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun hashsmithIterateKeys(s: ReadState, bh: Blackhole) {
         for (e in s.hashsmith.keys) {
@@ -347,7 +398,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun hashsmithIterateValues(s: ReadState, bh: Blackhole) {
         for (e in s.hashsmith.values) {
@@ -355,61 +406,10 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun hashsmithIterate(s: ReadState, bh: Blackhole) {
         for (e in s.hashsmith) {
-            bh.consume(e.key)
-            bh.consume(e.value)
-        }
-    }
-
-    @Benchmark
-    fun kdsGetHit(s: ReadState) = s.kds[s.nextWrappingInKey()]
-
-    @Benchmark
-    fun kdsGetMiss(s: ReadState) = s.kds[s.nextWrappingOutKey()]
-
-    @Benchmark
-    fun kdsPutHit(s: ReadState) {
-        val k = s.nextWrappingInKey()
-        s.kds[k] = k
-    }
-
-    @OperationsPerInvocation(5000000)
-    @Warmup(iterations = 10, batchSize = 5000000)
-    @Measurement(iterations = 20, batchSize = 5000000)
-    @BenchmarkMode(Mode.SingleShotTime)
-    @Benchmark
-    fun kdsPutMiss(s: EmptyState) {
-        val k = s.nextInKey()
-        s.kds[k] = k
-    }
-
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Benchmark
-    fun kdsGrow(s: ReadState) = IntIntMap().apply { repeat(s.size) { set(s.inKeys[it], s.inKeys[it]) } }
-
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Benchmark
-    fun kdsIterateKeys(s: ReadState, bh: Blackhole) {
-        for (e in s.kds.keys) {
-            bh.consume(e)
-        }
-    }
-
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Benchmark
-    fun kdsIterateValues(s: ReadState, bh: Blackhole) {
-        for (e in s.kds.values) {
-            bh.consume(e)
-        }
-    }
-
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Benchmark
-    fun kdsIterate(s: ReadState, bh: Blackhole) {
-        for (e in s.kds.entries) {
             bh.consume(e.key)
             bh.consume(e.value)
         }
@@ -437,11 +437,11 @@ open class MapBenchmark {
         s.kotlin[k] = k
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun kotlinGrow(s: ReadState) = HashMap<Int, Int>().apply { repeat(s.size) { set(s.inKeys[it], s.inKeys[it]) } }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun kotlinIterateKeys(s: ReadState, bh: Blackhole) {
         for (e in s.kotlin.keys) {
@@ -449,7 +449,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun kotlinIterateValues(s: ReadState, bh: Blackhole) {
         for (e in s.kotlin.values) {
@@ -457,7 +457,7 @@ open class MapBenchmark {
         }
     }
 
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun kotlinIterate(s: ReadState, bh: Blackhole) {
         for (e in s.kotlin.entries) {

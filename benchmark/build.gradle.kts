@@ -5,6 +5,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    google()
 }
 
 kotlin {
@@ -26,7 +27,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.benchmark.runtime)
                 implementation(project(":fastcollect"))
-                implementation("org.korge:korlibs-datastructure:6.1.0")
+                implementation("androidx.collection:collection:1.6.0")
             }
         }
         jvmMain {

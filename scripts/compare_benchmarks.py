@@ -15,7 +15,7 @@ import json
 import sys
 from pathlib import Path
 
-IMPLS = ['fastcollect', 'fastutil', 'hashsmith', 'eclipse', 'kds', 'kotlin']
+IMPLS = ['fastcollect', 'fastutil', 'hashsmith', 'eclipse', 'androidx', 'kotlin']
 BENCH_TYPES = ['List', 'Map', 'Set']
 
 

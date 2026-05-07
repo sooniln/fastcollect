@@ -10,117 +10,117 @@
 text {
    text-rendering: optimizeLegibility;
 }
-#pbjqvr3 .plot-title {
+#pQdCdPR .plot-title {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 16.0px;
 
 }
-#pbjqvr3 .plot-subtitle {
+#pQdCdPR .plot-subtitle {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pbjqvr3 .plot-caption {
+#pQdCdPR .plot-caption {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pbjqvr3 .hyperlink-element {
+#pQdCdPR .hyperlink-element {
 fill: #118ed8;
 font-weight: normal;
    font-style: normal;
 }
-#pbjqvr3 .legend-title {
+#pQdCdPR .legend-title {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pbjqvr3 .legend-item {
+#pQdCdPR .legend-item {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pbjqvr3 .axis-title-x {
+#pQdCdPR .axis-title-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pbjqvr3 .axis-text-x {
+#pQdCdPR .axis-text-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dqtwXRc .axis-tooltip-text-x {
+#dkMjJOs .axis-tooltip-text-x {
 fill: #303030;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pbjqvr3 .axis-title-y {
+#pQdCdPR .axis-title-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pbjqvr3 .axis-text-y {
+#pQdCdPR .axis-text-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dqtwXRc .axis-tooltip-text-y {
+#dkMjJOs .axis-tooltip-text-y {
 fill: #303030;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pbjqvr3 .facet-strip-text-x {
+#pQdCdPR .facet-strip-text-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pbjqvr3 .facet-strip-text-y {
+#pQdCdPR .facet-strip-text-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dqtwXRc .tooltip-text {
+#dkMjJOs .tooltip-text {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dqtwXRc .tooltip-title {
+#dkMjJOs .tooltip-title {
 fill: #bbbbbb;
 font-weight: bold;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dqtwXRc .tooltip-label {
+#dkMjJOs .tooltip-label {
 fill: #bbbbbb;
 font-weight: bold;
    font-style: normal;font-family: sans-serif;
@@ -129,7 +129,7 @@ font-size: 13.0px;
 }
 
   </style>
-  <g id="pbjqvr3">
+  <g id="pQdCdPR">
     <path fill-rule="evenodd" fill="rgb(48,48,48)" fill-opacity="1.0" d="M0.0 0.0 L0.0 800.0 L894.0 800.0 L894.0 0.0 Z">
     </path>
     <g transform="translate(21.0 22.0 ) ">
@@ -209,7 +209,7 @@ font-size: 13.0px;
           </g>
         </g>
       </g>
-      <g clip-path="url(#c8flc7L)" clip-bounds-jfx="[rect (17.961210910936405, 0.0), (734.0233305481024, 669.0275702820961)]">
+      <g clip-path="url(#cBJMEf4)" clip-bounds-jfx="[rect (17.961210910936405, 0.0), (734.0233305481024, 669.0275702820961)]">
         <g transform="translate(17.961210910936405 0.0 ) ">
           <g>
             <g>
@@ -417,7 +417,7 @@ font-size: 13.0px;
           </g>
         </g>
         <defs>
-          <clipPath id="c8flc7L">
+          <clipPath id="cBJMEf4">
             <rect x="17.961210910936405" y="0.0" width="734.0233305481024" height="669.0275702820961">
             </rect>
           </clipPath>
@@ -779,7 +779,7 @@ font-size: 13.0px;
             </g>
             <g transform="translate(26.9903027277341 11.5 ) ">
               <text class="legend-item" y="0.0" dy="0.35em">
-                <tspan>KDS</tspan>
+                <tspan>AndroidX</tspan>
               </text>
             </g>
           </g>
@@ -804,6 +804,6 @@ font-size: 13.0px;
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(187,187,187)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 800.0 L894.0 800.0 L894.0 0.0 Z" pointer-events="none">
     </path>
   </g>
-  <g id="dqtwXRc">
+  <g id="dkMjJOs">
   </g>
 </svg>

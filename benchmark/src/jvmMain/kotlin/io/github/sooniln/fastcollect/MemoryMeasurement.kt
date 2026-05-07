@@ -1,13 +1,14 @@
 package io.github.sooniln.fastcollect
 
+import androidx.collection.MutableIntIntMap
+import androidx.collection.MutableIntList
+import androidx.collection.MutableIntSet
 import io.github.sooniln.fastcollect.ints.Int2IntHashMap
 import io.github.sooniln.fastcollect.ints.IntArrayDeque
 import io.github.sooniln.fastcollect.ints.IntHashSet
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet
-import korlibs.datastructure.IntIntMap
-import korlibs.datastructure.IntSet
 import org.eclipse.collections.impl.map.mutable.primitive.IntIntHashMap
 import org.openjdk.jol.info.GraphLayout.parseInstance
 
@@ -25,19 +26,19 @@ fun main() {
     val listFastcollect = IntArrayDeque()
     val listFastutil = IntArrayList()
     val listEclipse = org.eclipse.collections.impl.list.mutable.primitive.IntArrayList()
-    val listKds = korlibs.datastructure.IntArrayList()
+    val listAndroidX = MutableIntList()
     val listKotlin = ArrayList<Int>()
 
     val setFastcollect = IntHashSet()
     val setFastutil = IntOpenHashSet()
     val setEclipse = org.eclipse.collections.impl.set.mutable.primitive.IntHashSet()
-    val setKds = IntSet()
+    val setAndroidX = MutableIntSet()
     val setKotlin = HashSet<Int>()
 
     val mapFastcollect = Int2IntHashMap()
     val mapFastutil = Int2IntOpenHashMap()
     val mapEclipse = IntIntHashMap()
-    val mapKds = IntIntMap()
+    val mapAndroidX = MutableIntIntMap()
     val mapKotlin = HashMap<Int, Int>()
 
     println("collection,size,bytes")
@@ -47,17 +48,17 @@ fun main() {
             listFastcollect.add(i)
             listFastutil.add(i)
             listEclipse.add(i)
-            listKds.add(i)
+            listAndroidX.add(i)
             listKotlin.add(i)
             setFastcollect.add(i)
             setFastutil.add(i)
             setEclipse.add(i)
-            setKds.add(i)
+            setAndroidX.add(i)
             setKotlin.add(i)
             mapFastcollect[i] = i
             mapFastutil[i] = i
             mapEclipse.put(i, i)
-            mapKds[i] = i
+            mapAndroidX[i] = i
             mapKotlin[i] = i
         }
         prev = size
@@ -65,17 +66,17 @@ fun main() {
         row("listFastCollect", size, listFastcollect)
         row("listFastutil", size, listFastutil)
         row("listEclipse", size, listEclipse)
-        row("listKDS", size, listKds)
+        row("listAndroidX", size, listAndroidX)
         row("listKotlin", size, listKotlin)
         row("setFastCollect", size, setFastcollect)
         row("setFastutil", size, setFastutil)
         row("setEclipse", size, setEclipse)
-        row("setKDS", size, setKds)
+        row("setAndroidX", size, setAndroidX)
         row("setKotlin", size, setKotlin)
         row("mapFastCollect", size, mapFastcollect)
         row("mapFastutil", size, mapFastutil)
         row("mapEclipse", size, mapEclipse)
-        row("mapKDS", size, mapKds)
+        row("mapAndroidX", size, mapAndroidX)
         row("mapKotlin", size, mapKotlin)
     }
 }
