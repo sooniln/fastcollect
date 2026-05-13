@@ -26,8 +26,8 @@ import kotlin.random.Random
  * A JVM specific benchmark which measures the performance of various set libraries.
  */
 @Fork(1, jvmArgsAppend = ["--add-modules", "jdk.incubator.vector"])
-@Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MICROSECONDS)
-@Measurement(iterations = 5, time = 1500, timeUnit = TimeUnit.MICROSECONDS)
+@Warmup(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 1500, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class SetBenchmark {

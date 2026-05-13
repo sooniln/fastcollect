@@ -178,20 +178,19 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
         }
 
         val mask = mask
+        val rotVal = mask.rotVal()
         var slot = key.slot(mask)
+        var slotDistance = 0
         while (true) {
             val currKey = keysArr[slot]
             if (currKey == key) {
                 return slot
-            } else if (currKey == ZERO) {
+            } else if (currKey == ZERO || currKey.slotDistance(slot, mask, rotVal) < slotDistance) {
                 return -1
             }
 
-            // do not bother to compare slot distances to break out of the loop - in benchmarking this has not proved
-            // worth it. the calculation overhead is likely too high since we don't cache hash/DIBs. worsened latency in
-            // lookup hits is ~4x the improved latency in lookup misses on average...
-
             slot = slot.nextSlot(mask)
+            ++slotDistance
         }
     }
 
