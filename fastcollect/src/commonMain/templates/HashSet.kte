@@ -9,10 +9,6 @@ import kotlin.math.min
  * the Kotlin standard library [HashSet] implementations to improve performance and memory usage. Has the same API
  * contracts as the standard library [HashSet] unless noted otherwise.
  *
- * This implementation differs in behavior from common hash sets in that at low capacity numbers it will effectively
- * force a loadFactor of 1. This may improve performance slightly at low capacities, or at worst will be only a small
- * performance penalty - however it will substantially reduce memory requirements at low capacities.
- *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  *
  * Note that a load factor of 1.0 is accepted, unlike many HashSets - this is interpreted to mean that only 1 slot need
@@ -20,11 +16,9 @@ import kotlin.math.min
  */
 public class ${Type}HashSet @JvmOverloads constructor(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
-    private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
 ) : AbstractMutable${Type}Set() {
 
     init {
-        require(loadFactor > 0 && loadFactor <= 1) { "Load factor must be > 0 and <= 1" }
         require(capacity >= 0) { "Capacity must be >= 0" }
     }
 
@@ -36,6 +30,7 @@ public class ${Type}HashSet @JvmOverloads constructor(
     // there is no special handling for zero.
     private var keysArr = EMPTY_ARRAY
     private var mask = keysArr.mask()
+    private var rotVal = mask.rotVal()
 
     override var size: Int = 0
         private set
@@ -80,7 +75,7 @@ public class ${Type}HashSet @JvmOverloads constructor(
         }
 
         val mask = mask
-        val rotVal = mask.rotVal()
+        val rotVal = rotVal
         var slot = element.slot(mask, rotVal)
         var newKey = element
         var newKeySlotDistance = 0
@@ -136,14 +131,24 @@ public class ${Type}HashSet @JvmOverloads constructor(
         }
 
         val mask = mask
-        val rotVal = mask.rotVal()
+        val rotVal = rotVal
         var slot = key.slot(mask, rotVal)
         var slotDistance = 0
         while (true) {
             val currKey = keysArr[slot]
             if (currKey == key) {
                 return slot
-            } else if (currKey == ZERO || currKey.slotDistance(slot, mask, rotVal) < slotDistance) {
+            } else if (currKey == ZERO ||
+                    // checking whether the current slot distance is higher than our search distance allows us to early
+                    // exit the search loop, but at a non-trivial cost in extra operations. this generally increases
+                    // GetHit time and decreases GetMiss time. in order to optimize this further so that we can still
+                    // get the benefit of early exiting without paying the full cost, we implement the following: check
+                    // for early exit only once per cache line, and then only when we hit the 8th element (selected
+                    // experimentally) within the cache line. this doesn't penalize GetHit times much (as we can
+                    // hopefully find the element before incurring the cost) and still substantially reduces GetMiss
+                    // times.
+                    (slotDistance and CACHE_LINE_MASK == 8
+                        && currKey.slotDistance(slot, mask, rotVal) < slotDistance)) {
                 return -1
             }
 
@@ -163,7 +168,7 @@ public class ${Type}HashSet @JvmOverloads constructor(
         }
 
         val mask = mask
-        val rotVal = mask.rotVal()
+        val rotVal = rotVal
 
         // move all slots left until we hit a zero slot
         var currSlot = slot
@@ -214,21 +219,22 @@ public class ${Type}HashSet @JvmOverloads constructor(
         if (capacity == 0 && keysArr !== EMPTY_ARRAY) {
             keysArr = EMPTY_ARRAY
             mask = keysArr.mask()
+            rotVal = mask.rotVal()
             threshold = DEFAULT_INITIAL_CAPACITY
             return
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1f else loadFactor
+        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1f else .9f
 
         val newLength = arraySize(capacity, actualLoadFactor)
         if (keysArr.size == newLength) return
 
         val newKeysArr = ${Type}Array(newLength)
         val newMask = newKeysArr.mask()
+        val newRotVal = newMask.rotVal()
         val newEndSlot = newKeysArr.endSlot()
 
-        val newRotVal = newMask.rotVal()
         val oldEndSlot = keysArr.endSlot()
         for (slot in 0..<oldEndSlot) {
             val key = keysArr[slot]
@@ -238,15 +244,16 @@ public class ${Type}HashSet @JvmOverloads constructor(
 
         keysArr = newKeysArr
         mask = newMask
+        rotVal = newRotVal
 
         // threshold must always maintain the invariant of at least 1 slot being open
         threshold = min((newEndSlot * actualLoadFactor).toInt(), newEndSlot - 1)
     }
 
-    // we can assume element doesn't exist in array and that we never insert zero
-    private fun addRehashing(keysArr: ${Type}Array, mask: Int, rotVal: Int, element: ${Type}) {
-        var slot = element.slot(mask, rotVal)
-        var newKey = element
+    // we can assume key doesn't exist in array and that we never insert zero
+    private fun addRehashing(keysArr: ${Type}Array, mask: Int, rotVal: Int, key: ${Type}) {
+        var slot = key.slot(mask, rotVal)
+        var newKey = key
         var newKeySlotDistance = 0
         while (true) {
             val currKey = keysArr[slot]
@@ -367,7 +374,7 @@ public class ${Type}HashSet @JvmOverloads constructor(
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun ${Type}.slot(mask: Int, rotVal: Int = mask.rotVal()): Int {
+    private inline fun ${Type}.slot(mask: Int, rotVal: Int): Int {
         return mixHash(this.hashCode(), rotVal) and mask
     }
 
@@ -377,7 +384,7 @@ public class ${Type}HashSet @JvmOverloads constructor(
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun ${Type}.slotDistance(slot: Int, mask: Int, rotVal: Int = mask.rotVal()): Int {
+    private inline fun ${Type}.slotDistance(slot: Int, mask: Int, rotVal: Int): Int {
         return (slot - slot(mask, rotVal)) and mask
     }
 
@@ -395,12 +402,14 @@ public class ${Type}HashSet @JvmOverloads constructor(
         //     Pseudorandom Number Generators" by Guy Steele and Sebastiano Vigna.
         private const val K: Int = 0x93d765dd.toInt()
 
-        private const val DEFAULT_LOAD_FACTOR = .9f
-        private const val DEFAULT_INITIAL_CAPACITY = 1 shl 2  // must be power of two
+        private const val DEFAULT_INITIAL_CAPACITY = 7
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two
 
-        // we force the load factor to 1.0 up to the size of two cache lines (which we assume are 64 bytes each)
-        private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * 64 / ${Type}.SIZE_BYTES
+        private const val CACHE_LINE_SIZE = 64 / ${Type}.SIZE_BYTES
+        // we force the load factor to 1.0 up to the size of two cache lines
+        private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE
+        // mask for # of elements in a single cache line
+        private const val CACHE_LINE_MASK: Int = CACHE_LINE_SIZE - 1
 
         private fun arraySize(capacity: Int, loadFactor: Float): Int {
             check(capacity >= 0)

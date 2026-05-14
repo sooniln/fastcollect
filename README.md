@@ -7,7 +7,8 @@ A library for high-performance primitive collections in the Kotlin ecosystem.
 
 As a drop-in replacement for standard Kotlin collections, FastCollect generally reduces memory usage by 4–5× and
 improves CPU performance by 2-4× (and perhaps >10× on some iteration heavy workloads). Details and benchmarks are
-available in the performance section below.
+available in the performance section below. FastCollect distinguishes itself with a much smaller dependency size
+(supporting only necessary collections), but performance comparable to much larger and more complex libraries.
 
 FastCollect currently supports the following major platforms (minor platforms have not been listed for brevity, the
 Gradle build files are the source of truth):
@@ -88,8 +89,8 @@ Multiplatform, and those that are JVM only.
 Other multiplatform collection libraries include:
 
 * Kotlin standard library collections
-* [KorGE Data Structures](https://docs.korge.org/data-structures/) (KDS) - a primitive collections library that is part
-  of a larger game development library.
+* [androidX](https://developer.android.com/jetpack/androidx/releases/collection) - AndroidX now offers multiplatform
+  primitive collections.
 
 Other JVM-only collection libraries include:
 
@@ -110,9 +111,7 @@ A more detailed examination of performance can be found in the [Performance Benc
 doc. In benchmarking, FastCollect unsurprisingly outperforms standard Kotlin collections by orders of magnitude (as
 expected since FastCollect stores primitives, not boxed types). Performance is very comparable to fastutil, with slight
 variations in who takes the top spot, though the differences are small enough they are unlikely to be significant except
-in the most performance-critical code paths. KDS underperforms significantly for a primitives library — in some
-benchmarks performing worse than the Kotlin standard library. It has some very fast results for the occasional API, but
-this is often due to pre-allocating massive amounts of memory.
+in the most performance-critical code paths.
 
 A key advantage of primitive collections is not just reduced CPU usage, but substantially lower memory usage, which
 has compounding benefits — more data fitting in CPU caches further reduces memory access latency.

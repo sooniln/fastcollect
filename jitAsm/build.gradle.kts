@@ -72,3 +72,12 @@ registerJitAsm("jitAsmIntHashSetGrow") {
         "-XX:CompileCommand=print,it.unimi.dsi.fastutil.ints.IntOpenHashSet::rehash",
     )
 }
+
+registerJitAsm("jitAsmInt2IntHashMapLookup") {
+    mainClass = "io.github.sooniln.fastcollect.Int2IntHashMapLookupAsmProbe"
+    jvmArgs(
+        "-XX:CompileCommand=quiet",
+        "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.ints.Int2IntHashMap::lookup",
+        "-XX:CompileCommand=print,io.github.sooniln.fastcollect.ints.Int2IntHashMap::lookup",
+    )
+}

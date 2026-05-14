@@ -18,10 +18,6 @@ import kotlin.math.min
  * relationships. Can be used in place of the Kotlin standard library [HashMap] implementations to improve performance
  * and memory usage. Has the same API contracts as the standard library [HashMap] unless noted otherwise.
  *
- * This implementation differs in behavior from common hash sets in that at low capacity numbers it will effectively
- * force a loadFactor of 1. This may improve performance slightly at low capacities, or at worst will be only a small
- * performance penalty - however it will substantially reduce memory requirements at low capacities.
- *
 
  * Note that unfortunately many of the common Kotlin Map methods may force primitive type boxing, and thus could incur
  * performance penalties. These methods have been marked as deprecated so they will be easily visible in IDEs. It is
@@ -50,7 +46,6 @@ import kotlin.math.min
  */
 public class Long2IntHashMap @JvmOverloads constructor(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
-    private val loadFactor: Float = DEFAULT_LOAD_FACTOR,
 
     /** The default value should be the value that is ideally least likely to occur in the map. */
     override val defaultValue: Int = Int.MIN_VALUE
@@ -58,7 +53,6 @@ public class Long2IntHashMap @JvmOverloads constructor(
 ) : AbstractMutableLong2IntMap() {
 
     init {
-        require(loadFactor > 0 && loadFactor <= 1) { "Load factor must be > 0 and <= 1" }
         require(capacity >= 0) { "Capacity must be >= 0" }
     }
 
@@ -122,7 +116,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
 
         val mask = mask
         val rotVal = mask.rotVal()
-        var slot = key.slot(mask)
+        var slot = key.slot(mask, rotVal)
         var newKey = key
         var newValue: Int = value
         var newKeySlotDistance = 0
@@ -187,13 +181,23 @@ public class Long2IntHashMap @JvmOverloads constructor(
 
         val mask = mask
         val rotVal = mask.rotVal()
-        var slot = key.slot(mask)
+        var slot = key.slot(mask, rotVal)
         var slotDistance = 0
         while (true) {
             val currKey = keysArr[slot]
             if (currKey == key) {
                 return slot
-            } else if (currKey == ZERO || currKey.slotDistance(slot, mask, rotVal) < slotDistance) {
+            } else if (currKey == ZERO ||
+                    // checking whether the current slot distance is higher than our search distance allows us to early
+                    // exit the search loop, but at a non-trivial cost in extra operations. this generally increases
+                    // GetHit time and decreases GetMiss time. in order to optimize this further so that we can still
+                    // get the benefit of early exiting without paying the full cost, we implement the following: check
+                    // for early exit only once per cache line, and then only when we hit the 8th element (selected
+                    // experimentally) within the cache line. this doesn't penalize GetHit times much (as we can
+                    // hopefully find the element before incurring the cost) and still substantially reduces GetMiss
+                    // times.
+                    (slotDistance and CACHE_LINE_MASK == 8
+                        && currKey.slotDistance(slot, mask, rotVal) < slotDistance)) {
                 return -1
             }
 
@@ -315,7 +319,6 @@ public class Long2IntHashMap @JvmOverloads constructor(
     }
 
     override fun lookup(key: Long): Int {
-        val valuesArr = valuesArr
         val slot = findSlot(key)
         return if (slot >= 0) valuesArr[slot] else defaultValue
     }
@@ -343,7 +346,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1f else loadFactor
+        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1f else .9f
 
         val newLength = arraySize(capacity, actualLoadFactor)
         if (keysArr.size == newLength) return
@@ -353,9 +356,9 @@ public class Long2IntHashMap @JvmOverloads constructor(
         val newValuesArr = IntArray(newLength)
 
         val newMask = newKeysArr.mask()
+        val newRotVal = newMask.rotVal()
         val newEndSlot = newKeysArr.endSlot()
 
-        val newRotVal = newMask.rotVal()
         val oldEndSlot = keysArr.endSlot()
         for (slot in 0..<oldEndSlot) {
             val key = keysArr[slot]
@@ -543,7 +546,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun Long.slot(mask: Int, rotVal: Int = mask.rotVal()): Int {
+    private inline fun Long.slot(mask: Int, rotVal: Int): Int {
         return mixHash(this.hashCode(), mask, rotVal) and mask
     }
 
@@ -553,7 +556,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
     }
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun Long.slotDistance(slot: Int, mask: Int, rotVal: Int = mask.rotVal()): Int {
+    private inline fun Long.slotDistance(slot: Int, mask: Int, rotVal: Int): Int {
         return (slot - slot(mask, rotVal)) and mask
     }
 
@@ -574,12 +577,14 @@ public class Long2IntHashMap @JvmOverloads constructor(
         //     Pseudorandom Number Generators" by Guy Steele and Sebastiano Vigna.
         private const val K: Int = 0x93d765dd.toInt()
 
-        private const val DEFAULT_LOAD_FACTOR = .85f
-        private const val DEFAULT_INITIAL_CAPACITY = 1 shl 2  // must be power of two
+        private const val DEFAULT_INITIAL_CAPACITY = 7
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two
 
-        // we force the load factor to 1.0 up to the size of two cache lines (which we assume are 64 bytes each)
-        private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * 64 / Long.SIZE_BYTES
+        private const val CACHE_LINE_SIZE = 64 / Long.SIZE_BYTES
+        // we force the load factor to 1.0 up to the size of two cache lines
+        private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE
+        // mask for # of elements in a single cache line
+        private const val CACHE_LINE_MASK: Int = CACHE_LINE_SIZE - 1
 
         private fun arraySize(capacity: Int, loadFactor: Float): Int {
             check(capacity >= 0)
