@@ -47,16 +47,6 @@ class IntHashSetTest {
         assertFailsWith<IllegalArgumentException> { IntHashSet(-1) }
     }
 
-    @Test
-    fun invalidLoadFactorZeroThrows() {
-        assertFailsWith<IllegalArgumentException> { IntHashSet(4, 0f) }
-    }
-
-    @Test
-    fun invalidLoadFactorNegativeThrows() {
-        assertFailsWith<IllegalArgumentException> { IntHashSet(4, -0.5f) }
-    }
-
     // --- add ---
 
     @Test

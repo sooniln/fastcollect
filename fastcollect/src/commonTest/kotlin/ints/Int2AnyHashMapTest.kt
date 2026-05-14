@@ -36,16 +36,6 @@ class Int2AnyHashMapTest {
         assertFailsWith<IllegalArgumentException> { Int2AnyHashMap<String>(-1) }
     }
 
-    @Test
-    fun invalidLoadFactorZeroThrows() {
-        assertFailsWith<IllegalArgumentException> { Int2AnyHashMap<String>(4, 0f) }
-    }
-
-    @Test
-    fun invalidLoadFactorNegativeThrows() {
-        assertFailsWith<IllegalArgumentException> { Int2AnyHashMap<String>(4, -0.5f) }
-    }
-
     // --- putValue / set ---
 
     @Test

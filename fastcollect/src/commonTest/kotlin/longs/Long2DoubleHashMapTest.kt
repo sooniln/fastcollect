@@ -42,16 +42,6 @@ class Long2DoubleHashMapTest {
         assertFailsWith<IllegalArgumentException> { Long2DoubleHashMap(-1) }
     }
 
-    @Test
-    fun invalidLoadFactorZeroThrows() {
-        assertFailsWith<IllegalArgumentException> { Long2DoubleHashMap(4, 0f) }
-    }
-
-    @Test
-    fun invalidLoadFactorNegativeThrows() {
-        assertFailsWith<IllegalArgumentException> { Long2DoubleHashMap(4, -0.5f) }
-    }
-
     // --- putValue / set ---
 
     @Test

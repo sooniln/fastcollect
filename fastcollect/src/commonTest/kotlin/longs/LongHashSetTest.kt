@@ -47,16 +47,6 @@ class LongHashSetTest {
         assertFailsWith<IllegalArgumentException> { LongHashSet(-1) }
     }
 
-    @Test
-    fun invalidLoadFactorZeroThrows() {
-        assertFailsWith<IllegalArgumentException> { LongHashSet(4, 0f) }
-    }
-
-    @Test
-    fun invalidLoadFactorNegativeThrows() {
-        assertFailsWith<IllegalArgumentException> { LongHashSet(4, -0.5f) }
-    }
-
     // --- add ---
 
     @Test

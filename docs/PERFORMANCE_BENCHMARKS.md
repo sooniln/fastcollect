@@ -6,7 +6,7 @@ not proven trustworthy (it appears to have large memory leak issues on JS platfo
 features available on JVM which make micro-benchmarking useful).
 
 > [!WARNING]
-> Microbenchmarks of the sort performed here are NOT good indicators of real world performance. These benchmarks are
+> Micro-benchmarks of the sort performed here are NOT good indicators of real world performance. These benchmarks are
 > primarily performed with random data (and it's trivial to write a fast HashSet/HashMap against random data - now try
 > to keep it fast against more adversarial data patterns). These benchmark do not measure JVM optimizations that can
 > often substantially change performance profiles, and they are executed on a single machine that is not representative

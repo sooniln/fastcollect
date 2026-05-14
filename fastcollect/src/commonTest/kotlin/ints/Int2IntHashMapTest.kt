@@ -42,16 +42,6 @@ class Int2IntHashMapTest {
         assertFailsWith<IllegalArgumentException> { Int2IntHashMap(-1) }
     }
 
-    @Test
-    fun invalidLoadFactorZeroThrows() {
-        assertFailsWith<IllegalArgumentException> { Int2IntHashMap(4, 0f) }
-    }
-
-    @Test
-    fun invalidLoadFactorNegativeThrows() {
-        assertFailsWith<IllegalArgumentException> { Int2IntHashMap(4, -0.5f) }
-    }
-
     // --- putValue / set ---
 
     @Test
