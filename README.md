@@ -100,7 +100,7 @@ Other JVM-only collection libraries include:
   library that also includes primitive specific collections.
 * [HashSmith](https://github.com/bluuewhale/hash-smith) - a relatively new but fast HashSet/HashMap library for
   reference values (not primitives). Included in benchmarks to test comparison against a modern Swiss table with
-  vectorized logic.
+  vectorized logic - it is not expected to be competitive for primitive collections.
 
 There are further JVM-only collections libraries, but they tend to be older and relatively unsupported (Koloboke, Trove,
 etc...)

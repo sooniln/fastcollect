@@ -12,6 +12,36 @@ features available on JVM which make micro-benchmarking useful).
 > often substantially change performance profiles, and they are executed on a single machine that is not representative
 > of most machines. Take them with an extremely large grain of salt.
 
+The following synthetic benchmark was used for the high level analysis:
+
+Benchmark = (.25 * (.25 * PutHit + .75 * PutMiss) + .75 * (.5 * GetMiss + .5 * GetHit))
+
+This weights reads more than writes, and assumes that reads are evenly split between hit/miss and writes are weighted
+towards misses. Eclipse generally comes away looking dominant (though Eclipse also suffers from much worse iteration
+times than competitors).
+
+![Map Synthetic Time](map_synthetic_cpu.svg)
+
+| Library / Size |  3,000 | 12,000 | 48,000 | 192,000 | 768,000 | 3,072,000 | 12,288,000 |
+|:---------------|-------:|-------:|-------:|--------:|--------:|----------:|-----------:|
+| fastcollect    |   6.86 |   7.43 |  12.66 |   13.94 |   15.10 |     18.01 |      31.74 |
+| androidx       |   9.51 |   9.51 |   9.60 |   11.49 |   12.44 |     22.92 |      33.31 |
+| fastutil       |   6.74 |   6.55 |  11.78 |   13.25 |   15.42 |     20.20 |      38.89 |
+| eclipse        |   4.77 |   4.82 |   6.00 |    8.31 |    8.94 |     17.28 |      19.68 |
+| kotlin         |  11.34 |  13.66 |  17.32 |   18.47 |   33.15 |     42.28 |      55.05 |
+| hashsmith      |  23.60 |  24.24 |  26.91 |   28.34 |   37.77 |     60.14 |      73.50 |
+
+![Set Synthetic Time](set_synthetic_cpu.svg)
+
+| Library / Size |  3,000 | 12,000 | 48,000 | 192,000 | 768,000 | 3,072,000 | 12,288,000 |
+|:---------------|-------:|-------:|-------:|--------:|--------:|----------:|-----------:|
+| fastcollect    |   4.69 |   4.90 |  10.06 |   10.65 |   12.09 |     12.73 |      26.27 |
+| androidx       |   7.19 |   7.34 |   7.99 |    9.13 |   10.62 |     12.03 |      30.80 |
+| fastutil       |   4.84 |   5.17 |   9.60 |   10.45 |   12.77 |     13.44 |      32.88 |
+| eclipse        |   5.31 |   5.14 |   6.43 |    8.68 |    9.31 |     14.58 |      19.96 |
+| kotlin         |  10.86 |  11.30 |  14.33 |   17.40 |   26.66 |     37.95 |      49.22 |
+| hashsmith      |  14.53 |  16.34 |  17.81 |   20.25 |   41.47 |     47.08 |      75.70 |
+
 ---
 
 ## List (IntArrayList or equivalent)

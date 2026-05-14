@@ -536,14 +536,14 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
     private inline fun Int.rotVal(): Int = countOneBits()
 
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun mixHash(hashcode: Int, mask: Int, rotVal: Int): Int {
+    private inline fun mixHash(hashcode: Int, rotVal: Int): Int {
         // see equivalent function in HashSet for explanation and commentary
         return (hashcode * K).rotateLeft(rotVal)
     }
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun Int.slot(mask: Int, rotVal: Int): Int {
-        return mixHash(this.hashCode(), mask, rotVal) and mask
+        return mixHash(this.hashCode(), rotVal) and mask
     }
 
     @Suppress("NOTHING_TO_INLINE")
