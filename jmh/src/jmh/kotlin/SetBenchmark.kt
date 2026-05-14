@@ -114,7 +114,7 @@ open class SetBenchmark {
         //@Param("seqLow", "seqHigh", "random", "evenLow", "evenHigh", "partitionLow", "partitionHigh", "highBits")
         var order: String = "random"
 
-        @Param("3000", "12000", "48000", "192000", "768000", "3072000")
+        @Param("3000", "12000", "48000", "192000", "768000", "3072000", "12288000")
         open var size: Int = 192000
 
         var index = 0
@@ -177,7 +177,6 @@ open class SetBenchmark {
         }
 
         inline fun nextInKey() = inKeys[index++]
-        inline fun nextOutKey() = outKeys[index++]
         inline fun nextWrappingInKey() = inKeys[nextIndex()]
         inline fun nextWrappingOutKey() = outKeys[nextIndex()]
     }
