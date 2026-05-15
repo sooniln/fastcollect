@@ -17,6 +17,7 @@ java {
 dependencies {
     implementation(project(":fastcollect"))
     implementation("it.unimi.dsi:fastutil:8.5.18")
+    implementation("org.eclipse.collections:eclipse-collections:13.0.0")
 }
 
 private fun registerJitAsm(name: String, configuration: JavaExec.() -> Unit): TaskProvider<JavaExec> = tasks.register<JavaExec>(name) {
@@ -59,6 +60,8 @@ registerJitAsm("jitAsmIntHashSetContains") {
         "-XX:CompileCommand=quiet",
         "-XX:CompileCommand=compileonly,io.github.sooniln.fastcollect.ints.IntHashSet::contains",
         "-XX:CompileCommand=print,io.github.sooniln.fastcollect.ints.IntHashSet::contains",
+        "-XX:CompileCommand=compileonly,org.eclipse.collections.impl.set.mutable.primitive.IntHashSet::contains",
+        "-XX:CompileCommand=print,org.eclipse.collections.impl.set.mutable.primitive.IntHashSet::contains",
     )
 }
 

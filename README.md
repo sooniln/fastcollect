@@ -30,7 +30,7 @@ You can add FastCollect as a dependency in your project with:
 #### Gradle ####
 
 ```groovy
-implementation 'io.github.sooniln:fastcollect-kotlin:1.0.0'
+implementation 'io.github.sooniln:fastcollect-kotlin:1.0.1'
 ```
 
 #### Maven ####
@@ -39,7 +39,7 @@ implementation 'io.github.sooniln:fastcollect-kotlin:1.0.0'
 <dependency>
     <groupId>io.github.sooniln</groupId>
     <artifactId>fastcollect-kotlin</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 ```
 
@@ -107,14 +107,14 @@ etc...)
 
 ## Performance ##
 
-A more detailed examination of performance can be found in the [Performance Benchmarks](docs/PERFORMANCE_BENCHMARKS.md)
-doc. In benchmarking, FastCollect unsurprisingly outperforms standard Kotlin collections by orders of magnitude (as
-expected since FastCollect stores primitives, not boxed types). Performance is very comparable to fastutil, with slight
-variations in who takes the top spot, though the differences are small enough they are unlikely to be significant except
-in the most performance-critical code paths.
-
 A key advantage of primitive collections is not just reduced CPU usage, but substantially lower memory usage, which
 has compounding benefits — more data fitting in CPU caches further reduces memory access latency.
+
+A more detailed examination of performance can be found in the [Performance Benchmarks](docs/PERFORMANCE_BENCHMARKS.md)
+doc. In benchmarking, FastCollect unsurprisingly outperforms standard Kotlin collections by orders of magnitude (as
+expected since FastCollect stores primitives, not boxed types). While exact results can vary based on the situation, the
+overall benchmarks make it fair to say that FastCollect is often the fastest of all implementations, and has a strong
+argument to be generally the fastest map and set implementation.
 
 ### Memory Usage ###
 
@@ -126,10 +126,6 @@ computing such as graphs, but a consideration that many collections neglect).
 Map memory usage as a function of collection size:
 
 ![Map Memory Usage](docs/map_memory.svg)
-
-Memory usage of 1 million empty Sets:
-
-![Empty Map Memory Usage](docs/empty_set_memory_split.svg)
 
 ## Generated Code
 

@@ -151,7 +151,7 @@ open class SetBenchmark {
 
             fastcollect = IntHashSet(size).apply { for (key in inKeys) add(key) }
             fastutil = IntOpenHashSet(size).apply { for (key in inKeys) add(key) }
-            eclipse = org.eclipse.collections.impl.set.mutable.primitive.IntHashSet(size).apply { for (key in outKeys) add(key) }
+            eclipse = org.eclipse.collections.impl.set.mutable.primitive.IntHashSet(size).apply { for (key in inKeys) add(key) }
             androidx = MutableIntSet(size).apply { for (key in inKeys) add(key) }
             hashsmith = SwissSet<Int>(size).apply { for (key in inKeys) add(key) }
             kotlin = HashSet<Int>(size).apply { for (key in inKeys) add(key) }

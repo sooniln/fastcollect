@@ -10,117 +10,117 @@
 text {
    text-rendering: optimizeLegibility;
 }
-#pCMCU51 .plot-title {
+#p74AlfM .plot-title {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 16.0px;
 
 }
-#pCMCU51 .plot-subtitle {
+#p74AlfM .plot-subtitle {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pCMCU51 .plot-caption {
+#p74AlfM .plot-caption {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pCMCU51 .hyperlink-element {
+#p74AlfM .hyperlink-element {
 fill: #118ed8;
 font-weight: normal;
    font-style: normal;
 }
-#pCMCU51 .legend-title {
+#p74AlfM .legend-title {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pCMCU51 .legend-item {
+#p74AlfM .legend-item {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pCMCU51 .axis-title-x {
+#p74AlfM .axis-title-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pCMCU51 .axis-text-x {
+#p74AlfM .axis-text-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dZUtZUM .axis-tooltip-text-x {
+#dBqqdMT .axis-tooltip-text-x {
 fill: #303030;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pCMCU51 .axis-title-y {
+#p74AlfM .axis-title-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 15.0px;
 
 }
-#pCMCU51 .axis-text-y {
+#p74AlfM .axis-text-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dZUtZUM .axis-tooltip-text-y {
+#dBqqdMT .axis-tooltip-text-y {
 fill: #303030;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pCMCU51 .facet-strip-text-x {
+#p74AlfM .facet-strip-text-x {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#pCMCU51 .facet-strip-text-y {
+#p74AlfM .facet-strip-text-y {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dZUtZUM .tooltip-text {
+#dBqqdMT .tooltip-text {
 fill: #bbbbbb;
 font-weight: normal;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dZUtZUM .tooltip-title {
+#dBqqdMT .tooltip-title {
 fill: #bbbbbb;
 font-weight: bold;
    font-style: normal;font-family: sans-serif;
 font-size: 13.0px;
 
 }
-#dZUtZUM .tooltip-label {
+#dBqqdMT .tooltip-label {
 fill: #bbbbbb;
 font-weight: bold;
    font-style: normal;font-family: sans-serif;
@@ -129,7 +129,7 @@ font-size: 13.0px;
 }
 
   </style>
-  <g id="pCMCU51">
+  <g id="p74AlfM">
     <path fill-rule="evenodd" fill="rgb(48,48,48)" fill-opacity="1.0" d="M0.0 0.0 L0.0 400.0 L800.0 400.0 L800.0 0.0 Z">
     </path>
     <g transform="translate(21.0 22.0 ) ">
@@ -151,7 +151,7 @@ font-size: 13.0px;
           </g>
         </g>
       </g>
-      <g clip-path="url(#cgR1cRB)" clip-bounds-jfx="[rect (2.0, 0.0), (660.7586129927316, 338.0)]">
+      <g clip-path="url(#cN7SDzQ)" clip-bounds-jfx="[rect (2.0, 0.0), (660.7586129927316, 338.0)]">
         <g transform="translate(2.0 0.0 ) ">
           <g>
             <g>
@@ -168,15 +168,7 @@ font-size: 13.0px;
                 </path>
               </g>
               <g>
-                <path d="M0.0 328.3598592178288 L0.0 328.3598592178288 L109.48437754684505 324.28783213629936 L218.96875509369022 256.92514070938023 L328.4531326405353 231.16930609853634 L437.93751018738044 206.03254563863874 L547.4218877342255 143.0597621537937 L656.9062652810703 136.22064573327725 " fill="none" stroke-width="1.6500000000000001" stroke="rgb(152,78,163)" stroke-opacity="1.0">
-                </path>
-              </g>
-              <g>
-                <path d="M0.0 221.912443464893 L0.0 221.912443464893 L109.48437754684505 205.26758261311463 L218.96875509369022 181.11860280851755 L328.4531326405353 162.1747557694401 L437.93751018738044 72.81535496011423 L547.4218877342255 54.67677803187655 L656.9062652810703 3.7050690697544155 " fill="none" stroke-width="1.6500000000000001" stroke="rgb(255,127,0)" stroke-opacity="1.0">
-                </path>
-              </g>
-              <g>
-                <path d="M0.0 241.65487373992292 L0.0 241.65487373992292 L109.48437754684505 215.113343325516 L218.96875509369022 210.0814493717932 L328.4531326405353 189.1582559689729 L437.93751018738044 165.62926082941118 L547.4218877342255 88.65486522927546 L656.9062652810703 15.609484472775137 " fill="none" stroke-width="1.6500000000000001" stroke="rgb(255,255,51)" stroke-opacity="1.0">
+                <path d="M0.0 221.912443464893 L0.0 221.912443464893 L109.48437754684505 205.26758261311463 L218.96875509369022 181.11860280851755 L328.4531326405353 162.1747557694401 L437.93751018738044 72.81535496011423 L547.4218877342255 54.67677803187655 L656.9062652810703 3.7050690697544155 " fill="none" stroke-width="1.6500000000000001" stroke="rgb(152,78,163)" stroke-opacity="1.0">
                 </path>
               </g>
             </g>
@@ -185,8 +177,8 @@ font-size: 13.0px;
               </line>
             </g>
             <g>
-              <g transform="rotate(0.0 77.46224990699432 75.86884303578614 ) ">
-                <g transform="translate(77.46224990699432 80.06884303578614 ) ">
+              <g transform="rotate(0.0 77.46224990699432 146.3420545523568 ) ">
+                <g transform="translate(77.46224990699432 150.5420545523568 ) ">
                   <text style="fill:#bbbbbb;font-size:14.0px;font-family:sans-serif;" fill-opacity="1.0" y="0.0" text-anchor="middle">
                     <tspan>L1 Cache</tspan>
                   </text>
@@ -198,8 +190,8 @@ font-size: 13.0px;
               </line>
             </g>
             <g>
-              <g transform="rotate(0.0 349.30015062606117 75.86884303578614 ) ">
-                <g transform="translate(349.30015062606117 80.06884303578614 ) ">
+              <g transform="rotate(0.0 349.30015062606117 146.3420545523568 ) ">
+                <g transform="translate(349.30015062606117 150.5420545523568 ) ">
                   <text style="fill:#bbbbbb;font-size:14.0px;font-family:sans-serif;" fill-opacity="1.0" y="0.0" text-anchor="middle">
                     <tspan>L2 Cache</tspan>
                   </text>
@@ -209,31 +201,31 @@ font-size: 13.0px;
           </g>
         </g>
         <defs>
-          <clipPath id="cNiwWbo">
+          <clipPath id="cvvkTpZ">
             <rect x="2.0" y="0.0" width="660.7586129927316" height="338.0">
             </rect>
           </clipPath>
         </defs>
         <defs>
-          <clipPath id="cT2S8GM">
+          <clipPath id="cowtUgf">
             <rect x="2.0" y="0.0" width="660.7586129927316" height="338.0">
             </rect>
           </clipPath>
         </defs>
         <defs>
-          <clipPath id="c1IMh1K">
+          <clipPath id="cxCfYb1">
             <rect x="2.0" y="0.0" width="660.7586129927316" height="338.0">
             </rect>
           </clipPath>
         </defs>
         <defs>
-          <clipPath id="ctu2SVx">
+          <clipPath id="cQQIZD2">
             <rect x="2.0" y="0.0" width="660.7586129927316" height="338.0">
             </rect>
           </clipPath>
         </defs>
         <defs>
-          <clipPath id="cgR1cRB">
+          <clipPath id="cN7SDzQ">
             <rect x="2.0" y="0.0" width="660.7586129927316" height="338.0">
             </rect>
           </clipPath>
@@ -286,7 +278,7 @@ font-size: 13.0px;
     </g>
     <g transform="translate(23.0 15.8 ) ">
       <text class="plot-title" y="0.0">
-        <tspan>Int Set PutHit Time</tspan>
+        <tspan>Int Set PutHit Benchmark</tspan>
       </text>
     </g>
     <g transform="translate(15.0 191.0 ) rotate(-90.0 ) ">
@@ -299,8 +291,8 @@ font-size: 13.0px;
         <tspan># of Elements (log scale)</tspan>
       </text>
     </g>
-    <g transform="translate(686.7586129927316 117.0 ) ">
-      <rect x="0.0" y="0.0" height="148.0" width="110.24138700726836" stroke="rgb(187,187,187)" stroke-opacity="1.0" stroke-width="0.0" fill="rgb(48,48,48)" fill-opacity="1.0">
+    <g transform="translate(686.7586129927316 140.0 ) ">
+      <rect x="0.0" y="0.0" height="102.0" width="110.24138700726836" stroke="rgb(187,187,187)" stroke-opacity="1.0" stroke-width="0.0" fill="rgb(48,48,48)" fill-opacity="1.0">
       </rect>
       <g transform="translate(5.0 5.0 ) ">
         <g transform="">
@@ -360,37 +352,7 @@ font-size: 13.0px;
             </g>
             <g transform="translate(26.9903027277341 11.5 ) ">
               <text class="legend-item" y="0.0" dy="0.35em">
-                <tspan>eclipse</tspan>
-              </text>
-            </g>
-          </g>
-          <g transform="translate(0.0 92.0 ) ">
-            <g>
-              <g transform="translate(1.0 1.0 ) ">
-                <g>
-                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(255,127,0)" stroke-opacity="1.0" fill="rgb(48,48,48)" fill-opacity="1.0" stroke-width="1.6500000000000001">
-                  </line>
-                </g>
-              </g>
-            </g>
-            <g transform="translate(26.9903027277341 11.5 ) ">
-              <text class="legend-item" y="0.0" dy="0.35em">
                 <tspan>kotlin</tspan>
-              </text>
-            </g>
-          </g>
-          <g transform="translate(0.0 115.0 ) ">
-            <g>
-              <g transform="translate(1.0 1.0 ) ">
-                <g>
-                  <line x1="0.0" y1="10.5" x2="21.0" y2="10.5" stroke="rgb(255,255,51)" stroke-opacity="1.0" fill="rgb(48,48,48)" fill-opacity="1.0" stroke-width="1.6500000000000001">
-                  </line>
-                </g>
-              </g>
-            </g>
-            <g transform="translate(26.9903027277341 11.5 ) ">
-              <text class="legend-item" y="0.0" dy="0.35em">
-                <tspan>hashsmith</tspan>
               </text>
             </g>
           </g>
@@ -400,6 +362,6 @@ font-size: 13.0px;
     <path fill="rgb(0,0,0)" fill-opacity="0.0" stroke="rgb(187,187,187)" stroke-opacity="1.0" stroke-width="0.0" d="M0.0 0.0 L0.0 400.0 L800.0 400.0 L800.0 0.0 Z" pointer-events="none">
     </path>
   </g>
-  <g id="dZUtZUM">
+  <g id="dBqqdMT">
   </g>
 </svg>

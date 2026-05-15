@@ -8,39 +8,50 @@ features available on JVM which make micro-benchmarking useful).
 > [!WARNING]
 > Micro-benchmarks of the sort performed here are NOT good indicators of real world performance. These benchmarks are
 > primarily performed with random data (and it's trivial to write a fast HashSet/HashMap against random data - now try
-> to keep it fast against more adversarial data patterns). These benchmark do not measure JVM optimizations that can
+> to keep it fast against more adversarial data patterns). These benchmarks do not measure JVM optimizations that can
 > often substantially change performance profiles, and they are executed on a single machine that is not representative
 > of most machines. Take them with an extremely large grain of salt.
 
-The following synthetic benchmark was used for the high level analysis:
+An overview of the mechanics behind the various implementations of maps/sets:
 
-Benchmark = (.25 * (.25 * PutHit + .75 * PutMiss) + .75 * (.5 * GetMiss + .5 * GetHit))
+* FastCollect: RobinHood hashing implementation, 90% load factor
+* AndroidX: SwissTable using SWAR rather than true vector instructions, 87.5% load factor
+* Fastutil: Linear probing with backwards shift deletion, 75% load factor
+* Eclipse: Cuckoo hashing with 3 hashes and fallback to linear probing, 50% load factor
+* Kotlin: Separate chaining with fallback to RB tree, 75% load factor
+* HashSmith: SwissTable using SWAR rather than true vector instructions, 87.5% load factor
 
-This weights reads more than writes, and assumes that reads are evenly split between hit/miss and writes are weighted
-towards misses. Eclipse generally comes away looking dominant (though Eclipse also suffers from much worse iteration
-times than competitors).
+In raw results, Eclipse generally comes away looking dominant for sets/maps. However, this is due to Eclipse using a 50%
+load factor, much lower than all other implementations (this also explains why Eclipse suffers from much worse iteration
+times). When tested with a 50% load factor (instead of its default 90%), FastCollect out-performs Eclipse. Eclipse's
+load factor is hardcoded and cannot be adjusted - for this reason, Eclipse has been elided from visual graphs of results
+and the high level overview. HashSmith has also been elided from visual graphs as it generally performs worse than the
+Kotlin collections.
 
-![Map Synthetic Time](map_synthetic_cpu.svg)
+When weighting reads higher than writes, at smaller sizes (fits in L1), FastCollect and Fastutil are neck and neck for
+the fastest implementation (Fastutil has a slight edge with maps, and FastCollect a slight edge with sets). At medium
+sizes (fits in L2), AndroidX is dominant over both. And at larger sizes, FastCollect out-performs both AndroidX and
+Fastutil. It's also worth noting that AndroidX 'cheats' at iteration a bit - it exposes its internals as public APIs so
+that iteration is always inlined - at the cost of any change in the implementation now becoming a breaking change (it
+looks like some breaking changes have already been made without bumping the major version number?).
 
-| Library / Size |  3,000 | 12,000 | 48,000 | 192,000 | 768,000 | 3,072,000 | 12,288,000 |
-|:---------------|-------:|-------:|-------:|--------:|--------:|----------:|-----------:|
-| fastcollect    |   6.86 |   7.43 |  12.66 |   13.94 |   15.10 |     18.01 |      31.74 |
-| androidx       |   9.51 |   9.51 |   9.60 |   11.49 |   12.44 |     22.92 |      33.31 |
-| fastutil       |   6.74 |   6.55 |  11.78 |   13.25 |   15.42 |     20.20 |      38.89 |
-| eclipse        |   4.77 |   4.82 |   6.00 |    8.31 |    8.94 |     17.28 |      19.68 |
-| kotlin         |  11.34 |  13.66 |  17.32 |   18.47 |   33.15 |     42.28 |      55.05 |
-| hashsmith      |  23.60 |  24.24 |  26.91 |   28.34 |   37.77 |     60.14 |      73.50 |
+Geometric means for maps:
 
-![Set Synthetic Time](set_synthetic_cpu.svg)
+| Library       | Get GM (ns) | Put GM (ns) |
+|:--------------|------------:|------------:|
+| `fastcollect` |        8.27 |       17.78 |
+| `androidx`    |        8.00 |       19.71 |
+| `fastutil`    |        9.16 |       14.43 |
+| `kotlin`      |       10.48 |       40.24 |
 
-| Library / Size |  3,000 | 12,000 | 48,000 | 192,000 | 768,000 | 3,072,000 | 12,288,000 |
-|:---------------|-------:|-------:|-------:|--------:|--------:|----------:|-----------:|
-| fastcollect    |   4.69 |   4.90 |  10.06 |   10.65 |   12.09 |     12.73 |      26.27 |
-| androidx       |   7.19 |   7.34 |   7.99 |    9.13 |   10.62 |     12.03 |      30.80 |
-| fastutil       |   4.84 |   5.17 |   9.60 |   10.45 |   12.77 |     13.44 |      32.88 |
-| eclipse        |   5.31 |   5.14 |   6.43 |    8.68 |    9.31 |     14.58 |      19.96 |
-| kotlin         |  10.86 |  11.30 |  14.33 |   17.40 |   26.66 |     37.95 |      49.22 |
-| hashsmith      |  14.53 |  16.34 |  17.81 |   20.25 |   41.47 |     47.08 |      75.70 |
+Geometric means for sets:
+
+| Library       | Get GM (ns) | Put GM (ns) |
+|:--------------|------------:|------------:|
+| `fastcollect` |        7.59 |       11.40 |
+| `androidx`    |        7.34 |       13.68 |
+| `fastutil`    |        8.12 |        9.13 |
+| `kotlin`      |        9.29 |       35.17 |
 
 ---
 
@@ -211,7 +222,7 @@ justified.
 | `fastcollect`  | `1.492 ns` | `1.498 ns` | `8.210 ns` |  `9.176 ns` | `10.419 ns` | `10.611 ns` | `23.373 ns` |
 | `androidx`     | `3.806 ns` | `3.993 ns` | `4.062 ns` |  `5.463 ns` |  `7.556 ns` |  `8.692 ns` | `39.410 ns` |
 | `fastutil`     | `1.662 ns` | `1.726 ns` | `5.839 ns` |  `6.607 ns` |  `8.500 ns` |  `8.875 ns` | `22.918 ns` |
-| `eclipse`      | `2.234 ns` | `2.266 ns` | `5.439 ns` |  `8.203 ns` |  `8.720 ns` | `13.799 ns` | `21.021 ns` |
+| `eclipse`      | `1.484 ns` | `1.557 ns` | `1.597 ns` |  `4.453 ns` |  `4.980 ns` | `11.794 ns` | `17.163 ns` |
 | `kotlin`       | `2.365 ns` | `2.641 ns` | `4.394 ns` |  `8.228 ns` | `22.512 ns` | `38.344 ns` | `47.064 ns` |
 | `hashsmith`    | `5.428 ns` | `6.860 ns` | `8.773 ns` | `11.858 ns` | `15.563 ns` | `44.272 ns` | `86.886 ns` |
 
@@ -224,7 +235,7 @@ justified.
 | `fastcollect`  | `2.844 ns` | `2.987 ns` |  `9.707 ns` | `10.473 ns` | `12.519 ns` | `12.990 ns` | `34.678 ns` |
 | `androidx`     | `4.053 ns` | `4.063 ns` |  `6.622 ns` |  `7.912 ns` |  `8.629 ns` | `10.759 ns` | `18.860 ns` |
 | `fastutil`     | `3.568 ns` | `3.353 ns` | `11.549 ns` | `12.556 ns` | `16.888 ns` | `17.929 ns` | `54.006 ns` |
-| `eclipse`      | `1.991 ns` | `1.579 ns` |  `1.651 ns` |  `4.640 ns` |  `5.220 ns` | `10.935 ns` | `18.110 ns` |
+| `eclipse`      | `1.817 ns` | `1.920 ns` |  `6.535 ns` |  `8.411 ns` |  `8.963 ns` | `13.069 ns` | `22.346 ns` |
 | `kotlin`       | `2.071 ns` | `2.129 ns` |  `6.428 ns` |  `9.152 ns` | `13.876 ns` | `27.152 ns` | `39.828 ns` |
 | `hashsmith`    | `4.513 ns` | `4.378 ns` |  `6.605 ns` |  `9.085 ns` | `11.709 ns` | `33.619 ns` | `48.340 ns` |
 
@@ -237,7 +248,7 @@ justified.
 | `fastcollect`  | `2.581 ns` | `2.787 ns` | `10.005 ns` | `10.822 ns` | `12.525 ns` | `12.933 ns` |  `28.843 ns` |
 | `androidx`     | `4.724 ns` | `4.637 ns` |  `5.025 ns` |  `6.032 ns` |  `8.769 ns` | `11.692 ns` |  `45.477 ns` |
 | `fastutil`     | `1.662 ns` | `1.655 ns` |  `5.627 ns` |  `6.523 ns` |  `8.349 ns` |  `8.871 ns` |  `21.409 ns` |
-| `eclipse`      | `1.876 ns` | `1.978 ns` |  `4.749 ns` |  `6.638 ns` |  `9.204 ns` | `20.872 ns` |  `22.813 ns` |
+| `eclipse`      | `1.459 ns` | `1.764 ns` |  `1.673 ns` |  `4.797 ns` |  `5.248 ns` | `10.019 ns` |  `18.504 ns` |
 | `kotlin`       | `7.487 ns` | `9.296 ns` | `12.725 ns` | `16.279 ns` | `52.025 ns` | `65.862 ns` | `127.778 ns` |
 | `hashsmith`    | `5.792 ns` | `8.179 ns` |  `8.732 ns` | `11.462 ns` | `15.564 ns` | `42.342 ns` | `109.455 ns` |
 
@@ -250,7 +261,7 @@ justified.
 | `fastcollect`  | `15.476 ns` | `16.257 ns` | `14.471 ns` | `13.876 ns` |  `14.444 ns` | `16.391 ns` | `14.369 ns` |
 | `androidx`     | `21.033 ns` | `21.461 ns` | `19.550 ns` | `19.920 ns` |  `21.349 ns` | `21.327 ns` | `32.536 ns` |
 | `fastutil`     | `14.781 ns` | `16.856 ns` | `14.567 ns` | `15.217 ns` |  `14.541 ns` | `15.105 ns` | `14.380 ns` |
-| `eclipse`      | `19.226 ns` | `19.045 ns` | `18.550 ns` | `18.388 ns` |  `18.680 ns` | `21.324 ns` | `20.566 ns` |
+| `eclipse`      | `18.560 ns` | `18.492 ns` | `18.590 ns` | `18.665 ns` |  `18.539 ns` | `18.687 ns` | `21.287 ns` |
 | `kotlin`       | `46.561 ns` | `47.620 ns` | `50.554 ns` | `52.624 ns` |  `52.053 ns` | `49.477 ns` | `46.149 ns` |
 | `hashsmith`    | `55.704 ns` | `61.916 ns` | `61.311 ns` | `62.268 ns` | `161.434 ns` | `81.222 ns` | `96.799 ns` |
 
