@@ -121,11 +121,17 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableList<Int
     override fun listIterator(index: Int): MutableIntListIterator
 
     @Deprecated(
-        message = "Use setAt(index, element) instead.",
-        replaceWith = ReplaceWith("setAt(index, element)"),
+        message = "Use replace(index, element) instead.",
+        replaceWith = ReplaceWith("replace(index, element)"),
         level = DeprecationLevel.WARNING)
     override fun set(index: Int, element: Int): Int {
         assertBoxing()
+        val value = getAt(index)
+        setAt(index, element)
+        return value
+    }
+
+    public fun replace(index: Int, element: Int): Int {
         val value = getAt(index)
         setAt(index, element)
         return value

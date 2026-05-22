@@ -121,11 +121,17 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
     override fun listIterator(index: Int): MutableDoubleListIterator
 
     @Deprecated(
-        message = "Use setAt(index, element) instead.",
-        replaceWith = ReplaceWith("setAt(index, element)"),
+        message = "Use replace(index, element) instead.",
+        replaceWith = ReplaceWith("replace(index, element)"),
         level = DeprecationLevel.WARNING)
     override fun set(index: Int, element: Double): Double {
         assertBoxing()
+        val value = getAt(index)
+        setAt(index, element)
+        return value
+    }
+
+    public fun replace(index: Int, element: Double): Double {
         val value = getAt(index)
         setAt(index, element)
         return value

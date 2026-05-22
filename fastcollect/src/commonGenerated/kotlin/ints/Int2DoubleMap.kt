@@ -185,7 +185,7 @@ public interface MutableInt2DoubleMap : Int2DoubleMap, MutableMap<Int, Double> {
 
     @Deprecated(
         message = "Use removeKey(key) instead.",
-        replaceWith = ReplaceWith("removeKey(key, value)"),
+        replaceWith = ReplaceWith("removeKey(key)"),
         level = DeprecationLevel.WARNING)
     override fun remove(key: Int): Double? {
         assertBoxing()

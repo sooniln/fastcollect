@@ -185,7 +185,7 @@ public interface MutableLong2FloatMap : Long2FloatMap, MutableMap<Long, Float> {
 
     @Deprecated(
         message = "Use removeKey(key) instead.",
-        replaceWith = ReplaceWith("removeKey(key, value)"),
+        replaceWith = ReplaceWith("removeKey(key)"),
         level = DeprecationLevel.WARNING)
     override fun remove(key: Long): Float? {
         assertBoxing()

@@ -198,7 +198,7 @@ public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics}, MutableMa
 <% if (!isReferenceValue) { %>
     @Deprecated(
         message = "Use removeKey(key) instead.",
-        replaceWith = ReplaceWith("removeKey(key, value)"),
+        replaceWith = ReplaceWith("removeKey(key)"),
         level = DeprecationLevel.WARNING)
     override fun remove(key: ${KeyType}): ${ValueType}? {
         assertBoxing()
