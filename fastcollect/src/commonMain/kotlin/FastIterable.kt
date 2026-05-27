@@ -57,6 +57,12 @@ public interface MutableFastIterable<out T> : FastIterable<T>, MutableIterable<T
     override fun fastIterator(): MutableFastIterator<T>
 }
 
+/** Returns an empty [FastIterator]. */
+public fun <T> emptyFastIterator(): FastIterator<T> = object : FastIterator<T> {
+    override fun hasNext() = false
+    override fun next(): T = throw NoSuchElementException()
+}
+
 /**
  * A fast iterator which can be used to improve iteration performance. See [FastIterable] for details.
  */

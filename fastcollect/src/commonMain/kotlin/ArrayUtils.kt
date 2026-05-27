@@ -5,7 +5,7 @@ import kotlin.math.max
 /**
  * Utilities for dealing with arrays.
  */
-public object ArrayUtils {
+internal object ArrayUtils {
 
     /**
      * A soft maximum array length imposed by array growth computations. Some JVMs (such as HotSpot) have an

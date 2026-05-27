@@ -1,6 +1,5 @@
 package io.github.sooniln.fastcollect.doubles
 
-import io.github.sooniln.fastcollect.assertBoxing
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -44,29 +43,21 @@ public inline fun MutableDoubleList(size: Int, init: (index: Int) -> Double): Mu
 }
 
 /**
- * A list of Doubles which inherits from [List].
+ * A list of Doubles.
  */
-public interface DoubleList : List<Double>, DoubleCollection {
-    override fun listIterator(): DoubleListIterator
-    override fun listIterator(index: Int): DoubleListIterator
-
-    override fun isEmpty(): Boolean = super.isEmpty()
+public interface DoubleList : DoubleCollection {
+    public fun listIterator(): DoubleListIterator
+    public fun listIterator(index: Int): DoubleListIterator
 
     override fun contains(element: Double): Boolean {
         return indexOf(element) != -1
     }
 
-    @Deprecated(
-        message = "Use getAt(index) instead.",
-        replaceWith = ReplaceWith("getAt(index)"),
-        level = DeprecationLevel.WARNING)
-    override fun get(index: Int): Double = getAt(index)
-
-    public fun getAt(index: Int): Double
+    public operator fun get(index: Int): Double
 
     override fun containsAll(elements: Collection<Double>): Boolean = super.containsAll(elements)
 
-    override fun indexOf(element: Double): Int {
+    public fun indexOf(element: Double): Int {
         val it = listIterator()
         while (it.hasNext()) {
             if (it.nextDouble() == element) {
@@ -76,18 +67,20 @@ public interface DoubleList : List<Double>, DoubleCollection {
         return -1
     }
 
-    override fun lastIndexOf(element: Double): Int {
+    public fun lastIndexOf(element: Double): Int {
         val it = listIterator(size)
         while (it.hasPrevious()) {
-            if (it.previous() == element) {
+            if (it.previousDouble() == element) {
                 return it.nextIndex()
             }
         }
         return -1
     }
 
-    override fun subList(fromIndex: Int, toIndex: Int): DoubleList
+    public fun subList(fromIndex: Int, toIndex: Int): DoubleList
 }
+
+public val DoubleList.lastIndex: Int inline get() = size - 1
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun <R> DoubleList.foldRight(initial: R, operation: (Double, accumulated: R) -> R): R {
@@ -96,7 +89,7 @@ public inline fun <R> DoubleList.foldRight(initial: R, operation: (Double, accum
     var accumulated = initial
     val it = listIterator(size)
     while (it.hasPrevious()) {
-        accumulated = operation(it.previous(), accumulated)
+        accumulated = operation(it.previousDouble(), accumulated)
     }
     return accumulated
 }
@@ -113,38 +106,29 @@ public inline fun DoubleList.reduceRight(operation: (accumulated: Double, Double
     return accumulated
 }
 
+public fun DoubleList.asList(): List<Double> = DoubleListWrapper(this)
+
 /**
- * A mutable list of Doubles which inherits from [MutableList].
+ * A mutable list of Doubles.
  */
-public interface MutableDoubleList : DoubleList, MutableDoubleCollection, MutableList<Double> {
+public interface MutableDoubleList : DoubleList, MutableDoubleCollection {
     override fun listIterator(): MutableDoubleListIterator
     override fun listIterator(index: Int): MutableDoubleListIterator
 
-    @Deprecated(
-        message = "Use replace(index, element) instead.",
-        replaceWith = ReplaceWith("replace(index, element)"),
-        level = DeprecationLevel.WARNING)
-    override fun set(index: Int, element: Double): Double {
-        assertBoxing()
-        val value = getAt(index)
-        setAt(index, element)
-        return value
-    }
+    public operator fun set(index: Int, element: Double)
 
     public fun replace(index: Int, element: Double): Double {
-        val value = getAt(index)
-        setAt(index, element)
-        return value
+        val t = get(index)
+        set(index, element)
+        return t
     }
-
-    public fun setAt(index: Int, element: Double)
 
     override fun add(element: Double): Boolean {
         addLast(element)
         return true
     }
 
-    override fun add(index: Int, element: Double)
+    public fun add(index: Int, element: Double)
 
     public fun addFirst(element: Double): Unit = add(0, element)
     public fun addLast(element: Double): Unit = add(size, element)
@@ -161,33 +145,23 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
         }
     }
 
+    public fun removeAt(index: Int): Double
+
     public fun removeRange(fromIndex: Int, toIndex: Int)
 
-    override fun clear() {
-        removeRange(0, size)
-    }
+    override fun clear(): Unit = removeRange(0, size)
 
-    override fun addAll(elements: DoubleCollection): Boolean {
-        return addAll(size, elements)
-    }
+    override fun addAll(elements: DoubleCollection): Boolean = addAll(size, elements)
+    override fun addAll(elements: Collection<Double>): Boolean = addAll(size, elements)
 
-    override fun addAll(elements: Collection<Double>): Boolean {
-        return addAll(size, elements)
-    }
-
-    override fun removeAll(elements: Collection<Double>): Boolean {
-        return super.removeAll(elements)
-    }
-
-    override fun retainAll(elements: Collection<Double>): Boolean {
-        return super.retainAll(elements)
-    }
+    override fun removeAll(elements: Collection<Double>): Boolean = super.removeAll(elements)
+    override fun retainAll(elements: Collection<Double>): Boolean = super.retainAll(elements)
 
     public fun addAll(index: Int, elements: DoubleCollection): Boolean
-    override fun addAll(index: Int, elements: Collection<Double>): Boolean
+    public fun addAll(index: Int, elements: Collection<Double>): Boolean
 
     public fun sort() {
-        val sorted = toDoubleArray().also { sort() }
+        val sorted = toDoubleArray().also { it.sort() }
         val it = listIterator()
         for (element in sorted) {
             it.next()
@@ -196,7 +170,7 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
     }
 
     public fun sortDescending() {
-        val sorted = toDoubleArray().also { sortDescending() }
+        val sorted = toDoubleArray().also { it.sortDescending() }
         val it = listIterator()
         for (element in sorted) {
             it.next()
@@ -207,7 +181,7 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
     public fun fill(element: Double) {
         if (this is RandomAccess) {
             for (index in 0..lastIndex) {
-                setAt(index, element)
+                set(index, element)
             }
         } else {
             val it = listIterator()
@@ -221,9 +195,9 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
     public fun shuffle() {
         for (i in lastIndex downTo 1) {
             val j = Random.nextInt(i + 1)
-            val tmp = getAt(i)
-            setAt(i, getAt(j))
-            setAt(j, tmp)
+            val tmp = get(i)
+            set(i, get(j))
+            set(j, tmp)
         }
     }
 
@@ -232,9 +206,9 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
         if (midPoint < 1) return
         var j = size - 1
         for (i in 0..<midPoint) {
-            val tmp = getAt(i)
-            setAt(i, getAt(j))
-            setAt(j, tmp)
+            val tmp = get(i)
+            set(i, get(j))
+            set(j, tmp)
             --j
         }
     }
@@ -242,19 +216,13 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
     override fun subList(fromIndex: Int, toIndex: Int): MutableDoubleList
 }
 
+public fun MutableDoubleList.asMutableList(): MutableList<Double> = MutableDoubleListWrapper(this)
+
 public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleList {
 
-    override fun iterator(): DoubleIterator {
-        return IteratorImpl()
-    }
-
-    override fun listIterator(): DoubleListIterator {
-        return listIterator(0)
-    }
-
-    override fun listIterator(index: Int): DoubleListIterator {
-        return ListIteratorImpl(index)
-    }
+    override fun iterator(): DoubleIterator = IteratorImpl()
+    override fun listIterator(): DoubleListIterator = listIterator(0)
+    override fun listIterator(index: Int): DoubleListIterator = ListIteratorImpl(index)
 
     override fun subList(fromIndex: Int, toIndex: Int): DoubleList {
         return if (this is RandomAccess) {
@@ -295,74 +263,77 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
         return hashCode
     }
 
-    protected fun rangeCheck(index: Int): Int {
-        if (index !in indices) throw IndexOutOfBoundsException("index=$index, size=$size")
+    protected fun rangeCheck(index: Int, size: Int = this.size): Int {
+        if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
         return index
     }
 
-    protected fun rangeCheck(fromIndex: Int, toIndex: Int) {
+    protected fun rangeCheckInclusive(index: Int): Int {
+        if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
+        return index
+    }
+
+    protected fun rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
         require(fromIndex <= toIndex)
         if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
         if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
     }
 
-    private inner class IteratorImpl(private var index: Int = 0): DoubleIterator() {
+    private inner class IteratorImpl: DoubleIterator() {
+
+        private var index = 0
 
         override fun nextDouble(): Double {
-            val value = getAt(index)
+            if (index == size) throw NoSuchElementException()
+            val value = get(index)
             index++
             return value
         }
 
-        override fun hasNext(): Boolean {
-            return index != size
-        }
+        override fun hasNext(): Boolean = index != size
     }
 
     private inner class ListIteratorImpl(private var index: Int = 0): DoubleListIterator() {
 
+        init {
+            if (index != 0) rangeCheckInclusive(index)
+        }
+
         override fun previousDouble(): Double {
+            if (index == 0) throw NoSuchElementException()
             val i = index - 1
-            val value = getAt(i)
+            val value = get(i)
             index = i
             return value
         }
 
         override fun nextDouble(): Double {
-            val value = getAt(index)
+            if (index == size) throw NoSuchElementException()
+            val value = get(index)
             index++
             return value
         }
 
-        override fun hasNext(): Boolean {
-            return index != size
-        }
+        override fun hasNext(): Boolean = index != size
+        override fun hasPrevious(): Boolean = index != 0
 
-        override fun hasPrevious(): Boolean {
-            return index != 0
-        }
-
-        override fun nextIndex(): Int {
-            return index
-        }
-
-        override fun previousIndex(): Int {
-            return index - 1
-        }
+        override fun nextIndex(): Int = index
+        override fun previousIndex(): Int = index - 1
     }
 
     private open class DoubleSubList(private val list: DoubleList, fromIndex: Int, toIndex: Int) : AbstractDoubleList() {
 
         init {
-            rangeCheck(fromIndex, toIndex)
+            rangeCheck(fromIndex, toIndex, list.size)
         }
 
         private val offset = fromIndex
         final override var size = toIndex - fromIndex
             protected set
 
-        override fun getAt(index: Int): Double {
-            return list.getAt(index + offset)
+        override fun get(index: Int): Double {
+            rangeCheck(index)
+            return list.get(index + offset)
         }
     }
 
@@ -374,9 +345,7 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
     override fun removeRange(fromIndex: Int, toIndex: Int) {
         if (fromIndex == 0 && toIndex == 0) return
 
-        require(fromIndex <= toIndex)
-        rangeCheck(fromIndex)
-        rangeCheckForAdd(toIndex)
+        rangeCheck(fromIndex, toIndex)
 
         val it = listIterator(fromIndex)
         repeat(toIndex-fromIndex) { _ ->
@@ -386,7 +355,7 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
     }
 
     override fun addAll(index: Int, elements: DoubleCollection): Boolean {
-        var index = rangeCheckForAdd(index)
+        var index = rangeCheckInclusive(index)
         var modified = false
         for (element in elements) {
             add(index++, element)
@@ -400,7 +369,7 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
             return addAll(index, elements)
         }
 
-        var index = rangeCheckForAdd(index)
+        var index = rangeCheckInclusive(index)
         var modified = false
         for (element in elements) {
             add(index++, element)
@@ -409,17 +378,9 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
         return modified
     }
 
-    override fun iterator(): MutableDoubleIterator {
-        return IteratorImpl()
-    }
-
-    override fun listIterator(): MutableDoubleListIterator {
-        return listIterator(0)
-    }
-
-    override fun listIterator(index: Int): MutableDoubleListIterator {
-        return ListIteratorImpl(index)
-    }
+    override fun iterator(): MutableDoubleIterator = IteratorImpl()
+    override fun listIterator(): MutableDoubleListIterator = listIterator(0)
+    override fun listIterator(index: Int): MutableDoubleListIterator = ListIteratorImpl(index)
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableDoubleList {
         return if (this is RandomAccess) {
@@ -429,25 +390,20 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
         }
     }
 
-    protected fun rangeCheckForAdd(index: Int): Int {
-        if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    private inner class IteratorImpl(private var index: Int = 0): MutableDoubleIterator() {
+    private inner class IteratorImpl: MutableDoubleIterator() {
+        private var index = 0
         private var lastIndex = -1
 
         override fun nextDouble(): Double {
+            if (index == size) throw NoSuchElementException()
             val i = index
-            val value = getAt(i)
+            val value = get(i)
             lastIndex = i
             index = i + 1
             return value
         }
 
-        override fun hasNext(): Boolean {
-            return index != size
-        }
+        override fun hasNext(): Boolean = index != size
 
         override fun remove() {
             check(lastIndex >= 0)
@@ -460,39 +416,35 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
 
     private inner class ListIteratorImpl(private var index: Int = 0): MutableDoubleListIterator() {
 
+        init {
+            if (index != 0) rangeCheckInclusive(index)
+        }
+
         private var lastIndex = -1
 
         override fun previousDouble(): Double {
+            if (index == 0) throw NoSuchElementException()
             val i = index - 1
-            val value = getAt(i)
+            val value = get(i)
             index = i
             lastIndex = i
             return value
         }
 
         override fun nextDouble(): Double {
+            if (index == size) throw NoSuchElementException()
             val i = index
-            val value = getAt(i)
+            val value = get(i)
             lastIndex = i
             index = i + 1
             return value
         }
 
-        override fun hasNext(): Boolean {
-            return index != size
-        }
+        override fun hasNext(): Boolean = index != size
+        override fun hasPrevious(): Boolean = index != 0
 
-        override fun hasPrevious(): Boolean {
-            return index != 0
-        }
-
-        override fun nextIndex(): Int {
-            return index
-        }
-
-        override fun previousIndex(): Int {
-            return index - 1
-        }
+        override fun nextIndex(): Int = index
+        override fun previousIndex(): Int = index - 1
 
         override fun remove() {
             check(lastIndex >= 0)
@@ -504,7 +456,7 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
 
         override fun set(element: Double) {
             check(lastIndex >= 0)
-            setAt(lastIndex, element)
+            set(lastIndex, element)
         }
 
         override fun add(element: Double) {
@@ -518,40 +470,41 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
     private open class DoubleSubList(private val list: MutableDoubleList, fromIndex: Int, toIndex: Int) : AbstractMutableDoubleList() {
 
         init {
-            rangeCheck(fromIndex, toIndex)
+            rangeCheck(fromIndex, toIndex, list.size)
         }
 
         private val offset = fromIndex
         final override var size = toIndex - fromIndex
             private set
 
-        override fun setAt(index: Int, element: Double) {
-            return list.setAt(index + offset, element)
+        override fun set(index: Int, element: Double) {
+            return list.set(rangeCheck(index) + offset, element)
         }
 
-        override fun getAt(index: Int): Double {
-            return list.getAt(index + offset)
+        override fun get(index: Int): Double {
+            return list.get(rangeCheck(index) + offset)
         }
 
         override fun add(index: Int, element: Double) {
-            list.add(index + offset, element)
+            list.add(rangeCheckInclusive(index) + offset, element)
             size++
         }
 
         override fun removeAt(index: Int): Double {
-            val result = list.removeAt(index + offset)
+            val result = list.removeAt(rangeCheck(index) + offset)
             size--
             return result
         }
 
         override fun removeRange(fromIndex: Int, toIndex: Int) {
+            rangeCheck(fromIndex, toIndex)
             list.removeRange(fromIndex + offset, toIndex + offset)
         }
 
         override fun addAll(index: Int, elements: DoubleCollection): Boolean {
             if (elements.isEmpty()) return false
 
-            list.addAll(offset + index, elements)
+            list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
             return true
         }
@@ -568,7 +521,7 @@ private object EmptyDoubleList : DoubleList, RandomAccess {
     override fun containsAll(elements: Collection<Double>): Boolean = elements.isEmpty()
     override fun containsAll(elements: DoubleCollection): Boolean = elements.isEmpty()
 
-    override fun getAt(index: Int): Double = throw IndexOutOfBoundsException()
+    override fun get(index: Int): Double = throw IndexOutOfBoundsException()
     override fun indexOf(element: Double): Int = -1
     override fun lastIndexOf(element: Double): Int = -1
 
@@ -588,7 +541,7 @@ private class SingletonDoubleList(private val value: Double) : AbstractDoubleLis
     override fun isEmpty(): Boolean = false
     override fun contains(element: Double): Boolean = value == element
 
-    override fun getAt(index: Int): Double = if (index == 0) return value else throw IndexOutOfBoundsException()
+    override fun get(index: Int): Double = if (index == 0) return value else throw IndexOutOfBoundsException()
     override fun indexOf(element: Double): Int = if (element == value) 0 else -1
     override fun lastIndexOf(element: Double): Int = if (element == value) 0 else -1
 
@@ -600,5 +553,46 @@ private class SingletonDoubleList(private val value: Double) : AbstractDoubleLis
 
 private class DoubleArrayListWrapper(private val array: DoubleArray): AbstractDoubleList(), RandomAccess {
     override val size: Int get() = array.size
-    override fun getAt(index: Int): Double = array[index]
+    override fun get(index: Int): Double = array[index]
+}
+
+private class DoubleListWrapper(private val list: DoubleList) : AbstractList<Double>() {
+    override val size: Int get() = list.size
+
+    override fun get(index: Int) = list[index]
+    override fun contains(element: Double) = list.contains(element)
+
+    override fun indexOf(element: Double) = list.indexOf(element)
+    override fun lastIndexOf(element: Double) = list.lastIndexOf(element)
+
+    override fun iterator() = list.iterator()
+    override fun listIterator() = list.listIterator()
+    override fun listIterator(index: Int) = list.listIterator(index)
+}
+
+private class MutableDoubleListWrapper(private val list: MutableDoubleList) : AbstractMutableList<Double>() {
+    override val size: Int get() = list.size
+
+    override fun get(index: Int) = list[index]
+    override fun contains(element: Double) = list.contains(element)
+
+    override fun indexOf(element: Double) = list.indexOf(element)
+    override fun lastIndexOf(element: Double) = list.lastIndexOf(element)
+
+    override fun iterator() = list.iterator()
+    override fun listIterator() = list.listIterator()
+    override fun listIterator(index: Int) = list.listIterator(index)
+
+    override fun set(index: Int, element: Double) = list.replace(index, element)
+
+    override fun add(element: Double) = list.add(element)
+    override fun add(index: Int, element: Double) = list.add(index, element)
+
+    override fun remove(element: Double): Boolean = list.remove(element)
+    override fun removeAt(index: Int): Double = list.removeAt(index)
+    override fun removeRange(fromIndex: Int, toIndex: Int) = list.removeRange(fromIndex, toIndex)
+
+    override fun clear() = list.clear()
+
+    override fun subList(fromIndex: Int, toIndex: Int): MutableList<Double> = list.subList(fromIndex, toIndex).asMutableList()
 }

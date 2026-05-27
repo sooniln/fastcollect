@@ -1,16 +1,15 @@
 package io.github.sooniln.fastcollect.${subpackage}
 
-import io.github.sooniln.fastcollect.assertBoxing
-
 public fun empty${Type}Iterator(): ${Type}ListIterator = Empty${Type}Iterator
 
 public abstract class Mutable${Type}Iterator : ${Type}Iterator(), MutableIterator<${Type}>
 
 public abstract class ${Type}ListIterator: ${Type}Iterator(), ListIterator<${Type}> {
-    final override fun previous(): ${Type} {
-        assertBoxing()
-        return previous${Type}()
-    }
+    @Deprecated(
+        message = "Use previousByte() instead.",
+        replaceWith = ReplaceWith("previousByte()"),
+        level = DeprecationLevel.WARNING)
+    final override fun previous(): ${Type} = previous${Type}()
     public abstract fun previous${Type}(): ${Type}
 }
 

@@ -24,52 +24,43 @@ public inline fun buildLongSet(expectedSize: Int = 0, builderAction: MutableLong
 }
 
 /**
- * A set of Longs which inherits from [Set].
+ * A set of Longs.
  */
-public interface LongSet : Set<Long>, LongCollection {
-    override fun isEmpty(): Boolean = super.isEmpty()
-
+public interface LongSet : LongCollection {
     override fun contains(element: Long): Boolean {
         for (e in this) {
             if (e == element) return true
         }
         return false
     }
+}
 
-    override fun containsAll(elements: Collection<Long>): Boolean = super.containsAll(elements)
+public fun LongSet.asSet(): Set<Long> = LongSetWrapper(this)
 
-    public infix fun union(other: LongSet): LongSet = LongHashSet(this).apply { addAll(other) }
+public infix fun LongSet.union(other: LongSet): LongSet = LongHashSet(this).apply { addAll(other) }
 
-    public infix fun intersect(other: LongSet): LongSet {
-        if (other.size < size) return other.intersect(this)
+public infix fun LongSet.intersect(other: LongSet): LongSet {
+    if (other.size < size) return other.intersect(this)
 
-        val set = LongHashSet(size)
-        for (element in other) {
-            if (contains(element)) set.add(element)
-        }
-        return set
+    val set = LongHashSet(size)
+    for (element in other) {
+        if (contains(element)) set.add(element)
     }
+    return set
+}
 
-    public infix fun subtract(other: LongSet): LongSet {
-        if (other.size < size) return other.intersect(this)
-
-        val set = LongHashSet(size)
-        for (element in other) {
-            if (!contains(element)) set.add(element)
-        }
-        return set
+public infix fun LongSet.subtract(other: LongSet): LongSet {
+    val set = LongHashSet(size)
+    for (element in this) {
+        if (!other.contains(element)) set.add(element)
     }
+    return set
 }
 
 /**
- * A mutable set of Longs which inherits from [MutableSet].
+ * A mutable set of Longs.
  */
-public interface MutableLongSet : LongSet, MutableLongCollection, MutableSet<Long> {
-    override fun clear(): Unit = super.clear()
-    override fun addAll(elements: Collection<Long>): Boolean = super.addAll(elements)
-    override fun removeAll(elements: Collection<Long>): Boolean = super.removeAll(elements)
-    override fun retainAll(elements: Collection<Long>): Boolean = super.retainAll(elements)
-}
+public interface MutableLongSet : LongSet, MutableLongCollection
 
 public abstract class AbstractLongSet : AbstractLongCollection(), LongSet {
     override fun equals(other: Any?): Boolean {
@@ -83,15 +74,17 @@ public abstract class AbstractLongSet : AbstractLongCollection(), LongSet {
     }
 
     override fun hashCode(): Int {
-        var hashCode = 1
+        var hashCode = 0
         for (element in this) {
-            hashCode = 31 * hashCode + element.hashCode()
+            hashCode += element.hashCode()
         }
         return hashCode
     }
 }
 
 public abstract class AbstractMutableLongSet : AbstractLongSet(), MutableLongSet
+
+public fun MutableLongSet.asMutableSet(): MutableSet<Long> = MutableLongSetWrapper(this)
 
 private object EmptyLongSet : LongSet {
     override val size: Int get() = 0
@@ -121,4 +114,20 @@ private class SingletonLongSet(private val value: Long) : LongSet {
 
         override fun hasNext(): Boolean = !complete
     }
+}
+
+private class LongSetWrapper(private val set: LongSet) : AbstractSet<Long>() {
+    override val size: Int get() = set.size
+    override fun contains(element: Long) = set.contains(element)
+    override fun iterator() = set.iterator()
+}
+
+private class MutableLongSetWrapper(private val set: MutableLongSet) : AbstractMutableSet<Long>() {
+    override val size: Int get() = set.size
+    override fun contains(element: Long) = set.contains(element)
+    override fun iterator() = set.iterator()
+
+    override fun add(element: Long) = set.add(element)
+    override fun remove(element: Long): Boolean = set.remove(element)
+    override fun clear() = set.clear()
 }

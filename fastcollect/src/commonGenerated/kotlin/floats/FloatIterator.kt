@@ -1,16 +1,15 @@
 package io.github.sooniln.fastcollect.floats
 
-import io.github.sooniln.fastcollect.assertBoxing
-
 public fun emptyFloatIterator(): FloatListIterator = EmptyFloatIterator
 
 public abstract class MutableFloatIterator : FloatIterator(), MutableIterator<Float>
 
 public abstract class FloatListIterator: FloatIterator(), ListIterator<Float> {
-    final override fun previous(): Float {
-        assertBoxing()
-        return previousFloat()
-    }
+    @Deprecated(
+        message = "Use previousByte() instead.",
+        replaceWith = ReplaceWith("previousByte()"),
+        level = DeprecationLevel.WARNING)
+    final override fun previous(): Float = previousFloat()
     public abstract fun previousFloat(): Float
 }
 

@@ -1,16 +1,15 @@
 package io.github.sooniln.fastcollect.shorts
 
-import io.github.sooniln.fastcollect.assertBoxing
-
 public fun emptyShortIterator(): ShortListIterator = EmptyShortIterator
 
 public abstract class MutableShortIterator : ShortIterator(), MutableIterator<Short>
 
 public abstract class ShortListIterator: ShortIterator(), ListIterator<Short> {
-    final override fun previous(): Short {
-        assertBoxing()
-        return previousShort()
-    }
+    @Deprecated(
+        message = "Use previousByte() instead.",
+        replaceWith = ReplaceWith("previousByte()"),
+        level = DeprecationLevel.WARNING)
+    final override fun previous(): Short = previousShort()
     public abstract fun previousShort(): Short
 }
 

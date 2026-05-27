@@ -1,10 +1,7 @@
 package io.github.sooniln.fastcollect
 
-import androidx.collection.IntList
-import androidx.collection.MutableIntList
 import io.github.sooniln.fastcollect.ints.IntArrayDeque
 import io.github.sooniln.fastcollect.ints.IntHashSet
-import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Fork
@@ -59,10 +56,6 @@ open class ListBenchmark {
         lateinit var inElements: IntArray
 
         lateinit var fastcollect: IntArrayDeque
-        lateinit var fastutil: IntArrayList
-        lateinit var eclipse: org.eclipse.collections.impl.list.mutable.primitive.IntArrayList
-        lateinit var androidx: MutableIntList
-        lateinit var kotlin: ArrayList<Int>
 
         private fun generateInElements(size: Int) {
             inElements = IntArray(size)
@@ -74,10 +67,6 @@ open class ListBenchmark {
             generateInElements(size)
 
             fastcollect = IntArrayDeque(size).apply { for (e in inElements) add(e) }
-            fastutil = IntArrayList(size).apply { for (e in inElements) add(e) }
-            eclipse = org.eclipse.collections.impl.list.mutable.primitive.IntArrayList(size).apply { for (e in inElements) add(e) }
-            androidx = MutableIntList(size).apply { for (e in inElements) add(e) }
-            kotlin = ArrayList<Int>(size).apply { for (e in inElements) add(e) }
         }
 
         @Setup(Level.Iteration)
@@ -109,10 +98,6 @@ open class ListBenchmark {
         override fun setupIteration(params: IterationParams) {
             super.setupIteration(params)
             fastcollect.clear()
-            fastutil.clear()
-            eclipse.clear()
-            androidx.clear()
-            kotlin.clear()
         }
     }
 
@@ -121,129 +106,23 @@ open class ListBenchmark {
     @Measurement(iterations = 40, batchSize = 5000000)
     @BenchmarkMode(Mode.SingleShotTime)
     @Benchmark
-    fun fastcollectAdd(s: EmptyState) = s.fastcollect.add(s.nextInKey())
+    fun add(s: EmptyState) = s.fastcollect.add(s.nextInKey())
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun fastcollectGrow(s: ReadState) = IntArrayDeque().apply { repeat(s.size) { add(s.inElements[it]) } }
+    fun grow(s: ReadState) = IntArrayDeque().apply { repeat(s.size) { add(s.inElements[it]) } }
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun fastcollectSearch(s: ReadState): Int {
+    fun search(s: ReadState): Int {
         val element = s.nextWrappingInKey()
         return s.fastcollect.indexOf(element) + s.fastcollect.lastIndexOf(element)
     }
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun fastcollectIterate(s: ReadState, bh: Blackhole) {
+    fun iterate(s: ReadState, bh: Blackhole) {
         for (v in s.fastcollect) {
-            bh.consume(v)
-        }
-    }
-
-    @OperationsPerInvocation(5000000)
-    @Warmup(iterations = 20, batchSize = 5000000)
-    @Measurement(iterations = 40, batchSize = 5000000)
-    @BenchmarkMode(Mode.SingleShotTime)
-    @Benchmark
-    fun fastutilAdd(s: EmptyState) = s.fastutil.add(s.nextInKey())
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun fastutilGrow(s: ReadState) = IntArrayList().apply { repeat(s.size) { add(s.inElements[it]) } }
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun fastutilSearch(s: ReadState): Int {
-        val element = s.nextWrappingInKey()
-        return s.fastutil.indexOf(element) + s.fastutil.lastIndexOf(element)
-    }
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun fastutilIterate(s: ReadState, bh: Blackhole) {
-        val it = s.fastutil.iterator()
-        while (it.hasNext()) {
-            bh.consume(it.nextInt())
-        }
-    }
-
-    @OperationsPerInvocation(5000000)
-    @Warmup(iterations = 20, batchSize = 5000000)
-    @Measurement(iterations = 40, batchSize = 5000000)
-    @BenchmarkMode(Mode.SingleShotTime)
-    @Benchmark
-    fun eclipseAdd(s: EmptyState) = s.eclipse.add(s.nextInKey())
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun eclipseGrow(s: ReadState) = org.eclipse.collections.impl.list.mutable.primitive.IntArrayList().apply { repeat(s.size) { add(s.inElements[it]) } }
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun eclipseSearch(s: ReadState): Int {
-        val element = s.nextWrappingInKey()
-        return s.eclipse.indexOf(element) + s.eclipse.lastIndexOf(element)
-    }
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun eclipseIterate(s: ReadState, bh: Blackhole) {
-        val it = s.eclipse.intIterator()
-        while (it.hasNext()) {
-            bh.consume(it.next())
-        }
-    }
-
-    @OperationsPerInvocation(5000000)
-    @Warmup(iterations = 20, batchSize = 5000000)
-    @Measurement(iterations = 40, batchSize = 5000000)
-    @BenchmarkMode(Mode.SingleShotTime)
-    @Benchmark
-    fun androidxAdd(s: EmptyState) = s.androidx.add(s.nextInKey())
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun androidxGrow(s: ReadState) = MutableIntList().apply { repeat(s.size) { add(s.inElements[it]) } }
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun androidxSearch(s: ReadState): Int {
-        val element = s.nextWrappingInKey()
-        return s.androidx.indexOf(element) + s.androidx.lastIndexOf(element)
-    }
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun androidxIterate(s: ReadState, bh: Blackhole) {
-        for (i in s.androidx.indices) {
-            bh.consume(s.androidx[i])
-        }
-    }
-
-    @OperationsPerInvocation(5000000)
-    @Warmup(iterations = 20, batchSize = 5000000)
-    @Measurement(iterations = 40, batchSize = 5000000)
-    @BenchmarkMode(Mode.SingleShotTime)
-    @Benchmark
-    fun kotlinAdd(s: EmptyState) = s.kotlin.add(s.nextInKey())
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun kotlinGrow(s: ReadState) = ArrayList<Int>().apply { repeat(s.size) { add(s.inElements[it]) } }
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun kotlinSearch(s: ReadState): Int {
-        val element = s.nextWrappingInKey()
-        return s.kotlin.indexOf(element) + s.kotlin.lastIndexOf(element)
-    }
-
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
-    @Benchmark
-    fun kotlinIterate(s: ReadState, bh: Blackhole) {
-        for (v in s.kotlin) {
             bh.consume(v)
         }
     }

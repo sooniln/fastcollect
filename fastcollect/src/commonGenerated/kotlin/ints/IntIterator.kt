@@ -1,16 +1,15 @@
 package io.github.sooniln.fastcollect.ints
 
-import io.github.sooniln.fastcollect.assertBoxing
-
 public fun emptyIntIterator(): IntListIterator = EmptyIntIterator
 
 public abstract class MutableIntIterator : IntIterator(), MutableIterator<Int>
 
 public abstract class IntListIterator: IntIterator(), ListIterator<Int> {
-    final override fun previous(): Int {
-        assertBoxing()
-        return previousInt()
-    }
+    @Deprecated(
+        message = "Use previousByte() instead.",
+        replaceWith = ReplaceWith("previousByte()"),
+        level = DeprecationLevel.WARNING)
+    final override fun previous(): Int = previousInt()
     public abstract fun previousInt(): Int
 }
 

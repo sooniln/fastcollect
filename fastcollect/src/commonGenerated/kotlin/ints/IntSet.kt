@@ -24,52 +24,43 @@ public inline fun buildIntSet(expectedSize: Int = 0, builderAction: MutableIntSe
 }
 
 /**
- * A set of Ints which inherits from [Set].
+ * A set of Ints.
  */
-public interface IntSet : Set<Int>, IntCollection {
-    override fun isEmpty(): Boolean = super.isEmpty()
-
+public interface IntSet : IntCollection {
     override fun contains(element: Int): Boolean {
         for (e in this) {
             if (e == element) return true
         }
         return false
     }
+}
 
-    override fun containsAll(elements: Collection<Int>): Boolean = super.containsAll(elements)
+public fun IntSet.asSet(): Set<Int> = IntSetWrapper(this)
 
-    public infix fun union(other: IntSet): IntSet = IntHashSet(this).apply { addAll(other) }
+public infix fun IntSet.union(other: IntSet): IntSet = IntHashSet(this).apply { addAll(other) }
 
-    public infix fun intersect(other: IntSet): IntSet {
-        if (other.size < size) return other.intersect(this)
+public infix fun IntSet.intersect(other: IntSet): IntSet {
+    if (other.size < size) return other.intersect(this)
 
-        val set = IntHashSet(size)
-        for (element in other) {
-            if (contains(element)) set.add(element)
-        }
-        return set
+    val set = IntHashSet(size)
+    for (element in other) {
+        if (contains(element)) set.add(element)
     }
+    return set
+}
 
-    public infix fun subtract(other: IntSet): IntSet {
-        if (other.size < size) return other.intersect(this)
-
-        val set = IntHashSet(size)
-        for (element in other) {
-            if (!contains(element)) set.add(element)
-        }
-        return set
+public infix fun IntSet.subtract(other: IntSet): IntSet {
+    val set = IntHashSet(size)
+    for (element in this) {
+        if (!other.contains(element)) set.add(element)
     }
+    return set
 }
 
 /**
- * A mutable set of Ints which inherits from [MutableSet].
+ * A mutable set of Ints.
  */
-public interface MutableIntSet : IntSet, MutableIntCollection, MutableSet<Int> {
-    override fun clear(): Unit = super.clear()
-    override fun addAll(elements: Collection<Int>): Boolean = super.addAll(elements)
-    override fun removeAll(elements: Collection<Int>): Boolean = super.removeAll(elements)
-    override fun retainAll(elements: Collection<Int>): Boolean = super.retainAll(elements)
-}
+public interface MutableIntSet : IntSet, MutableIntCollection
 
 public abstract class AbstractIntSet : AbstractIntCollection(), IntSet {
     override fun equals(other: Any?): Boolean {
@@ -83,15 +74,17 @@ public abstract class AbstractIntSet : AbstractIntCollection(), IntSet {
     }
 
     override fun hashCode(): Int {
-        var hashCode = 1
+        var hashCode = 0
         for (element in this) {
-            hashCode = 31 * hashCode + element.hashCode()
+            hashCode += element.hashCode()
         }
         return hashCode
     }
 }
 
 public abstract class AbstractMutableIntSet : AbstractIntSet(), MutableIntSet
+
+public fun MutableIntSet.asMutableSet(): MutableSet<Int> = MutableIntSetWrapper(this)
 
 private object EmptyIntSet : IntSet {
     override val size: Int get() = 0
@@ -121,4 +114,20 @@ private class SingletonIntSet(private val value: Int) : IntSet {
 
         override fun hasNext(): Boolean = !complete
     }
+}
+
+private class IntSetWrapper(private val set: IntSet) : AbstractSet<Int>() {
+    override val size: Int get() = set.size
+    override fun contains(element: Int) = set.contains(element)
+    override fun iterator() = set.iterator()
+}
+
+private class MutableIntSetWrapper(private val set: MutableIntSet) : AbstractMutableSet<Int>() {
+    override val size: Int get() = set.size
+    override fun contains(element: Int) = set.contains(element)
+    override fun iterator() = set.iterator()
+
+    override fun add(element: Int) = set.add(element)
+    override fun remove(element: Int): Boolean = set.remove(element)
+    override fun clear() = set.clear()
 }

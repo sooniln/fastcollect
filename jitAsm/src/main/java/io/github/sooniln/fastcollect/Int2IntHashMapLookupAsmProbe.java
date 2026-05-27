@@ -21,7 +21,7 @@ public final class Int2IntHashMapLookupAsmProbe {
         while (i < N_KEYS) {
             int r = rnd.nextInt();
             if (!m.containsKey(r)) {
-                m.putValue(r, r);
+                m.set(r, r);
                 inElements[i++] = r;
             }
         }
@@ -45,7 +45,7 @@ public final class Int2IntHashMapLookupAsmProbe {
         // Warmup + measurement-ish loop. We want a very hot call-site so C2 compiles it.
         long insum = 0;
         for (i = 0; i < outElements.length; i++) {
-            insum += m.lookup(outElements[i]);
+            insum += m.get(outElements[i]);
         }
         System.out.println(insum);
     }

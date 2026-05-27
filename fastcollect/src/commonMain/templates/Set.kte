@@ -24,52 +24,43 @@ public inline fun build${Type}Set(expectedSize: Int = 0, builderAction: Mutable$
 }
 
 /**
- * A set of ${Type}s which inherits from [Set].
+ * A set of ${Type}s.
  */
-public interface ${Type}Set : Set<${Type}>, ${Type}Collection {
-    override fun isEmpty(): Boolean = super.isEmpty()
-
+public interface ${Type}Set : ${Type}Collection {
     override fun contains(element: ${Type}): Boolean {
         for (e in this) {
             if (e == element) return true
         }
         return false
     }
+}
 
-    override fun containsAll(elements: Collection<${Type}>): Boolean = super.containsAll(elements)
+public fun ${Type}Set.asSet(): Set<$Type> = ${Type}SetWrapper(this)
 
-    public infix fun union(other: ${Type}Set): ${Type}Set = ${Type}HashSet(this).apply { addAll(other) }
+public infix fun ${Type}Set.union(other: ${Type}Set): ${Type}Set = ${Type}HashSet(this).apply { addAll(other) }
 
-    public infix fun intersect(other: ${Type}Set): ${Type}Set {
-        if (other.size < size) return other.intersect(this)
+public infix fun ${Type}Set.intersect(other: ${Type}Set): ${Type}Set {
+    if (other.size < size) return other.intersect(this)
 
-        val set = ${Type}HashSet(size)
-        for (element in other) {
-            if (contains(element)) set.add(element)
-        }
-        return set
+    val set = ${Type}HashSet(size)
+    for (element in other) {
+        if (contains(element)) set.add(element)
     }
+    return set
+}
 
-    public infix fun subtract(other: ${Type}Set): ${Type}Set {
-        if (other.size < size) return other.intersect(this)
-
-        val set = ${Type}HashSet(size)
-        for (element in other) {
-            if (!contains(element)) set.add(element)
-        }
-        return set
+public infix fun ${Type}Set.subtract(other: ${Type}Set): ${Type}Set {
+    val set = ${Type}HashSet(size)
+    for (element in this) {
+        if (!other.contains(element)) set.add(element)
     }
+    return set
 }
 
 /**
- * A mutable set of ${Type}s which inherits from [MutableSet].
+ * A mutable set of ${Type}s.
  */
-public interface Mutable${Type}Set : ${Type}Set, Mutable${Type}Collection, MutableSet<${Type}> {
-    override fun clear(): Unit = super.clear()
-    override fun addAll(elements: Collection<${Type}>): Boolean = super.addAll(elements)
-    override fun removeAll(elements: Collection<${Type}>): Boolean = super.removeAll(elements)
-    override fun retainAll(elements: Collection<${Type}>): Boolean = super.retainAll(elements)
-}
+public interface Mutable${Type}Set : ${Type}Set, Mutable${Type}Collection
 
 public abstract class Abstract${Type}Set : Abstract${Type}Collection(), ${Type}Set {
     override fun equals(other: Any?): Boolean {
@@ -83,15 +74,17 @@ public abstract class Abstract${Type}Set : Abstract${Type}Collection(), ${Type}S
     }
 
     override fun hashCode(): Int {
-        var hashCode = 1
+        var hashCode = 0
         for (element in this) {
-            hashCode = 31 * hashCode + element.hashCode()
+            hashCode += element.hashCode()
         }
         return hashCode
     }
 }
 
 public abstract class AbstractMutable${Type}Set : Abstract${Type}Set(), Mutable${Type}Set
+
+public fun Mutable${Type}Set.asMutableSet(): MutableSet<$Type> = Mutable${Type}SetWrapper(this)
 
 private object Empty${Type}Set : ${Type}Set {
     override val size: Int get() = 0
@@ -121,4 +114,20 @@ private class Singleton${Type}Set(private val value: ${Type}) : ${Type}Set {
 
         override fun hasNext(): Boolean = !complete
     }
+}
+
+private class ${Type}SetWrapper(private val set: ${Type}Set) : AbstractSet<${Type}>() {
+    override val size: Int get() = set.size
+    override fun contains(element: ${Type}) = set.contains(element)
+    override fun iterator() = set.iterator()
+}
+
+private class Mutable${Type}SetWrapper(private val set: Mutable${Type}Set) : AbstractMutableSet<${Type}>() {
+    override val size: Int get() = set.size
+    override fun contains(element: ${Type}) = set.contains(element)
+    override fun iterator() = set.iterator()
+
+    override fun add(element: ${Type}) = set.add(element)
+    override fun remove(element: ${Type}): Boolean = set.remove(element)
+    override fun clear() = set.clear()
 }

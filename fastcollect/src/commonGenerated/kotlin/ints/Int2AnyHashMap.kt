@@ -3,7 +3,6 @@
 package io.github.sooniln.fastcollect.ints
 
 import io.github.sooniln.fastcollect.FastIterator
-import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.MutableFastIterator
 
 import kotlin.jvm.JvmOverloads
@@ -12,24 +11,16 @@ import kotlin.math.min
 
 /**
  * A [HashMap](https://en.wikipedia.org/wiki/Hash_table) implementation for storing Int to V
- * relationships. Can be used in place of the Kotlin standard library [HashMap] implementations to improve performance
- * and memory usage. Has the same API contracts as the standard library [HashMap] unless noted otherwise.
+ * relationships.
  *
-
+ * The [keys]/[values] mutable collections exposed by this class will throw [UnsupportedOperationException] on any
+ * attempt to mutate the collection, EXCEPT that [MutableIterator.remove] will work as expected. Other mutation
+ * operations should be made directly on the map rather than on the sub-collections.
  *
- * The [keys]/[values]/[entries]/[primitiveEntries] mutable collections exposed by this class will throw
- * [UnsupportedOperationException] on any attempt to mutate the collection, EXCEPT that [MutableIterator.remove] will
- * work as expected. Mutation operations should be made directly on this map instead.
- *
- * This class offers faster iteration over entries - a faster iterator can be accessed via [fastIterator] or
- * `primitiveEntries.fastIterator()` with the caveat that it may not be used if the entries returned by
- * [FastIterator.next] escape the iteration loop. See [io.github.sooniln.fastcollect.FastIterable] for more explanation
- * and details.
+ * The entry [iterator] exposed by this class is a [FastIterator] - clients may not allow the returned entry to escape. See
+ * the [FastIterator] documentation for more information.
  *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
- *
- * Note that a load factor of 1.0 is accepted, unlike many HashMaps - this is interpreted to mean that only 1 slot need
- * ever remain free (i.e. the actual load factor is (capacity - 1)/capacity).
  */
 public class Int2AnyHashMap<V> @JvmOverloads constructor(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
@@ -40,9 +31,9 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         require(capacity >= 0) { "Capacity must be >= 0" }
     }
 
-    public constructor(map: Map<Int, V>): this(map.size) {
-        putAll(map)
-    }
+    public constructor(map: Int2AnyMap<V>): this() { putAll(map) }
+
+    public constructor(map: Map<Int, V>): this() { putAll(map) }
 
     // when used in hashing mode, the last slot in the array is used to store the zero key/value respectively. when used
     // in array mode, there is no special handling for zero.
@@ -53,9 +44,6 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
     private var valuesArr = EMPTY_VALUE_ARRAY as Array<V?>
 
     private val defaultValue: V? = null
-
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun isDefaultValue(value: V?) = value == null
 
 
     override var size: Int = 0
@@ -85,7 +73,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         rehash(size)
     }
 
-    override fun putValue(key: Int, value: V): V? {
+    override fun put(key: Int, value: V): V? {
         resizeIfNecessary()
 
         val keysArr = keysArr
@@ -141,7 +129,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         }
     }
 
-    override fun removeKey(key: Int): V? {
+    override fun remove(key: Int): V? {
         val slot = findSlot(key)
         if (slot >= 0) {
             val oldValue = valuesArr[slot]
@@ -184,11 +172,10 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
                     // exit the search loop, but at a non-trivial cost in extra operations. this generally increases
                     // GetHit time and decreases GetMiss time. in order to optimize this further so that we can still
                     // get the benefit of early exiting without paying the full cost, we implement the following: check
-                    // for early exit only once per cache line, and then only when we hit the 8th element (selected
-                    // experimentally) within the cache line. this doesn't penalize GetHit times much (as we can
-                    // hopefully find the element before incurring the cost) and still substantially reduces GetMiss
-                    // times.
-                    (slotDistance and CACHE_LINE_MASK == 8
+                    // for early exit only once per cache line, when we're half way through the cache line. this doesn't
+                    // penalize GetHit times much (as we can hopefully find the element before incurring the full cost)
+                    // and still substantially reduces GetMiss times.
+                    (slotDistance and CACHE_LINE_MASK == HALF_CACHE_LINE_SIZE
                         && currKey.slotDistance(slot, mask, rotVal) < slotDistance)) {
                 return -1
             }
@@ -236,18 +223,34 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         --size
     }
 
-    override fun putAll(from: Map<out Int, V>) {
-        ensureCapacity(max(size + (from.size shr 1), from.size))
-
-        if (from is Int2AnyMap) {
-            for (entry in from.fastIterator()) {
-                set(entry.key(), entry.value())
-            }
+    override fun putAll(from: Int2AnyMap<V>) {
+        if (isEmpty() && from is Int2AnyHashMap<V>) {
+            initializeFrom(from)
         } else {
+            ensureCapacity(max(size + (from.size shr 1), from.size))
             for (entry in from) {
                 set(entry.key, entry.value)
             }
         }
+    }
+
+    override fun putAll(from: Map<out Int, V>) {
+        ensureCapacity(max(size + (from.size shr 1), from.size))
+        for (entry in from) {
+            set(entry.key, entry.value)
+        }
+    }
+
+    private fun initializeFrom(from: Int2AnyHashMap<V>) {
+        check(isEmpty())
+
+        if (from.isEmpty()) return
+
+        keysArr = from.keysArr.copyOf()
+        mask = from.mask
+        valuesArr = from.valuesArr.copyOf()
+        size = from.size
+        threshold = from.threshold
     }
 
     private var _keys: MutableIntSet? = null
@@ -280,24 +283,6 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             .also { _values = it }
     }
 
-    private var _primitiveEntries: MutableEntrySet<MutableInt2AnyMap.MutableEntry<V>>? = null
-    override val primitiveEntries: MutableEntrySet<MutableInt2AnyMap.MutableEntry<V>> get() {
-        return _primitiveEntries ?:
-            object : AbstractMutableSet<MutableInt2AnyMap.MutableEntry<V>>(), MutableEntrySet<MutableInt2AnyMap.MutableEntry<V>> {
-                override val size: Int get() = this@Int2AnyHashMap.size
-                override fun contains(element: MutableInt2AnyMap.MutableEntry<V>): Boolean {
-                    val value = lookup(element.key())
-                    return if (isDefaultValue(value) && !containsKey(element.key())) false else value == element.value()
-                }
-                override fun add(element: MutableInt2AnyMap.MutableEntry<V>): Boolean = throw UnsupportedOperationException()
-                override fun remove(element: MutableInt2AnyMap.MutableEntry<V>): Boolean = throw UnsupportedOperationException()
-                override fun iterator(): MutableIterator<MutableInt2AnyMap.MutableEntry<V>> = EntryIterator()
-                override fun fastIterator(): MutableFastIterator<MutableInt2AnyMap.MutableEntry<V>> = FastEntryIterator()
-                override fun clear() = throw UnsupportedOperationException()
-            }
-            .also { _primitiveEntries = it }
-    }
-
     override fun containsKey(key: Int): Boolean {
         return findSlot(key) >= 0
     }
@@ -314,7 +299,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         return false
     }
 
-    override fun lookup(key: Int): V? {
+    override fun get(key: Int): V? {
         val slot = findSlot(key)
         return if (slot >= 0) valuesArr[slot] else defaultValue
     }
@@ -402,9 +387,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         }
     }
 
-    override operator fun iterator(): MutableIterator<MutableInt2AnyMap.MutableEntry<V>> = EntryIterator()
-
-    override fun fastIterator(): MutableFastIterator<MutableInt2AnyMap.MutableEntry<V>> = FastEntryIterator()
+    override operator fun iterator(): MutableFastIterator<MutableInt2AnyMap.MutableEntry<V>> = FastEntryIterator()
 
     private open inner class SlotIterator {
         val keysArr = this@Int2AnyHashMap.keysArr
@@ -491,37 +474,21 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
 
     private inner class FastEntryIterator: SlotIterator(), MutableFastIterator<MutableInt2AnyMap.MutableEntry<V>>, MutableInt2AnyMap.MutableEntry<V> {
 
-        override fun setValue(newValue: V): V {
-            val oldValue = value()
-            updateValue(newValue)
-            return oldValue
-        }
+        override val key: Int get() = key()
+        override var value: V
+            get() = value()
+            set(value) {
+                updateValue(value)
+            }
 
         override fun next(): MutableInt2AnyMap.MutableEntry<V> {
             nextSlot()
             return this
         }
-    }
 
-    private inner class EntryIterator : SlotIterator(), MutableIterator<MutableInt2AnyMap.MutableEntry<V>> {
-
-        override fun next(): MutableInt2AnyMap.MutableEntry<V> {
-            nextSlot()
-            return object : MutableInt2AnyMap.MutableEntry<V> {
-                private val slot = slot()
-
-                override fun key(): Int = keysArr[slot]
-                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                override fun value(): V = valuesArr[slot] as V
-
-                override fun setValue(newValue: V): V {
-                    val oldValue = value()
-                    if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
-                    valuesArr[slot] = newValue
-                    return oldValue
-                }
-            }
-        }
+        override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+        override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+        override fun toString(): String = "$key=$value"
     }
 
     // the slot at the end of slot iteration (exclusive), also the slot that stores the zero value
@@ -577,6 +544,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two
 
         private const val CACHE_LINE_SIZE = 64 / Int.SIZE_BYTES
+        private const val HALF_CACHE_LINE_SIZE = CACHE_LINE_SIZE / 2
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE
         // mask for # of elements in a single cache line

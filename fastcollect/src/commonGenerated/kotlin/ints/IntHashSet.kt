@@ -22,9 +22,9 @@ public class IntHashSet @JvmOverloads constructor(
         require(capacity >= 0) { "Capacity must be >= 0" }
     }
 
-    public constructor(elements: Collection<Int>): this(elements.size) {
-        addAll(elements)
-    }
+    public constructor(elements: IntCollection): this() { addAll(elements) }
+
+    public constructor(elements: Collection<Int>): this() { addAll(elements) }
 
     // when used in hashing mode, the last slot in the array is used to store the zero key. when used in array mode,
     // there is no special handling for zero.
@@ -45,7 +45,7 @@ public class IntHashSet @JvmOverloads constructor(
     public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
         if (keysArr === EMPTY_ARRAY) {
-            threshold = capacity
+            threshold = if (capacity == 0) threshold else capacity
         } else if (capacity > threshold) {
             rehash(capacity)
         }
@@ -143,11 +143,10 @@ public class IntHashSet @JvmOverloads constructor(
                     // exit the search loop, but at a non-trivial cost in extra operations. this generally increases
                     // GetHit time and decreases GetMiss time. in order to optimize this further so that we can still
                     // get the benefit of early exiting without paying the full cost, we implement the following: check
-                    // for early exit only once per cache line, and then only when we hit the 8th element (selected
-                    // experimentally) within the cache line. this doesn't penalize GetHit times much (as we can
-                    // hopefully find the element before incurring the cost) and still substantially reduces GetMiss
-                    // times.
-                    (slotDistance and CACHE_LINE_MASK == 8
+                    // for early exit only once per cache line, when we're half way through the cache line. this doesn't
+                    // penalize GetHit times much (as we can hopefully find the element before incurring the full cost)
+                    // and still substantially reduces GetMiss times.
+                    (slotDistance and CACHE_LINE_MASK == HALF_CACHE_LINE_SIZE
                         && currKey.slotDistance(slot, mask, rotVal) < slotDistance)) {
                 return -1
             }
@@ -190,8 +189,12 @@ public class IntHashSet @JvmOverloads constructor(
 
         var modified = false
         if (elements is IntCollection) {
-            for (element in elements) {
-                modified = add(element) or modified
+            if (isEmpty() && elements is IntHashSet) {
+                initializeFrom(elements)
+            } else {
+                for (element in elements) {
+                    modified = add(element) or modified
+                }
             }
         } else {
             for (element in elements) {
@@ -199,6 +202,18 @@ public class IntHashSet @JvmOverloads constructor(
             }
         }
         return modified
+    }
+
+    private fun initializeFrom(from: IntHashSet) {
+        check(isEmpty())
+
+        if (from.isEmpty()) return
+
+        keysArr = from.keysArr.copyOf()
+        mask = from.mask
+        rotVal = from.rotVal
+        size = from.size
+        threshold = from.threshold
     }
 
     override fun contains(element: Int): Boolean {
@@ -406,6 +421,7 @@ public class IntHashSet @JvmOverloads constructor(
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two
 
         private const val CACHE_LINE_SIZE = 64 / Int.SIZE_BYTES
+        private const val HALF_CACHE_LINE_SIZE = CACHE_LINE_SIZE / 2
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE
         // mask for # of elements in a single cache line

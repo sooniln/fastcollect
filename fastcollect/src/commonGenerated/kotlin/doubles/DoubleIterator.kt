@@ -1,16 +1,15 @@
 package io.github.sooniln.fastcollect.doubles
 
-import io.github.sooniln.fastcollect.assertBoxing
-
 public fun emptyDoubleIterator(): DoubleListIterator = EmptyDoubleIterator
 
 public abstract class MutableDoubleIterator : DoubleIterator(), MutableIterator<Double>
 
 public abstract class DoubleListIterator: DoubleIterator(), ListIterator<Double> {
-    final override fun previous(): Double {
-        assertBoxing()
-        return previousDouble()
-    }
+    @Deprecated(
+        message = "Use previousByte() instead.",
+        replaceWith = ReplaceWith("previousByte()"),
+        level = DeprecationLevel.WARNING)
+    final override fun previous(): Double = previousDouble()
     public abstract fun previousDouble(): Double
 }
 

@@ -10,15 +10,9 @@ import kotlin.math.min
 public typealias LongArrayList = LongArrayDeque
 
 /**
- * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing {Long}s. Can be
+ * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing Longs. Can be
  * used in place of the Kotlin standard library [ArrayList] and [ArrayDeque] implementations to improve performance and
  * memory usage. Has the same API contracts as the standard library [ArrayList] and [ArrayDeque] unless noted otherwise.
- *
- * Note that unfortunately some of the common Kotlin List methods may force primitive type boxing, and thus could incur
- * performance penalties. These methods have been marked as deprecated so they will be easily visible in IDEs. It is
- * encouraged to use the replacement methods this class offers in order to guarantee no unnecessary boxing will occur:
- *
- *   * Use [setAt] instead of [MutableList.set] or the indexed write operator.
  *
  * This implementation supports amortized O(1) `addFirst/addLast/removeFirst/removeLast` functionality. The
  * [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
@@ -31,6 +25,8 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         private set
 
     public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else LongArray(capacity), 0)
+
+    public constructor(elements: LongCollection) : this(if (elements is LongList) elements.toLongArray() else elements.toLongArray())
 
     public constructor(elements: Collection<Long>) : this(if (elements is LongList) elements.toLongArray() else elements.toLongArray())
 
@@ -63,7 +59,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
             ring.copyInto(dest, 0, head, tail)
         } else {
             ring.copyInto(dest, 0, head, ring.size)
-            ring.copyInto(dest, ring.size - head, 0, ring.positiveMod(tail))
+            ring.copyInto(dest, ring.size - head, 0, tail - ring.size)
         }
         return dest
     }
@@ -75,11 +71,11 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    override fun getAt(index: Int): Long {
+    override fun get(index: Int): Long {
         return ring[ring.position(rangeCheck(index))]
     }
 
-    override fun setAt(index: Int, element: Long) {
+    override fun set(index: Int, element: Long) {
         ring[ring.position(rangeCheck(index))] = element
     }
 
@@ -100,7 +96,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
     }
 
     override fun add(index: Int, element: Long) {
-        rangeCheckForAdd(index)
+        rangeCheckInclusive(index)
         when (index) {
             size -> addLast(element)
             0 -> addFirst(element)
@@ -121,7 +117,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
             if (actualPosition >= head) {
                 // head before position
                 ring[newHead] = ring[head]  // first element could possibly roll over to the back of the array
-                ring.copyInto(ring, head, head + 1, position)
+                ring.copyInto(ring, head, head + 1, head + index)
             } else {
                 // head after position
                 ring.copyInto(ring, newHead, head, ring.size) // head can't be zero
@@ -141,7 +137,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
                 val lastIndex = ring.size - 1
                 ring.copyInto(ring, 1, 0, tail)
                 ring[0] = ring[lastIndex]
-                ring.copyInto(ring, position + 1, position, lastIndex)
+                ring.copyInto(ring, ring.incrementPosition(position), position, lastIndex)
             }
             ring[position] = element
         }
@@ -207,8 +203,8 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
     override fun removeRange(fromIndex: Int, toIndex: Int) {
         // TODO: would array copy operations be more efficient?
         require(fromIndex <= toIndex)
-        rangeCheckForAdd(fromIndex)
-        rangeCheckForAdd(toIndex)
+        rangeCheckInclusive(fromIndex)
+        rangeCheckInclusive(toIndex)
         if (fromIndex == toIndex) return
 
         val removed = toIndex - fromIndex
@@ -217,7 +213,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
             for (i in fromIndex - 1 downTo 0) {
                 ring[ring.position(i + removed)] = ring[ring.position(i)]
             }
-            head = (head + removed) % ring.size
+            head = ring.positiveMod(head + removed)
         } else {
             // Shift [toIndex, size) left by `removed`.
             for (i in toIndex until size) {
@@ -248,7 +244,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         for (i in head..<ring.size) {
             if (ring[i] == element) return i - head
         }
-        for (i in 0..<ring.positiveMod(tail)) {
+        for (i in 0..<tail-ring.size) {
             if (ring[i] == element) return i + ring.size - head
         }
         return -1
@@ -277,7 +273,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
     private fun lastIndexOfDiscrete(tail: Int, element: Long): Int {
         // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
         val head = head
-        var i = ring.positiveMod(tail)
+        var i = tail - ring.size
         while (i >= 0) {
             if (ring[i] == element) return i + ring.size - head
             --i
@@ -299,7 +295,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
             addToRing(elements.ring, elements.head, elementsTail)
         } else {
             addToRing(elements.ring, elements.head, elements.ring.size)
-            addToRing(elements.ring, 0, elements.ring.positiveMod(elementsTail))
+            addToRing(elements.ring, 0, elementsTail - elements.ring.size)
         }
         return true
     }
@@ -316,7 +312,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
                 src.copyInto(ring, 0, intermediateIndex, toIndex)
             }
         } else {
-            src.copyInto(ring, ring.positiveMod(tail), fromIndex, toIndex)
+            src.copyInto(ring, tail - ring.size, fromIndex, toIndex)
         }
         size += srcLength
     }
@@ -398,7 +394,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
     private fun makeContinuousUnordered() {
         val tail = head + size
         if (tail > ring.size) {
-            val end = ring.positiveMod(tail)
+            val end = tail - ring.size
             if (ring.size - head > end) {
                 head = head - end
                 ring.copyInto(ring, head, 0, end)
@@ -421,8 +417,11 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         var j = ring.position(size - 1)
         repeat(midPoint) {
             val tmp = ring[i]
-            ring[i--] = ring[j]
-            ring[j--] = tmp
+            ring[i] = ring[j]
+            ring[j] = tmp
+
+            i = ring.incrementPosition(i)
+            j = ring.decrementPosition(j)
         }
     }
 
@@ -441,24 +440,18 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is List<*>) return false
+        if (other !is LongList) return false
 
         if (size != other.size) return false
-        if (other is LongList && other is RandomAccess) {
+        if (other is RandomAccess) {
             for (i in indices) {
-                if (ring[ring.position(i)] != other.getAt(i)) return false
+                if (ring[ring.position(i)] != other[i]) return false
             }
         } else {
             val it = other.iterator()
             var i = 0
-            if (it is LongIterator) {
-                while (it.hasNext()) {
-                    if (it.nextLong() != this.getAt(i++)) return false
-                }
-            } else {
-                while (it.hasNext()) {
-                    if (it.next() != this.getAt(i++)) return false
-                }
+            while (it.hasNext()) {
+                if (it.nextLong() != this[i++]) return false
             }
         }
         return true

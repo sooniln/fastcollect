@@ -2,13 +2,9 @@
 
 package io.github.sooniln.fastcollect.longs
 
-import io.github.sooniln.fastcollect.assertBoxing
-import io.github.sooniln.fastcollect.EntrySet
 import io.github.sooniln.fastcollect.FastIterator
-import io.github.sooniln.fastcollect.MutableEntrySet
 import io.github.sooniln.fastcollect.MutableFastIterator
-import io.github.sooniln.fastcollect.emptyEntrySet
-import io.github.sooniln.fastcollect.entrySetOf
+import io.github.sooniln.fastcollect.emptyFastIterator
 
 import io.github.sooniln.fastcollect.ints.intListOf
 import io.github.sooniln.fastcollect.ints.IntCollection
@@ -42,98 +38,55 @@ public inline fun  buildLong2IntMap(expectedSize: Int = 0, builderAction: Mutabl
 }
 
 /**
- * A map of Longs to Ints which inherits from [Map].
+ * A map of Longs to Ints.
  *
 
  * Because this interface is designed to store primitives, methods which lookup keys and return non-nullable primitive
- * values may not return null to indicate no such key is present. Instead, a Long2IntMap has a
- * [defaultValue] which is returned instead to indicate no such key is present. Thus in order to obtain the best
- * performance implementations and clients are encouraged to ensure that the [defaultValue] is the value which is least
- * likely to ever appear in the possible set of values stored in this map. This is purely a performance and not a
- * correctness concern however - the map will still operate correctly and all methods will perform as expected even if
- * the map contains values equal to [defaultValue]. [Float.NaN] or [Double.NaN] are acceptable for [defaultValue] if
- * applicable.
+ * values may not return null to indicate no such key is present. Instead, a Long2IntMap has a [defaultValue] which is
+ * returned to indicate no such key is present. In order to obtain the best performance, implementations and clients are
+ * encouraged to ensure that the [defaultValue] is the value which is least likely to ever appear in the possible set of
+ * values stored in this map. This is purely a performance and not a correctness concern however - the map will still
+ * operate correctly and all methods will perform as expected even if the map contains values equal to [defaultValue].
+ * [Float.NaN] or [Double.NaN] are acceptable for [defaultValue] if applicable.
 
  */
-public interface Long2IntMap : Map<Long, Int> {
+public interface Long2IntMap {
 
     public val defaultValue: Int
 
 
-    override fun isEmpty(): Boolean {
+    public val size: Int
+
+    public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    override fun containsValue(value: Int): Boolean {
-        for (entry in primitiveEntries) {
-            if (entry.value() == value) return true
+    public operator fun get(key: Long): Int
+
+    public fun containsKey(key: Long): Boolean {
+        for (k in keys) {
+            if (k == key) return true
         }
         return false
     }
 
-
-    @Deprecated(
-        message = "Use the lookup(key) method instead.",
-        replaceWith = ReplaceWith("lookup(key)"),
-        level = DeprecationLevel.WARNING)
-    override fun get(key: Long): Int? {
-        assertBoxing()
-        val value = lookup(key)
-        return if (isDefaultValue(value) && !containsKey(key)) null else value
+    public fun containsValue(value: Int): Boolean {
+        for (v in values) {
+            if (v == value) return true
+        }
+        return false
     }
 
+    public val keys: LongSet
+    public val values: IntCollection
 
-    public fun getOrDefault(key: Long, defaultValue: Int): Int = getOrElse(key) { defaultValue }
-
-
-    /**
-     * Returns the value associated with the given key, or [defaultValue] if the given key is not present in the map.
-     */
-
-    public fun lookup(key: Long): Int
-
-    override val keys: LongSet
-
-    override val values: IntCollection
-
-    @Deprecated(
-        message = "Use primitiveEntries instead.",
-        replaceWith = ReplaceWith("primitiveEntries"),
-        level = DeprecationLevel.WARNING)
-    override val entries: Set<Map.Entry<Long, Int>>
-        get() {
-            assertBoxing()
-            return primitiveEntries
-        }
-
-    public val primitiveEntries: EntrySet<Entry>
-
-    public interface Entry : Map.Entry<Long, Int> {
-        @Deprecated(
-            message = "Use key() instead.",
-            replaceWith = ReplaceWith("key()"),
-            level = DeprecationLevel.WARNING)
-        override val key: Long get() {
-            assertBoxing()
-            return key()
-        }
-
-        @Deprecated(
-            message = "Use value() instead.",
-            replaceWith = ReplaceWith("key()"),
-            level = DeprecationLevel.WARNING)
-        override val value: Int get() {
-            assertBoxing()
-            return value()
-        }
-
-        public fun key(): Long
-        public fun value(): Int
+    public interface Entry {
+        public val key: Long
+        public val value: Int
     }
 
-    public operator fun iterator(): Iterator<Entry> = primitiveEntries.iterator()
-
-    public fun fastIterator(): FastIterator<Entry> = primitiveEntries.fastIterator()
+    /** Returns a [FastIterator] over the map entries. */
+    public operator fun iterator(): FastIterator<Entry>
 }
 
 
@@ -141,107 +94,96 @@ public interface Long2IntMap : Map<Long, Int> {
 @Suppress("NOTHING_TO_INLINE")
 public inline fun  Long2IntMap.isDefaultValue(value: Int): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
 
+
+public fun  Long2IntMap.asMap(): Map<Long, Int> = Long2IntMapWrapper(this)
+
 @Suppress("NOTHING_TO_INLINE")
-public inline fun  Long2IntMap.getValue(key: Long): Int = getOrElse(key) { throw NoSuchElementException() }
+public inline fun  Long2IntMap.getOrDefault(key: Long, defaultValue: Int): Int = getOrElse(key) { defaultValue }
 
-@OptIn(ExperimentalContracts::class)
-public inline fun  Long2IntMap.getOrElse(key: Long, defaultValue: () -> Int): Int {
-    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun  Long2IntMap.getValue(key: Long): Int {
 
-    val value = lookup(key)
-    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
+    return getOrElse<Int>(key) { throw NoSuchElementException() }
+
 }
 
+@OptIn(ExperimentalContracts::class)
+
+public inline fun <T : Int?> Long2IntMap.getOrElse(key: Long, defaultValue: () -> T): T {
+
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    val value = get(key)
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as T
+}
 
 /**
- * A mutable map of Longs to Ints which inherits from [MutableMap].
+ * A mutable map of Longs to Ints.
  */
-public interface MutableLong2IntMap : Long2IntMap, MutableMap<Long, Int> {
+public interface MutableLong2IntMap : Long2IntMap {
 
-
-    @Deprecated(
-        message = "Use putValue(key, value) instead.",
-        replaceWith = ReplaceWith("putValue(key, value)"),
-        level = DeprecationLevel.WARNING)
-    override fun put(key: Long, value: Int): Int? {
-        assertBoxing()
-        val value = putValue(key, value)
-        return if (isDefaultValue(value) && !containsKey(key)) null else value
-    }
-
-
-
-    /**
-     * Updates the value associated with the given key and returns the previous value, or [defaultValue] if the given
-     * key was not present previously.
-     */
-
-    public fun putValue(key: Long, value: Int): Int
+    public fun put(key: Long, value: Int): Int
 
     public operator fun set(key: Long, value: Int) {
-        putValue(key, value)
+        put(key, value)
     }
 
+    public fun remove(key: Long): Int
 
-    @Deprecated(
-        message = "Use removeKey(key) instead.",
-        replaceWith = ReplaceWith("removeKey(key)"),
-        level = DeprecationLevel.WARNING)
-    override fun remove(key: Long): Int? {
-        assertBoxing()
-        return if (containsKey(key)) removeKey(key) else null
-    }
-
-
-    public fun removeKey(key: Long): Int
-
-
-    public fun merge(key: Long, value: Int, merge: (oldValue: Int, value: Int) -> Int): Int {
-        val oldValue = lookup(key)
-        val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue, value)
-        if (newValue != oldValue) {
-            putValue(key, newValue)
-        }
-        return newValue
-    }
-
+    public fun clear()
 
     override val keys: MutableLongSet
     override val values: MutableIntCollection
 
-    @Suppress("UNCHECKED_CAST")
-    @Deprecated(
-        message = "Use primitiveEntries instead.",
-        replaceWith = ReplaceWith("primitiveEntries"),
-        level = DeprecationLevel.WARNING)
-    override val entries: MutableSet<MutableMap.MutableEntry<Long, Int>>
-        get() {
-            assertBoxing()
-            return primitiveEntries as MutableSet<MutableMap.MutableEntry<Long, Int>>
+    public fun putAll(from: Long2IntMap) {
+        for (entry in from) {
+            put(entry.key, entry.value)
         }
+    }
 
-    override val primitiveEntries: MutableEntrySet<MutableEntry>
+    public fun putAll(from: Map<out Long, Int>) {
+        for (entry in from) {
+            put(entry.key, entry.value)
+        }
+    }
 
-    public interface MutableEntry : Long2IntMap.Entry, MutableMap.MutableEntry<Long, Int>
+    public interface MutableEntry : Long2IntMap.Entry {
+        override var value: Int
+    }
 
-    override operator fun iterator(): MutableIterator<MutableEntry> = primitiveEntries.iterator()
-
-    override fun fastIterator(): MutableFastIterator<MutableEntry> = primitiveEntries.fastIterator()
+    override fun iterator(): MutableFastIterator<MutableEntry>
 }
 
+public fun  MutableLong2IntMap.asMutableMap(): MutableMap<Long, Int> = MutableLong2IntMapWrapper(this)
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableLong2IntMap.merge(key: Long, value: Int, merge: (oldValue: Int, value: Int) -> Int): Int {
+    contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
+
+    val oldValue = get(key)
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue as Int, value)
+    if (newValue != oldValue) {
+        set(key, newValue)
+    }
+    return newValue
+}
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableLong2IntMap.getOrPut(key: Long, defaultValue: () -> Int): Int {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
-    var value = lookup(key)
+    var value = get(key)
     if (isDefaultValue(value) && !containsKey(key)) {
         value = defaultValue()
-        putValue(key, value)
+        set(key, value)
+        return value
+    } else {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return value as Int
     }
-    return value
 }
-
 
 public abstract class AbstractLong2IntMap : Long2IntMap {
 
@@ -250,8 +192,8 @@ public abstract class AbstractLong2IntMap : Long2IntMap {
         if (other is Map<*, *>) {
             if (other.size != size) return false
 
-            for (entry in fastIterator()) {
-                if (other[entry.key()] != entry.value()) return false
+            for (entry in this) {
+                if (other[entry.key] != entry.value) return false
             }
 
             return true
@@ -262,34 +204,20 @@ public abstract class AbstractLong2IntMap : Long2IntMap {
 
     override fun hashCode(): Int {
         var result = 0
-        for (entry in fastIterator()) {
-            result += entry.key().hashCode() xor entry.value().hashCode()
+        for (entry in this) {
+            result += entry.key.hashCode() xor entry.value.hashCode()
         }
         return result
     }
 
     override fun toString(): String {
-        return Iterable { fastIterator() }.joinToString(", ", "{", "}") { "${it.key()}=${it.value()}" }
+        return Iterable { iterator() }.joinToString(", ", "{", "}") { "${it.key}=${it.value}" }
     }
 
-    public class SimpleEntry(private val _key: Long, private val _value: Int) : Long2IntMap.Entry {
-        override fun key(): Long = _key
-        override fun value(): Int = _value
-    }
+    public class SimpleEntry(override val key: Long, override val value: Int) : Long2IntMap.Entry
 }
 
-public abstract class AbstractMutableLong2IntMap : AbstractLong2IntMap(), MutableLong2IntMap {
-
-    public class SimpleMutableEntry(private val _key: Long, private var _value: Int) : MutableLong2IntMap.MutableEntry {
-        override fun key(): Long = _key
-        override fun value(): Int = _value
-        override fun setValue(newValue: Int): Int {
-            val oldValue = _value
-            _value = newValue
-            return oldValue
-        }
-    }
-}
+public abstract class AbstractMutableLong2IntMap : AbstractLong2IntMap(), MutableLong2IntMap
 
 
 private object EmptyLong2IntMap : Long2IntMap {
@@ -305,14 +233,14 @@ private object EmptyLong2IntMap : Long2IntMap {
     override fun containsKey(key: Long): Boolean = false
 
     override fun containsValue(value: Int): Boolean = false
-    override fun lookup(key: Long): Int = Int.MIN_VALUE
+    override fun get(key: Long): Int = Int.MIN_VALUE
 
 
 
     override val keys: LongSet get() = emptyLongSet()
 
     override val values: IntCollection get() = emptyIntList()
-    override val primitiveEntries: EntrySet<Long2IntMap.Entry> = emptyEntrySet()
+    override fun iterator() = emptyFastIterator<Long2IntMap.Entry>()
 
 }
 
@@ -326,7 +254,7 @@ private class SingletonLong2IntMap(private val key: Long, private val value: Int
 
     override fun containsKey(key: Long): Boolean = key == this.key
     override fun containsValue(value: Int): Boolean = value == this.value
-    override fun lookup(key: Long): Int = if (key == this.key) value else Int.MIN_VALUE
+    override fun get(key: Long): Int = if (key == this.key) value else Int.MIN_VALUE
 
     override val keys: LongSet by lazy { longSetOf(key) }
 
@@ -334,5 +262,105 @@ private class SingletonLong2IntMap(private val key: Long, private val value: Int
     override val values: IntCollection by lazy { intListOf(value) }
 
 
-    override val primitiveEntries: EntrySet<Long2IntMap.Entry> by lazy { entrySetOf(AbstractLong2IntMap.SimpleEntry(key, value)) }
+    override fun iterator() = object : FastIterator<Long2IntMap.Entry> {
+        private var complete: Boolean = false
+
+        override fun hasNext() = !complete
+        override fun next(): Long2IntMap.Entry {
+            if (complete) throw NoSuchElementException()
+            complete = true
+            return AbstractLong2IntMap.SimpleEntry(key, value)
+        }
+    }
+}
+
+private class Long2IntMapWrapper(private val map: Long2IntMap) : AbstractMap<Long, Int>() {
+    override val size: Int get() = map.size
+
+    override fun get(key: Long): Int? = map.getOrElse(key) { null }
+
+    override fun containsKey(key: Long): Boolean = map.containsKey(key)
+
+    override fun containsValue(value: Int): Boolean = map.containsValue(value)
+
+    override val entries: Set<Map.Entry<Long, Int>> = object : AbstractSet<Map.Entry<Long, Int>>() {
+        override val size: Int get() = map.size
+
+        override fun contains(element: Map.Entry<Long, Int>): Boolean {
+            val value = map[element.key]
+            if (map.isDefaultValue(value) && !containsKey(element.key)) return false
+            return value == element.value
+        }
+
+        override fun iterator(): Iterator<Map.Entry<Long, Int>> = object : Iterator<Map.Entry<Long, Int>> {
+            private val it = map.iterator()
+
+            override fun hasNext(): Boolean = it.hasNext()
+            override fun next(): Map.Entry<Long, Int> {
+                val entry = it.next()
+                return object : Map.Entry<Long, Int> {
+                    override val key = entry.key
+                    override val value = entry.value
+                }
+            }
+        }
+    }
+}
+
+private class MutableLong2IntMapWrapper(private val map: MutableLong2IntMap) : AbstractMutableMap<Long, Int>() {
+    override val size: Int get() = map.size
+
+    override fun get(key: Long): Int? = map.getOrElse(key) { null }
+
+    override fun containsKey(key: Long): Boolean = map.containsKey(key)
+
+    override fun containsValue(value: Int): Boolean = map.containsValue(value)
+
+    override fun remove(key: Long): Int? {
+        return if (map.containsKey(key)) map.remove(key) else null
+    }
+
+    override fun put(key: Long, value: Int): Int? {
+        val containsKey = map.containsKey(key)
+        val oldValue = map.put(key, value)
+        return if (containsKey) oldValue else null
+    }
+
+    override fun clear(): Unit = map.clear()
+
+    override val entries: MutableSet<MutableMap.MutableEntry<Long, Int>> = object : AbstractMutableSet<MutableMap.MutableEntry<Long, Int>>() {
+        override val size: Int get() = map.size
+
+        override fun contains(element: MutableMap.MutableEntry<Long, Int>): Boolean {
+            val value = map[element.key]
+            if (map.isDefaultValue(value) && !containsKey(element.key)) return false
+            return value == element.value
+        }
+
+        override fun add(element: MutableMap.MutableEntry<Long, Int>): Boolean = throw UnsupportedOperationException()
+
+        override fun iterator(): MutableIterator<MutableMap.MutableEntry<Long, Int>> = object : MutableIterator<MutableMap.MutableEntry<Long, Int>> {
+            private val it = map.iterator()
+
+            override fun hasNext(): Boolean = it.hasNext()
+            override fun next(): MutableMap.MutableEntry<Long, Int> = it.next().let { e -> Entry(e.key, e.value) }
+            override fun remove() = it.remove()
+        }
+
+        private inner class Entry(override val key: Long, value: Int) : MutableMap.MutableEntry<Long, Int> {
+            override var value = value
+                private set
+
+            override fun setValue(newValue: Int): Int {
+                val oldValue = value
+                if (map.put(key, newValue) != oldValue) throw ConcurrentModificationException()
+                value = newValue
+                return oldValue
+            }
+
+            override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+            override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+            override fun toString(): String = "$key=$value"
+        }
+    }
 }

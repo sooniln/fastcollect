@@ -15,10 +15,6 @@ repositories {
 
 dependencies {
     jmhImplementation(project(":fastcollect"))
-    jmhImplementation("it.unimi.dsi:fastutil:8.5.18")
-    jmhImplementation("io.github.bluuewhale:hashsmith:0.2.0")
-    jmhImplementation("org.eclipse.collections:eclipse-collections:13.0.0")
-    jmhImplementation("androidx.collection:collection:1.6.0")
 }
 
 jmh {
@@ -51,24 +47,12 @@ private fun registerJMHTask(name: String, configuration: JMHTask.()->Unit): Task
     configuration()
 }
 
-registerJMHTask("FastCollectList") {
-    includes.set(listOf("ListBenchmark\\.fastcollect"))
-}
-
-registerJMHTask("FastCollectMap") {
-    includes.set(listOf("MapBenchmark\\.fastcollect"))
-}
-
-registerJMHTask("FastCollectSet") {
-    includes.set(listOf("SetBenchmark\\.fastcollect"))
-}
-
 registerJMHTask("List") {
     includes.set(listOf("ListBenchmark\\."))
 }
 
 registerJMHTask("Map") {
-    includes.set(listOf("MapBenchmark\\."))
+    includes.set(listOf("Map(32|64)Benchmark\\."))
 }
 
 registerJMHTask("Set") {
