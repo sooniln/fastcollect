@@ -152,8 +152,11 @@ tasks.register<Copy>("GenerateCollections") {
 }
 
 kotlin {
-    jvmToolchain(17)
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
 
+    jvmToolchain(17)
     jvm {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
@@ -225,7 +228,11 @@ dokka {
 
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
+
+    val isLocalPublish = gradle.startParameter.taskNames.any { it.endsWith("ToMavenLocal") }
+    if (!isLocalPublish) {
+        signAllPublications()
+    }
 
     coordinates(group.toString(), "fastcollect-kotlin", version.toString())
 

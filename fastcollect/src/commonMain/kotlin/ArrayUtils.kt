@@ -21,7 +21,7 @@ internal object ArrayUtils {
      * and the preferred growth. Will attempt to grow by the preferred amount if possible, but will always grow by at
      * least the minimum amount.
      */
-    public fun growArraySize(oldSize: Int, minGrowth: Int, prefGrowth: Int = oldSize shr 1): Int {
+    fun growArraySize(oldSize: Int, minGrowth: Int, prefGrowth: Int = oldSize shr 1): Int {
         require(minGrowth > 0)
         val prefSize = oldSize + max(minGrowth, prefGrowth) // might overflow
         return if (prefSize in 1..SOFT_MAX_ARRAY_SIZE) {

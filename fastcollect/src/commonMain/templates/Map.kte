@@ -105,25 +105,15 @@ public fun ${Generics} ${Name}Map${Generics}.asMap(): Map<${KeyType}, ${ValueTyp
 public inline fun ${Generics} ${Name}Map${Generics}.getOrDefault(key: ${KeyType}, defaultValue: ${ValueType}): ${ValueType} = getOrElse(key) { defaultValue }
 
 @Suppress("NOTHING_TO_INLINE")
-public inline fun ${Generics} ${Name}Map${Generics}.getValue(key: ${KeyType}): ${ValueType} {
-<% if (!isReferenceValue) { %>
-    return getOrElse<${ValueType}>(key) { throw NoSuchElementException() }
-<% } else { %>
-    return getOrElse<${ValueType}, ${ValueType}>(key) { throw NoSuchElementException() }
-<% } %>
-}
+public inline fun ${Generics} ${Name}Map${Generics}.getValue(key: ${KeyType}): ${ValueType} = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
-<% if (!isReferenceValue) { %>
-public inline fun <T : ${ValueType}?> ${Name}Map${Generics}.getOrElse(key: ${KeyType}, defaultValue: () -> T): T {
-<% } else { %>
-public inline fun <${ValueType}, T : ${ValueType}?> ${Name}Map${Generics}.getOrElse(key: ${KeyType}, defaultValue: () -> T): T {
-<% } %>
+public inline fun ${Generics} ${Name}Map${Generics}.getOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = get(key)
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as T
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as ${ValueType}
 }
 
 /**
@@ -295,7 +285,10 @@ private class Singleton${Name}Map${Generics}(private val key: ${KeyType}, privat
 private class ${Name}MapWrapper${Generics}(private val map: ${Name}Map${Generics}) : AbstractMap<${KeyType}, ${ValueType}>() {
     override val size: Int get() = map.size
 
-    override fun get(key: ${KeyType}): ${ValueType}? = map.getOrElse(key) { null }
+    override fun get(key: ${KeyType}): ${ValueType}? {
+        val value = map.get(key)
+        return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
+    }
 
     override fun containsKey(key: ${KeyType}): Boolean = map.containsKey(key)
 
@@ -328,7 +321,10 @@ private class ${Name}MapWrapper${Generics}(private val map: ${Name}Map${Generics
 private class Mutable${Name}MapWrapper${Generics}(private val map: Mutable${Name}Map${Generics}) : AbstractMutableMap<${KeyType}, ${ValueType}>() {
     override val size: Int get() = map.size
 
-    override fun get(key: ${KeyType}): ${ValueType}? = map.getOrElse(key) { null }
+    override fun get(key: ${KeyType}): ${ValueType}? {
+        val value = map.get(key)
+        return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
+    }
 
     override fun containsKey(key: ${KeyType}): Boolean = map.containsKey(key)
 

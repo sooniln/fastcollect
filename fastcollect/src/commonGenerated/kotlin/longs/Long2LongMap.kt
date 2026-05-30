@@ -101,21 +101,15 @@ public fun  Long2LongMap.asMap(): Map<Long, Long> = Long2LongMapWrapper(this)
 public inline fun  Long2LongMap.getOrDefault(key: Long, defaultValue: Long): Long = getOrElse(key) { defaultValue }
 
 @Suppress("NOTHING_TO_INLINE")
-public inline fun  Long2LongMap.getValue(key: Long): Long {
-
-    return getOrElse<Long>(key) { throw NoSuchElementException() }
-
-}
+public inline fun  Long2LongMap.getValue(key: Long): Long = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
-
-public inline fun <T : Long?> Long2LongMap.getOrElse(key: Long, defaultValue: () -> T): T {
-
+public inline fun  Long2LongMap.getOrElse(key: Long, defaultValue: () -> Long): Long {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = get(key)
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as T
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as Long
 }
 
 /**
@@ -277,7 +271,10 @@ private class SingletonLong2LongMap(private val key: Long, private val value: Lo
 private class Long2LongMapWrapper(private val map: Long2LongMap) : AbstractMap<Long, Long>() {
     override val size: Int get() = map.size
 
-    override fun get(key: Long): Long? = map.getOrElse(key) { null }
+    override fun get(key: Long): Long? {
+        val value = map.get(key)
+        return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
+    }
 
     override fun containsKey(key: Long): Boolean = map.containsKey(key)
 
@@ -310,7 +307,10 @@ private class Long2LongMapWrapper(private val map: Long2LongMap) : AbstractMap<L
 private class MutableLong2LongMapWrapper(private val map: MutableLong2LongMap) : AbstractMutableMap<Long, Long>() {
     override val size: Int get() = map.size
 
-    override fun get(key: Long): Long? = map.getOrElse(key) { null }
+    override fun get(key: Long): Long? {
+        val value = map.get(key)
+        return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
+    }
 
     override fun containsKey(key: Long): Boolean = map.containsKey(key)
 

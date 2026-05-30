@@ -101,21 +101,15 @@ public fun  Int2FloatMap.asMap(): Map<Int, Float> = Int2FloatMapWrapper(this)
 public inline fun  Int2FloatMap.getOrDefault(key: Int, defaultValue: Float): Float = getOrElse(key) { defaultValue }
 
 @Suppress("NOTHING_TO_INLINE")
-public inline fun  Int2FloatMap.getValue(key: Int): Float {
-
-    return getOrElse<Float>(key) { throw NoSuchElementException() }
-
-}
+public inline fun  Int2FloatMap.getValue(key: Int): Float = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
-
-public inline fun <T : Float?> Int2FloatMap.getOrElse(key: Int, defaultValue: () -> T): T {
-
+public inline fun  Int2FloatMap.getOrElse(key: Int, defaultValue: () -> Float): Float {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = get(key)
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as T
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as Float
 }
 
 /**
@@ -277,7 +271,10 @@ private class SingletonInt2FloatMap(private val key: Int, private val value: Flo
 private class Int2FloatMapWrapper(private val map: Int2FloatMap) : AbstractMap<Int, Float>() {
     override val size: Int get() = map.size
 
-    override fun get(key: Int): Float? = map.getOrElse(key) { null }
+    override fun get(key: Int): Float? {
+        val value = map.get(key)
+        return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
+    }
 
     override fun containsKey(key: Int): Boolean = map.containsKey(key)
 
@@ -310,7 +307,10 @@ private class Int2FloatMapWrapper(private val map: Int2FloatMap) : AbstractMap<I
 private class MutableInt2FloatMapWrapper(private val map: MutableInt2FloatMap) : AbstractMutableMap<Int, Float>() {
     override val size: Int get() = map.size
 
-    override fun get(key: Int): Float? = map.getOrElse(key) { null }
+    override fun get(key: Int): Float? {
+        val value = map.get(key)
+        return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
+    }
 
     override fun containsKey(key: Int): Boolean = map.containsKey(key)
 

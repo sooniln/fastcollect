@@ -43,26 +43,10 @@ implementation 'io.github.sooniln:fastcollect-kotlin:1.0.1'
 </dependency>
 ```
 
-FastCollect can be used as a drop-in replacement for Kotlin standard library collections and should provide immediate
-memory and CPU improvements without any further changes. However, many of the Kotlin standard library APIs are not
-flexible enough to properly support primitives without risking boxing penalties. Note that on JVM platforms, within
-tight loops and boxed values that do not escape, the runtime is often intelligent enough to optimize away boxing -
-however this becomes less likely as complexity grows. In addition, the situation on non-JVM platforms can vary
-dramatically. In order to avoid potential boxing penalties, FastCollect has marked methods that force boxing as
-deprecated (for visibility in IDEs, the methods will still function exactly as expected) and provided alternatives.
-
-It is generally preferable to keep FastCollect collections as specifically typed as possible — for example, prefer:
-```kotlin
-val set: IntHashSet
-set = IntHashSet()
-```
-instead of:
-```kotlin
-val set: Set<Int>
-set = IntHashSet()
-```
-This helps ensure that methods which avoid boxing penalties are appropriately available, and that extension methods work
-as expected.
+FastCollect can be used as a (mostly) drop-in replacement for Kotlin standard library collections and should provide
+immediate memory and CPU improvements without any further changes. You may need to explicitly import FastCollect
+extension functions where standard library extension functions were imported silently, and note that FastCollect
+currently does not provide extension methods that create new collections (i.e. filter(), etc...).
 
 Using FastCollect types should be quite straightforward for anyone familiar with standard Kotlin/Java collections.
 FastCollect provides ArrayList/ArrayDeque, HashSet, and HashMap analogues that can store primitives (and in the case of
@@ -72,12 +56,89 @@ maps, primitive keys with reference or primitive values).
 > FastCollect currently only supports Int/Long keys for HashSet/HashMap (all types of values are supported). This is
 > done out of a desire to reduce binary size and bloat by eliminating use cases that are unlikely to be very common or
 > useful. If you feel you have a compelling use case that is not currently supported, please reach out, as support is
-> trivial to add.
+> generally trivial to add.
+
+### Examples ###
+
+You'll find that FastCollect collection usage is pretty much exactly like Kotlin collection usage. A few examples of
+common APIs follow:
+
+```kotlin
+// creating a list
+var list = IntArrayList() // create FastCollect list directly
+list = mutableIntList(1, 2, 3) // directly create FastCollect list
+
+// get/set by index
+var i = list[1]
+list[1] = 2
+
+// search for value in list
+list.indexOf(1)
+list.lastIndexOf(2)
+list.contains(3)
+
+// iterate over list
+for (i in list) { ... }
+
+// mutate list
+list.add(5)
+list.remove(5)
+list.removeAt(0)
+list.clear()
+
+// other operations
+list.sort()
+list.shuffle()
+list.fill(0)
+```
+
+```kotlin
+// creating a set
+var set = IntHashSet() // create FastCollect set directly
+set = mutableIntSetOf(1, 2, 3) // directly create FastCollect set
+
+// search for presence in set
+set.contains(3)
+
+// iterate over set
+for (i in set) { ... }
+
+// mutate set
+set.add(5)
+set.remove(5)
+set.clear()
+```
+
+```kotlin
+// creating a map
+var map = Int2IntHashMap() // create FastCollect map directly
+map = mutableInt2IntMapOf(1 to 2, 2 to 4, 3 to 7) // directly create FastCollect map
+
+// get/set by index
+var v = map[1]
+map[1] = 5
+
+// search for key/value in map
+map.containsKey(1)
+map.containsValue(2)
+
+// iterate over map
+for (k in map.keys) { ... }
+for (v in map.values) { ... }
+for ((k, v) in map) { ... }
+
+// mutate map
+map.remove(5)
+map.clear()
+
+// other operations
+map.getOrElse(1) { -1 }
+```
 
 ### ConcurrentModificationException ###
 
-The standard Kotlin libraries may make reasonable efforts to throw ConcurrentModificationException if they detect
-collections being modified in inappropriate ways. This already only a best effort, with no guarantees made, but
+The standard Kotlin libraries make reasonable efforts to throw ConcurrentModificationException if they detect
+collections being modified in inappropriate ways. This already only a best effort with no guarantees made, but
 FastCollect makes even less of an effort in the interests of performance. Do not expect FastCollect to throw
 ConcurrentModificationException if you are shooting yourself in the foot, except in rare instances.
 
@@ -92,15 +153,12 @@ Other multiplatform collection libraries include:
 * [androidX](https://developer.android.com/jetpack/androidx/releases/collection) - AndroidX now offers multiplatform
   primitive collections.
 
-Other JVM-only collection libraries include:
+Other JVM-only primitive collection libraries include:
 
 * [fastutil](https://github.com/vigna/fastutil) - the Java standard for primitive collections, supporting a wide variety
   of scientific computing use cases.
 * [Eclipse Collections](https://github.com/eclipse-collections/eclipse-collections) - a large multipurpose collections
   library that also includes primitive specific collections.
-* [HashSmith](https://github.com/bluuewhale/hash-smith) - a relatively new but fast HashSet/HashMap library for
-  reference values (not primitives). Included in benchmarks to test comparison against a modern Swiss table with
-  vectorized logic - it is not expected to be competitive for primitive collections.
 
 There are further JVM-only collections libraries, but they tend to be older and relatively unsupported (Koloboke, Trove,
 etc...)
@@ -112,9 +170,7 @@ has compounding benefits — more data fitting in CPU caches further reduces mem
 
 A more detailed examination of performance can be found in the [Performance Benchmarks](docs/PERFORMANCE_BENCHMARKS.md)
 doc. In benchmarking, FastCollect unsurprisingly outperforms standard Kotlin collections by orders of magnitude (as
-expected since FastCollect stores primitives, not boxed types). While exact results can vary based on the situation, the
-overall benchmarks make it fair to say that FastCollect is often the fastest of all implementations, and has a strong
-argument to be generally the fastest map and set implementation.
+expected since FastCollect stores primitives, not boxed types).
 
 ### Memory Usage ###
 
@@ -134,27 +190,6 @@ present. Contrary to common practice, this project checks the generated code dir
 non-standard from a build pipeline perspective, this project has public APIs composed of generated code, and it is
 important for clients and users that the actual code (rather than just the generation templates) is viewable,
 searchable, and parseable within the repository itself.
-
-## Detecting Boxing
-
-While FastCollect deprecates collection methods that lead to boxing, this does not help detect indirect usage of these
-methods which may still be causing performance problems. One problem for example is the use of Kotlin standard library
-extension methods (which are always in scope, whereas FastCollect extension methods need to be specifically imported).
-Thus on some platforms, FastCollect supports setting the 'fastcollect-warn-on-boxing' property which will output
-error logs with stack traces if it detects usage of methods which are causing boxing.
-
-On JVM this is a system property, which can be set via a java flag: `java -Dfastcollect-warn-on-boxing=true ...`. For
-native applications this can be set via a command line flag `--fastcollect-warn-on-boxing=true`.
-
-## JVM Boxing and Escape Analysis
-
-Modern JVM runtimes are quite good at analyzing and optimizing code while they're running. This means that in simple
-scenarios the JVM can completely elide some boxing penalties even where you might expect to see them. For this reason,
-switching from collection methods that imply boxing to FastCollect methods that prevent boxing may not always directly
-improve performance (switching the underlying storage will improve performance). However, FastCollect methods that avoid
-boxing will never perform worse than methods that may box, and for more complex code usage will likely deliver
-substantial performance improvements, so it is always worth migrating to FastCollect methods that avoid boxing where
-reasonable.
 
 ## HashSet/HashMap Development Notes
 

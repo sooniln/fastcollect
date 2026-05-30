@@ -101,21 +101,15 @@ public fun  Long2DoubleMap.asMap(): Map<Long, Double> = Long2DoubleMapWrapper(th
 public inline fun  Long2DoubleMap.getOrDefault(key: Long, defaultValue: Double): Double = getOrElse(key) { defaultValue }
 
 @Suppress("NOTHING_TO_INLINE")
-public inline fun  Long2DoubleMap.getValue(key: Long): Double {
-
-    return getOrElse<Double>(key) { throw NoSuchElementException() }
-
-}
+public inline fun  Long2DoubleMap.getValue(key: Long): Double = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
-
-public inline fun <T : Double?> Long2DoubleMap.getOrElse(key: Long, defaultValue: () -> T): T {
-
+public inline fun  Long2DoubleMap.getOrElse(key: Long, defaultValue: () -> Double): Double {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = get(key)
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as T
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as Double
 }
 
 /**
@@ -277,7 +271,10 @@ private class SingletonLong2DoubleMap(private val key: Long, private val value: 
 private class Long2DoubleMapWrapper(private val map: Long2DoubleMap) : AbstractMap<Long, Double>() {
     override val size: Int get() = map.size
 
-    override fun get(key: Long): Double? = map.getOrElse(key) { null }
+    override fun get(key: Long): Double? {
+        val value = map.get(key)
+        return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
+    }
 
     override fun containsKey(key: Long): Boolean = map.containsKey(key)
 
@@ -310,7 +307,10 @@ private class Long2DoubleMapWrapper(private val map: Long2DoubleMap) : AbstractM
 private class MutableLong2DoubleMapWrapper(private val map: MutableLong2DoubleMap) : AbstractMutableMap<Long, Double>() {
     override val size: Int get() = map.size
 
-    override fun get(key: Long): Double? = map.getOrElse(key) { null }
+    override fun get(key: Long): Double? {
+        val value = map.get(key)
+        return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
+    }
 
     override fun containsKey(key: Long): Boolean = map.containsKey(key)
 
