@@ -57,6 +57,9 @@ public interface ${Name}Map${Generics} {
 
     public val size: Int
 
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun size(): Int = size
+
     public fun isEmpty(): Boolean {
         return size == 0
     }
@@ -79,6 +82,11 @@ public interface ${Name}Map${Generics} {
 
     public val keys: ${KeyType}Set
     public val values: ${ValueCollectionType}${Generics}
+
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun keys(): ${KeyType}Set = keys
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun values(): ${ValueCollectionType}${Generics} = values
 
     public interface Entry${Generics} {
         public val key: ${KeyType}

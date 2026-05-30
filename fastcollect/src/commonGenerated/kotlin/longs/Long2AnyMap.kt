@@ -42,6 +42,9 @@ public interface Long2AnyMap<V> {
 
     public val size: Int
 
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun size(): Int = size
+
     public fun isEmpty(): Boolean {
         return size == 0
     }
@@ -64,6 +67,11 @@ public interface Long2AnyMap<V> {
 
     public val keys: LongSet
     public val values: Collection<V>
+
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun keys(): LongSet = keys
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun values(): Collection<V> = values
 
     public interface Entry<V> {
         public val key: Long

@@ -13,6 +13,5 @@ plugins {
 }
 
 include("fastcollect")
-include("benchmark")
 include("jmh")
 include("jitAsm")

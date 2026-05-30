@@ -57,6 +57,9 @@ public interface Long2DoubleMap {
 
     public val size: Int
 
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun size(): Int = size
+
     public fun isEmpty(): Boolean {
         return size == 0
     }
@@ -79,6 +82,11 @@ public interface Long2DoubleMap {
 
     public val keys: LongSet
     public val values: DoubleCollection
+
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun keys(): LongSet = keys
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun values(): DoubleCollection = values
 
     public interface Entry {
         public val key: Long
