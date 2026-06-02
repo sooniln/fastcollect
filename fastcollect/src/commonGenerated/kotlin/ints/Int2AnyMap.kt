@@ -76,6 +76,9 @@ public interface Int2AnyMap<V> {
     public interface Entry<V> {
         public val key: Int
         public val value: V
+
+        public operator fun component1(): Int = key
+        public operator fun component2(): V = value
     }
 
     /** Returns a [FastIterator] over the map entries. */

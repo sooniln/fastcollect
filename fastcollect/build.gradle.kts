@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinMultiplatform
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -232,6 +234,8 @@ mavenPublishing {
     val isLocalPublish = gradle.startParameter.taskNames.any { it.endsWith("ToMavenLocal") }
     if (!isLocalPublish) {
         signAllPublications()
+    } else {
+        configure(KotlinMultiplatform(javadocJar = JavadocJar.Empty(), sourcesJar = true))
     }
 
     coordinates(group.toString(), "fastcollect-kotlin", version.toString())

@@ -77,6 +77,8 @@ object KeyGenerators{
 
         repeat(inKeys.size) { inKeys[it] = it + 1 }
         repeat(outKeys.size) { outKeys[it] = inKeys[it] + inKeys.size + 1 }
+        inKeys.shuffle()
+        outKeys.shuffle()
     }
 
     private fun generateSequentialKeys(inKeys: LongArray, outKeys: LongArray) {

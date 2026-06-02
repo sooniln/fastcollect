@@ -76,6 +76,9 @@ public interface Long2AnyMap<V> {
     public interface Entry<V> {
         public val key: Long
         public val value: V
+
+        public operator fun component1(): Long = key
+        public operator fun component2(): V = value
     }
 
     /** Returns a [FastIterator] over the map entries. */

@@ -20,11 +20,15 @@ import java.util.concurrent.TimeUnit
  * A JVM specific benchmark which measures the performance of various map libraries.
  */
 @Fork(1)
-@Warmup(iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 10, time = 200, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 10, time = 150, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 10, time = 300, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class Map64Benchmark {
+
+    companion object {
+        private val seed = System.currentTimeMillis()
+    }
 
     @State(Scope.Benchmark)
     open class BaseState {
@@ -42,7 +46,7 @@ open class Map64Benchmark {
         @Setup(Level.Trial)
         fun setup() {
             keys = LongArray(size)
-            KeyGenerators.generateRandomKeys(keys)
+            KeyGenerators.generateRandomKeys(keys, seed = seed)
 
             var value = 0L
             for (key in keys) {
@@ -68,7 +72,7 @@ open class Map64Benchmark {
         open fun setup() {
             inKeys = LongArray(size)
             outKeys = LongArray(size)
-            KeyGenerators.generateKeys(order, inKeys, outKeys)
+            KeyGenerators.generateKeys(order, inKeys, outKeys, seed = seed)
 
             inKeys.forEachIndexed { i, key -> map[key] = i.toLong() }
         }

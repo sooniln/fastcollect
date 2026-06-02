@@ -10,6 +10,7 @@ import io.github.sooniln.fastcollect.doubles.doubleListOf
 import io.github.sooniln.fastcollect.doubles.DoubleCollection
 import io.github.sooniln.fastcollect.doubles.MutableDoubleCollection
 import io.github.sooniln.fastcollect.doubles.emptyDoubleList
+import io.github.sooniln.fastcollect.toBits
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -91,6 +92,9 @@ public interface Int2DoubleMap {
     public interface Entry {
         public val key: Int
         public val value: Double
+
+        public operator fun component1(): Int = key
+        public operator fun component2(): Double = value
     }
 
     /** Returns a [FastIterator] over the map entries. */
@@ -100,7 +104,7 @@ public interface Int2DoubleMap {
 
 // handles presence of NaN correctly
 @Suppress("NOTHING_TO_INLINE")
-public inline fun  Int2DoubleMap.isDefaultValue(value: Double): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+public inline fun  Int2DoubleMap.isDefaultValue(value: Double): Boolean = value.toBits() == defaultValue.toBits()
 
 
 public fun  Int2DoubleMap.asMap(): Map<Int, Double> = Int2DoubleMapWrapper(this)

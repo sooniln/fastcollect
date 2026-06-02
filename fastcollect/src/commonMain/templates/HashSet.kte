@@ -26,8 +26,6 @@ public class ${Type}HashSet @JvmOverloads constructor(
 
     public constructor(elements: Collection<${Type}>): this() { addAll(elements) }
 
-    // when used in hashing mode, the last slot in the array is used to store the zero key. when used in array mode,
-    // there is no special handling for zero.
     private var keysArr = EMPTY_ARRAY
     private var mask = keysArr.mask()
     private var rotVal = mask.rotVal()
@@ -326,37 +324,9 @@ public class ${Type}HashSet @JvmOverloads constructor(
         }
 
         private fun decrement() {
-            // why do we stride by 17 instead of 1 (which we could further optimize and would be cheaper, as well as
-            // being more logical)? first, in terms of correctness, since our backing array is power-of-two sized, any
-            // odd number will be coprime, and thus any odd stride is still guaranteed to cover all elements given that
-            // we're wrapping around via the mask. second, this is a defense against pathological accidentally quadratic
-            // scenarios (google "robin hood accidentally quadratic"). since the backing array is by design storing
-            // elements as close to their 'home' slot as possible, iteration in array order will tend to return large
-            // groupings all with the same/nearby home slot. if this ordering is used for insertion it results in
-            // pathologically quadratic devolution, as each element insertion has to push through extremely large chains
-            // of elements all close to their home slot. however, we know (you can trivially simulate this or check
-            // papers on DIB distributions in robin hood tables) that max DIBs grow very slowly (logarithmic wrt table
-            // size), and the 99th percentile of DIBs is 17 for pretty much every table we can address.
-            //
-            // so this means that by picking a stride of 17 we are pretty much guaranteed that every next element we
-            // pick will fall into a different 'home' cluster than the previous element we return. now if we happen to
-            // be inserting in iteration order, every element we insert should hash to a different cluster and avoid
-            // pathologically quadratic-ness.
-            //
-            // and of course subtracting a simple constant here is far cheaper than the other solutions considered
-            // (random seed in hash smearing - requires an extra 4 bytes per instance to store the seed and an extra
-            // operation within the smear which is our most performance sensitive inner loop code, also far less cache
-            // hits).
-            //
-            // note that this is not a defense against dedicated adversarial attacks - the original sequence is
-            // trivially reconstructable, but we are not using a smear that's terribly secure anyway, and the overall
-            // design of this library prioritizes performance over security.
-
-            var s = slot
             do {
-                s = (s - 17) and mask
-            } while (keysArr[s] == ZERO)
-            slot = s
+                slot = (slot - 1) and mask
+            } while (keysArr[slot] == ZERO)
         }
     }
 
@@ -364,7 +334,6 @@ public class ${Type}HashSet @JvmOverloads constructor(
     @Suppress("NOTHING_TO_INLINE")
     private inline fun ${Type}Array.endSlot(): Int = size - 1
 
-    // caching the mask in a member var can reduce lookup miss latency - at the cost of +4 bytes per instance
     @Suppress("NOTHING_TO_INLINE")
     private inline fun ${Type}Array.mask(): Int = size - 2
 
@@ -373,19 +342,7 @@ public class ${Type}HashSet @JvmOverloads constructor(
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun mixHash(hashcode: Int, rotVal: Int): Int {
-        // hash smear based on rustc-hash, the hashing function used internally within the rust compiler. this has a
-        // couple advantages for our use case. 1) it's fast 2) it's not a super strong hash function, but we're using it
-        // as a smear... 3) it's a multiplicative hash which means it tends to concentrate entropy in the high bits
-        // (where they're not terribly useful for our needs) - but we can rotate by the table size which concentrates
-        // the entropy in the low bits exactly where we need them! taking the table size into account means that the
-        // hashcode changes every time the table size does, which for a normal robin hood implementation would break
-        // hashcode caching. since we don't cache hashcodes however, this is actually a win for us.
-
-        // this smear also performed quite favorably in testing against a variety of adversarial inputs - but that said
-        // I am definitely not a hashing expert and would not claim this smear is very DOS resistant. if you see
-        // weaknesses, please say something.
-
-        return (hashcode * K).rotateLeft(rotVal)
+        return (hashcode * PHI).rotateLeft(rotVal)
     }
 
     @Suppress("NOTHING_TO_INLINE")
@@ -412,10 +369,8 @@ public class ${Type}HashSet @JvmOverloads constructor(
 
         private val EMPTY_ARRAY = ${lowerType}ArrayOf(ZERO, NONZERO)
 
-        // Constant taken from:
-        //     "Computationally Easy, Spectrally Good Multipliers for Congruential
-        //     Pseudorandom Number Generators" by Guy Steele and Sebastiano Vigna.
-        private const val K: Int = 0x93d765dd.toInt()
+        // Knuth multiplicative hash
+        private const val PHI: Int = 0x93d765dd.toInt()
 
         private const val DEFAULT_INITIAL_CAPACITY = 7
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two

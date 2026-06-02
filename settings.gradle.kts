@@ -14,4 +14,3 @@ plugins {
 
 include("fastcollect")
 include("jmh")
-include("jitAsm")

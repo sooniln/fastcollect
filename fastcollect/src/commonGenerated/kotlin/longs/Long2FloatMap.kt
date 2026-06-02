@@ -10,6 +10,7 @@ import io.github.sooniln.fastcollect.floats.floatListOf
 import io.github.sooniln.fastcollect.floats.FloatCollection
 import io.github.sooniln.fastcollect.floats.MutableFloatCollection
 import io.github.sooniln.fastcollect.floats.emptyFloatList
+import io.github.sooniln.fastcollect.toBits
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -91,6 +92,9 @@ public interface Long2FloatMap {
     public interface Entry {
         public val key: Long
         public val value: Float
+
+        public operator fun component1(): Long = key
+        public operator fun component2(): Float = value
     }
 
     /** Returns a [FastIterator] over the map entries. */
@@ -100,7 +104,7 @@ public interface Long2FloatMap {
 
 // handles presence of NaN correctly
 @Suppress("NOTHING_TO_INLINE")
-public inline fun  Long2FloatMap.isDefaultValue(value: Float): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+public inline fun  Long2FloatMap.isDefaultValue(value: Float): Boolean = value.toBits() == defaultValue.toBits()
 
 
 public fun  Long2FloatMap.asMap(): Map<Long, Float> = Long2FloatMapWrapper(this)

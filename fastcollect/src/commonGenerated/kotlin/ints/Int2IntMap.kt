@@ -10,6 +10,7 @@ import io.github.sooniln.fastcollect.ints.intListOf
 import io.github.sooniln.fastcollect.ints.IntCollection
 import io.github.sooniln.fastcollect.ints.MutableIntCollection
 import io.github.sooniln.fastcollect.ints.emptyIntList
+import io.github.sooniln.fastcollect.toBits
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -91,6 +92,9 @@ public interface Int2IntMap {
     public interface Entry {
         public val key: Int
         public val value: Int
+
+        public operator fun component1(): Int = key
+        public operator fun component2(): Int = value
     }
 
     /** Returns a [FastIterator] over the map entries. */
@@ -100,7 +104,7 @@ public interface Int2IntMap {
 
 // handles presence of NaN correctly
 @Suppress("NOTHING_TO_INLINE")
-public inline fun  Int2IntMap.isDefaultValue(value: Int): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+public inline fun  Int2IntMap.isDefaultValue(value: Int): Boolean = value.toBits() == defaultValue.toBits()
 
 
 public fun  Int2IntMap.asMap(): Map<Int, Int> = Int2IntMapWrapper(this)

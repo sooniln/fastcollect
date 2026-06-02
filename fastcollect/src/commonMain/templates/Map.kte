@@ -10,6 +10,7 @@ import io.github.sooniln.fastcollect.${valueSubpackage}.${lowerValueType}ListOf
 import io.github.sooniln.fastcollect.${valueSubpackage}.${ValueType}Collection
 import io.github.sooniln.fastcollect.${valueSubpackage}.Mutable${ValueType}Collection
 import io.github.sooniln.fastcollect.${valueSubpackage}.empty${ValueType}List
+import io.github.sooniln.fastcollect.toBits
 <% } %>
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -91,6 +92,9 @@ public interface ${Name}Map${Generics} {
     public interface Entry${Generics} {
         public val key: ${KeyType}
         public val value: ${ValueType}
+
+        public operator fun component1(): ${KeyType} = key
+        public operator fun component2(): ${ValueType} = value
     }
 
     /** Returns a [FastIterator] over the map entries. */
@@ -100,7 +104,7 @@ public interface ${Name}Map${Generics} {
 <% if (!isReferenceValue) { %>
 // handles presence of NaN correctly
 @Suppress("NOTHING_TO_INLINE")
-public inline fun ${Generics} ${Name}Map${Generics}.isDefaultValue(value: ${ValueType}): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+public inline fun ${Generics} ${Name}Map${Generics}.isDefaultValue(value: ${ValueType}): Boolean = value.toBits() == defaultValue.toBits()
 <% } else { %>
 @Suppress("NOTHING_TO_INLINE", "UnusedReceiverParameter")
 @PublishedApi

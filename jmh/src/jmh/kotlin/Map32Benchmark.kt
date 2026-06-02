@@ -13,18 +13,21 @@ import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.Setup
 import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.annotations.Warmup
-import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
 
 /**
  * A JVM specific benchmark which measures the performance of various map libraries.
  */
 @Fork(1)
-@Warmup(iterations = 10, time = 100, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 10, time = 200, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 10, time = 150, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 10, time = 300, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class Map32Benchmark {
+
+    companion object {
+        private val seed = System.currentTimeMillis()
+    }
 
     @State(Scope.Benchmark)
     open class BaseState {
@@ -42,7 +45,7 @@ open class Map32Benchmark {
         @Setup(Level.Trial)
         fun setup() {
             keys = IntArray(size)
-            KeyGenerators.generateRandomKeys(keys)
+            KeyGenerators.generateRandomKeys(keys, seed = seed)
 
             var value = 0
             for (key in keys) {
@@ -54,10 +57,10 @@ open class Map32Benchmark {
     @State(Scope.Benchmark)
     open class FullState : BaseState() {
 
-        @Param("3000", "12000", "48000", "192000", "768000", "3072000", "12288000")
+        @Param("3000", /*"12000", "48000", "192000",*/ "768000", /*"3072000", "12288000"*/)
         open var size: Int = 3000
 
-        @Param("random", "sequential", "even", "partition", "highBits")
+        @Param("random", "sequential", /*"even", "partition", "highBits"*/)
         var order: String = "random"
 
         var idx = 0
@@ -68,7 +71,7 @@ open class Map32Benchmark {
         open fun setup() {
             inKeys = IntArray(size)
             outKeys = IntArray(size)
-            KeyGenerators.generateKeys(order, inKeys, outKeys)
+            KeyGenerators.generateKeys(order, inKeys, outKeys, seed = seed)
 
             inKeys.forEachIndexed { i, key -> map[key] = i }
         }
@@ -109,6 +112,7 @@ open class Map32Benchmark {
     open class EmptyState : FullState() {
         @Setup(Level.Trial)
         override fun setup() {
+            super.setup()
             map.clear()
         }
 
@@ -122,7 +126,7 @@ open class Map32Benchmark {
         }
     }
 
-    @Benchmark
+    /*@Benchmark
     fun naiveCopy(state: RandomState): Int2IntHashMap {
         val copy = Int2IntHashMap()
         for (entry in state.map) {
@@ -132,7 +136,7 @@ open class Map32Benchmark {
     }
 
     @Benchmark
-    fun preAllocatedCopy(state: RandomState) = Int2IntHashMap(state.map)
+    fun preAllocatedCopy(state: RandomState) = Int2IntHashMap(state.map)*/
 
     @Benchmark
     fun getHit(state: FullState) = state.nextInKey { key -> map[key] }
@@ -145,7 +149,7 @@ open class Map32Benchmark {
 
     @Benchmark
     fun putMiss(state: EmptyState) = state.nextMissInKey { key -> map[key] = key }
-
+/*
     @Benchmark
     fun removeAndPutMiss(state: FullState) = state.nextInOutKeys { inKey, outKey ->
         map.remove(inKey)
@@ -160,5 +164,5 @@ open class Map32Benchmark {
             bh.consume(entry.key)
             bh.consume(entry.value)
         }
-    }
+    }*/
 }

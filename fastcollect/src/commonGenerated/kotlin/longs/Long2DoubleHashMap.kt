@@ -29,7 +29,7 @@ public class Long2DoubleHashMap @JvmOverloads constructor(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
 
     /** The default value should be the value that is ideally least likely to occur in the map. */
-    override val defaultValue: Double = Double.NaN
+    override val defaultValue: Double = Double.NaN,
 
 ) : AbstractMutableLong2DoubleMap() {
 
@@ -387,9 +387,9 @@ public class Long2DoubleHashMap @JvmOverloads constructor(
     override operator fun iterator(): MutableFastIterator<MutableLong2DoubleMap.MutableEntry> = FastEntryIterator()
 
     private open inner class SlotIterator {
-        val keysArr = this@Long2DoubleHashMap.keysArr
+        private val keysArr = this@Long2DoubleHashMap.keysArr
         private val mask = this@Long2DoubleHashMap.mask
-        val valuesArr = this@Long2DoubleHashMap.valuesArr
+        private val valuesArr = this@Long2DoubleHashMap.valuesArr
 
         private var slotsLeft = size
 
@@ -417,7 +417,7 @@ public class Long2DoubleHashMap @JvmOverloads constructor(
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         fun value(): Double = valuesArr[previousSlot] as Double
 
-        protected fun updateValue(newValue: Double) {
+        fun updateValue(newValue: Double) {
             check(previousSlot != -1)
             if (keysArr !== this@Long2DoubleHashMap.keysArr) throw ConcurrentModificationException()
             valuesArr[previousSlot] = newValue
@@ -432,12 +432,9 @@ public class Long2DoubleHashMap @JvmOverloads constructor(
         }
 
         private fun decrement() {
-            // see the similar function within HashSet for an explanation and discussion of why we stride by 17 here
-            var s = slot
             do {
-                s = (s - 17) and mask
-            } while (keysArr[s] == ZERO)
-            slot = s
+                slot = (slot - 1) and mask
+            } while (keysArr[slot] == ZERO)
         }
     }
 
@@ -492,17 +489,15 @@ public class Long2DoubleHashMap @JvmOverloads constructor(
     @Suppress("NOTHING_TO_INLINE")
     private inline fun LongArray.endSlot(): Int = size - 1
 
-    // caching the mask in a member var can shave a little off get miss latency - at the cost of +4 bytes per instance
     @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.mask() = size - 2
+    private inline fun LongArray.mask(): Int = size - 2
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun Int.rotVal(): Int = countOneBits()
 
     @Suppress("NOTHING_TO_INLINE")
     private inline fun mixHash(hashcode: Int, rotVal: Int): Int {
-        // see equivalent function in HashSet for explanation and commentary
-        return (hashcode * K).rotateLeft(rotVal)
+        return (hashcode * PHI).rotateLeft(rotVal)
     }
 
     @Suppress("NOTHING_TO_INLINE")
@@ -532,10 +527,8 @@ public class Long2DoubleHashMap @JvmOverloads constructor(
         private val EMPTY_VALUE_ARRAY = DoubleArray(2)
 
 
-        // Constant taken from:
-        //     "Computationally Easy, Spectrally Good Multipliers for Congruential
-        //     Pseudorandom Number Generators" by Guy Steele and Sebastiano Vigna.
-        private const val K: Int = 0x93d765dd.toInt()
+        // Knuth multiplicative hash
+        private const val PHI: Int = 0x9E3779B9.toInt()
 
         private const val DEFAULT_INITIAL_CAPACITY = 7
         private const val MAXIMUM_CAPACITY: Int = 1 shl 30 // must be power of two

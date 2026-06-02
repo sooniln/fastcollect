@@ -6,8 +6,9 @@ dealing with collections as closely as possible.
 
 This library uses code generation from templates so that it is unnecessary to maintain multiple copies of almost
 identical code. The GenerateCollections gradle task is responsible for taking as input the template files within
-src/commonMain/templates and generating output into src/commonGenerated. Changes should thus always be made to the
-template files rather than the generated output.
+src/commonMain/templates and generating output into src/commonGenerated - it is generally executed automatically as a
+dependency of other compile tasks. Changes should thus always be made to the template files rather than the generated
+output.
 
 ## Testing
 
@@ -26,8 +27,3 @@ Use the "jmh" task to run all JMH benchmarks. Flags to control JMH:
 * -P-wi=<number> to set the number of warmup iterations
 
 Previous JMH benchmark results are stored in JSON format in a timestamped file in the jmh/benchmark-results directory.
-
-## JIT-ASM
-
-The jitAsm subproject holds harnesses that can be run to output JIT ASM for interesting methods to allow for detailed
-analysis of the assembly code and a deeper understanding of real performance.

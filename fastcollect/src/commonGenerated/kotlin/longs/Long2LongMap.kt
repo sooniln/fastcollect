@@ -10,6 +10,7 @@ import io.github.sooniln.fastcollect.longs.longListOf
 import io.github.sooniln.fastcollect.longs.LongCollection
 import io.github.sooniln.fastcollect.longs.MutableLongCollection
 import io.github.sooniln.fastcollect.longs.emptyLongList
+import io.github.sooniln.fastcollect.toBits
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -91,6 +92,9 @@ public interface Long2LongMap {
     public interface Entry {
         public val key: Long
         public val value: Long
+
+        public operator fun component1(): Long = key
+        public operator fun component2(): Long = value
     }
 
     /** Returns a [FastIterator] over the map entries. */
@@ -100,7 +104,7 @@ public interface Long2LongMap {
 
 // handles presence of NaN correctly
 @Suppress("NOTHING_TO_INLINE")
-public inline fun  Long2LongMap.isDefaultValue(value: Long): Boolean = value == defaultValue || (defaultValue != defaultValue && value != value)
+public inline fun  Long2LongMap.isDefaultValue(value: Long): Boolean = value.toBits() == defaultValue.toBits()
 
 
 public fun  Long2LongMap.asMap(): Map<Long, Long> = Long2LongMapWrapper(this)

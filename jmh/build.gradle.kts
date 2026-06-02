@@ -1,7 +1,5 @@
 import me.champeau.jmh.JMHTask
 import org.gradle.kotlin.dsl.kotlin
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 plugins {
     kotlin("jvm")
@@ -51,20 +49,16 @@ registerJMHTask("List") {
     includes.set(listOf("ListBenchmark\\."))
 }
 
-registerJMHTask("Map") {
-    includes.set(listOf("Map(32|64)Benchmark\\."))
-}
-
 registerJMHTask("Set") {
     includes.set(listOf("SetBenchmark\\."))
 }
 
-private val copyTask = tasks.register<Copy>("CopyJmhResults") {
-    description = "Copy last JMH results into benchmark-results directory."
+registerJMHTask("Map32") {
+    includes.set(listOf("Map32Benchmark\\."))
+}
 
-    from("build/results/jmh/results.json")
-    into("benchmark-results")
-    rename { "${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))}.json" }
+registerJMHTask("Map64") {
+    includes.set(listOf("Map64Benchmark\\."))
 }
 
 private abstract class ExclusiveTaskService : BuildService<BuildServiceParameters.None>
@@ -79,7 +73,4 @@ tasks.withType<JMHTask> {
 
     // ensure jmh tasks cannot run in parallel
     usesService(exclusiveServiceProvider)
-
-    // save all benchmark data
-    finalizedBy(copyTask)
 }
