@@ -162,6 +162,7 @@ public class Int2LongHashMap @JvmOverloads constructor(
 
         val mask = mask
         val rotVal = mask.rotVal()
+
         var slot = key.slot(mask, rotVal)
         var slotDistance = 0
         while (true) {
@@ -175,16 +176,14 @@ public class Int2LongHashMap @JvmOverloads constructor(
                 }
 
                 slot = slot.nextSlot(mask)
-                ++slotDistance
             }
 
-            // checking whether the current slot distance is higher than our search distance allows us to early
-            // exit the search loop, but at a non-trivial cost in extra operations. this generally increases
-            // GetHit time and decreases GetMiss time. in order to optimize this further so that we can still
-            // get the benefit of early exiting without paying the full cost, we implement the following: check
-            // for early exit only once per cache line, when we're half way through the cache line. this doesn't
-            // penalize GetHit times much (as we can hopefully find the element before incurring the full cost)
-            // and still substantially reduces GetMiss times.
+            slotDistance += HALF_CACHE_LINE_SIZE
+
+            // checking whether the current slot distance is higher than our search distance allows us to early exit the
+            // search loop, but at a non-trivial cost in extra operations. this generally increases GetHit time and
+            // decreases GetMiss time. in order to optimize this further so that we can still get the benefit of early
+            // exiting without paying the full cost, we only check once every half cache line.
             if (currKey.slotDistance(slot, mask, rotVal) < slotDistance) {
                 return -1
             }
