@@ -84,6 +84,5 @@ tasks.withType<JMHTask> {
 
     // forward various parameters to JMH
     findProperty("jmhSize")?.also { prop -> benchmarkParameters.put("size", objects.listProperty(String::class.java).apply { addAll(prop.toString().split(",")) }) }
-    findProperty("jmhType")?.also { prop -> benchmarkParameters.put("type", objects.listProperty(String::class.java).apply { addAll(prop.toString().split(",")) }) }
     findProperty("jmhOrder")?.also { prop -> benchmarkParameters.put("order", objects.listProperty(String::class.java).apply { addAll(prop.toString().split(",")) }) }
 }
