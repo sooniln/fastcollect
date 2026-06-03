@@ -165,24 +165,29 @@ public class Long2LongHashMap @JvmOverloads constructor(
         var slot = key.slot(mask, rotVal)
         var slotDistance = 0
         while (true) {
-            val currKey = keysArr[slot]
-            if (currKey == key) {
-                return slot
-            } else if (currKey == ZERO ||
-                    // checking whether the current slot distance is higher than our search distance allows us to early
-                    // exit the search loop, but at a non-trivial cost in extra operations. this generally increases
-                    // GetHit time and decreases GetMiss time. in order to optimize this further so that we can still
-                    // get the benefit of early exiting without paying the full cost, we implement the following: check
-                    // for early exit only once per cache line, when we're half way through the cache line. this doesn't
-                    // penalize GetHit times much (as we can hopefully find the element before incurring the full cost)
-                    // and still substantially reduces GetMiss times.
-                    (slotDistance and CACHE_LINE_MASK == HALF_CACHE_LINE_SIZE
-                        && currKey.slotDistance(slot, mask, rotVal) < slotDistance)) {
-                return -1
+            var currKey = ZERO
+            repeat(HALF_CACHE_LINE_SIZE) {
+                currKey = keysArr[slot]
+                if (currKey == key) {
+                    return slot
+                } else if (currKey == ZERO) {
+                    return -1
+                }
+
+                slot = slot.nextSlot(mask)
+                ++slotDistance
             }
 
-            slot = slot.nextSlot(mask)
-            ++slotDistance
+            // checking whether the current slot distance is higher than our search distance allows us to early
+            // exit the search loop, but at a non-trivial cost in extra operations. this generally increases
+            // GetHit time and decreases GetMiss time. in order to optimize this further so that we can still
+            // get the benefit of early exiting without paying the full cost, we implement the following: check
+            // for early exit only once per cache line, when we're half way through the cache line. this doesn't
+            // penalize GetHit times much (as we can hopefully find the element before incurring the full cost)
+            // and still substantially reduces GetMiss times.
+            if (currKey.slotDistance(slot, mask, rotVal) < slotDistance) {
+                return -1
+            }
         }
     }
 
@@ -537,8 +542,6 @@ public class Long2LongHashMap @JvmOverloads constructor(
         private const val HALF_CACHE_LINE_SIZE = CACHE_LINE_SIZE / 2
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE
-        // mask for # of elements in a single cache line
-        private const val CACHE_LINE_MASK: Int = CACHE_LINE_SIZE - 1
 
         private fun arraySize(capacity: Int, loadFactor: Float): Int {
             check(capacity >= 0)
