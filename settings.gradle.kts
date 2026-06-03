@@ -9,7 +9,7 @@ pluginManagement {
 rootProject.name = "fastcollect"
 
 plugins {
-    kotlin("multiplatform") version "2.3.20" apply false
+    kotlin("multiplatform") version "2.4.0" apply false
 }
 
 include("fastcollect")

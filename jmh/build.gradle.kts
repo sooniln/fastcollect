@@ -25,8 +25,32 @@ jmh {
     findProperty("jmhIncludes")?.also { includes.set(listOf(it as String)) }
 }
 
+registerJMHTask("IntList") {
+    includes.set(listOf("IntListBenchmark\\."))
+}
+
+registerJMHTask("LongList") {
+    includes.set(listOf("LongListBenchmark\\."))
+}
+
+registerJMHTask("IntSet") {
+    includes.set(listOf("IntSetBenchmark\\."))
+}
+
+registerJMHTask("LongSet") {
+    includes.set(listOf("LongSetBenchmark\\."))
+}
+
+registerJMHTask("IntMap") {
+    includes.set(listOf("IntMapBenchmark\\."))
+}
+
+registerJMHTask("LongMap") {
+    includes.set(listOf("LongMapBenchmark\\."))
+}
+
 private fun registerJMHTask(name: String, configuration: JMHTask.()->Unit): TaskProvider<JMHTask> = tasks.register<JMHTask>("jmh$name") {
-    group = "jmh"
+    group = "benchmark"
     description = "Run JMH benchmarks for $name"
 
     includeTests = false
@@ -45,22 +69,6 @@ private fun registerJMHTask(name: String, configuration: JMHTask.()->Unit): Task
     configuration()
 }
 
-registerJMHTask("List") {
-    includes.set(listOf("ListBenchmark\\."))
-}
-
-registerJMHTask("Set") {
-    includes.set(listOf("SetBenchmark\\."))
-}
-
-registerJMHTask("Map32") {
-    includes.set(listOf("Map32Benchmark\\."))
-}
-
-registerJMHTask("Map64") {
-    includes.set(listOf("Map64Benchmark\\."))
-}
-
 private abstract class ExclusiveTaskService : BuildService<BuildServiceParameters.None>
 private val exclusiveServiceProvider = gradle.sharedServices.registerIfAbsent("exclusiveTask", ExclusiveTaskService::class.java) {
     maxParallelUsages.set(1)
@@ -73,4 +81,9 @@ tasks.withType<JMHTask> {
 
     // ensure jmh tasks cannot run in parallel
     usesService(exclusiveServiceProvider)
+
+    // forward various parameters to JMH
+    findProperty("jmhSize")?.also { prop -> benchmarkParameters.put("size", objects.listProperty(String::class.java).apply { addAll(prop.toString().split(",")) }) }
+    findProperty("jmhType")?.also { prop -> benchmarkParameters.put("type", objects.listProperty(String::class.java).apply { addAll(prop.toString().split(",")) }) }
+    findProperty("jmhOrder")?.also { prop -> benchmarkParameters.put("order", objects.listProperty(String::class.java).apply { addAll(prop.toString().split(",")) }) }
 }
