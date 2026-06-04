@@ -319,9 +319,9 @@ public class ${Type}HashSet @JvmOverloads constructor(
         }
 
         override fun next${Type}(): ${Type} {
-            if (slotsLeft-- <= 0) throw NoSuchElementException()
+            if (slotsLeft <= 0) throw NoSuchElementException()
             previousSlot = slot
-            if (slotsLeft > 0) decrement()
+            if (--slotsLeft > 0) decrement()
             return keysArr[previousSlot]
         }
 

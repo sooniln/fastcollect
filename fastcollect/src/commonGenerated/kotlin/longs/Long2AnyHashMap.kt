@@ -420,9 +420,9 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
         }
 
         fun nextSlot() {
-            if (slotsLeft-- <= 0) throw NoSuchElementException()
+            if (slotsLeft <= 0) throw NoSuchElementException()
             previousSlot = slot
-            if (slotsLeft > 0) decrement()
+            if (--slotsLeft > 0) decrement()
         }
 
         fun slot(): Int = previousSlot.also { check(it != -1) }

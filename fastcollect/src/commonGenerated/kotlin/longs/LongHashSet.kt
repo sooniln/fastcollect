@@ -319,9 +319,9 @@ public class LongHashSet @JvmOverloads constructor(
         }
 
         override fun nextLong(): Long {
-            if (slotsLeft-- <= 0) throw NoSuchElementException()
+            if (slotsLeft <= 0) throw NoSuchElementException()
             previousSlot = slot
-            if (slotsLeft > 0) decrement()
+            if (--slotsLeft > 0) decrement()
             return keysArr[previousSlot]
         }
 
