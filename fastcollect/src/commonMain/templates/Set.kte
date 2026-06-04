@@ -130,4 +130,6 @@ private class Mutable${Type}SetWrapper(private val set: Mutable${Type}Set) : Abs
     override fun add(element: ${Type}) = set.add(element)
     override fun remove(element: ${Type}): Boolean = set.remove(element)
     override fun clear() = set.clear()
+
+    override fun addAll(elements: Collection<${Type}>): Boolean = set.addAll(elements)
 }

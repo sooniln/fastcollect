@@ -389,4 +389,6 @@ private class Mutable${Name}MapWrapper${Generics}(private val map: Mutable${Name
             override fun toString(): String = "\$key=\$value"
         }
     }
+
+    override fun putAll(from: Map<out ${KeyType}, ${ValueType}>): Unit = map.putAll(from)
 }

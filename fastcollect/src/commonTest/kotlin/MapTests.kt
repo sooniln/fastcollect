@@ -165,6 +165,25 @@ class Int2IntMapTest {
         assertEquals(10, map[1])
         assertEquals(20, map[2])
     }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        // Keys 1, 3, 11 hash to slots 2, 3, 3 in a 4-slot array (mask=3, from trimToSize on 3
+        // entries). One slot-3 key wraps to slot 0 via probe collision. Removing the slot-3
+        // entry chains a backward shift from slot 0 to slot 3, so the iterator must use
+        // (slot-1) and mask to avoid an ArrayIndexOutOfBoundsException.
+        val map = Int2IntHashMap(100).apply { set(1, 1); set(3, 3); set(11, 11) }
+        map.trimToSize()
+        val visited = mutableMapOf<Int, Int>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            visited[entry.key] = entry.value
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals(mapOf(1 to 1, 3 to 3, 11 to 11), visited)
+    }
 }
 
 // ============================= Int2Long =============================
@@ -245,6 +264,21 @@ class Int2LongMapTest {
         assertFalse(invoked)
         assertEquals(10L, result)
     }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        val map = Int2LongHashMap(100).apply { set(1, 1L); set(3, 3L); set(11, 11L) }
+        map.trimToSize()
+        val visited = mutableMapOf<Int, Long>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            visited[entry.key] = entry.value
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals(mapOf(1 to 1L, 3 to 3L, 11 to 11L), visited)
+    }
 }
 
 // ============================= Int2Float =============================
@@ -305,6 +339,21 @@ class Int2FloatMapTest {
         val result = int2FloatMapOf(1 to 1f).getOrElse(1) { invoked = true; -1f }
         assertFalse(invoked)
         assertEquals(1f, result)
+    }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        val map = Int2FloatHashMap(100).apply { set(1, 1f); set(3, 3f); set(11, 11f) }
+        map.trimToSize()
+        val visited = mutableMapOf<Int, Float>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            visited[entry.key] = entry.value
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals(mapOf(1 to 1f, 3 to 3f, 11 to 11f), visited)
     }
 }
 
@@ -367,6 +416,21 @@ class Int2DoubleMapTest {
         assertFalse(invoked)
         assertEquals(1.0, result)
     }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        val map = Int2DoubleHashMap(100).apply { set(1, 1.0); set(3, 3.0); set(11, 11.0) }
+        map.trimToSize()
+        val visited = mutableMapOf<Int, Double>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            visited[entry.key] = entry.value
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals(mapOf(1 to 1.0, 3 to 3.0, 11 to 11.0), visited)
+    }
 }
 
 // ============================= Int2Any =============================
@@ -394,6 +458,21 @@ class Int2AnyMapTest {
         val result = map.getOrElse(1) { invoked = true; "fallback" }
         assertFalse(invoked, "lambda must not be invoked when null is stored under the key")
         assertNull(result)
+    }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        val map = Int2AnyHashMap<String>(100).apply { set(1, "a"); set(3, "b"); set(11, "c") }
+        map.trimToSize()
+        val visited = mutableMapOf<Int, String?>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            visited[entry.key] = entry.value
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals(mapOf<Int, String?>(1 to "a", 3 to "b", 11 to "c"), visited)
     }
 }
 
@@ -495,6 +574,21 @@ class Long2IntMapTest {
         assertEquals(10, dest[1L])
         assertEquals(20, dest[2L])
     }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        val map = Long2IntHashMap(100).apply { set(1L, 1); set(3L, 3); set(11L, 11) }
+        map.trimToSize()
+        val visited = mutableMapOf<Long, Int>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            visited[entry.key] = entry.value
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals(mapOf(1L to 1, 3L to 3, 11L to 11), visited)
+    }
 }
 
 // ============================= Long2Long =============================
@@ -544,6 +638,21 @@ class Long2LongMapTest {
         val result = long2LongMapOf(1L to 10L).getOrElse(1L) { invoked = true; -1L }
         assertFalse(invoked)
         assertEquals(10L, result)
+    }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        val map = Long2LongHashMap(100).apply { set(1L, 1L); set(3L, 3L); set(11L, 11L) }
+        map.trimToSize()
+        val visited = mutableMapOf<Long, Long>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            visited[entry.key] = entry.value
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals(mapOf(1L to 1L, 3L to 3L, 11L to 11L), visited)
     }
 }
 
@@ -606,6 +715,21 @@ class Long2FloatMapTest {
         assertFalse(invoked)
         assertEquals(1f, result)
     }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        val map = Long2FloatHashMap(100).apply { set(1L, 1f); set(3L, 3f); set(11L, 11f) }
+        map.trimToSize()
+        val visited = mutableMapOf<Long, Float>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            visited[entry.key] = entry.value
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals(mapOf(1L to 1f, 3L to 3f, 11L to 11f), visited)
+    }
 }
 
 // ============================= Long2Double =============================
@@ -667,6 +791,21 @@ class Long2DoubleMapTest {
         assertFalse(invoked)
         assertEquals(1.0, result)
     }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        val map = Long2DoubleHashMap(100).apply { set(1L, 1.0); set(3L, 3.0); set(11L, 11.0) }
+        map.trimToSize()
+        val visited = mutableMapOf<Long, Double>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            visited[entry.key] = entry.value
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals(mapOf(1L to 1.0, 3L to 3.0, 11L to 11.0), visited)
+    }
 }
 
 // ============================= Long2Any =============================
@@ -694,5 +833,20 @@ class Long2AnyMapTest {
         val result = map.getOrElse(1L) { invoked = true; "fallback" }
         assertFalse(invoked, "lambda must not be invoked when null is stored under the key")
         assertNull(result)
+    }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        val map = Long2AnyHashMap<String>(100).apply { set(1L, "a"); set(3L, "b"); set(11L, "c") }
+        map.trimToSize()
+        val visited = mutableMapOf<Long, String?>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            visited[entry.key] = entry.value
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals(mapOf<Long, String?>(1L to "a", 3L to "b", 11L to "c"), visited)
     }
 }

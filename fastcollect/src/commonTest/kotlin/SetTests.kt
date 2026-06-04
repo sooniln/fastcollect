@@ -118,6 +118,24 @@ class IntSetTest {
         assertTrue(set.contains(2))
         assertTrue(set.contains(3))
     }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        // Keys 1, 3, 5 all hash to slots 2 or 3 in a 4-slot array (mask=3, from trimToSize).
+        // One key ends up at slot 0 via probe wrap-around (distance > 0). Removing the
+        // highest-slot element chains a backward shift from slot 0 to slot 3, so the iterator
+        // must use (slot-1) and mask rather than --slot to avoid an ArrayIndexOutOfBoundsException.
+        val set = IntHashSet(100).apply { add(1); add(3); add(5) }
+        set.trimToSize()
+        val visited = mutableListOf<Int>()
+        val it = set.iterator()
+        while (it.hasNext()) {
+            visited.add(it.nextInt())
+            it.remove()
+        }
+        assertTrue(set.isEmpty())
+        assertEquals(listOf(1, 3, 5), visited.sorted())
+    }
 }
 
 // ============================= Long =============================
@@ -233,5 +251,21 @@ class LongSetTest {
         assertTrue(set.contains(1L))
         assertTrue(set.contains(2L))
         assertTrue(set.contains(3L))
+    }
+
+    @Test
+    fun iteratorRemove_wrapsElementAroundToEndOfArray() {
+        // Same scenario as IntSetTest: keys 1, 3, 5 hash to the same slots for Long (small
+        // values produce the same hashCode), exercising the backward-shift wrap-around path.
+        val set = LongHashSet(100).apply { add(1L); add(3L); add(5L) }
+        set.trimToSize()
+        val visited = mutableListOf<Long>()
+        val it = set.iterator()
+        while (it.hasNext()) {
+            visited.add(it.nextLong())
+            it.remove()
+        }
+        assertTrue(set.isEmpty())
+        assertEquals(listOf(1L, 3L, 5L), visited.sorted())
     }
 }
