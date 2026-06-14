@@ -451,7 +451,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
         h = h xor (h ushr 16)
         h = h * PHI
         h = h xor (h ushr 16)
-        return h and mask
+        return h and mask and 1.inv()
     }
 
     private fun Long.slotDistance(slot: Int, mask: Int): Int {
@@ -459,7 +459,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
         h = h xor (h ushr 16)
         h = h * PHI
         h = h xor (h ushr 16)
-        return (slot - h) and mask
+        return (slot - (h and 1.inv())) and mask
     }
 
     internal companion object {
@@ -467,7 +467,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
         private const val ZERO: Long = 0.toLong()
 
-        private val EMPTY_ARRAY = longArrayOf(ZERO)
+        private val EMPTY_ARRAY = longArrayOf(ZERO, ZERO)
 
         private const val PHI: Int = 0x9E3779B9.toInt()
 
