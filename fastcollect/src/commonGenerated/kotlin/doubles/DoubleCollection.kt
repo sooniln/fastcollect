@@ -1,8 +1,14 @@
 package io.github.sooniln.fastcollect.doubles
 
+
+import io.github.sooniln.fastcollect.longs.MutableLongCollection
+import io.github.sooniln.fastcollect.longs.MutableLongIterator
+
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmInline
 
 /**
  * A collection of Doubles which inherits from [Collection].
@@ -16,7 +22,7 @@ public interface DoubleCollection : Collection<Double> {
 
     override fun contains(element: Double): Boolean {
         for (e in this) {
-            if (e == element) return true
+            if (e equalsBoxed element) return true
         }
         return false
     }
@@ -188,7 +194,7 @@ public inline fun MutableDoubleCollection.retainAll(predicate: (Double) -> Boole
 }
 
 @OptIn(ExperimentalContracts::class)
-private inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
+internal inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -207,3 +213,24 @@ public abstract class AbstractDoubleCollection : DoubleCollection {
         return joinToString(", ", "[", "]")
     }
 }
+
+
+
+@Suppress("OVERRIDE_BY_INLINE")
+@JvmInline
+public value class InlineDoubleCollection @PublishedApi internal constructor(@PublishedApi internal val collection: MutableLongCollection) : MutableDoubleCollection {
+    override val size: Int
+        inline get() = collection.size
+    override fun contains(element: Double): Boolean = collection.contains(element.toBits())
+    override fun add(element: Double): Boolean = collection.add(element.toBits())
+    override fun remove(element: Double): Boolean = collection.remove(element.toBits())
+    override fun iterator(): InlineMutableDoubleIterator = InlineMutableDoubleIterator(collection.iterator())
+}
+
+public class InlineMutableDoubleIterator internal constructor(@PublishedApi internal val it: MutableLongIterator) : MutableDoubleIterator() {
+    override fun hasNext(): Boolean = it.hasNext()
+    override fun nextDouble(): Double = Double.fromBits(it.nextLong())
+    override fun remove() { it.remove() }
+}
+
+

@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.ints
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -10,11 +11,11 @@ public fun emptyIntList(): IntList = EmptyIntList
 
 public fun intListOf(): IntList = EmptyIntList
 public fun intListOf(element: Int): IntList = SingletonIntList(element)
-public fun intListOf(vararg elements: Int): IntList = IntArrayDeque.wrap(elements)
+public fun intListOf(vararg elements: Int): IntList = IntArrayDeque(elements)
 
 public fun mutableIntListOf(): MutableIntList = IntArrayDeque()
 public fun mutableIntListOf(element: Int): MutableIntList = IntArrayDeque(1).apply { add(element) }
-public fun mutableIntListOf(vararg elements: Int): MutableIntList = IntArrayDeque.wrap(elements)
+public fun mutableIntListOf(vararg elements: Int): MutableIntList = IntArrayDeque(elements)
 
 public fun IntArray.asIntList(): IntList = IntArrayListWrapper(this)
 
@@ -60,7 +61,7 @@ public interface IntList : IntCollection {
     public fun indexOf(element: Int): Int {
         val it = listIterator()
         while (it.hasNext()) {
-            if (it.nextInt() == element) {
+            if (it.nextInt() equalsBoxed element) {
                 return it.previousIndex()
             }
         }
@@ -70,7 +71,7 @@ public interface IntList : IntCollection {
     public fun lastIndexOf(element: Int): Int {
         val it = listIterator(size)
         while (it.hasPrevious()) {
-            if (it.previousInt() == element) {
+            if (it.previousInt() equalsBoxed element) {
                 return it.nextIndex()
             }
         }
@@ -81,6 +82,22 @@ public interface IntList : IntCollection {
 }
 
 public val IntList.lastIndex: Int inline get() = size - 1
+
+public fun IntList.rangeCheck(index: Int, size: Int = this.size): Int {
+    if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
+    return index
+}
+
+public fun IntList.rangeCheckInclusive(index: Int): Int {
+    if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
+    return index
+}
+
+public fun IntList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+    require(fromIndex <= toIndex)
+    if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
+    if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
+}
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun <R> IntList.foldRight(initial: R, operation: (Int, accumulated: R) -> R): R {
@@ -151,14 +168,30 @@ public interface MutableIntList : IntList, MutableIntCollection {
 
     override fun clear(): Unit = removeRange(0, size)
 
-    override fun addAll(elements: IntCollection): Boolean = addAll(size, elements)
-    override fun addAll(elements: Collection<Int>): Boolean = addAll(size, elements)
+    override fun addAll(elements: IntCollection): Boolean {
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    override fun addAll(elements: Collection<Int>): Boolean {
+        if (elements is IntCollection) return addAll(elements)
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    public fun addAll(index: Int, elements: IntCollection) {
+        var i = index
+        for (element in elements) add(i++, element)
+    }
+    public fun addAll(index: Int, elements: Collection<Int>) {
+        if (elements is IntCollection) {
+            addAll(index, elements)
+            return
+        }
+        var i = rangeCheckInclusive(index)
+        for (element in elements) add(i++, element)
+    }
 
     override fun removeAll(elements: Collection<Int>): Boolean = super.removeAll(elements)
     override fun retainAll(elements: Collection<Int>): Boolean = super.retainAll(elements)
-
-    public fun addAll(index: Int, elements: IntCollection): Boolean
-    public fun addAll(index: Int, elements: Collection<Int>): Boolean
 
     public fun sort() {
         val sorted = toIntArray().also { it.sort() }
@@ -241,7 +274,7 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
         val otherIt = other.listIterator()
         if (otherIt is IntIterator) {
             while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextInt() != otherIt.nextInt()) {
+                if (!(it.nextInt() equalsBoxed otherIt.nextInt())) {
                     return false
                 }
             }
@@ -261,22 +294,6 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode
-    }
-
-    protected fun rangeCheck(index: Int, size: Int = this.size): Int {
-        if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    protected fun rangeCheckInclusive(index: Int): Int {
-        if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    protected fun rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
-        require(fromIndex <= toIndex)
-        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
-        if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
     }
 
     private inner class IteratorImpl: IntIterator() {
@@ -352,30 +369,6 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
             it.nextInt()
             it.remove()
         }
-    }
-
-    override fun addAll(index: Int, elements: IntCollection): Boolean {
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
-    }
-
-    override fun addAll(index: Int, elements: Collection<Int>): Boolean {
-        if (elements is IntCollection) {
-            return addAll(index, elements)
-        }
-
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
     }
 
     override fun iterator(): MutableIntIterator = IteratorImpl()
@@ -499,14 +492,21 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
         override fun removeRange(fromIndex: Int, toIndex: Int) {
             rangeCheck(fromIndex, toIndex)
             list.removeRange(fromIndex + offset, toIndex + offset)
+            size -= toIndex - fromIndex
         }
 
-        override fun addAll(index: Int, elements: IntCollection): Boolean {
-            if (elements.isEmpty()) return false
-
+        override fun addAll(index: Int, elements: IntCollection) {
             list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
-            return true
+        }
+
+        override fun addAll(index: Int, elements: Collection<Int>) {
+            if (elements is IntCollection) {
+                addAll(index, elements)
+                return
+            }
+            list.addAll(offset + rangeCheckInclusive(index), elements)
+            size += elements.size
         }
     }
 
@@ -539,11 +539,11 @@ private class SingletonIntList(private val value: Int) : AbstractIntList(), Rand
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: Int): Boolean = value == element
+    override fun contains(element: Int): Boolean = value equalsBoxed element
 
     override fun get(index: Int): Int = if (index == 0) return value else throw IndexOutOfBoundsException()
-    override fun indexOf(element: Int): Int = if (element == value) 0 else -1
-    override fun lastIndexOf(element: Int): Int = if (element == value) 0 else -1
+    override fun indexOf(element: Int): Int = if (element equalsBoxed value) 0 else -1
+    override fun lastIndexOf(element: Int): Int = if (element equalsBoxed value) 0 else -1
 
     override fun subList(fromIndex: Int, toIndex: Int): IntList {
         rangeCheck(fromIndex, toIndex)

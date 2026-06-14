@@ -5,12 +5,12 @@ package io.github.sooniln.fastcollect.longs
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableFastIterator
 import io.github.sooniln.fastcollect.emptyFastIterator
+import io.github.sooniln.fastcollect.equalsBoxed
 
 import io.github.sooniln.fastcollect.doubles.doubleListOf
 import io.github.sooniln.fastcollect.doubles.DoubleCollection
 import io.github.sooniln.fastcollect.doubles.MutableDoubleCollection
 import io.github.sooniln.fastcollect.doubles.emptyDoubleList
-import io.github.sooniln.fastcollect.toBits
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -41,20 +41,13 @@ public inline fun  buildLong2DoubleMap(expectedSize: Int = 0, builderAction: Mut
 /**
  * A map of Longs to Doubles.
  *
-
- * Because this interface is designed to store primitives, methods which lookup keys and return non-nullable primitive
- * values may not return null to indicate no such key is present. Instead, a Long2DoubleMap has a [defaultValue] which is
- * returned to indicate no such key is present. In order to obtain the best performance, implementations and clients are
- * encouraged to ensure that the [defaultValue] is the value which is least likely to ever appear in the possible set of
- * values stored in this map. This is purely a performance and not a correctness concern however - the map will still
- * operate correctly and all methods will perform as expected even if the map contains values equal to [defaultValue].
- * [Float.NaN] or [Double.NaN] are acceptable for [defaultValue] if applicable.
-
+ * A Long2DoubleMap returns some default value (how this default value is chosen is implementation dependent) to indicate
+ * that a key is not present in the map. Returned values from APIs may be checked with [isDefaultValue] and if this
+ * returns true it indicates that the key was not present (or it was present but associated with that value - it may be
+ * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
+ * cases more easily.
  */
 public interface Long2DoubleMap {
-
-    public val defaultValue: Double
-
 
     public val size: Int
 
@@ -65,18 +58,27 @@ public interface Long2DoubleMap {
         return size == 0
     }
 
+    /**
+     * Returns true if the given value is current the default value of the map (i.e., the value returned from retrieval
+     * operations when a key is not present). Note that maps are not required to have an unchanging default value
+     * (though this is the most common implementation). A map may change its default value during the invocation of any
+     * mutable public API method. A map may not change its default value outside of the invocation of any mutable public
+     * API method. For this reason clients should not store or make other assumptions about the default value.
+     */
+    public fun isDefaultValue(value: Double): Boolean
+
     public operator fun get(key: Long): Double
 
     public fun containsKey(key: Long): Boolean {
         for (k in keys) {
-            if (k == key) return true
+            if (k equalsBoxed key) return true
         }
         return false
     }
 
     public fun containsValue(value: Double): Boolean {
         for (v in values) {
-            if (v == value) return true
+            if (v equalsBoxed value) return true
         }
         return false
     }
@@ -101,19 +103,11 @@ public interface Long2DoubleMap {
     public operator fun iterator(): FastIterator<Entry>
 }
 
-
-// handles presence of NaN correctly
-@Suppress("NOTHING_TO_INLINE")
-public inline fun  Long2DoubleMap.isDefaultValue(value: Double): Boolean = value.toBits() == defaultValue.toBits()
-
-
 public fun  Long2DoubleMap.asMap(): Map<Long, Double> = Long2DoubleMapWrapper(this)
 
-@Suppress("NOTHING_TO_INLINE")
-public inline fun  Long2DoubleMap.getOrDefault(key: Long, defaultValue: Double): Double = getOrElse(key) { defaultValue }
+public fun  Long2DoubleMap.getOrDefault(key: Long, defaultValue: Double): Double = getOrElse(key) { defaultValue }
 
-@Suppress("NOTHING_TO_INLINE")
-public inline fun  Long2DoubleMap.getValue(key: Long): Double = getOrElse(key) { throw NoSuchElementException() }
+public fun  Long2DoubleMap.getValue(key: Long): Double = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Long2DoubleMap.getOrElse(key: Long, defaultValue: () -> Double): Double {
@@ -144,13 +138,13 @@ public interface MutableLong2DoubleMap : Long2DoubleMap {
 
     public fun putAll(from: Long2DoubleMap) {
         for (entry in from) {
-            put(entry.key, entry.value)
+            set(entry.key, entry.value)
         }
     }
 
     public fun putAll(from: Map<out Long, Double>) {
         for (entry in from) {
-            put(entry.key, entry.value)
+            set(entry.key, entry.value)
         }
     }
 
@@ -168,9 +162,10 @@ public inline fun  MutableLong2DoubleMap.merge(key: Long, value: Double, merge: 
     contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
 
     val oldValue = get(key)
+    val absent = isDefaultValue(oldValue) && !containsKey(key)
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue as Double, value)
-    if (newValue != oldValue) {
+    val newValue = if (absent) value else merge(oldValue as Double, value)
+    if (absent || !(newValue equalsBoxed oldValue)) {
         set(key, newValue)
     }
     return newValue
@@ -216,9 +211,7 @@ public abstract class AbstractLong2DoubleMap : Long2DoubleMap {
         return result
     }
 
-    override fun toString(): String {
-        return Iterable { iterator() }.joinToString(", ", "{", "}") { "${it.key}=${it.value}" }
-    }
+    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
     public class SimpleEntry(override val key: Long, override val value: Double) : Long2DoubleMap.Entry
 }
@@ -229,8 +222,7 @@ public abstract class AbstractMutableLong2DoubleMap : AbstractLong2DoubleMap(), 
 private object EmptyLong2DoubleMap : Long2DoubleMap {
 
 
-
-    override val defaultValue: Double get() = Double.NaN
+    override fun isDefaultValue(value: Double): Boolean = true
 
 
     override val size: Int get() = 0
@@ -242,7 +234,6 @@ private object EmptyLong2DoubleMap : Long2DoubleMap {
     override fun get(key: Long): Double = Double.NaN
 
 
-
     override val keys: LongSet get() = emptyLongSet()
 
     override val values: DoubleCollection get() = emptyDoubleList()
@@ -251,22 +242,18 @@ private object EmptyLong2DoubleMap : Long2DoubleMap {
 }
 
 private class SingletonLong2DoubleMap(private val key: Long, private val value: Double) : Long2DoubleMap {
-
-    override val defaultValue: Double get() = Double.NaN
-
+    override fun isDefaultValue(value: Double): Boolean = value equalsBoxed Double.NaN
 
     override val size: Int get() = 1
     override fun isEmpty(): Boolean = false
 
-    override fun containsKey(key: Long): Boolean = key == this.key
-    override fun containsValue(value: Double): Boolean = value == this.value
-    override fun get(key: Long): Double = if (key == this.key) value else Double.NaN
+    override fun containsKey(key: Long): Boolean = key equalsBoxed this.key
+    override fun containsValue(value: Double): Boolean = value equalsBoxed this.value
+    override fun get(key: Long): Double = if (key equalsBoxed this.key) value else Double.NaN
 
     override val keys: LongSet by lazy { longSetOf(key) }
 
-
     override val values: DoubleCollection by lazy { doubleListOf(value) }
-
 
     override fun iterator() = object : FastIterator<Long2DoubleMap.Entry> {
         private var complete: Boolean = false
@@ -298,7 +285,7 @@ private class Long2DoubleMapWrapper(private val map: Long2DoubleMap) : AbstractM
         override fun contains(element: Map.Entry<Long, Double>): Boolean {
             val value = map[element.key]
             if (map.isDefaultValue(value) && !containsKey(element.key)) return false
-            return value == element.value
+            return value equalsBoxed element.value
         }
 
         override fun iterator(): Iterator<Map.Entry<Long, Double>> = object : Iterator<Map.Entry<Long, Double>> {
@@ -346,7 +333,7 @@ private class MutableLong2DoubleMapWrapper(private val map: MutableLong2DoubleMa
         override fun contains(element: MutableMap.MutableEntry<Long, Double>): Boolean {
             val value = map[element.key]
             if (map.isDefaultValue(value) && !containsKey(element.key)) return false
-            return value == element.value
+            return value equalsBoxed element.value
         }
 
         override fun add(element: MutableMap.MutableEntry<Long, Double>): Boolean = throw UnsupportedOperationException()
@@ -365,7 +352,7 @@ private class MutableLong2DoubleMapWrapper(private val map: MutableLong2DoubleMa
 
             override fun setValue(newValue: Double): Double {
                 val oldValue = value
-                if (map.put(key, newValue) != oldValue) throw ConcurrentModificationException()
+                if (!(map.put(key, newValue) equalsBoxed oldValue)) throw ConcurrentModificationException()
                 value = newValue
                 return oldValue
             }
@@ -375,4 +362,6 @@ private class MutableLong2DoubleMapWrapper(private val map: MutableLong2DoubleMa
             override fun toString(): String = "$key=$value"
         }
     }
+
+    override fun putAll(from: Map<out Long, Double>): Unit = map.putAll(from)
 }

@@ -1,6 +1,6 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.longs.Long2LongHashMap
+import io.github.sooniln.fastcollect.longs.Long2IntHashMap
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Fork
@@ -20,27 +20,32 @@ import java.util.concurrent.TimeUnit
  * A JVM specific benchmark which measures the performance of various map libraries.
  */
 @Fork(1)
-@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 10, time = 200, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class LongMapBenchmark {
 
     companion object {
-        val seed = System.currentTimeMillis()
+        const val seed = 1001L
     }
 
     @State(Scope.Benchmark)
     open class BaseState {
 
-        @Param("3000", "12000", "48000", "192000", "768000", "3072000", "12288000")
-        var size: Int = 3000
+        @Param("12", "14", "16", "18", "20", "22", "24")
+        var pow2: Int = 12
 
-        lateinit var map: Long2LongHashMap
+        @Param(".50", ".75")
+        var loadFactor: Float = .75f
+
+        var size: Int = 0
+        lateinit var map: Long2IntHashMap
 
         @Setup(Level.Trial)
         open fun setup() {
-            map = Long2LongHashMap()
+            size = ((1 shl pow2) * loadFactor).toInt() - 2
+            map = Long2IntHashMap()
         }
     }
 
@@ -56,7 +61,7 @@ open class LongMapBenchmark {
             keys = LongArray(size)
             KeyGenerators.generateRandomKeys(keys, seed = seed)
 
-            var value = 0L
+            var value = 0
             for (key in keys) {
                 map.put(key, value++)
             }
@@ -81,7 +86,7 @@ open class LongMapBenchmark {
             outKeys = LongArray(size)
             KeyGenerators.generateKeys(order, inKeys, outKeys, seed = seed)
 
-            inKeys.forEachIndexed { i, key -> map.put(key, i.toLong()) }
+            inKeys.forEachIndexed { i, key -> map.put(key, i) }
         }
 
         inline fun <T> nextInKey(crossinline action: FullState.(Long) -> T): T {
@@ -135,14 +140,14 @@ open class LongMapBenchmark {
     }
 
     @Benchmark
-    fun naiveCopy(state: RandomState): Long2LongHashMap {
-        val copy = Long2LongHashMap()
+    fun naiveCopy(state: RandomState): Long2IntHashMap {
+        val copy = Long2IntHashMap()
         for ((key, value) in state.map) { copy.put(key, value) }
         return copy
     }
 
     @Benchmark
-    fun preAllocatedCopy(state: RandomState) = Long2LongHashMap(state.map)
+    fun preAllocatedCopy(state: RandomState) = Long2IntHashMap(state.map)
 
     @Benchmark
     fun getHit(state: FullState) = state.nextInKey { key -> map.get(key) }
@@ -151,10 +156,10 @@ open class LongMapBenchmark {
     fun getMiss(state: FullState) = state.nextOutKey { key -> map.get(key) }
 
     @Benchmark
-    fun putHit(state: FullState) = state.nextInKey { key -> map.put(key, key) }
+    fun putHit(state: FullState) = state.nextInKey { key -> map.put(key, key.toInt()) }
 
     @Benchmark
-    fun putMiss(state: EmptyState) = state.nextMissInKey { key -> map.put(key, key) }
+    fun putMiss(state: EmptyState) = state.nextMissInKey { key -> map.put(key, key.toInt()) }
 
     @Benchmark
     fun removeAndPutMiss(state: FullState) = state.nextInOutKeys { inKey, outKey ->

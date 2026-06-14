@@ -6,8 +6,8 @@ public abstract class MutableDoubleIterator : DoubleIterator(), MutableIterator<
 
 public abstract class DoubleListIterator: DoubleIterator(), ListIterator<Double> {
     @Deprecated(
-        message = "Use previousByte() instead.",
-        replaceWith = ReplaceWith("previousByte()"),
+        message = "Use previousDouble() instead.",
+        replaceWith = ReplaceWith("previousDouble()"),
         level = DeprecationLevel.WARNING)
     final override fun previous(): Double = previousDouble()
     public abstract fun previousDouble(): Double

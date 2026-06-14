@@ -6,8 +6,8 @@ public abstract class Mutable${Type}Iterator : ${Type}Iterator(), MutableIterato
 
 public abstract class ${Type}ListIterator: ${Type}Iterator(), ListIterator<${Type}> {
     @Deprecated(
-        message = "Use previousByte() instead.",
-        replaceWith = ReplaceWith("previousByte()"),
+        message = "Use previous${Type}() instead.",
+        replaceWith = ReplaceWith("previous${Type}()"),
         level = DeprecationLevel.WARNING)
     final override fun previous(): ${Type} = previous${Type}()
     public abstract fun previous${Type}(): ${Type}

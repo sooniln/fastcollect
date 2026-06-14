@@ -1,558 +1,198 @@
 package io.github.sooniln.fastcollect.doubles
 
-import io.github.sooniln.fastcollect.ArrayUtils
+import io.github.sooniln.fastcollect.longs.LongArrayDeque
+import io.github.sooniln.fastcollect.longs.LongList
+import io.github.sooniln.fastcollect.longs.MutableLongList
+import io.github.sooniln.fastcollect.longs.MutableLongListIterator
+import io.github.sooniln.fastcollect.longs.filterInPlace
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.jvm.JvmInline
 
+public typealias DoubleArrayDeque = InlineDoubleArrayDeque
 public typealias DoubleArrayList = DoubleArrayDeque
 
-/**
- * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing Doubles. Can be
- * used in place of the Kotlin standard library [ArrayList] and [ArrayDeque] implementations to improve performance and
- * memory usage. Has the same API contracts as the standard library [ArrayList] and [ArrayDeque] unless noted otherwise.
- *
- * This implementation supports amortized O(1) `addFirst/addLast/removeFirst/removeLast` functionality. The
- * [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
- */
-public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int = array.size) : AbstractMutableDoubleList(), RandomAccess {
+@Suppress("OVERRIDE_BY_INLINE")
+@JvmInline
+public value class InlineDoubleArrayDeque private constructor(@PublishedApi internal val list: LongArrayDeque) : MutableDoubleList {
 
-    private var head: Int = 0
-    private var ring: DoubleArray = array
-    override var size: Int = size
-        private set
+    public constructor(capacity: Int = 0) : this(LongArrayDeque(capacity))
+    public constructor(elements: DoubleCollection) : this() { addAll(elements) }
+    public constructor(elements: Collection<Double>) : this() { addAll(elements) }
+    public constructor(elements: DoubleArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(toIndex - fromIndex) { for (i in fromIndex..<toIndex) add(elements[i]) }
 
-    public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else DoubleArray(capacity), 0)
+    override val size: Int
+        inline get() = list.size
 
-    public constructor(elements: DoubleCollection) : this(if (elements is DoubleList) elements.toDoubleArray() else elements.toDoubleArray())
+    public fun ensureCapacity(capacity: Int) { list.ensureCapacity(capacity) }
+    public fun trimToSize() { list.trimToSize() }
 
-    public constructor(elements: Collection<Double>) : this(if (elements is DoubleList) elements.toDoubleArray() else elements.toDoubleArray())
-
-    public constructor(elements: DoubleArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex))
-
-    public fun ensureCapacity(capacity: Int) {
-        if (capacity > ring.size) grow(capacity)
-    }
-
-    private fun grow(capacity: Int) {
-        val oldCapacity = ring.size
-        val newCapacity = if (oldCapacity > 0 || ring !== EMPTY_ARRAY) {
-            ArrayUtils.growArraySize(oldCapacity, capacity - oldCapacity)
-        } else {
-            max(DEFAULT_CAPACITY, capacity)
-        }
-
-        if (head == 0) {
-            ring = ring.copyOf(newCapacity)
-        } else {
-            ring = copyFromRing(DoubleArray(newCapacity))
-            head = 0
-        }
-    }
-
-    private fun copyFromRing(dest: DoubleArray): DoubleArray {
-        check(dest.size >= size)
-        val tail = head + size
-        if (tail <= ring.size) {
-            ring.copyInto(dest, 0, head, tail)
-        } else {
-            ring.copyInto(dest, 0, head, ring.size)
-            ring.copyInto(dest, ring.size - head, 0, tail - ring.size)
-        }
-        return dest
-    }
-
-    public fun trimToSize() {
-        if (size < ring.size) {
-            ring = if (isEmpty()) EMPTY_ARRAY else copyFromRing(DoubleArray(size))
-            head = 0
-        }
-    }
-
-    override fun get(index: Int): Double {
-        return ring[ring.position(rangeCheck(index))]
-    }
-
-    override fun set(index: Int, element: Double) {
-        ring[ring.position(rangeCheck(index))] = element
-    }
-
-    override fun addFirst(element: Double) {
-        val newSize = size + 1
-        ensureCapacity(newSize)
-        head = ring.decrementPosition(head)
-        ring[head] = element
-        size = newSize
-    }
-
-    override fun addLast(element: Double) {
-        val s = size
-        val newSize = s + 1
-        ensureCapacity(newSize)
-        ring[ring.position(s)] = element
-        size = newSize
-    }
-
-    override fun add(index: Int, element: Double) {
-        rangeCheckInclusive(index)
-        when (index) {
-            size -> addLast(element)
-            0 -> addFirst(element)
-            else -> addMiddle(index, element)
-        }
-    }
-
-    private fun addMiddle(index: Int, element: Double) {
-        val newSize = size + 1
-        ensureCapacity(newSize)
-
-        // attempt to shift a minimal number of elements depending on where position falls within the array
-        val position = ring.position(index)
-        if (index < newSize shr 1) {
-            // shift elements before position
-            val actualPosition = ring.decrementPosition(position)
-            val newHead = ring.decrementPosition(head)
-            if (actualPosition >= head) {
-                // head before position
-                ring[newHead] = ring[head]  // first element could possibly roll over to the back of the array
-                ring.copyInto(ring, head, head + 1, head + index)
-            } else {
-                // head after position
-                ring.copyInto(ring, newHead, head, ring.size) // head can't be zero
-                ring[ring.size - 1] = ring[0]
-                ring.copyInto(ring, 0, 1, position)
-            }
-            ring[actualPosition] = element
-            head = newHead
-        } else {
-            // shift elements after position
-            val tail = ring.position(size)
-            if (position < tail) {
-                // position before tail
-                ring.copyInto(ring, position + 1, position, tail)
-            } else {
-                // position after tail
-                val lastIndex = ring.size - 1
-                ring.copyInto(ring, 1, 0, tail)
-                ring[0] = ring[lastIndex]
-                ring.copyInto(ring, ring.incrementPosition(position), position, lastIndex)
-            }
-            ring[position] = element
-        }
-        size = newSize
-    }
-
-    override fun removeFirst(): Double {
-        if (isEmpty()) throw NoSuchElementException()
-        val element = ring[head]
-        head = ring.incrementPosition(head)
-        --size
-        return element
-    }
-
-    override fun removeLast(): Double {
-        if (isEmpty()) throw NoSuchElementException()
-        return ring[ring.position(--size)]
-    }
-
-    override fun removeAt(index: Int): Double {
-        rangeCheck(index)
-
-        val position = ring.position(index)
-        val element = ring[position]
-        removeAtInternal(position)
-        return element
-    }
-
-    // returns -1 if the back half was shifted left and 0 if the front half was shifted right
-    private fun removeAtInternal(position: Int): Int {
-        // attempt to shift a minimal number of elements depending on where position falls within the array
-        if (ring.index(position) < size shr 1) {
-            // shift front half right, then advance head
-            if (position > head) {
-                ring.copyInto(ring, head + 1, head, position)
-            } else if (position < head) {
-                // wrapped: position is in the lower part of the ring
-                ring.copyInto(ring, 1, 0, position)
-                ring[0] = ring[ring.size - 1]
-                ring.copyInto(ring, head + 1, head, ring.size - 1)
-            }
-            // else: position == head (first element), no copy needed
-            head = ring.incrementPosition(head)
-            --size
-            return 0
-        } else {
-            // shift back half left
-            val tail = ring.position(size - 1)
-            if (position < tail) {
-                ring.copyInto(ring, position, position + 1, tail + 1)
-            } else if (position > tail) {
-                // wrapped: position is in the upper part of the ring
-                ring.copyInto(ring, position, position + 1, ring.size)
-                ring[ring.size - 1] = ring[0]
-                ring.copyInto(ring, 0, 1, tail + 1)
-            }
-            // else: position == tail (last element), no copy needed
-            --size
-            return -1
-        }
-    }
-
-    override fun removeRange(fromIndex: Int, toIndex: Int) {
-        // TODO: would array copy operations be more efficient?
-        require(fromIndex <= toIndex)
-        rangeCheckInclusive(fromIndex)
-        rangeCheckInclusive(toIndex)
-        if (fromIndex == toIndex) return
-
-        val removed = toIndex - fromIndex
-        if (fromIndex <= size - toIndex) {
-            // Shift [0, fromIndex) right by `removed`, then advance head.
-            for (i in fromIndex - 1 downTo 0) {
-                ring[ring.position(i + removed)] = ring[ring.position(i)]
-            }
-            head = ring.positiveMod(head + removed)
-        } else {
-            // Shift [toIndex, size) left by `removed`.
-            for (i in toIndex until size) {
-                ring[ring.position(i - removed)] = ring[ring.position(i)]
-            }
-        }
-        size -= removed
-    }
-
-    override fun clear() {
-        head = 0
-        size = 0
-    }
-
-    override fun indexOf(element: Double): Int {
-        val tail = head + size
-        return if (tail <= ring.size) indexOfContinuous(tail, element) else indexOfDiscrete(tail, element)
-    }
-
-    private fun indexOfContinuous(tail: Int, element: Double): Int {
-        for (i in head..<tail) {
-            if (ring[i] == element) return i - head
-        }
-        return -1
-    }
-
-    private fun indexOfDiscrete(tail: Int, element: Double): Int {
-        for (i in head..<ring.size) {
-            if (ring[i] == element) return i - head
-        }
-        for (i in 0..<tail-ring.size) {
-            if (ring[i] == element) return i + ring.size - head
-        }
-        return -1
-    }
-
-    override fun lastIndexOf(element: Double): Int {
-        val tail = head + size - 1
-        return if (tail < ring.size) {
-            lastIndexOfContinuous(tail, element)
-        } else {
-            lastIndexOfDiscrete(tail, element)
-        }
-    }
-
-    private fun lastIndexOfContinuous(tail: Int, element: Double): Int {
-        // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
-        val head = head
-        var i = tail
-        while (i >= head) {
-            if (ring[i] == element) return i - head
-            --i
-        }
-        return -1
-    }
-
-    private fun lastIndexOfDiscrete(tail: Int, element: Double): Int {
-        // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
-        val head = head
-        var i = tail - ring.size
-        while (i >= 0) {
-            if (ring[i] == element) return i + ring.size - head
-            --i
-        }
-        i = ring.size - 1
-        while (i >= head) {
-            if (ring[i] == element) return i - head
-            --i
-        }
-        return -1
-    }
-
-    public fun addAll(elements: DoubleArrayDeque): Boolean {
-        if (elements.isEmpty()) return false
-
-        ensureCapacity(size + elements.size)
-        val elementsTail = elements.head + elements.size
-        if (elementsTail <= elements.ring.size) {
-            addToRing(elements.ring, elements.head, elementsTail)
-        } else {
-            addToRing(elements.ring, elements.head, elements.ring.size)
-            addToRing(elements.ring, 0, elementsTail - elements.ring.size)
-        }
-        return true
-    }
-
-    private fun addToRing(src: DoubleArray, fromIndex: Int, toIndex: Int) {
-        val srcLength = toIndex - fromIndex
-        check(srcLength >= 0 && srcLength <= ring.size - size)
-
-        val tail = head + size
-        if (tail <= ring.size) {
-            val intermediateIndex = min(toIndex, fromIndex + ring.size - tail)
-            src.copyInto(ring, tail, fromIndex, intermediateIndex)
-            if (intermediateIndex != toIndex) {
-                src.copyInto(ring, 0, intermediateIndex, toIndex)
-            }
-        } else {
-            src.copyInto(ring, tail - ring.size, fromIndex, toIndex)
-        }
-        size += srcLength
-    }
+    override fun get(index: Int): Double = Double.fromBits(list[index])
+    override fun set(index: Int, element: Double) { list[index] = element.toBits() }
+    override fun addFirst(element: Double) { list.addFirst(element.toBits()) }
+    override fun addLast(element: Double) { list.addLast(element.toBits()) }
+    override fun add(index: Int, element: Double) { list.add(index, element.toBits()) }
+    override fun removeFirst(): Double = Double.fromBits(list.removeFirst())
+    override fun removeLast(): Double = Double.fromBits(list.removeLast())
+    override fun removeAt(index: Int): Double = Double.fromBits(list.removeAt(index))
+    override fun removeRange(fromIndex: Int, toIndex: Int) { list.removeRange(fromIndex, toIndex) }
+    override fun clear() { list.clear() }
+    override fun indexOf(element: Double): Int = list.indexOf(element.toBits())
+    override fun lastIndexOf(element: Double): Int = list.lastIndexOf(element.toBits())
 
     override fun addAll(elements: DoubleCollection): Boolean {
-        if (elements is DoubleArrayDeque) return addAll(elements)
-        if (elements.isEmpty()) return false
+        if (elements is InlineDoubleArrayDeque) return list.addAll(elements.list)
 
         ensureCapacity(size + elements.size)
-        for (element in elements) {
-            addLast(element)
-        }
-        return true
+        for (element in elements) list.addLast(element.toBits())
+        return !elements.isEmpty()
     }
-
     override fun addAll(elements: Collection<Double>): Boolean {
         if (elements is DoubleCollection) return addAll(elements)
-        if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        for (element in elements) {
-            addLast(element)
-        }
-        return true
+        for (element in elements) list.addLast(element.toBits())
+        return !elements.isEmpty()
     }
-
-    public override fun removeAll(elements: Collection<Double>): Boolean {
-        return filterInPlace { e -> elements.contains(e) }
-    }
-
-    public override fun retainAll(elements: Collection<Double>): Boolean {
-        return filterInPlace { e -> !elements.contains(e) }
-    }
-
-    @OptIn(ExperimentalContracts::class)
-    internal inline fun filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
-        contract {
-            callsInPlace(removePredicate, InvocationKind.UNKNOWN)
-        }
-
-        var position = head
-        val tail = ring.position(size)
-        while (true) {
-            if (position == tail) {
-                return false
-            } else if (removePredicate(ring[position])) {
-                break
-            }
-            position = ring.incrementPosition(position)
-        }
-
-        var insertionPosition = position
-        position = ring.incrementPosition(position)
-        while (position != tail) {
-            val element = ring[position]
-            position = ring.incrementPosition(position)
-            if (!removePredicate(element)) {
-                ring[insertionPosition] = element
-                insertionPosition = ring.incrementPosition(insertionPosition)
-            }
-        }
-        size = insertionPosition - head
-        if (size < 0) {
-            size += ring.size
-        }
-        return true
-    }
-
-    override fun sort() {
-        makeContinuousUnordered()
-        ring.sort(head, head + size)
-    }
-
-    override fun sortDescending() {
-        makeContinuousUnordered()
-        ring.sortDescending(head, head + size)
-    }
-
-    private fun makeContinuousUnordered() {
-        val tail = head + size
-        if (tail > ring.size) {
-            val end = tail - ring.size
-            if (ring.size - head > end) {
-                head = head - end
-                ring.copyInto(ring, head, 0, end)
-            } else {
-                ring.copyInto(ring, end, head, ring.size)
-                head = 0
-            }
-        }
-    }
-
-    override fun fill(element: Double) {
-        ring.fill(element, 0, size)
-        head = 0
-    }
-
-    override fun reverse() {
-        val midPoint = size / 2
-        if (midPoint < 1) return
-        var i = head
-        var j = ring.position(size - 1)
-        repeat(midPoint) {
-            val tmp = ring[i]
-            ring[i] = ring[j]
-            ring[j] = tmp
-
-            i = ring.incrementPosition(i)
-            j = ring.decrementPosition(j)
-        }
-    }
-
-    override fun toDoubleArray(): DoubleArray {
-        return copyFromRing(DoubleArray(size))
-    }
-
-    override fun iterator(): MutableDoubleIterator {
-        val tail = head + size
-        return if (tail > ring.size) {
-            DiscreteIterator()
+    override fun addAll(index: Int, elements: DoubleCollection) {
+        if (elements is InlineDoubleArrayDeque) {
+            list.addAll(index, elements.list)
         } else {
-            ContinuousIterator(tail)
+            ensureCapacity(size + elements.size)
+            var i = index
+            for (element in elements) list.add(i++, element.toBits())
         }
     }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is DoubleList) return false
-
-        if (size != other.size) return false
-        if (other is RandomAccess) {
-            for (i in indices) {
-                if (ring[ring.position(i)] != other[i]) return false
-            }
+    override fun addAll(index: Int, elements: Collection<Double>) {
+        if (elements is DoubleCollection) {
+            addAll(index, elements)
         } else {
-            val it = other.iterator()
-            var i = 0
-            while (it.hasNext()) {
-                if (it.nextDouble() != this[i++]) return false
-            }
-        }
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var hashCode = 1
-        if (!isEmpty()) {
-            var position = head
-            val end = ring.position(size)
-            do {
-                hashCode = 31 * hashCode + ring[position].hashCode()
-                position = ring.incrementPosition(position)
-            } while (position != end)
-        }
-        return hashCode
-    }
-
-    private inner class ContinuousIterator(private var tail: Int) : MutableDoubleIterator() {
-        private val ring = this@DoubleArrayDeque.ring
-
-        private var position = head
-        private var previousPosition = -1
-
-        init {
-            check(tail <= ring.size)
-        }
-
-        override fun hasNext() = position < tail
-
-        override fun nextDouble(): Double {
-            if (!hasNext()) throw NoSuchElementException()
-
-            previousPosition = position++
-            return ring[previousPosition]
-        }
-
-        override fun remove() {
-            if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
-            check(previousPosition != -1)
-
-            val d = removeAtInternal(previousPosition)
-            tail = tail + d
-            position = ring.negativeMod(position + d)
-            previousPosition = -1
+            ensureCapacity(size + elements.size)
+            var i = index
+            for (element in elements) list.add(i++, element.toBits())
         }
     }
 
-    private inner class DiscreteIterator : MutableDoubleIterator() {
-        private val ring = this@DoubleArrayDeque.ring
+    public override fun removeAll(elements: Collection<Double>): Boolean = list.filterDoubleInPlace { e -> elements.contains(e) }
+    public override fun retainAll(elements: Collection<Double>): Boolean = list.filterDoubleInPlace { e -> !elements.contains(e) }
 
-        private var remaining = size
-        private var position = head
-        private var previousPosition = -1
+    override fun sort() { list.sortDouble() }
+    override fun sortDescending() { list.sortDescendingDouble() }
+    override fun fill(element: Double) { list.fill(element.toBits()) }
+    override fun reverse() { list.reverse() }
 
-        override fun hasNext() = remaining > 0
+    override fun iterator(): InlineMutableDoubleIterator = InlineMutableDoubleIterator(list.iterator())
+    override fun listIterator(): InlineMutableDoubleListIterator = InlineMutableDoubleListIterator(list.listIterator())
+    override fun listIterator(index: Int): InlineMutableDoubleListIterator = InlineMutableDoubleListIterator(list.listIterator(index))
+    override fun subList(fromIndex: Int, toIndex: Int): InlineDoubleList = InlineDoubleList(list.subList(fromIndex, toIndex))
 
-        override fun nextDouble(): Double {
-            if (!hasNext()) throw NoSuchElementException()
+    override fun toString(): String = list.toDoubleListString()
+}
 
-            --remaining
-            previousPosition = position
-            position = ring.incrementPosition(position)
-            return ring[previousPosition]
-        }
+@Suppress("OVERRIDE_BY_INLINE")
+@JvmInline
+public value class InlineDoubleList internal constructor(@PublishedApi internal val list: MutableLongList) : MutableDoubleList {
 
-        override fun remove() {
-            if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
-            check(previousPosition != -1)
+    override val size: Int
+        inline get() = list.size
 
-            val d = removeAtInternal(previousPosition)
-            position = ring.negativeMod(position + d)
-            previousPosition = -1
-        }
+    override fun get(index: Int): Double = Double.fromBits(list[index])
+    override fun set(index: Int, element: Double) { list[index] = element.toBits() }
+    override fun addFirst(element: Double) { list.addFirst(element.toBits()) }
+    override fun addLast(element: Double) { list.addLast(element.toBits()) }
+    override fun add(index: Int, element: Double) { list.add(index, element.toBits()) }
+    override fun removeFirst(): Double = Double.fromBits(list.removeFirst())
+    override fun removeLast(): Double = Double.fromBits(list.removeLast())
+    override fun removeAt(index: Int): Double = Double.fromBits(list.removeAt(index))
+    override fun removeRange(fromIndex: Int, toIndex: Int) { list.removeRange(fromIndex, toIndex) }
+    override fun clear() { list.clear() }
+    override fun indexOf(element: Double): Int = list.indexOf(element.toBits())
+    override fun lastIndexOf(element: Double): Int = list.lastIndexOf(element.toBits())
+
+    public override fun removeAll(elements: Collection<Double>): Boolean = list.filterDoubleInPlace { e -> elements.contains(e) }
+    public override fun retainAll(elements: Collection<Double>): Boolean = list.filterDoubleInPlace { e -> !elements.contains(e) }
+
+    override fun sort() { list.sortDouble() }
+    override fun sortDescending() { list.sortDescendingDouble() }
+    override fun fill(element: Double) { list.fill(element.toBits()) }
+    override fun reverse() { list.reverse() }
+
+    override fun iterator(): InlineMutableDoubleIterator = InlineMutableDoubleIterator(list.iterator())
+    override fun listIterator(): InlineMutableDoubleListIterator = InlineMutableDoubleListIterator(list.listIterator())
+    override fun listIterator(index: Int): InlineMutableDoubleListIterator = InlineMutableDoubleListIterator(list.listIterator(index))
+    override fun subList(fromIndex: Int, toIndex: Int): InlineDoubleList = InlineDoubleList(list.subList(fromIndex, toIndex))
+
+    override fun toString(): String = list.toDoubleListString()
+}
+
+public class InlineMutableDoubleListIterator internal constructor(private val it: MutableLongListIterator) : MutableDoubleListIterator() {
+    override fun hasNext(): Boolean = it.hasNext()
+    override fun hasPrevious(): Boolean = it.hasPrevious()
+    override fun previousDouble(): Double = Double.fromBits(it.previousLong())
+    override fun nextDouble(): Double = Double.fromBits(it.nextLong())
+    override fun nextIndex(): Int = it.nextIndex()
+    override fun previousIndex(): Int = it.previousIndex()
+    override fun remove() { it.remove() }
+    override fun set(element: Double) { it.set(element.toBits()) }
+    override fun add(element: Double) { it.add(element.toBits()) }
+}
+
+@OptIn(ExperimentalContracts::class)
+private inline fun MutableLongList.filterDoubleInPlace(removePredicate: (Double) -> Boolean): Boolean {
+    contract {
+        callsInPlace(removePredicate, InvocationKind.UNKNOWN)
     }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun DoubleArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+    return filterInPlace { removePredicate(Double.fromBits(it)) }
+}
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun DoubleArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+private fun MutableLongList.sortDouble() {
+    // after sorting by integer representation, the negative values will be in reverse order - reverse them
+    sort()
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun DoubleArray.position(index: Int): Int = positiveMod(head + index)
+    // check the sign of the raw bits rather than the Double value - the value comparison misses -0.0
+    if (!isEmpty() && this[0] < 0) {
+        // binary search for edge of negative values
+        var left = 0
+        var right = size
+        while (left < right) {
+            val mid = left + ((right - left) / 2)
+            if (this[mid] < 0) left = mid + 1 else right = mid
+        }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun DoubleArray.index(position: Int): Int = negativeMod(position - head)
-
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun DoubleArray.incrementPosition(position: Int): Int = if (position == size - 1) 0 else position + 1
-
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun DoubleArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
-
-    internal companion object {
-        private val EMPTY_ARRAY = DoubleArray(0)
-        private const val DEFAULT_CAPACITY = 8
-
-        fun wrap(array: DoubleArray): DoubleArrayDeque = DoubleArrayDeque(array)
+        right = left - 1
+        left = 0
+        while (left < right) {
+            val tmp = this[left]
+            this[left++] = this[right]
+            this[right--] = tmp
+        }
     }
 }
 
-public fun DoubleArrayDeque.removeAll(predicate: (Double) -> Boolean): Boolean = filterInPlace(predicate)
-public fun DoubleArrayDeque.retainAll(predicate: (Double) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+private fun MutableLongList.sortDescendingDouble() {
+    // after sorting by integer representation, the negative values will be in reverse order - reverse them
+    sortDescending()
+
+    // check the sign of the raw bits rather than the Double value - the value comparison misses -0.0
+    if (!isEmpty() && this[size - 1] < 0) {
+        // binary search for edge of negative values
+        var left = 0
+        var right = size
+        while (left < right) {
+            val mid = left + ((right - left) / 2)
+            if (this[mid] < 0) right = mid else left = mid + 1
+        }
+
+        right = size - 1
+        while (left < right) {
+            val tmp = this[left]
+            this[left++] = this[right]
+            this[right--] = tmp
+        }
+    }
+}
+
+private fun LongList.toDoubleListString(): String = joinToString(", ", "[", "]") { Double.fromBits(it).toString() }
+

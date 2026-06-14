@@ -1,8 +1,11 @@
 package io.github.sooniln.fastcollect.ints
 
+
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmInline
 
 /**
  * A collection of Ints which inherits from [Collection].
@@ -16,7 +19,7 @@ public interface IntCollection : Collection<Int> {
 
     override fun contains(element: Int): Boolean {
         for (e in this) {
-            if (e == element) return true
+            if (e equalsBoxed element) return true
         }
         return false
     }
@@ -188,7 +191,7 @@ public inline fun MutableIntCollection.retainAll(predicate: (Int) -> Boolean): B
 }
 
 @OptIn(ExperimentalContracts::class)
-private inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) -> Boolean): Boolean {
+internal inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -207,3 +210,5 @@ public abstract class AbstractIntCollection : IntCollection {
         return joinToString(", ", "[", "]")
     }
 }
+
+

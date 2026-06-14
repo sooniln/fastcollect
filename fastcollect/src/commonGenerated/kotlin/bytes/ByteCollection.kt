@@ -1,8 +1,11 @@
 package io.github.sooniln.fastcollect.bytes
 
+
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmInline
 
 /**
  * A collection of Bytes which inherits from [Collection].
@@ -16,7 +19,7 @@ public interface ByteCollection : Collection<Byte> {
 
     override fun contains(element: Byte): Boolean {
         for (e in this) {
-            if (e == element) return true
+            if (e equalsBoxed element) return true
         }
         return false
     }
@@ -188,7 +191,7 @@ public inline fun MutableByteCollection.retainAll(predicate: (Byte) -> Boolean):
 }
 
 @OptIn(ExperimentalContracts::class)
-private inline fun MutableByteCollection.filterInPlace(removePredicate: (Byte) -> Boolean): Boolean {
+internal inline fun MutableByteCollection.filterInPlace(removePredicate: (Byte) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -207,3 +210,5 @@ public abstract class AbstractByteCollection : ByteCollection {
         return joinToString(", ", "[", "]")
     }
 }
+
+

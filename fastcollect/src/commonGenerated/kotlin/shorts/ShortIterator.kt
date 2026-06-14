@@ -6,8 +6,8 @@ public abstract class MutableShortIterator : ShortIterator(), MutableIterator<Sh
 
 public abstract class ShortListIterator: ShortIterator(), ListIterator<Short> {
     @Deprecated(
-        message = "Use previousByte() instead.",
-        replaceWith = ReplaceWith("previousByte()"),
+        message = "Use previousShort() instead.",
+        replaceWith = ReplaceWith("previousShort()"),
         level = DeprecationLevel.WARNING)
     final override fun previous(): Short = previousShort()
     public abstract fun previousShort(): Short

@@ -6,8 +6,8 @@ public abstract class MutableFloatIterator : FloatIterator(), MutableIterator<Fl
 
 public abstract class FloatListIterator: FloatIterator(), ListIterator<Float> {
     @Deprecated(
-        message = "Use previousByte() instead.",
-        replaceWith = ReplaceWith("previousByte()"),
+        message = "Use previousFloat() instead.",
+        replaceWith = ReplaceWith("previousFloat()"),
         level = DeprecationLevel.WARNING)
     final override fun previous(): Float = previousFloat()
     public abstract fun previousFloat(): Float

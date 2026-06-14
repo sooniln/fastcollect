@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.doubles
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -10,11 +11,11 @@ public fun emptyDoubleList(): DoubleList = EmptyDoubleList
 
 public fun doubleListOf(): DoubleList = EmptyDoubleList
 public fun doubleListOf(element: Double): DoubleList = SingletonDoubleList(element)
-public fun doubleListOf(vararg elements: Double): DoubleList = DoubleArrayDeque.wrap(elements)
+public fun doubleListOf(vararg elements: Double): DoubleList = DoubleArrayDeque(elements)
 
 public fun mutableDoubleListOf(): MutableDoubleList = DoubleArrayDeque()
 public fun mutableDoubleListOf(element: Double): MutableDoubleList = DoubleArrayDeque(1).apply { add(element) }
-public fun mutableDoubleListOf(vararg elements: Double): MutableDoubleList = DoubleArrayDeque.wrap(elements)
+public fun mutableDoubleListOf(vararg elements: Double): MutableDoubleList = DoubleArrayDeque(elements)
 
 public fun DoubleArray.asDoubleList(): DoubleList = DoubleArrayListWrapper(this)
 
@@ -60,7 +61,7 @@ public interface DoubleList : DoubleCollection {
     public fun indexOf(element: Double): Int {
         val it = listIterator()
         while (it.hasNext()) {
-            if (it.nextDouble() == element) {
+            if (it.nextDouble() equalsBoxed element) {
                 return it.previousIndex()
             }
         }
@@ -70,7 +71,7 @@ public interface DoubleList : DoubleCollection {
     public fun lastIndexOf(element: Double): Int {
         val it = listIterator(size)
         while (it.hasPrevious()) {
-            if (it.previousDouble() == element) {
+            if (it.previousDouble() equalsBoxed element) {
                 return it.nextIndex()
             }
         }
@@ -81,6 +82,22 @@ public interface DoubleList : DoubleCollection {
 }
 
 public val DoubleList.lastIndex: Int inline get() = size - 1
+
+public fun DoubleList.rangeCheck(index: Int, size: Int = this.size): Int {
+    if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
+    return index
+}
+
+public fun DoubleList.rangeCheckInclusive(index: Int): Int {
+    if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
+    return index
+}
+
+public fun DoubleList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+    require(fromIndex <= toIndex)
+    if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
+    if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
+}
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun <R> DoubleList.foldRight(initial: R, operation: (Double, accumulated: R) -> R): R {
@@ -151,14 +168,30 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection {
 
     override fun clear(): Unit = removeRange(0, size)
 
-    override fun addAll(elements: DoubleCollection): Boolean = addAll(size, elements)
-    override fun addAll(elements: Collection<Double>): Boolean = addAll(size, elements)
+    override fun addAll(elements: DoubleCollection): Boolean {
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    override fun addAll(elements: Collection<Double>): Boolean {
+        if (elements is DoubleCollection) return addAll(elements)
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    public fun addAll(index: Int, elements: DoubleCollection) {
+        var i = index
+        for (element in elements) add(i++, element)
+    }
+    public fun addAll(index: Int, elements: Collection<Double>) {
+        if (elements is DoubleCollection) {
+            addAll(index, elements)
+            return
+        }
+        var i = rangeCheckInclusive(index)
+        for (element in elements) add(i++, element)
+    }
 
     override fun removeAll(elements: Collection<Double>): Boolean = super.removeAll(elements)
     override fun retainAll(elements: Collection<Double>): Boolean = super.retainAll(elements)
-
-    public fun addAll(index: Int, elements: DoubleCollection): Boolean
-    public fun addAll(index: Int, elements: Collection<Double>): Boolean
 
     public fun sort() {
         val sorted = toDoubleArray().also { it.sort() }
@@ -241,7 +274,7 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
         val otherIt = other.listIterator()
         if (otherIt is DoubleIterator) {
             while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextDouble() != otherIt.nextDouble()) {
+                if (!(it.nextDouble() equalsBoxed otherIt.nextDouble())) {
                     return false
                 }
             }
@@ -261,22 +294,6 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode
-    }
-
-    protected fun rangeCheck(index: Int, size: Int = this.size): Int {
-        if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    protected fun rangeCheckInclusive(index: Int): Int {
-        if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    protected fun rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
-        require(fromIndex <= toIndex)
-        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
-        if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
     }
 
     private inner class IteratorImpl: DoubleIterator() {
@@ -352,30 +369,6 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
             it.nextDouble()
             it.remove()
         }
-    }
-
-    override fun addAll(index: Int, elements: DoubleCollection): Boolean {
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
-    }
-
-    override fun addAll(index: Int, elements: Collection<Double>): Boolean {
-        if (elements is DoubleCollection) {
-            return addAll(index, elements)
-        }
-
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
     }
 
     override fun iterator(): MutableDoubleIterator = IteratorImpl()
@@ -499,14 +492,21 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
         override fun removeRange(fromIndex: Int, toIndex: Int) {
             rangeCheck(fromIndex, toIndex)
             list.removeRange(fromIndex + offset, toIndex + offset)
+            size -= toIndex - fromIndex
         }
 
-        override fun addAll(index: Int, elements: DoubleCollection): Boolean {
-            if (elements.isEmpty()) return false
-
+        override fun addAll(index: Int, elements: DoubleCollection) {
             list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
-            return true
+        }
+
+        override fun addAll(index: Int, elements: Collection<Double>) {
+            if (elements is DoubleCollection) {
+                addAll(index, elements)
+                return
+            }
+            list.addAll(offset + rangeCheckInclusive(index), elements)
+            size += elements.size
         }
     }
 
@@ -539,11 +539,11 @@ private class SingletonDoubleList(private val value: Double) : AbstractDoubleLis
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: Double): Boolean = value == element
+    override fun contains(element: Double): Boolean = value equalsBoxed element
 
     override fun get(index: Int): Double = if (index == 0) return value else throw IndexOutOfBoundsException()
-    override fun indexOf(element: Double): Int = if (element == value) 0 else -1
-    override fun lastIndexOf(element: Double): Int = if (element == value) 0 else -1
+    override fun indexOf(element: Double): Int = if (element equalsBoxed value) 0 else -1
+    override fun lastIndexOf(element: Double): Int = if (element equalsBoxed value) 0 else -1
 
     override fun subList(fromIndex: Int, toIndex: Int): DoubleList {
         rangeCheck(fromIndex, toIndex)

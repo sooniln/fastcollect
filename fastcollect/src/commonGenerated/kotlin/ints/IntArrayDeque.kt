@@ -354,21 +354,24 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
 
         var position = head
-        val tail = ring.position(size)
+        var remaining = size
         while (true) {
-            if (position == tail) {
+            if (remaining == 0) {
                 return false
             } else if (removePredicate(ring[position])) {
                 break
             }
             position = ring.incrementPosition(position)
+            --remaining
         }
 
         var insertionPosition = position
         position = ring.incrementPosition(position)
-        while (position != tail) {
+        --remaining
+        while (remaining > 0) {
             val element = ring[position]
             position = ring.incrementPosition(position)
+            --remaining
             if (!removePredicate(element)) {
                 ring[insertionPosition] = element
                 insertionPosition = ring.incrementPosition(insertionPosition)

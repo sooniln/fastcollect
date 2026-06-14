@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.floats
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -10,11 +11,11 @@ public fun emptyFloatList(): FloatList = EmptyFloatList
 
 public fun floatListOf(): FloatList = EmptyFloatList
 public fun floatListOf(element: Float): FloatList = SingletonFloatList(element)
-public fun floatListOf(vararg elements: Float): FloatList = FloatArrayDeque.wrap(elements)
+public fun floatListOf(vararg elements: Float): FloatList = FloatArrayDeque(elements)
 
 public fun mutableFloatListOf(): MutableFloatList = FloatArrayDeque()
 public fun mutableFloatListOf(element: Float): MutableFloatList = FloatArrayDeque(1).apply { add(element) }
-public fun mutableFloatListOf(vararg elements: Float): MutableFloatList = FloatArrayDeque.wrap(elements)
+public fun mutableFloatListOf(vararg elements: Float): MutableFloatList = FloatArrayDeque(elements)
 
 public fun FloatArray.asFloatList(): FloatList = FloatArrayListWrapper(this)
 
@@ -60,7 +61,7 @@ public interface FloatList : FloatCollection {
     public fun indexOf(element: Float): Int {
         val it = listIterator()
         while (it.hasNext()) {
-            if (it.nextFloat() == element) {
+            if (it.nextFloat() equalsBoxed element) {
                 return it.previousIndex()
             }
         }
@@ -70,7 +71,7 @@ public interface FloatList : FloatCollection {
     public fun lastIndexOf(element: Float): Int {
         val it = listIterator(size)
         while (it.hasPrevious()) {
-            if (it.previousFloat() == element) {
+            if (it.previousFloat() equalsBoxed element) {
                 return it.nextIndex()
             }
         }
@@ -81,6 +82,22 @@ public interface FloatList : FloatCollection {
 }
 
 public val FloatList.lastIndex: Int inline get() = size - 1
+
+public fun FloatList.rangeCheck(index: Int, size: Int = this.size): Int {
+    if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
+    return index
+}
+
+public fun FloatList.rangeCheckInclusive(index: Int): Int {
+    if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
+    return index
+}
+
+public fun FloatList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+    require(fromIndex <= toIndex)
+    if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
+    if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
+}
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun <R> FloatList.foldRight(initial: R, operation: (Float, accumulated: R) -> R): R {
@@ -151,14 +168,30 @@ public interface MutableFloatList : FloatList, MutableFloatCollection {
 
     override fun clear(): Unit = removeRange(0, size)
 
-    override fun addAll(elements: FloatCollection): Boolean = addAll(size, elements)
-    override fun addAll(elements: Collection<Float>): Boolean = addAll(size, elements)
+    override fun addAll(elements: FloatCollection): Boolean {
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    override fun addAll(elements: Collection<Float>): Boolean {
+        if (elements is FloatCollection) return addAll(elements)
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    public fun addAll(index: Int, elements: FloatCollection) {
+        var i = index
+        for (element in elements) add(i++, element)
+    }
+    public fun addAll(index: Int, elements: Collection<Float>) {
+        if (elements is FloatCollection) {
+            addAll(index, elements)
+            return
+        }
+        var i = rangeCheckInclusive(index)
+        for (element in elements) add(i++, element)
+    }
 
     override fun removeAll(elements: Collection<Float>): Boolean = super.removeAll(elements)
     override fun retainAll(elements: Collection<Float>): Boolean = super.retainAll(elements)
-
-    public fun addAll(index: Int, elements: FloatCollection): Boolean
-    public fun addAll(index: Int, elements: Collection<Float>): Boolean
 
     public fun sort() {
         val sorted = toFloatArray().also { it.sort() }
@@ -241,7 +274,7 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
         val otherIt = other.listIterator()
         if (otherIt is FloatIterator) {
             while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextFloat() != otherIt.nextFloat()) {
+                if (!(it.nextFloat() equalsBoxed otherIt.nextFloat())) {
                     return false
                 }
             }
@@ -261,22 +294,6 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode
-    }
-
-    protected fun rangeCheck(index: Int, size: Int = this.size): Int {
-        if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    protected fun rangeCheckInclusive(index: Int): Int {
-        if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    protected fun rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
-        require(fromIndex <= toIndex)
-        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
-        if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
     }
 
     private inner class IteratorImpl: FloatIterator() {
@@ -352,30 +369,6 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
             it.nextFloat()
             it.remove()
         }
-    }
-
-    override fun addAll(index: Int, elements: FloatCollection): Boolean {
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
-    }
-
-    override fun addAll(index: Int, elements: Collection<Float>): Boolean {
-        if (elements is FloatCollection) {
-            return addAll(index, elements)
-        }
-
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
     }
 
     override fun iterator(): MutableFloatIterator = IteratorImpl()
@@ -499,14 +492,21 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
         override fun removeRange(fromIndex: Int, toIndex: Int) {
             rangeCheck(fromIndex, toIndex)
             list.removeRange(fromIndex + offset, toIndex + offset)
+            size -= toIndex - fromIndex
         }
 
-        override fun addAll(index: Int, elements: FloatCollection): Boolean {
-            if (elements.isEmpty()) return false
-
+        override fun addAll(index: Int, elements: FloatCollection) {
             list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
-            return true
+        }
+
+        override fun addAll(index: Int, elements: Collection<Float>) {
+            if (elements is FloatCollection) {
+                addAll(index, elements)
+                return
+            }
+            list.addAll(offset + rangeCheckInclusive(index), elements)
+            size += elements.size
         }
     }
 
@@ -539,11 +539,11 @@ private class SingletonFloatList(private val value: Float) : AbstractFloatList()
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: Float): Boolean = value == element
+    override fun contains(element: Float): Boolean = value equalsBoxed element
 
     override fun get(index: Int): Float = if (index == 0) return value else throw IndexOutOfBoundsException()
-    override fun indexOf(element: Float): Int = if (element == value) 0 else -1
-    override fun lastIndexOf(element: Float): Int = if (element == value) 0 else -1
+    override fun indexOf(element: Float): Int = if (element equalsBoxed value) 0 else -1
+    override fun lastIndexOf(element: Float): Int = if (element equalsBoxed value) 0 else -1
 
     override fun subList(fromIndex: Int, toIndex: Int): FloatList {
         rangeCheck(fromIndex, toIndex)

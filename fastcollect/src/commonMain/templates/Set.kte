@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.${subpackage}
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -29,7 +30,7 @@ public inline fun build${Type}Set(expectedSize: Int = 0, builderAction: Mutable$
 public interface ${Type}Set : ${Type}Collection {
     override fun contains(element: ${Type}): Boolean {
         for (e in this) {
-            if (e == element) return true
+            if (e equalsBoxed element) return true
         }
         return false
     }
@@ -101,7 +102,7 @@ private class Singleton${Type}Set(private val value: ${Type}) : ${Type}Set {
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: ${Type}): Boolean = value == element
+    override fun contains(element: ${Type}): Boolean = value equalsBoxed element
 
     override fun iterator(): ${Type}Iterator = object : ${Type}Iterator() {
         private var complete = false

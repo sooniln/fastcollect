@@ -5,12 +5,12 @@ package io.github.sooniln.fastcollect.ints
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableFastIterator
 import io.github.sooniln.fastcollect.emptyFastIterator
+import io.github.sooniln.fastcollect.equalsBoxed
 
 import io.github.sooniln.fastcollect.floats.floatListOf
 import io.github.sooniln.fastcollect.floats.FloatCollection
 import io.github.sooniln.fastcollect.floats.MutableFloatCollection
 import io.github.sooniln.fastcollect.floats.emptyFloatList
-import io.github.sooniln.fastcollect.toBits
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
@@ -41,20 +41,13 @@ public inline fun  buildInt2FloatMap(expectedSize: Int = 0, builderAction: Mutab
 /**
  * A map of Ints to Floats.
  *
-
- * Because this interface is designed to store primitives, methods which lookup keys and return non-nullable primitive
- * values may not return null to indicate no such key is present. Instead, a Int2FloatMap has a [defaultValue] which is
- * returned to indicate no such key is present. In order to obtain the best performance, implementations and clients are
- * encouraged to ensure that the [defaultValue] is the value which is least likely to ever appear in the possible set of
- * values stored in this map. This is purely a performance and not a correctness concern however - the map will still
- * operate correctly and all methods will perform as expected even if the map contains values equal to [defaultValue].
- * [Float.NaN] or [Double.NaN] are acceptable for [defaultValue] if applicable.
-
+ * A Int2FloatMap returns some default value (how this default value is chosen is implementation dependent) to indicate
+ * that a key is not present in the map. Returned values from APIs may be checked with [isDefaultValue] and if this
+ * returns true it indicates that the key was not present (or it was present but associated with that value - it may be
+ * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
+ * cases more easily.
  */
 public interface Int2FloatMap {
-
-    public val defaultValue: Float
-
 
     public val size: Int
 
@@ -65,18 +58,27 @@ public interface Int2FloatMap {
         return size == 0
     }
 
+    /**
+     * Returns true if the given value is current the default value of the map (i.e., the value returned from retrieval
+     * operations when a key is not present). Note that maps are not required to have an unchanging default value
+     * (though this is the most common implementation). A map may change its default value during the invocation of any
+     * mutable public API method. A map may not change its default value outside of the invocation of any mutable public
+     * API method. For this reason clients should not store or make other assumptions about the default value.
+     */
+    public fun isDefaultValue(value: Float): Boolean
+
     public operator fun get(key: Int): Float
 
     public fun containsKey(key: Int): Boolean {
         for (k in keys) {
-            if (k == key) return true
+            if (k equalsBoxed key) return true
         }
         return false
     }
 
     public fun containsValue(value: Float): Boolean {
         for (v in values) {
-            if (v == value) return true
+            if (v equalsBoxed value) return true
         }
         return false
     }
@@ -101,19 +103,11 @@ public interface Int2FloatMap {
     public operator fun iterator(): FastIterator<Entry>
 }
 
-
-// handles presence of NaN correctly
-@Suppress("NOTHING_TO_INLINE")
-public inline fun  Int2FloatMap.isDefaultValue(value: Float): Boolean = value.toBits() == defaultValue.toBits()
-
-
 public fun  Int2FloatMap.asMap(): Map<Int, Float> = Int2FloatMapWrapper(this)
 
-@Suppress("NOTHING_TO_INLINE")
-public inline fun  Int2FloatMap.getOrDefault(key: Int, defaultValue: Float): Float = getOrElse(key) { defaultValue }
+public fun  Int2FloatMap.getOrDefault(key: Int, defaultValue: Float): Float = getOrElse(key) { defaultValue }
 
-@Suppress("NOTHING_TO_INLINE")
-public inline fun  Int2FloatMap.getValue(key: Int): Float = getOrElse(key) { throw NoSuchElementException() }
+public fun  Int2FloatMap.getValue(key: Int): Float = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2FloatMap.getOrElse(key: Int, defaultValue: () -> Float): Float {
@@ -144,13 +138,13 @@ public interface MutableInt2FloatMap : Int2FloatMap {
 
     public fun putAll(from: Int2FloatMap) {
         for (entry in from) {
-            put(entry.key, entry.value)
+            set(entry.key, entry.value)
         }
     }
 
     public fun putAll(from: Map<out Int, Float>) {
         for (entry in from) {
-            put(entry.key, entry.value)
+            set(entry.key, entry.value)
         }
     }
 
@@ -168,9 +162,10 @@ public inline fun  MutableInt2FloatMap.merge(key: Int, value: Float, merge: (old
     contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
 
     val oldValue = get(key)
+    val absent = isDefaultValue(oldValue) && !containsKey(key)
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    val newValue = if (isDefaultValue(oldValue) && !containsKey(key)) value else merge(oldValue as Float, value)
-    if (newValue != oldValue) {
+    val newValue = if (absent) value else merge(oldValue as Float, value)
+    if (absent || !(newValue equalsBoxed oldValue)) {
         set(key, newValue)
     }
     return newValue
@@ -216,9 +211,7 @@ public abstract class AbstractInt2FloatMap : Int2FloatMap {
         return result
     }
 
-    override fun toString(): String {
-        return Iterable { iterator() }.joinToString(", ", "{", "}") { "${it.key}=${it.value}" }
-    }
+    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
     public class SimpleEntry(override val key: Int, override val value: Float) : Int2FloatMap.Entry
 }
@@ -229,8 +222,7 @@ public abstract class AbstractMutableInt2FloatMap : AbstractInt2FloatMap(), Muta
 private object EmptyInt2FloatMap : Int2FloatMap {
 
 
-
-    override val defaultValue: Float get() = Float.NaN
+    override fun isDefaultValue(value: Float): Boolean = true
 
 
     override val size: Int get() = 0
@@ -242,7 +234,6 @@ private object EmptyInt2FloatMap : Int2FloatMap {
     override fun get(key: Int): Float = Float.NaN
 
 
-
     override val keys: IntSet get() = emptyIntSet()
 
     override val values: FloatCollection get() = emptyFloatList()
@@ -251,22 +242,18 @@ private object EmptyInt2FloatMap : Int2FloatMap {
 }
 
 private class SingletonInt2FloatMap(private val key: Int, private val value: Float) : Int2FloatMap {
-
-    override val defaultValue: Float get() = Float.NaN
-
+    override fun isDefaultValue(value: Float): Boolean = value equalsBoxed Float.NaN
 
     override val size: Int get() = 1
     override fun isEmpty(): Boolean = false
 
-    override fun containsKey(key: Int): Boolean = key == this.key
-    override fun containsValue(value: Float): Boolean = value == this.value
-    override fun get(key: Int): Float = if (key == this.key) value else Float.NaN
+    override fun containsKey(key: Int): Boolean = key equalsBoxed this.key
+    override fun containsValue(value: Float): Boolean = value equalsBoxed this.value
+    override fun get(key: Int): Float = if (key equalsBoxed this.key) value else Float.NaN
 
     override val keys: IntSet by lazy { intSetOf(key) }
 
-
     override val values: FloatCollection by lazy { floatListOf(value) }
-
 
     override fun iterator() = object : FastIterator<Int2FloatMap.Entry> {
         private var complete: Boolean = false
@@ -298,7 +285,7 @@ private class Int2FloatMapWrapper(private val map: Int2FloatMap) : AbstractMap<I
         override fun contains(element: Map.Entry<Int, Float>): Boolean {
             val value = map[element.key]
             if (map.isDefaultValue(value) && !containsKey(element.key)) return false
-            return value == element.value
+            return value equalsBoxed element.value
         }
 
         override fun iterator(): Iterator<Map.Entry<Int, Float>> = object : Iterator<Map.Entry<Int, Float>> {
@@ -346,7 +333,7 @@ private class MutableInt2FloatMapWrapper(private val map: MutableInt2FloatMap) :
         override fun contains(element: MutableMap.MutableEntry<Int, Float>): Boolean {
             val value = map[element.key]
             if (map.isDefaultValue(value) && !containsKey(element.key)) return false
-            return value == element.value
+            return value equalsBoxed element.value
         }
 
         override fun add(element: MutableMap.MutableEntry<Int, Float>): Boolean = throw UnsupportedOperationException()
@@ -365,7 +352,7 @@ private class MutableInt2FloatMapWrapper(private val map: MutableInt2FloatMap) :
 
             override fun setValue(newValue: Float): Float {
                 val oldValue = value
-                if (map.put(key, newValue) != oldValue) throw ConcurrentModificationException()
+                if (!(map.put(key, newValue) equalsBoxed oldValue)) throw ConcurrentModificationException()
                 value = newValue
                 return oldValue
             }
@@ -375,4 +362,6 @@ private class MutableInt2FloatMapWrapper(private val map: MutableInt2FloatMap) :
             override fun toString(): String = "$key=$value"
         }
     }
+
+    override fun putAll(from: Map<out Int, Float>): Unit = map.putAll(from)
 }

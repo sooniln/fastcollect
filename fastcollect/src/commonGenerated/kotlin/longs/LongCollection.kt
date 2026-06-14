@@ -1,8 +1,11 @@
 package io.github.sooniln.fastcollect.longs
 
+
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmInline
 
 /**
  * A collection of Longs which inherits from [Collection].
@@ -16,7 +19,7 @@ public interface LongCollection : Collection<Long> {
 
     override fun contains(element: Long): Boolean {
         for (e in this) {
-            if (e == element) return true
+            if (e equalsBoxed element) return true
         }
         return false
     }
@@ -188,7 +191,7 @@ public inline fun MutableLongCollection.retainAll(predicate: (Long) -> Boolean):
 }
 
 @OptIn(ExperimentalContracts::class)
-private inline fun MutableLongCollection.filterInPlace(removePredicate: (Long) -> Boolean): Boolean {
+internal inline fun MutableLongCollection.filterInPlace(removePredicate: (Long) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -207,3 +210,5 @@ public abstract class AbstractLongCollection : LongCollection {
         return joinToString(", ", "[", "]")
     }
 }
+
+

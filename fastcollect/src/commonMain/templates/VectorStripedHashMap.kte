@@ -1,19 +1,19 @@
 @file:Suppress("UnusedImport")
 
-package io.github.sooniln.fastcollect.longs
+package io.github.sooniln.fastcollect.${subpackage}
 
 import io.github.sooniln.fastcollect.ArrayUtils
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableFastIterator
-import io.github.sooniln.fastcollect.longs.MutableLongCollection
-import io.github.sooniln.fastcollect.longs.MutableLongIterator
+import io.github.sooniln.fastcollect.${subpackage}.Mutable${KVType}Collection
+import io.github.sooniln.fastcollect.${subpackage}.Mutable${KVType}Iterator
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
 /**
- * A [HashMap](https://en.wikipedia.org/wiki/Hash_table) implementation for storing Long to Long
+ * A [HashMap](https://en.wikipedia.org/wiki/Hash_table) implementation for storing ${KVType} to ${KVType}
  * relationships.
  *
  * The [keys]/[values] mutable collections exposed by this class will throw [UnsupportedOperationException] on any
@@ -25,23 +25,23 @@ import kotlin.random.Random
  *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  */
-public class Long2LongHashMap @JvmOverloads constructor(
+public class ${Name}HashMap @JvmOverloads constructor(
     capacity: Int = DEFAULT_INITIAL_CAPACITY,
     /** The default value should be the value that is ideally least likely to occur in the map. */
-    private val defaultValue: Long = Long.MIN_VALUE,
-) : AbstractMutableLong2LongMap() {
+    private val defaultValue: ${KVType} = ${DefaultValue},
+) : AbstractMutable${Name}Map() {
 
     init {
         require(capacity >= 0) { "Capacity must be >= 0" }
     }
 
-    public constructor(map: Long2LongMap): this() { putAll(map) }
+    public constructor(map: ${Name}Map): this() { putAll(map) }
 
-    public constructor(map: Map<Long, Long>): this() { putAll(map) }
+    public constructor(map: Map<${KVType}, ${KVType}>): this() { putAll(map) }
 
     private var kvArr = EMPTY_ARRAY
 
-    private var emptyKey = ZERO
+    private var emptyEntry = ZERO_ENTRY
 
     // use threshold to store the initial size before we allocate anything, after that it's the size at which we rehash
     private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
@@ -49,7 +49,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
     override var size: Int = 0
         private set
 
-    override fun isDefaultValue(value: Long): Boolean = value == defaultValue
+    override fun isDefaultValue(value: ${KVType}): Boolean = value == defaultValue
 
     /**
      * Ensures that the map can hold at least given number of key/value pairs without any further resizing of the
@@ -71,66 +71,61 @@ public class Long2LongHashMap @JvmOverloads constructor(
         rehash(size)
     }
 
-    override fun containsKey(key: Long): Boolean = findSlot(key, { true }, { false })
+    override fun containsKey(key: ${KVType}): Boolean = findSlot(key, { _, _ -> true }, { false })
 
-    override fun containsValue(value: Long): Boolean {
+    override fun containsValue(value: ${KVType}): Boolean {
         val kvArr = kvArr
-        val emptyKey = emptyKey
-        for (slot in 1..kvArr.size-1 step 2) {
-            if (kvArr[slot] == value && kvArr[slot - 1] != emptyKey) return true
+        val emptyEntry = emptyEntry
+        for (slot in kvArr.indices) {
+            val entry = kvArr[slot]
+            if (entry.value() == value && entry != emptyEntry) return true
         }
         return false
     }
 
-    override fun get(key: Long): Long = findSlot(key, { slot -> kvArr[slot + 1] }, { defaultValue })
+    override fun get(key: ${KVType}): ${KVType} = findSlot(key, { _, entry -> entry.value() }, { defaultValue })
 
-    override fun put(key: Long, value: Long): Long {
+    override fun put(key: ${KVType}, value: ${KVType}): ${KVType} {
         resizeIfNecessary()
 
-        if (key == emptyKey) changeEmptyKey()
+        var newEntry = arrayEntry(key, value)
+        if (newEntry == emptyEntry) changeEmptyEntry()
 
         val kvArr = kvArr
-        val emptyKey = emptyKey
+        val emptyEntry = emptyEntry
         val mask = kvArr.size - 1
-
-        var newKey = key
-        var newValue = value
 
         var slot = key.slot(mask)
         var newSlotDistance = 0
         while (true) {
-            val currKey = kvArr[slot]
-            if (currKey == emptyKey) {
-                kvArr[slot] = newKey
-                kvArr[slot + 1] = newValue
+            val currEntry = kvArr[slot]
+            if (currEntry == emptyEntry) {
+                kvArr[slot] = newEntry
                 ++size
                 return defaultValue
-            } else if(currKey == newKey) {
-                val oldValue = kvArr[slot + 1]
-                kvArr[slot + 1] = newValue
+            } else if(currEntry.key() == newEntry.key()) {
+                val oldValue = currEntry.value()
+                kvArr[slot] = newEntry
                 return oldValue
             }
 
-            val currSlotDistance = currKey.slotDistance(slot, mask)
+            val currSlotDistance = currEntry.key().slotDistance(slot, mask)
             if (newSlotDistance > currSlotDistance) {
-                val currValue = kvArr[slot + 1]
-                kvArr[slot] = newKey
-                kvArr[slot + 1] = newValue
-                newKey = currKey
-                newValue = currValue
+                kvArr[slot] = newEntry
+                newEntry = currEntry
                 newSlotDistance = currSlotDistance
             }
 
-            slot = (slot + 2) and mask
-            newSlotDistance += 2
+            slot = (slot + 1) and mask
+            ++newSlotDistance
         }
     }
 
-    override fun remove(key: Long): Long {
+    override fun remove(key: ${KVType}): ${KVType} {
         return findSlot(
             key,
-            { slot ->
-                val oldValue = kvArr[slot + 1]
+            { slot, entry ->
+                val oldValue = entry.value()
                 removeSlot(slot)
                 oldValue
             },
@@ -139,18 +134,18 @@ public class Long2LongHashMap @JvmOverloads constructor(
 
     override fun clear() {
         if (kvArr !== EMPTY_ARRAY) {
-            kvArr.fill(emptyKey)
+            kvArr.fill(emptyEntry)
         }
         size = 0
     }
 
-    private inline fun <T> findSlot(key: Long, onFind: (slot: Int) -> T, onFail: () -> T): T {
+    private inline fun <T> findSlot(key: ${KVType}, onFind: (slot: Int, entry: ${ArrayType}) -> T, onFail: () -> T): T {
         val kvArr = kvArr
-        val emptyKey = emptyKey
+        val emptyEntry = emptyEntry
         val mask = kvArr.size - 1
 
         var slot = key.slot(mask)
-        var currKey = kvArr[slot]
+        var currEntry = kvArr[slot]
 
         var slotDistance = 0
         while (true) {
@@ -159,18 +154,18 @@ public class Long2LongHashMap @JvmOverloads constructor(
             // performance we only check once every half cache line.
             var i = 0
             do {
-                if (currKey == emptyKey) {
+                if (currEntry == emptyEntry) {
                     return onFail()
-                } else if (currKey == key) {
-                    return onFind(slot)
+                } else if (currEntry.key() == key) {
+                    return onFind(slot, currEntry)
                 }
 
-                slot = (slot + 2) and mask
-                currKey = kvArr[slot]
+                slot = (slot + 1) and mask
+                currEntry = kvArr[slot]
             } while (++i < HALF_CACHE_LINE_SIZE)
 
-            slotDistance += 2 * HALF_CACHE_LINE_SIZE
-            if (currKey.slotDistance(slot, mask) < slotDistance) {
+            slotDistance += HALF_CACHE_LINE_SIZE
+            if (currEntry.key().slotDistance(slot, mask) < slotDistance) {
                 return onFail()
             }
         }
@@ -178,26 +173,25 @@ public class Long2LongHashMap @JvmOverloads constructor(
 
     private fun removeSlot(slot: Int) {
         val kvArr = kvArr
-        val emptyKey = emptyKey
+        val emptyEntry = emptyEntry
         val mask = kvArr.size - 1
 
         var currSlot = slot
-        var nextSlot = (currSlot + 2) and mask
-        var nextKey = kvArr[nextSlot]
-        while (nextKey != emptyKey && nextKey.slotDistance(nextSlot, mask) > 0) {
-            kvArr[currSlot] = nextKey
-            kvArr[currSlot + 1] = kvArr[nextSlot + 1]
+        var nextSlot = (currSlot + 1) and mask
+        var nextEntry = kvArr[nextSlot]
+        while (nextEntry != emptyEntry && nextEntry.key().slotDistance(nextSlot, mask) > 0) {
+            kvArr[currSlot] = nextEntry
 
             currSlot = nextSlot
-            nextSlot = (nextSlot + 2) and mask
-            nextKey = kvArr[nextSlot]
+            nextSlot = (nextSlot + 1) and mask
+            nextEntry = kvArr[nextSlot]
         }
-        kvArr[currSlot] = emptyKey
+        kvArr[currSlot] = emptyEntry
         --size
     }
 
-    override fun putAll(from: Long2LongMap) {
-        if (from is Long2LongHashMap && from.size / 2 > size) {
+    override fun putAll(from: ${Name}Map) {
+        if (from is ${Name}HashMap && from.size / 2 > size) {
             val old = iterator()
             resetTo(from)
             for ((key, value) in old) {
@@ -211,45 +205,45 @@ public class Long2LongHashMap @JvmOverloads constructor(
         }
     }
 
-    override fun putAll(from: Map<out Long, Long>) {
+    override fun putAll(from: Map<out ${KVType}, ${KVType}>) {
         ensureCapacity(max(size + (from.size / 2), from.size))
         for ((key, value) in from) {
             set(key, value)
         }
     }
 
-    private fun resetTo(from: Long2LongHashMap) {
+    private fun resetTo(from: ${Name}HashMap) {
         check(!from.isEmpty())
 
         kvArr = from.kvArr.copyOf()
-        emptyKey = from.emptyKey
+        emptyEntry = from.emptyEntry
         size = from.size
         threshold = from.threshold
     }
 
-    private var _keys: MutableLongSet? = null
-    override val keys: MutableLongSet get() {
+    private var _keys: Mutable${KVType}Set? = null
+    override val keys: Mutable${KVType}Set get() {
         return _keys ?:
-            object : MutableLongSet {
-                override val size: Int get() = this@Long2LongHashMap.size
-                override fun contains(element: Long): Boolean = containsKey(element)
-                override fun add(element: Long): Boolean = throw UnsupportedOperationException()
-                override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
-                override fun iterator(): MutableLongIterator = KeyIterator()
+            object : Mutable${KVType}Set {
+                override val size: Int get() = this@${Name}HashMap.size
+                override fun contains(element: ${KVType}): Boolean = containsKey(element)
+                override fun add(element: ${KVType}): Boolean = throw UnsupportedOperationException()
+                override fun remove(element: ${KVType}): Boolean = throw UnsupportedOperationException()
+                override fun iterator(): Mutable${KVType}Iterator = KeyIterator()
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
     }
 
-    private var _values: MutableLongCollection? = null
-    override val values: MutableLongCollection get() {
+    private var _values: Mutable${KVType}Collection? = null
+    override val values: Mutable${KVType}Collection get() {
         return _values ?:
-            object : MutableLongCollection {
-                override val size: Int get() = this@Long2LongHashMap.size
-                override fun contains(element: Long): Boolean = containsValue(element)
-                override fun add(element: Long): Boolean = throw UnsupportedOperationException()
-                override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
-                override fun iterator(): MutableLongIterator = ValueIterator()
+            object : Mutable${KVType}Collection {
+                override val size: Int get() = this@${Name}HashMap.size
+                override fun contains(element: ${KVType}): Boolean = containsValue(element)
+                override fun add(element: ${KVType}): Boolean = throw UnsupportedOperationException()
+                override fun remove(element: ${KVType}): Boolean = throw UnsupportedOperationException()
+                override fun iterator(): Mutable${KVType}Iterator = ValueIterator()
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _values = it }
@@ -269,7 +263,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
 
         if (capacity == 0 && kvArr !== EMPTY_ARRAY) {
             kvArr = EMPTY_ARRAY
-            emptyKey = ZERO
+            emptyEntry = ZERO_ENTRY
             threshold = DEFAULT_INITIAL_CAPACITY
             return
         }
@@ -280,15 +274,15 @@ public class Long2LongHashMap @JvmOverloads constructor(
         val newLength = arraySize(capacity, actualLoadFactor)
         if (kvArr.size == newLength) return
 
-        val newKvArr = LongArray(newLength)
-        if (emptyKey != ZERO) newKvArr.fill(emptyKey)
+        val newKvArr = ${ArrayType}Array(newLength)
+        if (emptyEntry != ZERO_ENTRY) newKvArr.fill(emptyEntry)
         val newMask = newKvArr.size - 1
 
         val oldKvArr = kvArr
-        val emptyKey = emptyKey
-        for (slot in oldKvArr.indices step 2) {
-            val key = oldKvArr[slot]
-            if (key != emptyKey) putRehashing(newKvArr, newMask, key, oldKvArr[slot + 1])
+        val emptyEntry = emptyEntry
+        for (slot in oldKvArr.indices) {
+            val entry = oldKvArr[slot]
+            if (entry != emptyEntry) putRehashing(newKvArr, newMask, entry)
         }
 
         kvArr = newKvArr
@@ -298,59 +292,54 @@ public class Long2LongHashMap @JvmOverloads constructor(
         threshold = min((newCapacity * actualLoadFactor).toInt(), newCapacity - 1)
     }
 
-    // we can assume key doesn't exist in array and that we never insert emptyKey
-    private fun putRehashing(kvArr: LongArray, mask: Int, key: Long, value: Long) {
-        val emptyKey = emptyKey
+    // we can assume key doesn't exist in array and that we never insert emptyEntry
+    private fun putRehashing(kvArr: ${ArrayType}Array, mask: Int, entry: ${ArrayType}) {
+        val emptyEntry = emptyEntry
 
-        var slot = key.slot(mask)
-        var newKey = key
-        var newValue = value
+        var slot = entry.key().slot(mask)
+        var newEntry = entry
         var newSlotDistance = 0
         while (true) {
-            val currKey = kvArr[slot]
-            if (currKey == emptyKey) {
-                kvArr[slot] = newKey
-                kvArr[slot + 1] = newValue
+            val currEntry = kvArr[slot]
+            if (currEntry == emptyEntry) {
+                kvArr[slot] = newEntry
                 return
             }
 
-            val currSlotDistance = currKey.slotDistance(slot, mask)
+            val currSlotDistance = currEntry.key().slotDistance(slot, mask)
             if (newSlotDistance > currSlotDistance) {
-                val currValue = kvArr[slot + 1]
-                kvArr[slot] = newKey
-                kvArr[slot + 1] = newValue
-                newKey = currKey
-                newValue = currValue
+                kvArr[slot] = newEntry
+                newEntry = currEntry
                 newSlotDistance = currSlotDistance
             }
 
-            slot = (slot + 2) and mask
-            newSlotDistance += 2
+            slot = (slot + 1) and mask
+            ++newSlotDistance
         }
     }
 
-    // changes emptyKey to a value not currently in the map, rewriting all empty slots
-    private fun changeEmptyKey() {
-        val oldEmptyKey = emptyKey
+    // changes emptyEntry to a value not currently in the map, rewriting all empty slots
+    private fun changeEmptyEntry() {
+        val oldEmptyEntry = emptyEntry
 
         // TODO: should we always try zero first or is that asking for trouble?
-        var candidate = ZERO
-        while (candidate == oldEmptyKey || findSlot(candidate, { true }, { false })) {
-            candidate = Random.nextLong()
+        var candidate = ZERO_ENTRY
+        while (candidate == oldEmptyEntry || findSlot(candidate.key(), { _, entry -> entry == candidate }, { false })) {
+            candidate = Random.next${ArrayType}()
         }
 
         val kvArr = kvArr
-        for (i in kvArr.indices step 2) {
-            if (kvArr[i] == oldEmptyKey) kvArr[i] = candidate
+        for (i in kvArr.indices) {
+            if (kvArr[i] == oldEmptyEntry) kvArr[i] = candidate
         }
-        emptyKey = candidate
+        emptyEntry = candidate
     }
 
-    override operator fun iterator(): MutableFastIterator<MutableLong2LongMap.MutableEntry> = FastEntryIterator()
+    override operator fun iterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry> = FastEntryIterator()
 
     private open inner class SlotIterator {
-        private val kvArr = this@Long2LongHashMap.kvArr
-        private val emptyKey = this@Long2LongHashMap.emptyKey
+        private val kvArr = this@${Name}HashMap.kvArr
+        private val emptyEntry = this@${Name}HashMap.emptyEntry
         private val mask = kvArr.size - 1
 
         private var slotsLeft = size
@@ -371,41 +360,41 @@ public class Long2LongHashMap @JvmOverloads constructor(
             if (--slotsLeft > 0) decrement()
         }
 
-        fun key(): Long = kvArr[previousSlot]
-        fun value(): Long = kvArr[previousSlot + 1]
+        fun key(): ${KVType} = kvArr[previousSlot].key()
+        fun value(): ${KVType} = kvArr[previousSlot].value()
 
-        fun updateValue(newValue: Long) {
+        fun updateValue(newValue: ${KVType}) {
             check(previousSlot != -1)
-            if (kvArr !== this@Long2LongHashMap.kvArr) throw ConcurrentModificationException()
-            kvArr[previousSlot + 1] = newValue
+            if (kvArr !== this@${Name}HashMap.kvArr) throw ConcurrentModificationException()
+            kvArr[previousSlot] = arrayEntry(key(), newValue)
         }
 
         fun remove() {
             check(previousSlot != -1)
-            if (kvArr !== this@Long2LongHashMap.kvArr) throw ConcurrentModificationException()
+            if (kvArr !== this@${Name}HashMap.kvArr) throw ConcurrentModificationException()
 
             removeSlot(previousSlot)
             previousSlot = -1
 
             // if removal wrapped all the way around to our next slot then we need to adjust
-            if (kvArr[slot] == emptyKey) {
-                slot = (slot - 2) and mask
+            if (kvArr[slot] == emptyEntry) {
+                slot = (slot - 1) and mask
             }
         }
 
         private fun decrement() {
             do {
-                slot = (slot - 2) and mask
-            } while (kvArr[slot] == emptyKey)
+                slot = (slot - 1) and mask
+            } while (kvArr[slot] == emptyEntry)
         }
     }
 
-    private inner class KeyIterator : MutableLongIterator() {
+    private inner class KeyIterator : Mutable${KVType}Iterator() {
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
 
-        override fun nextLong(): Long {
+        override fun next${KVType}(): ${KVType} {
             it.nextSlot()
             return it.key()
         }
@@ -413,12 +402,12 @@ public class Long2LongHashMap @JvmOverloads constructor(
         override fun remove() = it.remove()
     }
 
-    private inner class ValueIterator : MutableLongIterator() {
+    private inner class ValueIterator : Mutable${KVType}Iterator() {
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
 
-        override fun nextLong(): Long {
+        override fun next${KVType}(): ${KVType} {
             it.nextSlot()
             return it.value()
         }
@@ -426,27 +415,27 @@ public class Long2LongHashMap @JvmOverloads constructor(
         override fun remove() = it.remove()
     }
 
-    private inner class FastEntryIterator: SlotIterator(), MutableFastIterator<MutableLong2LongMap.MutableEntry>, MutableLong2LongMap.MutableEntry {
+    private inner class FastEntryIterator: SlotIterator(), MutableFastIterator<Mutable${Name}Map.MutableEntry>, Mutable${Name}Map.MutableEntry {
 
-        override val key: Long
+        override val key: ${KVType}
             get() = key()
-        override var value: Long
+        override var value: ${KVType}
             get() = value()
             set(value) {
                 updateValue(value)
             }
 
-        override fun next(): MutableLong2LongMap.MutableEntry {
+        override fun next(): Mutable${Name}Map.MutableEntry {
             nextSlot()
             return this
         }
 
         override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()
-        override fun toString(): String = "$key=$value"
+        override fun toString(): String = "\$key=\$value"
     }
 
-    private fun Long.slot(mask: Int): Int {
+    private fun ${KVType}.slot(mask: Int): Int {
         var h = hashCode()
         h = h xor (h ushr 16)
         h = h * PHI
@@ -454,7 +443,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
         return h and mask
     }
 
-    private fun Long.slotDistance(slot: Int, mask: Int): Int {
+    private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int {
         var h = hashCode()
         h = h xor (h ushr 16)
         h = h * PHI
@@ -462,18 +451,22 @@ public class Long2LongHashMap @JvmOverloads constructor(
         return (slot - h) and mask
     }
 
+    private fun ${ArrayType}.key(): ${KVType} = to${KVType}()
+    private fun ${ArrayType}.value(): ${KVType} = (this shr (8 * ${KVType}.SIZE_BYTES)).to${KVType}()
+    private fun arrayEntry(key: ${KVType}, value: ${KVType}): ${ArrayType} = (value.to${ArrayType}() shl (8 * ${KVType}.SIZE_BYTES)) or (key.toLong() and 0xFFFFFFFFL)
+
     internal companion object {
         // the value of a field in an uninitialized primitive array
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-        private const val ZERO: Long = 0.toLong()
+        private const val ZERO_ENTRY: ${ArrayType} = 0.to${ArrayType}()
 
-        private val EMPTY_ARRAY = longArrayOf(ZERO)
+        private val EMPTY_ARRAY = ${lowerArrayType}ArrayOf(ZERO_ENTRY)
 
         private const val PHI: Int = 0x9E3779B9.toInt()
 
         internal const val DEFAULT_INITIAL_CAPACITY = 7
 
-        private const val CACHE_LINE_SIZE = 64 / Long.SIZE_BYTES
+        private const val CACHE_LINE_SIZE = 64 / ${KVType}.SIZE_BYTES
         private const val HALF_CACHE_LINE_SIZE = CACHE_LINE_SIZE / 2
 
         // we force the load factor to 1.0 up to the size of two cache lines
@@ -483,7 +476,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
             check(capacity >= 0)
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = 2 * max((capacity / loadFactor).toInt(), capacity + 1)
-            return 2 * ArrayUtils.minPowerOfTwo(requiredArraySize)
+            return ArrayUtils.minPowerOfTwo(requiredArraySize)
         }
     }
 }

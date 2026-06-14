@@ -6,8 +6,8 @@ public abstract class MutableLongIterator : LongIterator(), MutableIterator<Long
 
 public abstract class LongListIterator: LongIterator(), ListIterator<Long> {
     @Deprecated(
-        message = "Use previousByte() instead.",
-        replaceWith = ReplaceWith("previousByte()"),
+        message = "Use previousLong() instead.",
+        replaceWith = ReplaceWith("previousLong()"),
         level = DeprecationLevel.WARNING)
     final override fun previous(): Long = previousLong()
     public abstract fun previousLong(): Long

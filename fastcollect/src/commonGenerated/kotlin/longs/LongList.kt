@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.longs
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -10,11 +11,11 @@ public fun emptyLongList(): LongList = EmptyLongList
 
 public fun longListOf(): LongList = EmptyLongList
 public fun longListOf(element: Long): LongList = SingletonLongList(element)
-public fun longListOf(vararg elements: Long): LongList = LongArrayDeque.wrap(elements)
+public fun longListOf(vararg elements: Long): LongList = LongArrayDeque(elements)
 
 public fun mutableLongListOf(): MutableLongList = LongArrayDeque()
 public fun mutableLongListOf(element: Long): MutableLongList = LongArrayDeque(1).apply { add(element) }
-public fun mutableLongListOf(vararg elements: Long): MutableLongList = LongArrayDeque.wrap(elements)
+public fun mutableLongListOf(vararg elements: Long): MutableLongList = LongArrayDeque(elements)
 
 public fun LongArray.asLongList(): LongList = LongArrayListWrapper(this)
 
@@ -60,7 +61,7 @@ public interface LongList : LongCollection {
     public fun indexOf(element: Long): Int {
         val it = listIterator()
         while (it.hasNext()) {
-            if (it.nextLong() == element) {
+            if (it.nextLong() equalsBoxed element) {
                 return it.previousIndex()
             }
         }
@@ -70,7 +71,7 @@ public interface LongList : LongCollection {
     public fun lastIndexOf(element: Long): Int {
         val it = listIterator(size)
         while (it.hasPrevious()) {
-            if (it.previousLong() == element) {
+            if (it.previousLong() equalsBoxed element) {
                 return it.nextIndex()
             }
         }
@@ -81,6 +82,22 @@ public interface LongList : LongCollection {
 }
 
 public val LongList.lastIndex: Int inline get() = size - 1
+
+public fun LongList.rangeCheck(index: Int, size: Int = this.size): Int {
+    if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
+    return index
+}
+
+public fun LongList.rangeCheckInclusive(index: Int): Int {
+    if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
+    return index
+}
+
+public fun LongList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+    require(fromIndex <= toIndex)
+    if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
+    if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
+}
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun <R> LongList.foldRight(initial: R, operation: (Long, accumulated: R) -> R): R {
@@ -151,14 +168,30 @@ public interface MutableLongList : LongList, MutableLongCollection {
 
     override fun clear(): Unit = removeRange(0, size)
 
-    override fun addAll(elements: LongCollection): Boolean = addAll(size, elements)
-    override fun addAll(elements: Collection<Long>): Boolean = addAll(size, elements)
+    override fun addAll(elements: LongCollection): Boolean {
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    override fun addAll(elements: Collection<Long>): Boolean {
+        if (elements is LongCollection) return addAll(elements)
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    public fun addAll(index: Int, elements: LongCollection) {
+        var i = index
+        for (element in elements) add(i++, element)
+    }
+    public fun addAll(index: Int, elements: Collection<Long>) {
+        if (elements is LongCollection) {
+            addAll(index, elements)
+            return
+        }
+        var i = rangeCheckInclusive(index)
+        for (element in elements) add(i++, element)
+    }
 
     override fun removeAll(elements: Collection<Long>): Boolean = super.removeAll(elements)
     override fun retainAll(elements: Collection<Long>): Boolean = super.retainAll(elements)
-
-    public fun addAll(index: Int, elements: LongCollection): Boolean
-    public fun addAll(index: Int, elements: Collection<Long>): Boolean
 
     public fun sort() {
         val sorted = toLongArray().also { it.sort() }
@@ -241,7 +274,7 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
         val otherIt = other.listIterator()
         if (otherIt is LongIterator) {
             while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextLong() != otherIt.nextLong()) {
+                if (!(it.nextLong() equalsBoxed otherIt.nextLong())) {
                     return false
                 }
             }
@@ -261,22 +294,6 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode
-    }
-
-    protected fun rangeCheck(index: Int, size: Int = this.size): Int {
-        if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    protected fun rangeCheckInclusive(index: Int): Int {
-        if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    protected fun rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
-        require(fromIndex <= toIndex)
-        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
-        if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
     }
 
     private inner class IteratorImpl: LongIterator() {
@@ -352,30 +369,6 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
             it.nextLong()
             it.remove()
         }
-    }
-
-    override fun addAll(index: Int, elements: LongCollection): Boolean {
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
-    }
-
-    override fun addAll(index: Int, elements: Collection<Long>): Boolean {
-        if (elements is LongCollection) {
-            return addAll(index, elements)
-        }
-
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
     }
 
     override fun iterator(): MutableLongIterator = IteratorImpl()
@@ -499,14 +492,21 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
         override fun removeRange(fromIndex: Int, toIndex: Int) {
             rangeCheck(fromIndex, toIndex)
             list.removeRange(fromIndex + offset, toIndex + offset)
+            size -= toIndex - fromIndex
         }
 
-        override fun addAll(index: Int, elements: LongCollection): Boolean {
-            if (elements.isEmpty()) return false
-
+        override fun addAll(index: Int, elements: LongCollection) {
             list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
-            return true
+        }
+
+        override fun addAll(index: Int, elements: Collection<Long>) {
+            if (elements is LongCollection) {
+                addAll(index, elements)
+                return
+            }
+            list.addAll(offset + rangeCheckInclusive(index), elements)
+            size += elements.size
         }
     }
 
@@ -539,11 +539,11 @@ private class SingletonLongList(private val value: Long) : AbstractLongList(), R
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: Long): Boolean = value == element
+    override fun contains(element: Long): Boolean = value equalsBoxed element
 
     override fun get(index: Int): Long = if (index == 0) return value else throw IndexOutOfBoundsException()
-    override fun indexOf(element: Long): Int = if (element == value) 0 else -1
-    override fun lastIndexOf(element: Long): Int = if (element == value) 0 else -1
+    override fun indexOf(element: Long): Int = if (element equalsBoxed value) 0 else -1
+    override fun lastIndexOf(element: Long): Int = if (element equalsBoxed value) 0 else -1
 
     override fun subList(fromIndex: Int, toIndex: Int): LongList {
         rangeCheck(fromIndex, toIndex)

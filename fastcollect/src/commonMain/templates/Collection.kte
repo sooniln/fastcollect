@@ -1,8 +1,14 @@
 package io.github.sooniln.fastcollect.${subpackage}
 
+<% if (isFPType) { %>
+import io.github.sooniln.fastcollect.${lowerNonFPType}s.Mutable${NonFPType}Collection
+import io.github.sooniln.fastcollect.${lowerNonFPType}s.Mutable${NonFPType}Iterator
+<% } %>
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmInline
 
 /**
  * A collection of ${Type}s which inherits from [Collection].
@@ -16,7 +22,7 @@ public interface ${Type}Collection : Collection<${Type}> {
 
     override fun contains(element: ${Type}): Boolean {
         for (e in this) {
-            if (e == element) return true
+            if (e equalsBoxed element) return true
         }
         return false
     }
@@ -188,7 +194,7 @@ public inline fun Mutable${Type}Collection.retainAll(predicate: (${Type}) -> Boo
 }
 
 @OptIn(ExperimentalContracts::class)
-private inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${Type}) -> Boolean): Boolean {
+internal inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${Type}) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -207,3 +213,24 @@ public abstract class Abstract${Type}Collection : ${Type}Collection {
         return joinToString(", ", "[", "]")
     }
 }
+
+<% if (isFPType) { %>
+
+@Suppress("OVERRIDE_BY_INLINE")
+@JvmInline
+public value class Inline${Type}Collection @PublishedApi internal constructor(@PublishedApi internal val collection: Mutable${NonFPType}Collection) : Mutable${Type}Collection {
+    override val size: Int
+        inline get() = collection.size
+    override fun contains(element: ${Type}): Boolean = collection.contains(element.toBits())
+    override fun add(element: ${Type}): Boolean = collection.add(element.toBits())
+    override fun remove(element: ${Type}): Boolean = collection.remove(element.toBits())
+    override fun iterator(): InlineMutable${Type}Iterator = InlineMutable${Type}Iterator(collection.iterator())
+}
+
+public class InlineMutable${Type}Iterator internal constructor(@PublishedApi internal val it: Mutable${NonFPType}Iterator) : Mutable${Type}Iterator() {
+    override fun hasNext(): Boolean = it.hasNext()
+    override fun next${Type}(): ${Type} = ${Type}.fromBits(it.next${NonFPType}())
+    override fun remove() { it.remove() }
+}
+
+<% } %>

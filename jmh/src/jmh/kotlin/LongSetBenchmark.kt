@@ -20,26 +20,31 @@ import java.util.concurrent.TimeUnit
  * A JVM specific benchmark which measures the performance of various set libraries.
  */
 @Fork(1)
-@Warmup(iterations = 5, time = 200, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 10, time = 200, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class LongSetBenchmark {
 
     companion object {
-        val seed = System.currentTimeMillis()
+        const val seed = 1001L
     }
 
     @State(Scope.Benchmark)
     open class BaseState {
 
-        @Param("3000", "12000", "48000", "192000", "768000", "3072000", "12288000")
-        var size: Int = 3000
+        @Param("12", "14", "16", "18", "20", "22", "24")
+        var pow2: Int = 12
 
+        @Param(".50", ".75")
+        var loadFactor: Float = .75f
+
+        var size: Int = 0
         lateinit var set: LongHashSet
 
         @Setup(Level.Trial)
         open fun setup() {
+            size = ((1 shl pow2) * loadFactor).toInt() - 2
             set = LongHashSet()
         }
     }

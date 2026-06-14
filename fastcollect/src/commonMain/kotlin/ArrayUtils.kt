@@ -43,4 +43,11 @@ internal object ArrayUtils {
             minSize
         }
     }
+
+    private const val MAXIMUM_CAPACITY: Int = 1 shl 30
+
+    fun minPowerOfTwo(cap: Int): Int {
+        val n = -1 ushr (cap - 1).countLeadingZeroBits()
+        return if (n < 0) 1 else if (n >= MAXIMUM_CAPACITY) MAXIMUM_CAPACITY else n + 1
+    }
 }

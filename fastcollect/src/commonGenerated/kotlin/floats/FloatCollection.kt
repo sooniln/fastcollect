@@ -1,8 +1,14 @@
 package io.github.sooniln.fastcollect.floats
 
+
+import io.github.sooniln.fastcollect.ints.MutableIntCollection
+import io.github.sooniln.fastcollect.ints.MutableIntIterator
+
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmInline
 
 /**
  * A collection of Floats which inherits from [Collection].
@@ -16,7 +22,7 @@ public interface FloatCollection : Collection<Float> {
 
     override fun contains(element: Float): Boolean {
         for (e in this) {
-            if (e == element) return true
+            if (e equalsBoxed element) return true
         }
         return false
     }
@@ -188,7 +194,7 @@ public inline fun MutableFloatCollection.retainAll(predicate: (Float) -> Boolean
 }
 
 @OptIn(ExperimentalContracts::class)
-private inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float) -> Boolean): Boolean {
+internal inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -207,3 +213,24 @@ public abstract class AbstractFloatCollection : FloatCollection {
         return joinToString(", ", "[", "]")
     }
 }
+
+
+
+@Suppress("OVERRIDE_BY_INLINE")
+@JvmInline
+public value class InlineFloatCollection @PublishedApi internal constructor(@PublishedApi internal val collection: MutableIntCollection) : MutableFloatCollection {
+    override val size: Int
+        inline get() = collection.size
+    override fun contains(element: Float): Boolean = collection.contains(element.toBits())
+    override fun add(element: Float): Boolean = collection.add(element.toBits())
+    override fun remove(element: Float): Boolean = collection.remove(element.toBits())
+    override fun iterator(): InlineMutableFloatIterator = InlineMutableFloatIterator(collection.iterator())
+}
+
+public class InlineMutableFloatIterator internal constructor(@PublishedApi internal val it: MutableIntIterator) : MutableFloatIterator() {
+    override fun hasNext(): Boolean = it.hasNext()
+    override fun nextFloat(): Float = Float.fromBits(it.nextInt())
+    override fun remove() { it.remove() }
+}
+
+

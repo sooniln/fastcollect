@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.ints
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -29,7 +30,7 @@ public inline fun buildIntSet(expectedSize: Int = 0, builderAction: MutableIntSe
 public interface IntSet : IntCollection {
     override fun contains(element: Int): Boolean {
         for (e in this) {
-            if (e == element) return true
+            if (e equalsBoxed element) return true
         }
         return false
     }
@@ -101,7 +102,7 @@ private class SingletonIntSet(private val value: Int) : IntSet {
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: Int): Boolean = value == element
+    override fun contains(element: Int): Boolean = value equalsBoxed element
 
     override fun iterator(): IntIterator = object : IntIterator() {
         private var complete = false
@@ -130,4 +131,6 @@ private class MutableIntSetWrapper(private val set: MutableIntSet) : AbstractMut
     override fun add(element: Int) = set.add(element)
     override fun remove(element: Int): Boolean = set.remove(element)
     override fun clear() = set.clear()
+
+    override fun addAll(elements: Collection<Int>): Boolean = set.addAll(elements)
 }

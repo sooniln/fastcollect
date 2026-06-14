@@ -6,8 +6,8 @@ public abstract class MutableIntIterator : IntIterator(), MutableIterator<Int>
 
 public abstract class IntListIterator: IntIterator(), ListIterator<Int> {
     @Deprecated(
-        message = "Use previousByte() instead.",
-        replaceWith = ReplaceWith("previousByte()"),
+        message = "Use previousInt() instead.",
+        replaceWith = ReplaceWith("previousInt()"),
         level = DeprecationLevel.WARNING)
     final override fun previous(): Int = previousInt()
     public abstract fun previousInt(): Int

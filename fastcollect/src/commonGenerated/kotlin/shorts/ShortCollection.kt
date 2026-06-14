@@ -1,8 +1,11 @@
 package io.github.sooniln.fastcollect.shorts
 
+
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmInline
 
 /**
  * A collection of Shorts which inherits from [Collection].
@@ -16,7 +19,7 @@ public interface ShortCollection : Collection<Short> {
 
     override fun contains(element: Short): Boolean {
         for (e in this) {
-            if (e == element) return true
+            if (e equalsBoxed element) return true
         }
         return false
     }
@@ -188,7 +191,7 @@ public inline fun MutableShortCollection.retainAll(predicate: (Short) -> Boolean
 }
 
 @OptIn(ExperimentalContracts::class)
-private inline fun MutableShortCollection.filterInPlace(removePredicate: (Short) -> Boolean): Boolean {
+internal inline fun MutableShortCollection.filterInPlace(removePredicate: (Short) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -207,3 +210,5 @@ public abstract class AbstractShortCollection : ShortCollection {
         return joinToString(", ", "[", "]")
     }
 }
+
+

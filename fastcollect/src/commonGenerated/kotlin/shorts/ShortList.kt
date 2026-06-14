@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.shorts
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -10,11 +11,11 @@ public fun emptyShortList(): ShortList = EmptyShortList
 
 public fun shortListOf(): ShortList = EmptyShortList
 public fun shortListOf(element: Short): ShortList = SingletonShortList(element)
-public fun shortListOf(vararg elements: Short): ShortList = ShortArrayDeque.wrap(elements)
+public fun shortListOf(vararg elements: Short): ShortList = ShortArrayDeque(elements)
 
 public fun mutableShortListOf(): MutableShortList = ShortArrayDeque()
 public fun mutableShortListOf(element: Short): MutableShortList = ShortArrayDeque(1).apply { add(element) }
-public fun mutableShortListOf(vararg elements: Short): MutableShortList = ShortArrayDeque.wrap(elements)
+public fun mutableShortListOf(vararg elements: Short): MutableShortList = ShortArrayDeque(elements)
 
 public fun ShortArray.asShortList(): ShortList = ShortArrayListWrapper(this)
 
@@ -60,7 +61,7 @@ public interface ShortList : ShortCollection {
     public fun indexOf(element: Short): Int {
         val it = listIterator()
         while (it.hasNext()) {
-            if (it.nextShort() == element) {
+            if (it.nextShort() equalsBoxed element) {
                 return it.previousIndex()
             }
         }
@@ -70,7 +71,7 @@ public interface ShortList : ShortCollection {
     public fun lastIndexOf(element: Short): Int {
         val it = listIterator(size)
         while (it.hasPrevious()) {
-            if (it.previousShort() == element) {
+            if (it.previousShort() equalsBoxed element) {
                 return it.nextIndex()
             }
         }
@@ -81,6 +82,22 @@ public interface ShortList : ShortCollection {
 }
 
 public val ShortList.lastIndex: Int inline get() = size - 1
+
+public fun ShortList.rangeCheck(index: Int, size: Int = this.size): Int {
+    if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
+    return index
+}
+
+public fun ShortList.rangeCheckInclusive(index: Int): Int {
+    if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
+    return index
+}
+
+public fun ShortList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+    require(fromIndex <= toIndex)
+    if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
+    if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
+}
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun <R> ShortList.foldRight(initial: R, operation: (Short, accumulated: R) -> R): R {
@@ -151,14 +168,30 @@ public interface MutableShortList : ShortList, MutableShortCollection {
 
     override fun clear(): Unit = removeRange(0, size)
 
-    override fun addAll(elements: ShortCollection): Boolean = addAll(size, elements)
-    override fun addAll(elements: Collection<Short>): Boolean = addAll(size, elements)
+    override fun addAll(elements: ShortCollection): Boolean {
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    override fun addAll(elements: Collection<Short>): Boolean {
+        if (elements is ShortCollection) return addAll(elements)
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    public fun addAll(index: Int, elements: ShortCollection) {
+        var i = index
+        for (element in elements) add(i++, element)
+    }
+    public fun addAll(index: Int, elements: Collection<Short>) {
+        if (elements is ShortCollection) {
+            addAll(index, elements)
+            return
+        }
+        var i = rangeCheckInclusive(index)
+        for (element in elements) add(i++, element)
+    }
 
     override fun removeAll(elements: Collection<Short>): Boolean = super.removeAll(elements)
     override fun retainAll(elements: Collection<Short>): Boolean = super.retainAll(elements)
-
-    public fun addAll(index: Int, elements: ShortCollection): Boolean
-    public fun addAll(index: Int, elements: Collection<Short>): Boolean
 
     public fun sort() {
         val sorted = toShortArray().also { it.sort() }
@@ -241,7 +274,7 @@ public abstract class AbstractShortList : AbstractShortCollection(), ShortList {
         val otherIt = other.listIterator()
         if (otherIt is ShortIterator) {
             while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextShort() != otherIt.nextShort()) {
+                if (!(it.nextShort() equalsBoxed otherIt.nextShort())) {
                     return false
                 }
             }
@@ -261,22 +294,6 @@ public abstract class AbstractShortList : AbstractShortCollection(), ShortList {
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode
-    }
-
-    protected fun rangeCheck(index: Int, size: Int = this.size): Int {
-        if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    protected fun rangeCheckInclusive(index: Int): Int {
-        if (index !in 0..size) throw IndexOutOfBoundsException("index=$index, size=$size")
-        return index
-    }
-
-    protected fun rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
-        require(fromIndex <= toIndex)
-        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
-        if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
     }
 
     private inner class IteratorImpl: ShortIterator() {
@@ -352,30 +369,6 @@ public abstract class AbstractMutableShortList : AbstractShortList(), MutableSho
             it.nextShort()
             it.remove()
         }
-    }
-
-    override fun addAll(index: Int, elements: ShortCollection): Boolean {
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
-    }
-
-    override fun addAll(index: Int, elements: Collection<Short>): Boolean {
-        if (elements is ShortCollection) {
-            return addAll(index, elements)
-        }
-
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
     }
 
     override fun iterator(): MutableShortIterator = IteratorImpl()
@@ -499,14 +492,21 @@ public abstract class AbstractMutableShortList : AbstractShortList(), MutableSho
         override fun removeRange(fromIndex: Int, toIndex: Int) {
             rangeCheck(fromIndex, toIndex)
             list.removeRange(fromIndex + offset, toIndex + offset)
+            size -= toIndex - fromIndex
         }
 
-        override fun addAll(index: Int, elements: ShortCollection): Boolean {
-            if (elements.isEmpty()) return false
-
+        override fun addAll(index: Int, elements: ShortCollection) {
             list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
-            return true
+        }
+
+        override fun addAll(index: Int, elements: Collection<Short>) {
+            if (elements is ShortCollection) {
+                addAll(index, elements)
+                return
+            }
+            list.addAll(offset + rangeCheckInclusive(index), elements)
+            size += elements.size
         }
     }
 
@@ -539,11 +539,11 @@ private class SingletonShortList(private val value: Short) : AbstractShortList()
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: Short): Boolean = value == element
+    override fun contains(element: Short): Boolean = value equalsBoxed element
 
     override fun get(index: Int): Short = if (index == 0) return value else throw IndexOutOfBoundsException()
-    override fun indexOf(element: Short): Int = if (element == value) 0 else -1
-    override fun lastIndexOf(element: Short): Int = if (element == value) 0 else -1
+    override fun indexOf(element: Short): Int = if (element equalsBoxed value) 0 else -1
+    override fun lastIndexOf(element: Short): Int = if (element equalsBoxed value) 0 else -1
 
     override fun subList(fromIndex: Int, toIndex: Int): ShortList {
         rangeCheck(fromIndex, toIndex)

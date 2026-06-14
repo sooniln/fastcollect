@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.longs
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -29,7 +30,7 @@ public inline fun buildLongSet(expectedSize: Int = 0, builderAction: MutableLong
 public interface LongSet : LongCollection {
     override fun contains(element: Long): Boolean {
         for (e in this) {
-            if (e == element) return true
+            if (e equalsBoxed element) return true
         }
         return false
     }
@@ -101,7 +102,7 @@ private class SingletonLongSet(private val value: Long) : LongSet {
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: Long): Boolean = value == element
+    override fun contains(element: Long): Boolean = value equalsBoxed element
 
     override fun iterator(): LongIterator = object : LongIterator() {
         private var complete = false
@@ -130,4 +131,6 @@ private class MutableLongSetWrapper(private val set: MutableLongSet) : AbstractM
     override fun add(element: Long) = set.add(element)
     override fun remove(element: Long): Boolean = set.remove(element)
     override fun clear() = set.clear()
+
+    override fun addAll(elements: Collection<Long>): Boolean = set.addAll(elements)
 }

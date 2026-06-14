@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.${subpackage}
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
@@ -10,11 +11,11 @@ public fun empty${Type}List(): ${Type}List = Empty${Type}List
 
 public fun ${lowerType}ListOf(): ${Type}List = Empty${Type}List
 public fun ${lowerType}ListOf(element: ${Type}): ${Type}List = Singleton${Type}List(element)
-public fun ${lowerType}ListOf(vararg elements: ${Type}): ${Type}List = ${Type}ArrayDeque.wrap(elements)
+public fun ${lowerType}ListOf(vararg elements: ${Type}): ${Type}List = ${Type}ArrayDeque(elements)
 
 public fun mutable${Type}ListOf(): Mutable${Type}List = ${Type}ArrayDeque()
 public fun mutable${Type}ListOf(element: ${Type}): Mutable${Type}List = ${Type}ArrayDeque(1).apply { add(element) }
-public fun mutable${Type}ListOf(vararg elements: ${Type}): Mutable${Type}List = ${Type}ArrayDeque.wrap(elements)
+public fun mutable${Type}ListOf(vararg elements: ${Type}): Mutable${Type}List = ${Type}ArrayDeque(elements)
 
 public fun ${Type}Array.as${Type}List(): ${Type}List = ${Type}ArrayListWrapper(this)
 
@@ -60,7 +61,7 @@ public interface ${Type}List : ${Type}Collection {
     public fun indexOf(element: ${Type}): Int {
         val it = listIterator()
         while (it.hasNext()) {
-            if (it.next${Type}() == element) {
+            if (it.next${Type}() equalsBoxed element) {
                 return it.previousIndex()
             }
         }
@@ -70,7 +71,7 @@ public interface ${Type}List : ${Type}Collection {
     public fun lastIndexOf(element: ${Type}): Int {
         val it = listIterator(size)
         while (it.hasPrevious()) {
-            if (it.previous${Type}() == element) {
+            if (it.previous${Type}() equalsBoxed element) {
                 return it.nextIndex()
             }
         }
@@ -81,6 +82,22 @@ public interface ${Type}List : ${Type}Collection {
 }
 
 public val ${Type}List.lastIndex: Int inline get() = size - 1
+
+public fun ${Type}List.rangeCheck(index: Int, size: Int = this.size): Int {
+    if (index !in 0..<size) throw IndexOutOfBoundsException("index=\$index, size=\$size")
+    return index
+}
+
+public fun ${Type}List.rangeCheckInclusive(index: Int): Int {
+    if (index !in 0..size) throw IndexOutOfBoundsException("index=\$index, size=\$size")
+    return index
+}
+
+public fun ${Type}List.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+    require(fromIndex <= toIndex)
+    if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=\$fromIndex")
+    if (toIndex > size) throw IndexOutOfBoundsException("toIndex=\$toIndex, size=\$size")
+}
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun <R> ${Type}List.foldRight(initial: R, operation: (${Type}, accumulated: R) -> R): R {
@@ -151,14 +168,30 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection {
 
     override fun clear(): Unit = removeRange(0, size)
 
-    override fun addAll(elements: ${Type}Collection): Boolean = addAll(size, elements)
-    override fun addAll(elements: Collection<${Type}>): Boolean = addAll(size, elements)
+    override fun addAll(elements: ${Type}Collection): Boolean {
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    override fun addAll(elements: Collection<${Type}>): Boolean {
+        if (elements is ${Type}Collection) return addAll(elements)
+        for (element in elements) addLast(element)
+        return !elements.isEmpty()
+    }
+    public fun addAll(index: Int, elements: ${Type}Collection) {
+        var i = index
+        for (element in elements) add(i++, element)
+    }
+    public fun addAll(index: Int, elements: Collection<${Type}>) {
+        if (elements is ${Type}Collection) {
+            addAll(index, elements)
+            return
+        }
+        var i = rangeCheckInclusive(index)
+        for (element in elements) add(i++, element)
+    }
 
     override fun removeAll(elements: Collection<${Type}>): Boolean = super.removeAll(elements)
     override fun retainAll(elements: Collection<${Type}>): Boolean = super.retainAll(elements)
-
-    public fun addAll(index: Int, elements: ${Type}Collection): Boolean
-    public fun addAll(index: Int, elements: Collection<${Type}>): Boolean
 
     public fun sort() {
         val sorted = to${Type}Array().also { it.sort() }
@@ -241,7 +274,7 @@ public abstract class Abstract${Type}List : Abstract${Type}Collection(), ${Type}
         val otherIt = other.listIterator()
         if (otherIt is ${Type}Iterator) {
             while (it.hasNext() && otherIt.hasNext()) {
-                if (it.next${Type}() != otherIt.next${Type}()) {
+                if (!(it.next${Type}() equalsBoxed otherIt.next${Type}())) {
                     return false
                 }
             }
@@ -261,22 +294,6 @@ public abstract class Abstract${Type}List : Abstract${Type}Collection(), ${Type}
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode
-    }
-
-    protected fun rangeCheck(index: Int, size: Int = this.size): Int {
-        if (index !in 0..<size) throw IndexOutOfBoundsException("index=\$index, size=\$size")
-        return index
-    }
-
-    protected fun rangeCheckInclusive(index: Int): Int {
-        if (index !in 0..size) throw IndexOutOfBoundsException("index=\$index, size=\$size")
-        return index
-    }
-
-    protected fun rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
-        require(fromIndex <= toIndex)
-        if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=\$fromIndex")
-        if (toIndex > size) throw IndexOutOfBoundsException("toIndex=\$toIndex, size=\$size")
     }
 
     private inner class IteratorImpl: ${Type}Iterator() {
@@ -352,30 +369,6 @@ public abstract class AbstractMutable${Type}List : Abstract${Type}List(), Mutabl
             it.next${Type}()
             it.remove()
         }
-    }
-
-    override fun addAll(index: Int, elements: ${Type}Collection): Boolean {
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
-    }
-
-    override fun addAll(index: Int, elements: Collection<${Type}>): Boolean {
-        if (elements is ${Type}Collection) {
-            return addAll(index, elements)
-        }
-
-        var index = rangeCheckInclusive(index)
-        var modified = false
-        for (element in elements) {
-            add(index++, element)
-            modified = true
-        }
-        return modified
     }
 
     override fun iterator(): Mutable${Type}Iterator = IteratorImpl()
@@ -499,14 +492,21 @@ public abstract class AbstractMutable${Type}List : Abstract${Type}List(), Mutabl
         override fun removeRange(fromIndex: Int, toIndex: Int) {
             rangeCheck(fromIndex, toIndex)
             list.removeRange(fromIndex + offset, toIndex + offset)
+            size -= toIndex - fromIndex
         }
 
-        override fun addAll(index: Int, elements: ${Type}Collection): Boolean {
-            if (elements.isEmpty()) return false
-
+        override fun addAll(index: Int, elements: ${Type}Collection) {
             list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
-            return true
+        }
+
+        override fun addAll(index: Int, elements: Collection<${Type}>) {
+            if (elements is ${Type}Collection) {
+                addAll(index, elements)
+                return
+            }
+            list.addAll(offset + rangeCheckInclusive(index), elements)
+            size += elements.size
         }
     }
 
@@ -539,11 +539,11 @@ private class Singleton${Type}List(private val value: ${Type}) : Abstract${Type}
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: ${Type}): Boolean = value == element
+    override fun contains(element: ${Type}): Boolean = value equalsBoxed element
 
     override fun get(index: Int): ${Type} = if (index == 0) return value else throw IndexOutOfBoundsException()
-    override fun indexOf(element: ${Type}): Int = if (element == value) 0 else -1
-    override fun lastIndexOf(element: ${Type}): Int = if (element == value) 0 else -1
+    override fun indexOf(element: ${Type}): Int = if (element equalsBoxed value) 0 else -1
+    override fun lastIndexOf(element: ${Type}): Int = if (element equalsBoxed value) 0 else -1
 
     override fun subList(fromIndex: Int, toIndex: Int): ${Type}List {
         rangeCheck(fromIndex, toIndex)

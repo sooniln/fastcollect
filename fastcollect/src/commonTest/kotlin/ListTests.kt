@@ -125,6 +125,23 @@ class ByteListTest {
     }
 
     @Test
+    fun subList_removeRange_updatesSubList() {
+        val list = mutableByteListOf(1, 2, 3, 4, 5)
+        val sub = list.subList(1, 4)
+        sub.removeRange(0, 2)
+        sub.assertContents(4)
+        list.assertContents(1, 4, 5)
+    }
+
+    @Test
+    fun removeAll_atExactCapacity_removesMatching() {
+        // a deque built from vararg elements exactly fills its backing ring buffer
+        val list = mutableByteListOf(1, 2, 3, 4)
+        assertTrue(list.removeAll(listOf(2.toByte(), 4.toByte())))
+        list.assertContents(1, 3)
+    }
+
+    @Test
     fun addAll_atIndex_withPrimitiveCollection() {
         val list = mutableByteListOf(1, 4)
         list.addAll(1, byteListOf(2, 3))
@@ -140,16 +157,16 @@ class ByteListTest {
 
     @Test
     fun sort_ascendingOrder() {
-        val list = mutableByteListOf(3, 1, 4, 1, 5)
+        val list = mutableByteListOf(-3, 1, 4, -1, 5)
         list.sort()
-        list.assertContents(1, 1, 3, 4, 5)
+        list.assertContents(-3, -1, 1, 4, 5)
     }
 
     @Test
     fun sortDescending_descendingOrder() {
-        val list = mutableByteListOf(3, 1, 4, 1, 5)
+        val list = mutableByteListOf(-3, 1, 4, -1, 5)
         list.sortDescending()
-        list.assertContents(5, 4, 3, 1, 1)
+        list.assertContents(5, 4, 1, -1, -3)
     }
 
     @Test
@@ -306,6 +323,23 @@ class ShortListTest {
     }
 
     @Test
+    fun subList_removeRange_updatesSubList() {
+        val list = mutableShortListOf(1, 2, 3, 4, 5)
+        val sub = list.subList(1, 4)
+        sub.removeRange(0, 2)
+        sub.assertContents(4)
+        list.assertContents(1, 4, 5)
+    }
+
+    @Test
+    fun removeAll_atExactCapacity_removesMatching() {
+        // a deque built from vararg elements exactly fills its backing ring buffer
+        val list = mutableShortListOf(1, 2, 3, 4)
+        assertTrue(list.removeAll(listOf(2.toShort(), 4.toShort())))
+        list.assertContents(1, 3)
+    }
+
+    @Test
     fun addAll_atIndex_withPrimitiveCollection() {
         val list = mutableShortListOf(1, 4)
         list.addAll(1, shortListOf(2, 3))
@@ -321,16 +355,16 @@ class ShortListTest {
 
     @Test
     fun sort_ascendingOrder() {
-        val list = mutableShortListOf(3, 1, 4, 1, 5)
+        val list = mutableShortListOf(-3, 1, 4, -1, 5)
         list.sort()
-        list.assertContents(1, 1, 3, 4, 5)
+        list.assertContents(-3, -1, 1, 4, 5)
     }
 
     @Test
     fun sortDescending_descendingOrder() {
-        val list = mutableShortListOf(3, 1, 4, 1, 5)
+        val list = mutableShortListOf(-3, 1, 4, -1, 5)
         list.sortDescending()
-        list.assertContents(5, 4, 3, 1, 1)
+        list.assertContents(5, 4, 1, -1, -3)
     }
 
     @Test
@@ -487,6 +521,23 @@ class IntListTest {
     }
 
     @Test
+    fun subList_removeRange_updatesSubList() {
+        val list = mutableIntListOf(1, 2, 3, 4, 5)
+        val sub = list.subList(1, 4)
+        sub.removeRange(0, 2)
+        sub.assertContents(4)
+        list.assertContents(1, 4, 5)
+    }
+
+    @Test
+    fun removeAll_atExactCapacity_removesMatching() {
+        // a deque built from vararg elements exactly fills its backing ring buffer
+        val list = mutableIntListOf(1, 2, 3, 4)
+        assertTrue(list.removeAll(listOf(2, 4)))
+        list.assertContents(1, 3)
+    }
+
+    @Test
     fun addAll_atIndex_withPrimitiveCollection() {
         val list = mutableIntListOf(1, 4)
         list.addAll(1, intListOf(2, 3))
@@ -502,16 +553,16 @@ class IntListTest {
 
     @Test
     fun sort_ascendingOrder() {
-        val list = mutableIntListOf(3, 1, 4, 1, 5)
+        val list = mutableIntListOf(-3, 1, 4, -1, 5)
         list.sort()
-        list.assertContents(1, 1, 3, 4, 5)
+        list.assertContents(-3, -1, 1, 4, 5)
     }
 
     @Test
     fun sortDescending_descendingOrder() {
-        val list = mutableIntListOf(3, 1, 4, 1, 5)
+        val list = mutableIntListOf(-3, 1, 4, -1, 5)
         list.sortDescending()
-        list.assertContents(5, 4, 3, 1, 1)
+        list.assertContents(5, 4, 1, -1, -3)
     }
 
     @Test
@@ -668,6 +719,23 @@ class LongListTest {
     }
 
     @Test
+    fun subList_removeRange_updatesSubList() {
+        val list = mutableLongListOf(1L, 2L, 3L, 4L, 5L)
+        val sub = list.subList(1, 4)
+        sub.removeRange(0, 2)
+        sub.assertContents(4L)
+        list.assertContents(1L, 4L, 5L)
+    }
+
+    @Test
+    fun removeAll_atExactCapacity_removesMatching() {
+        // a deque built from vararg elements exactly fills its backing ring buffer
+        val list = mutableLongListOf(1L, 2L, 3L, 4L)
+        assertTrue(list.removeAll(listOf(2L, 4L)))
+        list.assertContents(1L, 3L)
+    }
+
+    @Test
     fun addAll_atIndex_withPrimitiveCollection() {
         val list = mutableLongListOf(1L, 4L)
         list.addAll(1, longListOf(2L, 3L))
@@ -683,16 +751,16 @@ class LongListTest {
 
     @Test
     fun sort_ascendingOrder() {
-        val list = mutableLongListOf(3L, 1L, 4L, 1L, 5L)
+        val list = mutableLongListOf(-3L, 1L, 4L, -1L, 5L)
         list.sort()
-        list.assertContents(1L, 1L, 3L, 4L, 5L)
+        list.assertContents(-3L, -1L, 1L, 4L, 5L)
     }
 
     @Test
     fun sortDescending_descendingOrder() {
-        val list = mutableLongListOf(3L, 1L, 4L, 1L, 5L)
+        val list = mutableLongListOf(-3L, 1L, 4L, -1L, 5L)
         list.sortDescending()
-        list.assertContents(5L, 4L, 3L, 1L, 1L)
+        list.assertContents(5L, 4L, 1L, -1L, -3L)
     }
 
     @Test
@@ -849,6 +917,23 @@ class FloatListTest {
     }
 
     @Test
+    fun subList_removeRange_updatesSubList() {
+        val list = mutableFloatListOf(1f, 2f, 3f, 4f, 5f)
+        val sub = list.subList(1, 4)
+        sub.removeRange(0, 2)
+        sub.assertContents(4f)
+        list.assertContents(1f, 4f, 5f)
+    }
+
+    @Test
+    fun removeAll_atExactCapacity_removesMatching() {
+        // a deque built from vararg elements exactly fills its backing ring buffer
+        val list = mutableFloatListOf(1f, 2f, 3f, 4f)
+        assertTrue(list.removeAll(listOf(2f, 4f)))
+        list.assertContents(1f, 3f)
+    }
+
+    @Test
     fun addAll_atIndex_withPrimitiveCollection() {
         val list = mutableFloatListOf(1f, 4f)
         list.addAll(1, floatListOf(2f, 3f))
@@ -864,16 +949,18 @@ class FloatListTest {
 
     @Test
     fun sort_ascendingOrder() {
-        val list = mutableFloatListOf(3f, 1f, 4f, 1f, 5f)
+        // -0.0f sorts to the front of the raw-bits ordering and must be reversed into place with
+        // the other negative values
+        val list = mutableFloatListOf(-3f, 1f, 4f, -0.0f, -1f, 5f)
         list.sort()
-        list.assertContents(1f, 1f, 3f, 4f, 5f)
+        list.assertContents(-3f, -1f, -0.0f, 1f, 4f, 5f)
     }
 
     @Test
     fun sortDescending_descendingOrder() {
-        val list = mutableFloatListOf(3f, 1f, 4f, 1f, 5f)
+        val list = mutableFloatListOf(-3f, 1f, 4f, -0.0f, -1f, 5f)
         list.sortDescending()
-        list.assertContents(5f, 4f, 3f, 1f, 1f)
+        list.assertContents(5f, 4f, 1f, -0.0f, -1f, -3f)
     }
 
     @Test
@@ -941,6 +1028,33 @@ class FloatListTest {
     @Test
     fun lastIndex_empty_isMinusOne() {
         assertEquals(-1, floatListOf().lastIndex)
+    }
+
+    @Test
+    fun indexOfAndContains_nanAndNegativeZero_matchBoxedSemantics() {
+        // NaN must be found in all list implementations, and -0.0f must not match 0.0f
+        assertTrue(floatListOf(Float.NaN).contains(Float.NaN))
+        assertEquals(0, floatListOf(Float.NaN).indexOf(Float.NaN))
+        assertEquals(0, floatListOf(Float.NaN).lastIndexOf(Float.NaN))
+
+        val wrapped = floatArrayOf(1f, Float.NaN, Float.NaN).asFloatList()
+        assertTrue(wrapped.contains(Float.NaN))
+        assertEquals(1, wrapped.indexOf(Float.NaN))
+        assertEquals(2, wrapped.lastIndexOf(Float.NaN))
+
+        assertTrue(mutableFloatListOf(Float.NaN).contains(Float.NaN))
+
+        assertFalse(floatListOf(-0.0f).contains(0.0f))
+        assertEquals(-1, floatArrayOf(-0.0f).asFloatList().indexOf(0.0f))
+        assertTrue(floatArrayOf(-0.0f).asFloatList().contains(-0.0f))
+    }
+
+    @Test
+    fun equals_nanAndNegativeZero_matchBoxedSemantics() {
+        // a FloatList compares equal to a List<Float> (such as the asList view of another FloatList) - lists holding
+        // NaN are equal, and a -0.0f list is not equal to a 0.0f list
+        assertEquals<Any>(floatArrayOf(1f, Float.NaN).asFloatList(), floatArrayOf(1f, Float.NaN).asFloatList().asList())
+        assertNotEquals<Any>(floatArrayOf(-0.0f).asFloatList(), floatArrayOf(0.0f).asFloatList().asList())
     }
 }
 
@@ -1030,6 +1144,23 @@ class DoubleListTest {
     }
 
     @Test
+    fun subList_removeRange_updatesSubList() {
+        val list = mutableDoubleListOf(1.0, 2.0, 3.0, 4.0, 5.0)
+        val sub = list.subList(1, 4)
+        sub.removeRange(0, 2)
+        sub.assertContents(4.0)
+        list.assertContents(1.0, 4.0, 5.0)
+    }
+
+    @Test
+    fun removeAll_atExactCapacity_removesMatching() {
+        // a deque built from vararg elements exactly fills its backing ring buffer
+        val list = mutableDoubleListOf(1.0, 2.0, 3.0, 4.0)
+        assertTrue(list.removeAll(listOf(2.0, 4.0)))
+        list.assertContents(1.0, 3.0)
+    }
+
+    @Test
     fun addAll_atIndex_withPrimitiveCollection() {
         val list = mutableDoubleListOf(1.0, 4.0)
         list.addAll(1, doubleListOf(2.0, 3.0))
@@ -1045,16 +1176,18 @@ class DoubleListTest {
 
     @Test
     fun sort_ascendingOrder() {
-        val list = mutableDoubleListOf(3.0, 1.0, 4.0, 1.0, 5.0)
+        // -0.0 sorts to the front of the raw-bits ordering and must be reversed into place with
+        // the other negative values
+        val list = mutableDoubleListOf(-3.0, 1.0, 4.0, -0.0, -1.0, 5.0)
         list.sort()
-        list.assertContents(1.0, 1.0, 3.0, 4.0, 5.0)
+        list.assertContents(-3.0, -1.0, -0.0, 1.0, 4.0, 5.0)
     }
 
     @Test
     fun sortDescending_descendingOrder() {
-        val list = mutableDoubleListOf(3.0, 1.0, 4.0, 1.0, 5.0)
+        val list = mutableDoubleListOf(-3.0, 1.0, 4.0, -0.0, -1.0, 5.0)
         list.sortDescending()
-        list.assertContents(5.0, 4.0, 3.0, 1.0, 1.0)
+        list.assertContents(5.0, 4.0, 1.0, -0.0, -1.0, -3.0)
     }
 
     @Test
@@ -1122,5 +1255,32 @@ class DoubleListTest {
     @Test
     fun lastIndex_empty_isMinusOne() {
         assertEquals(-1, doubleListOf().lastIndex)
+    }
+
+    @Test
+    fun indexOfAndContains_nanAndNegativeZero_matchBoxedSemantics() {
+        // NaN must be found in all list implementations, and -0.0 must not match 0.0
+        assertTrue(doubleListOf(Double.NaN).contains(Double.NaN))
+        assertEquals(0, doubleListOf(Double.NaN).indexOf(Double.NaN))
+        assertEquals(0, doubleListOf(Double.NaN).lastIndexOf(Double.NaN))
+
+        val wrapped = doubleArrayOf(1.0, Double.NaN, Double.NaN).asDoubleList()
+        assertTrue(wrapped.contains(Double.NaN))
+        assertEquals(1, wrapped.indexOf(Double.NaN))
+        assertEquals(2, wrapped.lastIndexOf(Double.NaN))
+
+        assertTrue(mutableDoubleListOf(Double.NaN).contains(Double.NaN))
+
+        assertFalse(doubleListOf(-0.0).contains(0.0))
+        assertEquals(-1, doubleArrayOf(-0.0).asDoubleList().indexOf(0.0))
+        assertTrue(doubleArrayOf(-0.0).asDoubleList().contains(-0.0))
+    }
+
+    @Test
+    fun equals_nanAndNegativeZero_matchBoxedSemantics() {
+        // a DoubleList compares equal to a List<Double> (such as the asList view of another DoubleList) - lists holding
+        // NaN are equal, and a -0.0 list is not equal to a 0.0 list
+        assertEquals<Any>(doubleArrayOf(1.0, Double.NaN).asDoubleList(), doubleArrayOf(1.0, Double.NaN).asDoubleList().asList())
+        assertNotEquals<Any>(doubleArrayOf(-0.0).asDoubleList(), doubleArrayOf(0.0).asDoubleList().asList())
     }
 }
