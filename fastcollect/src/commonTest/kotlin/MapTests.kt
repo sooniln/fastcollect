@@ -171,6 +171,23 @@ class Int2IntMapTest {
     }
 
     @Test
+    fun putAll_fromLargerOverlappingMap_prefersFromValues() {
+        // when `from` is more than double this map's size, putAll takes a "reset to from" fast path;
+        // for keys present in both maps, from's value must win, while keys unique to this map are preserved.
+        val dest = mutableInt2IntMapOf(1 to 100, 6 to 600)
+        val source = int2IntMapOf(1 to 999, 2 to 2, 3 to 3, 4 to 4, 5 to 5, 7 to 7)
+        dest.putAll(source)
+        assertEquals(7, dest.size)
+        assertEquals(999, dest[1])
+        assertEquals(2, dest[2])
+        assertEquals(3, dest[3])
+        assertEquals(4, dest[4])
+        assertEquals(5, dest[5])
+        assertEquals(600, dest[6])
+        assertEquals(7, dest[7])
+    }
+
+    @Test
     fun putAll_fromStandardMap_copiesAllEntries() {
         val dest = mutableInt2IntMapOf(3 to 30)
         dest.putAll(mapOf(1 to 10, 2 to 20))
@@ -189,12 +206,41 @@ class Int2IntMapTest {
     }
 
     @Test
+    fun ensureCapacity_zeroOnFreshMap_doesNotCorruptState() {
+        // ensureCapacity(0) on a never-used map must not lower the threshold below what put() expects
+        val map = Int2IntHashMap()
+        map.ensureCapacity(0)
+        map[1] = 10
+        map[2] = 20
+        assertEquals(2, map.size)
+        assertEquals(10, map[1])
+        assertEquals(20, map[2])
+    }
+
+    @Test
     fun trimToSize_doesNotLoseEntries() {
         val map = Int2IntHashMap(100).apply { set(1, 10); set(2, 20) }
         map.trimToSize()
         assertEquals(2, map.size)
         assertEquals(10, map[1])
         assertEquals(20, map[2])
+    }
+
+    @Test
+    fun trimToSize_onFreshEmptyMap_doesNotCorruptSharedEmptyArray() {
+        // trimToSize() on a never-used map shares a backing EMPTY_ARRAY singleton with all other instances;
+        // it must not be mutated in place.
+        val map = Int2IntHashMap()
+        map.trimToSize()
+        map[5] = 50
+        map[6] = 60
+        assertEquals(2, map.size)
+        assertEquals(50, map[5])
+        assertEquals(60, map[6])
+
+        val freshMap = Int2IntHashMap()
+        assertEquals(0, freshMap.size)
+        assertFalse(freshMap.containsKey(5))
     }
 
     @Test
@@ -233,6 +279,26 @@ class Int2IntMapTest {
         }
         assertTrue(map.isEmpty())
         assertEquals((1..200).toList(), visited.sorted())
+    }
+
+    @Test
+    fun iteratorSetValue_collidingWithEmptySentinel_keepsEntryFindable() {
+        // setting an entry's value to a packed (key, value) pair that matches the current empty-slot sentinel
+        // must rotate the sentinel rather than making the entry indistinguishable from an empty slot.
+        val map = Int2IntHashMap()
+        map[0] = 5
+        map[1] = 1
+
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            if (entry.key == 0) entry.value = 0
+        }
+
+        assertEquals(2, map.size)
+        assertTrue(map.containsKey(0), "key 0 should still be findable after setting its value to 0")
+        assertEquals(0, map[0])
+        assertEquals(1, map[1])
     }
 }
 
@@ -400,6 +466,23 @@ class Int2LongMapTest {
         assertEquals(10L, dest[1])
         assertEquals(20L, dest[2])
         assertEquals(30L, dest[3])
+    }
+
+    @Test
+    fun putAll_fromLargerOverlappingMap_prefersFromValues() {
+        // when `from` is more than double this map's size, putAll takes a "reset to from" fast path;
+        // for keys present in both maps, from's value must win, while keys unique to this map are preserved.
+        val dest = mutableInt2LongMapOf(1 to 100L, 6 to 600L)
+        val source = int2LongMapOf(1 to 999L, 2 to 2L, 3 to 3L, 4 to 4L, 5 to 5L, 7 to 7L)
+        dest.putAll(source)
+        assertEquals(7, dest.size)
+        assertEquals(999L, dest[1])
+        assertEquals(2L, dest[2])
+        assertEquals(3L, dest[3])
+        assertEquals(4L, dest[4])
+        assertEquals(5L, dest[5])
+        assertEquals(600L, dest[6])
+        assertEquals(7L, dest[7])
     }
 
     @Test
@@ -1153,6 +1236,23 @@ class Int2AnyMapTest {
     }
 
     @Test
+    fun putAll_fromLargerOverlappingMap_prefersFromValues() {
+        // when `from` is more than double this map's size, putAll takes a "reset to from" fast path;
+        // for keys present in both maps, from's value must win, while keys unique to this map are preserved.
+        val dest = mutableInt2AnyMapOf(1 to "old", 6 to "f")
+        val source = int2AnyMapOf(1 to "new", 2 to "b", 3 to "c", 4 to "d", 5 to "e", 7 to "g")
+        dest.putAll(source)
+        assertEquals(7, dest.size)
+        assertEquals("new", dest[1])
+        assertEquals("b", dest[2])
+        assertEquals("c", dest[3])
+        assertEquals("d", dest[4])
+        assertEquals("e", dest[5])
+        assertEquals("f", dest[6])
+        assertEquals("g", dest[7])
+    }
+
+    @Test
     fun putAll_fromStandardMap_copiesAllEntries() {
         val dest = mutableInt2AnyMapOf(3 to "c")
         dest.putAll(mapOf(1 to "a", 2 to "b"))
@@ -1385,6 +1485,23 @@ class Long2IntMapTest {
     }
 
     @Test
+    fun putAll_fromLargerOverlappingMap_prefersFromValues() {
+        // when `from` is more than double this map's size, putAll takes a "reset to from" fast path;
+        // for keys present in both maps, from's value must win, while keys unique to this map are preserved.
+        val dest = mutableLong2IntMapOf(1L to 100, 6L to 600)
+        val source = long2IntMapOf(1L to 999, 2L to 2, 3L to 3, 4L to 4, 5L to 5, 7L to 7)
+        dest.putAll(source)
+        assertEquals(7, dest.size)
+        assertEquals(999, dest[1L])
+        assertEquals(2, dest[2L])
+        assertEquals(3, dest[3L])
+        assertEquals(4, dest[4L])
+        assertEquals(5, dest[5L])
+        assertEquals(600, dest[6L])
+        assertEquals(7, dest[7L])
+    }
+
+    @Test
     fun putAll_fromStandardMap_copiesAllEntries() {
         val dest = mutableLong2IntMapOf(3L to 30)
         dest.putAll(mapOf(1L to 10, 2L to 20))
@@ -1614,6 +1731,23 @@ class Long2LongMapTest {
         assertEquals(10L, dest[1L])
         assertEquals(20L, dest[2L])
         assertEquals(30L, dest[3L])
+    }
+
+    @Test
+    fun putAll_fromLargerOverlappingMap_prefersFromValues() {
+        // when `from` is more than double this map's size, putAll takes a "reset to from" fast path;
+        // for keys present in both maps, from's value must win, while keys unique to this map are preserved.
+        val dest = mutableLong2LongMapOf(1L to 100L, 6L to 600L)
+        val source = long2LongMapOf(1L to 999L, 2L to 2L, 3L to 3L, 4L to 4L, 5L to 5L, 7L to 7L)
+        dest.putAll(source)
+        assertEquals(7, dest.size)
+        assertEquals(999L, dest[1L])
+        assertEquals(2L, dest[2L])
+        assertEquals(3L, dest[3L])
+        assertEquals(4L, dest[4L])
+        assertEquals(5L, dest[5L])
+        assertEquals(600L, dest[6L])
+        assertEquals(7L, dest[7L])
     }
 
     @Test
@@ -2364,6 +2498,23 @@ class Long2AnyMapTest {
         assertEquals("a", dest[1L])
         assertEquals("b", dest[2L])
         assertEquals("c", dest[3L])
+    }
+
+    @Test
+    fun putAll_fromLargerOverlappingMap_prefersFromValues() {
+        // when `from` is more than double this map's size, putAll takes a "reset to from" fast path;
+        // for keys present in both maps, from's value must win, while keys unique to this map are preserved.
+        val dest = mutableLong2AnyMapOf(1L to "old", 6L to "f")
+        val source = long2AnyMapOf(1L to "new", 2L to "b", 3L to "c", 4L to "d", 5L to "e", 7L to "g")
+        dest.putAll(source)
+        assertEquals(7, dest.size)
+        assertEquals("new", dest[1L])
+        assertEquals("b", dest[2L])
+        assertEquals("c", dest[3L])
+        assertEquals("d", dest[4L])
+        assertEquals("e", dest[5L])
+        assertEquals("f", dest[6L])
+        assertEquals("g", dest[7L])
     }
 
     @Test

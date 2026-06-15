@@ -211,15 +211,17 @@ public class Int2LongHashMap @JvmOverloads constructor(
     }
 
     override fun putAll(from: Int2LongMap) {
-        val it = if (from is Int2LongHashMap && from.size / 2 > size) {
-            iterator().also { resetTo(from) }
+        if (from is Int2LongHashMap && from.size / 2 > size) {
+            val old = iterator()
+            resetTo(from)
+            for ((key, value) in old) {
+                if (!containsKey(key)) set(key, value)
+            }
         } else {
-            from.iterator()
-        }
-
-        ensureCapacity(max(size + (from.size / 2), from.size))
-        for ((key, value) in it) {
-            set(key, value)
+            ensureCapacity(max(size + (from.size / 2), from.size))
+            for ((key, value) in from) {
+                set(key, value)
+            }
         }
     }
 

@@ -58,7 +58,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
     public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
         if (kvArr === EMPTY_ARRAY) {
-            threshold = capacity
+            threshold = max(threshold, capacity)
         } else if (capacity > threshold) {
             rehash(capacity)
         }
@@ -195,7 +195,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             val old = iterator()
             resetTo(from)
             for ((key, value) in old) {
-                set(key, value)
+                if (!containsKey(key)) set(key, value)
             }
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
@@ -261,10 +261,12 @@ public class Int2IntHashMap @JvmOverloads constructor(
     private fun rehash(capacity: Int) {
         check(capacity >= size)
 
-        if (capacity == 0 && kvArr !== EMPTY_ARRAY) {
-            kvArr = EMPTY_ARRAY
-            emptyEntry = ZERO_ENTRY
-            threshold = DEFAULT_INITIAL_CAPACITY
+        if (capacity == 0) {
+            if (kvArr !== EMPTY_ARRAY) {
+                kvArr = EMPTY_ARRAY
+                emptyEntry = ZERO_ENTRY
+                threshold = DEFAULT_INITIAL_CAPACITY
+            }
             return
         }
 
@@ -339,7 +341,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     private open inner class SlotIterator {
         private val kvArr = this@Int2IntHashMap.kvArr
-        private val emptyEntry = this@Int2IntHashMap.emptyEntry
+        private var emptyEntry = this@Int2IntHashMap.emptyEntry
         private val mask = kvArr.size - 1
 
         private var slotsLeft = size
@@ -366,7 +368,13 @@ public class Int2IntHashMap @JvmOverloads constructor(
         fun updateValue(newValue: Int) {
             check(previousSlot != -1)
             if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()
-            kvArr[previousSlot] = arrayEntry(key(), newValue)
+
+            val newEntry = arrayEntry(key(), newValue)
+            if (newEntry == emptyEntry) {
+                this@Int2IntHashMap.changeEmptyEntry()
+                emptyEntry = this@Int2IntHashMap.emptyEntry
+            }
+            kvArr[previousSlot] = newEntry
         }
 
         fun remove() {
@@ -466,7 +474,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
         internal const val DEFAULT_INITIAL_CAPACITY = 7
 
-        private const val CACHE_LINE_SIZE = 64 / Int.SIZE_BYTES
+        private const val CACHE_LINE_SIZE = 64 / Long.SIZE_BYTES
         private const val HALF_CACHE_LINE_SIZE = CACHE_LINE_SIZE / 2
 
         // we force the load factor to 1.0 up to the size of two cache lines

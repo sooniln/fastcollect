@@ -201,7 +201,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
             val old = iterator()
             resetTo(from)
             for ((key, value) in old) {
-                set(key, value)
+                if (!containsKey(key)) set(key, value)
             }
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
