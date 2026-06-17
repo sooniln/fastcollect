@@ -288,6 +288,20 @@ public class IntHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableIntIterator = Iterator()
 
+    public fun forEach(action: (Int) -> Unit) {
+        val keysArr = keysArr
+        val emptyKey = emptyKey
+
+        var slot = keysArr.size - 1
+        while (slot >= 0) {
+            val key = keysArr[slot]
+            if(key != emptyKey) {
+                action(key)
+            }
+            --slot
+        }
+    }
+
     private inner class Iterator : MutableIntIterator() {
         private val keysArr = this@IntHashSet.keysArr
         private val emptyKey = this@IntHashSet.emptyKey

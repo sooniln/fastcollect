@@ -135,6 +135,24 @@ private object Generate {
             "VectorStripedHashMap.kte",
         )
         val Expansions = listOf<Map<String, Any>>(
+            //mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
+        )
+    }
+
+    object PSLVectorStripedHashMapTypes {
+        val Files = listOf(
+            "PSLVectorStripedHashMap.kte",
+        )
+        val Expansions = listOf<Map<String, Any>>(
+            //mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
+        )
+    }
+
+    object DualHashHashMapTypes {
+        val Files = listOf(
+            "DualHashHashMap.kte",
+        )
+        val Expansions = listOf<Map<String, Any>>(
             mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
         )
     }
@@ -330,6 +348,18 @@ tasks.register<Copy>("GenerateCollections") {
     }
 
     generate(
+        Generate.PSLVectorStripedHashMapTypes.Files,
+        Generate.PSLVectorStripedHashMapTypes.Expansions.generateFullExpansion()) { _, expansion ->
+        (expansion["Name"] as String) + "HashMap.kt"
+    }
+
+    generate(
+        Generate.DualHashHashMapTypes.Files,
+        Generate.DualHashHashMapTypes.Expansions.generateFullExpansion()) { _, expansion ->
+        (expansion["Name"] as String) + "HashMap.kt"
+    }
+
+    generate(
         Generate.FPHashMapTypes.Files,
         Generate.FPHashMapTypes.Expansions.generateFullExpansion()) { _, expansion ->
         (expansion["Name"] as String) + "HashMap.kt"
@@ -337,7 +367,7 @@ tasks.register<Copy>("GenerateCollections") {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
     jvm {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)

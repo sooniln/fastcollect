@@ -10,11 +10,23 @@ import io.github.sooniln.fastcollect.${subpackage}.Mutable${KVType}Iterator
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.random.Random
+import java.lang.foreign.MemorySegment
+import java.lang.foreign.ValueLayout
+import java.nio.ByteOrder
 
 /**
  * A [HashMap](https://en.wikipedia.org/wiki/Hash_table) implementation for storing ${KVType} to ${KVType}
- * relationships.
+ * relationships using Robin Hood hashing with a parallel PSL (Probe Sequence Length) [ByteArray].
+ *
+ * Each slot in the PSL array stores PSL+1 (displacement + 1) for occupied slots, or 0 for empty slots.
+ * Using 0 as the empty sentinel means the JVM's default ByteArray zero-initialization is sufficient, and
+ * the empty check is subsumed by the Robin Hood early-exit condition in SWAR without any extra mask term.
+ * Valid stored values are 1..128 (PSL 0..127); 0 means empty.
+ * This enables:
+ * - O(1) amortized early exit during lookup: the first slot where stored PSL+1 < expected PSL+1
+ *   terminates the search. Empty slots (stored=0) are always caught since 0 < any expected value >= 1.
+ * - A positive filter during lookup: a key K with home h can only exist at slot h+i if pslArr[h+i] == i+1,
+ *   so key comparisons are skipped for slots where PSL doesn't match.
  *
  * The [keys]/[values] mutable collections exposed by this class will throw [UnsupportedOperationException] on any
  * attempt to mutate the collection, EXCEPT that [MutableIterator.remove] will work as expected. Other mutation
@@ -39,9 +51,12 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
     public constructor(map: Map<${KVType}, ${KVType}>): this() { putAll(map) }
 
-    private var kvArr = EMPTY_ARRAY
+    private var kvArr = EMPTY_KV_ARRAY
 
-    private var emptyKey = ZERO
+    // parallel PSL array: pslArr[slot] == 0 means empty; stored value is PSL+1 (1..128 for PSL 0..127).
+    // allocated as N + SWAR_WIDTH - 1 bytes; pslArr[N + j] == pslArr[j] for j in 0..<SWAR_WIDTH - 1 (mirror region)
+    private var pslArr = EMPTY_PSL_ARRAY
+    private var pslArrSegment: MemorySegment = MemorySegment.ofArray(pslArr)
 
     // use threshold to store the initial size before we allocate anything, after that it's the size at which we rehash
     private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
@@ -57,8 +72,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
      */
     public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
-        if (kvArr === EMPTY_ARRAY) {
-            threshold = capacity
+        if (kvArr === EMPTY_KV_ARRAY) {
+            threshold = max(threshold, capacity)
         } else if (capacity > threshold) {
             rehash(capacity)
         }
@@ -71,66 +86,62 @@ public class ${Name}HashMap @JvmOverloads constructor(
         rehash(size)
     }
 
-    override fun containsKey(key: ${KVType}): Boolean = findSlot(key, { true }, { false })
+    override fun containsKey(key: ${KVType}): Boolean = findSlot(key, { _, _ -> true }, { false })
 
     override fun containsValue(value: ${KVType}): Boolean {
         val kvArr = kvArr
-        val emptyKey = emptyKey
-        for (slot in 1..kvArr.size-1 step 2) {
-            if (kvArr[slot] == value && kvArr[slot - 1] != emptyKey) return true
+        val pslArr = pslArr
+        for (slot in kvArr.indices) {
+            if (kvArr[slot].value() == value && pslArr[slot].toInt() != 0) return true
         }
         return false
     }
 
-    override fun get(key: ${KVType}): ${KVType} = findSlot(key, { slot -> kvArr[slot + 1] }, { defaultValue })
+    override fun get(key: ${KVType}): ${KVType} = findSlot(key, { _, entry -> entry.value() }, { defaultValue })
 
     override fun put(key: ${KVType}, value: ${KVType}): ${KVType} {
         resizeIfNecessary()
 
-        if (key == emptyKey) changeEmptyKey()
-
         val kvArr = kvArr
-        val emptyKey = emptyKey
+        val pslArr = pslArr
         val mask = kvArr.size - 1
 
-        var newKey = key
-        var newValue = value
-
+        val n = kvArr.size
+        var newEntry = arrayEntry(key, value)
         var slot = key.slot(mask)
-        var newSlotDistance = 0
+        var newPsl: Byte = 1
         while (true) {
-            val currKey = kvArr[slot]
-            if (currKey == emptyKey) {
-                kvArr[slot] = newKey
-                kvArr[slot + 1] = newValue
+            val currPsl = pslArr[slot]
+            if (currPsl.toInt() == 0) {
+                kvArr[slot] = newEntry
+                pslArr.writePsl(slot, newPsl, n)
                 ++size
                 return defaultValue
-            } else if(currKey == newKey) {
-                val oldValue = kvArr[slot + 1]
-                kvArr[slot + 1] = newValue
+            }
+            val currEntry = kvArr[slot]
+            if (currEntry.key() == newEntry.key()) {
+                val oldValue = currEntry.value()
+                kvArr[slot] = newEntry
+                // PSL is unchanged: same slot, same key
                 return oldValue
             }
-
-            val currSlotDistance = currKey.slotDistance(slot, mask)
-            if (newSlotDistance > currSlotDistance) {
-                val currValue = kvArr[slot + 1]
-                kvArr[slot] = newKey
-                kvArr[slot + 1] = newValue
-                newKey = currKey
-                newValue = currValue
-                newSlotDistance = currSlotDistance
+            // Robin Hood: steal from the richer entry (lower displacement)
+            if (newPsl > currPsl) {
+                kvArr[slot] = newEntry
+                pslArr.writePsl(slot, newPsl, n)
+                newEntry = currEntry
+                newPsl = currPsl
             }
-
-            slot = (slot + 2) and mask
-            newSlotDistance += 2
+            slot = (slot + 1) and mask
+            ++newPsl
         }
     }
 
     override fun remove(key: ${KVType}): ${KVType} {
         return findSlot(
             key,
-            { slot ->
-                val oldValue = kvArr[slot + 1]
+            { slot, entry ->
+                val oldValue = entry.value()
                 removeSlot(slot)
                 oldValue
             },
@@ -138,61 +149,58 @@ public class ${Name}HashMap @JvmOverloads constructor(
     }
 
     override fun clear() {
-        if (kvArr !== EMPTY_ARRAY) {
-            kvArr.fill(emptyKey)
+        if (kvArr !== EMPTY_KV_ARRAY) {
+            pslArr.fill(0)
         }
         size = 0
     }
 
-    private inline fun <T> findSlot(key: ${KVType}, onFind: (slot: Int) -> T, onFail: () -> T): T {
+    private inline fun <T> findSlot(key: ${KVType}, onFind: (slot: Int, entry: ${ArrayType}) -> T, onFail: () -> T): T {
+        val pslArrSegment = pslArrSegment
         val kvArr = kvArr
-        val emptyKey = emptyKey
         val mask = kvArr.size - 1
 
         var slot = key.slot(mask)
-        var currKey = kvArr[slot]
-
-        var slotDistance = 0
+        // initial expected vector [1,2,3,4,5,6,7,8]: stored PSL+1 we'd expect at each lane for slotDistance=0
+        var expectedLong = INC_VEC + BROADCAST_BYTE
         while (true) {
-            // checking whether the current slot distance is higher than our search distance allows us to early exit the
-            // search loop - but the cost of checking is non-trivial. as a compromise between GetHit and GetMiss
-            // performance we only check once every half cache line.
-            var i = 0
-            do {
-                if (currKey == emptyKey) {
-                    return onFail()
-                } else if (currKey == key) {
-                    return onFind(slot)
-                }
+            val storedLong = pslArrSegment.get(LONG_LAYOUT, slot.toLong())
+            val sub = (storedLong or MSB_MASK) - expectedLong
 
-                slot = (slot + 2) and mask
-                currKey = kvArr[slot]
-            } while (++i < HALF_CACHE_LINE_SIZE)
+            // empty slots (stored=0) and slots with stored < expected both produce sub_i < 0x80 → bit 7 of sub.inv() set
+            val earlyExit = sub.inv() and MSB_MASK
 
-            slotDistance += 2 * HALF_CACHE_LINE_SIZE
-            if (currKey.slotDistance(slot, mask) < slotDistance) {
-                return onFail()
+            val subFlipped = sub xor MSB_MASK
+            var candidates = (subFlipped - BROADCAST_BYTE) and subFlipped.inv() and MSB_MASK
+            while (candidates != 0L) {
+                val index = (slot + (candidates.countTrailingZeroBits() ushr 3)) and mask
+                val entry = kvArr[index]
+                if (entry.key() == key) return onFind(index, entry)
+                candidates = candidates and (candidates - 1)
             }
+
+            if (earlyExit != 0L) return onFail()
+            slot = (slot + SWAR_WIDTH) and mask
+            expectedLong += EXPECTED_STEP
         }
     }
 
     private fun removeSlot(slot: Int) {
         val kvArr = kvArr
-        val emptyKey = emptyKey
+        val pslArr = pslArr
         val mask = kvArr.size - 1
+        val n = kvArr.size
 
+        // backward shift: pull each following entry one slot back while it has PSL > 0 (stored > 1)
         var currSlot = slot
-        var nextSlot = (currSlot + 2) and mask
-        var nextKey = kvArr[nextSlot]
-        while (nextKey != emptyKey && nextKey.slotDistance(nextSlot, mask) > 0) {
-            kvArr[currSlot] = nextKey
-            kvArr[currSlot + 1] = kvArr[nextSlot + 1]
-
+        var nextSlot = (currSlot + 1) and mask
+        while (pslArr[nextSlot] > 1) {
+            kvArr[currSlot] = kvArr[nextSlot]
+            pslArr.writePsl(currSlot, (pslArr[nextSlot] - 1).toByte(), n)
             currSlot = nextSlot
-            nextSlot = (nextSlot + 2) and mask
-            nextKey = kvArr[nextSlot]
+            nextSlot = (nextSlot + 1) and mask
         }
-        kvArr[currSlot] = emptyKey
+        pslArr.writePsl(currSlot, 0, n)
         --size
     }
 
@@ -222,7 +230,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
         check(!from.isEmpty())
 
         kvArr = from.kvArr.copyOf()
-        emptyKey = from.emptyKey
+        pslArr = from.pslArr.copyOf()
+        pslArrSegment = MemorySegment.ofArray(pslArr)
         size = from.size
         threshold = from.threshold
     }
@@ -256,7 +265,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
     }
 
     private fun resizeIfNecessary() {
-        if (kvArr === EMPTY_ARRAY) {
+        if (kvArr === EMPTY_KV_ARRAY) {
             rehash(threshold)
         } else if (size >= threshold) {
             rehash(threshold shl 1)
@@ -267,10 +276,13 @@ public class ${Name}HashMap @JvmOverloads constructor(
     private fun rehash(capacity: Int) {
         check(capacity >= size)
 
-        if (capacity == 0 && kvArr !== EMPTY_ARRAY) {
-            kvArr = EMPTY_ARRAY
-            emptyKey = ZERO
-            threshold = DEFAULT_INITIAL_CAPACITY
+        if (capacity == 0) {
+            if (kvArr !== EMPTY_KV_ARRAY) {
+                kvArr = EMPTY_KV_ARRAY
+                pslArr = EMPTY_PSL_ARRAY
+                pslArrSegment = MemorySegment.ofArray(pslArr)
+                threshold = DEFAULT_INITIAL_CAPACITY
+            }
             return
         }
 
@@ -280,91 +292,70 @@ public class ${Name}HashMap @JvmOverloads constructor(
         val newLength = arraySize(capacity, actualLoadFactor)
         if (kvArr.size == newLength) return
 
-        val newKvArr = ${KVType}Array(newLength)
-        if (emptyKey != ZERO) newKvArr.fill(emptyKey)
+        val newKvArr = ${ArrayType}Array(newLength)
+        val newPslArr = ByteArray(newLength + SWAR_WIDTH - 1)  // zero-initialized; 0 means empty
         val newMask = newKvArr.size - 1
 
         val oldKvArr = kvArr
-        val emptyKey = emptyKey
-        for (slot in oldKvArr.indices step 2) {
-            val key = oldKvArr[slot]
-            if (key != emptyKey) putRehashing(newKvArr, newMask, key, oldKvArr[slot + 1])
+        val oldPslArr = pslArr
+        for (slot in oldKvArr.indices) {
+            if (oldPslArr[slot].toInt() != 0) putRehashing(newKvArr, newPslArr, newMask, oldKvArr[slot])
         }
+        for (j in 0 ..< SWAR_WIDTH - 1) newPslArr[newLength + j] = newPslArr[j]
 
         kvArr = newKvArr
+        pslArr = newPslArr
+        pslArrSegment = MemorySegment.ofArray(pslArr)
 
         // threshold must always maintain the invariant of at least 1 slot being open
         val newCapacity = newLength / 2
         threshold = min((newCapacity * actualLoadFactor).toInt(), newCapacity - 1)
     }
 
-    // we can assume key doesn't exist in array and that we never insert emptyKey
-    private fun putRehashing(kvArr: ${KVType}Array, mask: Int, key: ${KVType}, value: ${KVType}) {
-        val emptyKey = emptyKey
-
-        var slot = key.slot(mask)
-        var newKey = key
-        var newValue = value
-        var newSlotDistance = 0
+    // assumes key doesn't exist in array
+    private fun putRehashing(kvArr: ${ArrayType}Array, pslArr: ByteArray, mask: Int, entry: ${ArrayType}) {
+        val n = mask + 1
+        var slot = entry.key().slot(mask)
+        var newEntry = entry
+        var newPsl: Byte = 1
         while (true) {
-            val currKey = kvArr[slot]
-            if (currKey == emptyKey) {
-                kvArr[slot] = newKey
-                kvArr[slot + 1] = newValue
+            val currPsl = pslArr[slot]
+            if (currPsl.toInt() == 0) {
+                kvArr[slot] = newEntry
+                pslArr.writePsl(slot, newPsl, n)
                 return
             }
-
-            val currSlotDistance = currKey.slotDistance(slot, mask)
-            if (newSlotDistance > currSlotDistance) {
-                val currValue = kvArr[slot + 1]
-                kvArr[slot] = newKey
-                kvArr[slot + 1] = newValue
-                newKey = currKey
-                newValue = currValue
-                newSlotDistance = currSlotDistance
+            if (newPsl > currPsl) {
+                val tmpEntry = kvArr[slot]
+                kvArr[slot] = newEntry
+                pslArr.writePsl(slot, newPsl, n)
+                newEntry = tmpEntry
+                newPsl = currPsl
             }
-
-            slot = (slot + 2) and mask
-            newSlotDistance += 2
+            slot = (slot + 1) and mask
+            ++newPsl
         }
-    }
-
-    // changes emptyKey to a value not currently in the map, rewriting all empty slots
-    private fun changeEmptyKey() {
-        val oldEmptyKey = emptyKey
-
-        // TODO: should we always try zero first or is that asking for trouble?
-        var candidate = ZERO
-        while (candidate == oldEmptyKey || findSlot(candidate, { true }, { false })) {
-            candidate = Random.next${KVType}()
-        }
-
-        val kvArr = kvArr
-        for (i in kvArr.indices step 2) {
-            if (kvArr[i] == oldEmptyKey) kvArr[i] = candidate
-        }
-        emptyKey = candidate
     }
 
     override operator fun iterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry> = FastEntryIterator()
 
     public fun forEach(action: (${KVType}, ${KVType}) -> Unit) {
         val kvArr = kvArr
-        val emptyKey = emptyKey
+        val pslArr = pslArr
 
-        var slot = kvArr.size - 2
+        var slot = kvArr.size - 1
         while (slot >= 0) {
-            val key = kvArr[slot]
-            if(key != emptyKey) {
-                action(key, kvArr[slot + 1])
+            if (pslArr[slot].toInt() != 0) {
+                val entry = kvArr[slot]
+                action(entry.key(), entry.value())
             }
-            slot -= 2
+            --slot
         }
     }
 
     private open inner class SlotIterator {
         private val kvArr = this@${Name}HashMap.kvArr
-        private val emptyKey = this@${Name}HashMap.emptyKey
+        private val pslArr = this@${Name}HashMap.pslArr
         private val mask = kvArr.size - 1
 
         private var slotsLeft = size
@@ -385,13 +376,13 @@ public class ${Name}HashMap @JvmOverloads constructor(
             if (--slotsLeft > 0) decrement()
         }
 
-        fun key(): ${KVType} = kvArr[previousSlot]
-        fun value(): ${KVType} = kvArr[previousSlot + 1]
+        fun key(): ${KVType} = kvArr[previousSlot].key()
+        fun value(): ${KVType} = kvArr[previousSlot].value()
 
         fun updateValue(newValue: ${KVType}) {
             check(previousSlot != -1)
             if (kvArr !== this@${Name}HashMap.kvArr) throw ConcurrentModificationException()
-            kvArr[previousSlot + 1] = newValue
+            kvArr[previousSlot] = arrayEntry(key(), newValue)
         }
 
         fun remove() {
@@ -401,16 +392,16 @@ public class ${Name}HashMap @JvmOverloads constructor(
             removeSlot(previousSlot)
             previousSlot = -1
 
-            // if removal wrapped all the way around to our next slot then we need to adjust
-            if (kvArr[slot] == emptyKey) {
-                slot = (slot - 2) and mask
+            // if backward shift moved the entry at our next slot one position left, back up to follow it
+            if (pslArr[slot].toInt() == 0) {
+                slot = (slot - 1) and mask
             }
         }
 
         private fun decrement() {
             do {
-                slot = (slot - 2) and mask
-            } while (kvArr[slot] == emptyKey)
+                slot = (slot - 1) and mask
+            } while (pslArr[slot].toInt() == 0)
         }
     }
 
@@ -465,30 +456,37 @@ public class ${Name}HashMap @JvmOverloads constructor(
         h = h xor (h ushr 16)
         h = h * PHI
         h = h xor (h ushr 16)
-        return h and mask and 1.inv()
+        return h and mask
     }
 
-    private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int {
-        var h = hashCode()
-        h = h xor (h ushr 16)
-        h = h * PHI
-        h = h xor (h ushr 16)
-        return (slot - (h and 1.inv())) and mask
+    private fun ${ArrayType}.key(): ${KVType} = to${KVType}()
+    private fun ${ArrayType}.value(): ${KVType} = (this shr (8 * ${KVType}.SIZE_BYTES)).to${KVType}()
+    private fun arrayEntry(key: ${KVType}, value: ${KVType}): ${ArrayType} = (value.to${ArrayType}() shl (8 * ${KVType}.SIZE_BYTES)) or (key.toLong() and 0xFFFFFFFFL)
+
+    private fun ByteArray.writePsl(slot: Int, value: Byte, n: Int) {
+        this[slot] = value
+        if (slot < SWAR_WIDTH - 1) this[n + slot] = value
     }
 
     internal companion object {
-        // the value of a field in an uninitialized primitive array
-        @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-        private const val ZERO: ${KVType} = 0.to${KVType}()
+        private val EMPTY_KV_ARRAY = ${lowerArrayType}ArrayOf(0.to${ArrayType}())
 
-        private val EMPTY_ARRAY = ${lowerKVType}ArrayOf(ZERO, ZERO)
+        private const val SWAR_WIDTH = Long.SIZE_BYTES
+
+        // stored value 0 means empty; SWAR reads on an empty table (size=1) must be in-bounds
+        private val EMPTY_PSL_ARRAY = ByteArray(SWAR_WIDTH)
+
+        private const val BROADCAST_BYTE: Long = 0x0101010101010101L
+        private const val INC_VEC:        Long = 0x0706050403020100L
+        private const val MSB_MASK:       Long = BROADCAST_BYTE * 0x80L
+        private const val EXPECTED_STEP:  Long = BROADCAST_BYTE * SWAR_WIDTH.toLong()
+        private val LONG_LAYOUT = ValueLayout.JAVA_LONG_UNALIGNED.withOrder(ByteOrder.LITTLE_ENDIAN)
 
         private const val PHI: Int = 0x9E3779B9.toInt()
 
         internal const val DEFAULT_INITIAL_CAPACITY = 7
 
-        private const val CACHE_LINE_SIZE = 64 / ${KVType}.SIZE_BYTES
-        private const val HALF_CACHE_LINE_SIZE = CACHE_LINE_SIZE / 2
+        private const val CACHE_LINE_SIZE = 64 / ${ArrayType}.SIZE_BYTES
 
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE
@@ -497,7 +495,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
             check(capacity >= 0)
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = 2 * max((capacity / loadFactor).toInt(), capacity + 1)
-            return 2 * ArrayUtils.minPowerOfTwo(requiredArraySize)
+            return ArrayUtils.minPowerOfTwo(requiredArraySize)
         }
     }
 }

@@ -288,6 +288,20 @@ public class LongHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableLongIterator = Iterator()
 
+    public fun forEach(action: (Long) -> Unit) {
+        val keysArr = keysArr
+        val emptyKey = emptyKey
+
+        var slot = keysArr.size - 1
+        while (slot >= 0) {
+            val key = keysArr[slot]
+            if(key != emptyKey) {
+                action(key)
+            }
+            --slot
+        }
+    }
+
     private inner class Iterator : MutableLongIterator() {
         private val keysArr = this@LongHashSet.keysArr
         private val emptyKey = this@LongHashSet.emptyKey

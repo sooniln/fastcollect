@@ -348,6 +348,20 @@ public class Long2LongHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<MutableLong2LongMap.MutableEntry> = FastEntryIterator()
 
+    public fun forEach(action: (Long, Long) -> Unit) {
+        val kvArr = kvArr
+        val emptyKey = emptyKey
+
+        var slot = kvArr.size - 2
+        while (slot >= 0) {
+            val key = kvArr[slot]
+            if(key != emptyKey) {
+                action(key, kvArr[slot + 1])
+            }
+            slot -= 2
+        }
+    }
+
     private open inner class SlotIterator {
         private val kvArr = this@Long2LongHashMap.kvArr
         private val emptyKey = this@Long2LongHashMap.emptyKey

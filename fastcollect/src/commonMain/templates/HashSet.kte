@@ -288,6 +288,20 @@ public class ${Type}HashSet @JvmOverloads constructor(
 
     override fun iterator(): Mutable${Type}Iterator = Iterator()
 
+    public fun forEach(action: (${Type}) -> Unit) {
+        val keysArr = keysArr
+        val emptyKey = emptyKey
+
+        var slot = keysArr.size - 1
+        while (slot >= 0) {
+            val key = keysArr[slot]
+            if(key != emptyKey) {
+                action(key)
+            }
+            --slot
+        }
+    }
+
     private inner class Iterator : Mutable${Type}Iterator() {
         private val keysArr = this@${Type}HashSet.keysArr
         private val emptyKey = this@${Type}HashSet.emptyKey

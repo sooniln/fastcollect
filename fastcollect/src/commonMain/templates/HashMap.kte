@@ -390,6 +390,22 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry${Generics}> = FastEntryIterator()
 
+    public fun forEach(action: (${KeyType}, ${ValueType}) -> Unit) {
+        val keysArr = keysArr
+        val valuesArr = valuesArr
+        val emptyKey = emptyKey
+
+        var slot = keysArr.size - 1
+        while (slot >= 0) {
+            val key = keysArr[slot]
+            if(key != emptyKey) {
+                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+                action(key, valuesArr[slot] as ${ValueType})
+            }
+            --slot
+        }
+    }
+
     private open inner class SlotIterator {
         private val keysArr = this@${Name}HashMap.keysArr
         private val valuesArr = this@${Name}HashMap.valuesArr

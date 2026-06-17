@@ -15,14 +15,15 @@ dependencies {
     jmhImplementation(project(":fastcollect"))
 }
 
+private val jmhIncludes: Provider<String> = providers.gradleProperty("jmhIncludes")
+
 jmh {
     includeTests = false
     verbosity = "EXTRA"
     failOnError = true
     resultFormat = "JSON"
 
-    // if a jmhIncludes property is set, forward it to JMH
-    findProperty("jmhIncludes")?.also { includes.set(listOf(it as String)) }
+    if (jmhIncludes.isPresent) includes.set(decodeArgs(jmhIncludes.get()))
 }
 
 registerJMHTask("IntList") {

@@ -10,11 +10,18 @@ import io.github.sooniln.fastcollect.ints.MutableIntIterator
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.random.Random
 
 /**
  * A [HashMap](https://en.wikipedia.org/wiki/Hash_table) implementation for storing Int to Int
- * relationships.
+ * relationships using Robin Hood hashing with two hash functions and a parallel PSL [ByteArray].
+ *
+ * Each PSL byte encodes both the probe sequence length and which hash function homed the element:
+ * bit 7 = 0 means hash1 (identity); bit 7 = 1 means hash2 (Fibonacci mix). Bits 0–6 store PSL+1
+ * (1–127 for PSL 0–126), with 0 meaning empty.
+ *
+ * Lookup uses two phases: phase 1 scans one cache line from hash1(K) (brute force, no early
+ * termination needed); phase 2 probes from hash2(K) with Robin Hood early termination using all PSL
+ * bytes, since the global Robin Hood ordering is maintained across both hash functions.
  *
  * The [keys]/[values] mutable collections exposed by this class will throw [UnsupportedOperationException] on any
  * attempt to mutate the collection, EXCEPT that [MutableIterator.remove] will work as expected. Other mutation
@@ -39,9 +46,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     public constructor(map: Map<Int, Int>): this() { putAll(map) }
 
-    private var kvArr = EMPTY_ARRAY
-
-    private var emptyEntry = ZERO_ENTRY
+    private var metadataArr = EMPTY_METADATA_ARRAY
+    private var kvArr = EMPTY_KV_ARRAY
 
     // use threshold to store the initial size before we allocate anything, after that it's the size at which we rehash
     private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
@@ -57,7 +63,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
      */
     public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
-        if (kvArr === EMPTY_ARRAY) {
+        if (metadataArr === EMPTY_METADATA_ARRAY) {
             threshold = max(threshold, capacity)
         } else if (capacity > threshold) {
             rehash(capacity)
@@ -75,10 +81,9 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     override fun containsValue(value: Int): Boolean {
         val kvArr = kvArr
-        val emptyEntry = emptyEntry
+        val metadataArr = metadataArr
         for (slot in kvArr.indices) {
-            val entry = kvArr[slot]
-            if (entry.value() == value && entry != emptyEntry) return true
+            if (kvArr[slot].value() == value && metadataArr[slot] != 0.toByte()) return true
         }
         return false
     }
@@ -88,36 +93,70 @@ public class Int2IntHashMap @JvmOverloads constructor(
     override fun put(key: Int, value: Int): Int {
         resizeIfNecessary()
 
-        var newEntry = arrayEntry(key, value)
-        if (newEntry == emptyEntry) changeEmptyEntry()
-
+        val metadataArr = metadataArr
         val kvArr = kvArr
-        val emptyEntry = emptyEntry
-        val mask = kvArr.size - 1
+        val mask = metadataArr.size - 1
 
-        var slot = key.slot(mask)
-        var newSlotDistance = 0
-        while (true) {
-            val currEntry = kvArr[slot]
-            if (currEntry == emptyEntry) {
+        var newEntry = arrayEntry(key, value)
+        var newMetadata = 1  // hash1 element, PSL=0
+        var slot = key.slot1(mask)
+
+        // hash 1 insertion
+        for (i in 0 until HALF_CACHE_LINE_SIZE) {
+            val currMetadata = metadataArr[slot].toInt() and 0xFF
+            if (currMetadata == 0) {
+                metadataArr[slot] = newMetadata.toByte()
                 kvArr[slot] = newEntry
                 ++size
                 return defaultValue
-            } else if(currEntry.key() == newEntry.key()) {
-                val oldValue = currEntry.value()
+            } else if (kvArr[slot].key() == newEntry.key()) {
+                val oldValue = kvArr[slot].value()
                 kvArr[slot] = newEntry
                 return oldValue
             }
 
-            val currSlotDistance = currEntry.key().slotDistance(slot, mask)
-            if (newSlotDistance > currSlotDistance) {
+            if ((newMetadata and PSL_MASK) > (currMetadata and PSL_MASK)) {
+                metadataArr[slot] = newMetadata.toByte()
+                newMetadata = currMetadata
+                val currEntry = kvArr[slot]
                 kvArr[slot] = newEntry
                 newEntry = currEntry
-                newSlotDistance = currSlotDistance
             }
 
             slot = (slot + 1) and mask
-            ++newSlotDistance
+            ++newMetadata
+        }
+
+        // switch to hash 2 if necessary
+        if ((newMetadata and HASH2_BIT) == 0) {
+            slot = newEntry.key().slot2(mask)
+            newMetadata = HASH2_BIT or 1
+        }
+
+        // hash 2 insertion
+        while (true) {
+            val currMetadata = metadataArr[slot].toInt() and 0xFF
+            if (currMetadata == 0) {
+                metadataArr[slot] = newMetadata.toByte()
+                kvArr[slot] = newEntry
+                ++size
+                return defaultValue
+            } else if (kvArr[slot].key() == newEntry.key()) {
+                val oldValue = kvArr[slot].value()
+                kvArr[slot] = newEntry
+                return oldValue
+            }
+
+            if ((newMetadata and PSL_MASK) > (currMetadata and PSL_MASK)) {
+                metadataArr[slot] = newMetadata.toByte()
+                newMetadata = currMetadata
+                val currEntry = kvArr[slot]
+                kvArr[slot] = newEntry
+                newEntry = currEntry
+            }
+
+            slot = (slot + 1) and mask
+            ++newMetadata
         }
     }
 
@@ -133,60 +172,68 @@ public class Int2IntHashMap @JvmOverloads constructor(
     }
 
     override fun clear() {
-        if (kvArr !== EMPTY_ARRAY) {
-            kvArr.fill(emptyEntry)
+        if (metadataArr !== EMPTY_METADATA_ARRAY) {
+            metadataArr.fill(0)
         }
         size = 0
     }
 
     private inline fun <T> findSlot(key: Int, onFind: (slot: Int, entry: Long) -> T, onFail: () -> T): T {
+        val metadataArr = metadataArr
         val kvArr = kvArr
-        val emptyEntry = emptyEntry
-        val mask = kvArr.size - 1
+        val mask = metadataArr.size - 1
 
-        var slot = key.slot(mask)
-        var currEntry = kvArr[slot]
-
-        var slotDistance = 0
-        while (true) {
-            // checking whether the current slot distance is higher than our search distance allows us to early exit the
-            // search loop - but the cost of checking is non-trivial. as a compromise between GetHit and GetMiss
-            // performance we only check once every half cache line.
-            var i = 0
-            do {
-                if (currEntry == emptyEntry) {
-                    return onFail()
-                } else if (currEntry.key() == key) {
-                    return onFind(slot, currEntry)
-                }
-
-                slot = (slot + 1) and mask
-                currEntry = kvArr[slot]
-            } while (++i < HALF_CACHE_LINE_SIZE)
-
-            slotDistance += HALF_CACHE_LINE_SIZE
-            if (currEntry.key().slotDistance(slot, mask) < slotDistance) {
-                return onFail()
+        // Phase 1: cache-line scan from hash1(K).
+        // metadata == distance: PSL+1 matches expected; implies metadata > 0 (hash1), since hash2 bytes
+        // are negative as signed Int and distance is always positive.
+        // An empty slot breaks early; cannot return onFail() — K may still be a hash2 element.
+        var slot = key.slot1(mask)
+        for (distance in 1..HALF_CACHE_LINE_SIZE) {
+            if (metadataArr[slot].toInt() == distance && kvArr[slot].key() == key) {
+                return onFind(slot, kvArr[slot])
             }
+
+            slot = (slot + 1) and mask
+        }
+
+        // Phase 2: linear probe from hash2(K) with Robin Hood early termination.
+        // (metadata and 0x7F) extracts PSL+1 uniformly with a single mask for both hash types.
+        // metadata < 0 filters key comparisons to hash2 elements only.
+        // Empty always triggers onFail() — Robin Hood ordering guarantees K absent past empty in phase 2.
+        slot = key.slot2(mask)
+        var currDistance = 1
+        while (true) {
+            val metadata = metadataArr[slot].toInt()
+            val slotDistance = metadata and PSL_MASK
+            if (slotDistance < currDistance) {
+                return onFail()
+            } else if (slotDistance == currDistance && metadata < 0 && kvArr[slot].key() == key) {
+                return onFind(slot, kvArr[slot])
+            }
+
+            slot = (slot + 1) and mask
+            ++currDistance
         }
     }
 
     private fun removeSlot(slot: Int) {
+        val metadataArr = metadataArr
         val kvArr = kvArr
-        val emptyEntry = emptyEntry
-        val mask = kvArr.size - 1
+        val mask = metadataArr.size - 1
 
-        var currSlot = slot
-        var nextSlot = (currSlot + 1) and mask
-        var nextEntry = kvArr[nextSlot]
-        while (nextEntry != emptyEntry && nextEntry.key().slotDistance(nextSlot, mask) > 0) {
-            kvArr[currSlot] = nextEntry
+        var curr = slot
+        var next = (curr + 1) and mask
+        var nextMetadata = metadataArr[next].toInt() and 0xFF
+        while ((nextMetadata and PSL_MASK) > 1) {
+            metadataArr[curr] = (nextMetadata - 1).toByte()
+            kvArr[curr] = kvArr[next]
 
-            currSlot = nextSlot
-            nextSlot = (nextSlot + 1) and mask
-            nextEntry = kvArr[nextSlot]
+            curr = next
+            next = (next + 1) and mask
+            nextMetadata = metadataArr[next].toInt() and 0xFF
         }
-        kvArr[currSlot] = emptyEntry
+
+        metadataArr[curr] = 0
         --size
     }
 
@@ -215,8 +262,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
     private fun resetTo(from: Int2IntHashMap) {
         check(!from.isEmpty())
 
+        metadataArr = from.metadataArr.copyOf()
         kvArr = from.kvArr.copyOf()
-        emptyEntry = from.emptyEntry
         size = from.size
         threshold = from.threshold
     }
@@ -250,21 +297,20 @@ public class Int2IntHashMap @JvmOverloads constructor(
     }
 
     private fun resizeIfNecessary() {
-        if (kvArr === EMPTY_ARRAY) {
+        if (metadataArr === EMPTY_METADATA_ARRAY) {
             rehash(threshold)
         } else if (size >= threshold) {
             rehash(threshold shl 1)
         }
     }
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     private fun rehash(capacity: Int) {
         check(capacity >= size)
 
         if (capacity == 0) {
-            if (kvArr !== EMPTY_ARRAY) {
-                kvArr = EMPTY_ARRAY
-                emptyEntry = ZERO_ENTRY
+            if (metadataArr !== EMPTY_METADATA_ARRAY) {
+                metadataArr = EMPTY_METADATA_ARRAY
+                kvArr = EMPTY_KV_ARRAY
                 threshold = DEFAULT_INITIAL_CAPACITY
             }
             return
@@ -276,73 +322,96 @@ public class Int2IntHashMap @JvmOverloads constructor(
         val newLength = arraySize(capacity, actualLoadFactor)
         if (kvArr.size == newLength) return
 
+        val newMetadataArr = ByteArray(newLength)
         val newKvArr = LongArray(newLength)
-        if (emptyEntry != ZERO_ENTRY) newKvArr.fill(emptyEntry)
-        val newMask = newKvArr.size - 1
+        val newMask = newLength - 1
 
+        val oldMetadataArr = metadataArr
         val oldKvArr = kvArr
-        val emptyEntry = emptyEntry
-        for (slot in oldKvArr.indices) {
-            val entry = oldKvArr[slot]
-            if (entry != emptyEntry) putRehashing(newKvArr, newMask, entry)
+        for (slot in oldMetadataArr.indices) {
+            if (oldMetadataArr[slot] != 0.toByte()) putRehashing(newMetadataArr, newKvArr, newMask, oldKvArr[slot])
         }
 
         kvArr = newKvArr
+        metadataArr = newMetadataArr
 
         // threshold must always maintain the invariant of at least 1 slot being open
         val newCapacity = newLength / 2
         threshold = min((newCapacity * actualLoadFactor).toInt(), newCapacity - 1)
     }
 
-    // we can assume key doesn't exist in array and that we never insert emptyEntry
-    private fun putRehashing(kvArr: LongArray, mask: Int, entry: Long) {
-        val emptyEntry = emptyEntry
-
-        var slot = entry.key().slot(mask)
+    // assumes key doesn't exist in array
+    private fun putRehashing(metadataArr: ByteArray, kvArr: LongArray, mask: Int, entry: Long) {
         var newEntry = entry
-        var newSlotDistance = 0
-        while (true) {
-            val currEntry = kvArr[slot]
-            if (currEntry == emptyEntry) {
+        var newMetadata = 1
+        var slot = newEntry.key().slot1(mask)
+
+        for (i in 0 until HALF_CACHE_LINE_SIZE) {
+            val currMetadata = metadataArr[slot].toInt() and 0xFF
+            if (currMetadata == 0) {
+                metadataArr[slot] = newMetadata.toByte()
                 kvArr[slot] = newEntry
                 return
             }
 
-            val currSlotDistance = currEntry.key().slotDistance(slot, mask)
-            if (newSlotDistance > currSlotDistance) {
+            if ((newMetadata and PSL_MASK) > (currMetadata and PSL_MASK)) {
+                metadataArr[slot] = newMetadata.toByte()
+                newMetadata = currMetadata
+                val currEntry = kvArr[slot]
                 kvArr[slot] = newEntry
                 newEntry = currEntry
-                newSlotDistance = currSlotDistance
             }
 
             slot = (slot + 1) and mask
-            ++newSlotDistance
-        }
-    }
-
-    // changes emptyEntry to a value not currently in the map, rewriting all empty slots
-    private fun changeEmptyEntry() {
-        val oldEmptyEntry = emptyEntry
-
-        // TODO: should we always try zero first or is that asking for trouble?
-        var candidate = ZERO_ENTRY
-        while (candidate == oldEmptyEntry || findSlot(candidate.key(), { _, entry -> entry == candidate }, { false })) {
-            candidate = Random.nextLong()
+            ++newMetadata
         }
 
-        val kvArr = kvArr
-        for (i in kvArr.indices) {
-            if (kvArr[i] == oldEmptyEntry) kvArr[i] = candidate
+        if ((newMetadata and HASH2_BIT) == 0) {
+            slot = newEntry.key().slot2(mask)
+            newMetadata = HASH2_BIT or 1
         }
-        emptyEntry = candidate
+
+        while (true) {
+            val currMetadata = metadataArr[slot].toInt() and 0xFF
+            if (currMetadata == 0) {
+                kvArr[slot] = newEntry
+                metadataArr[slot] = newMetadata.toByte()
+                return
+            }
+
+            if ((newMetadata and PSL_MASK) > (currMetadata and PSL_MASK)) {
+                metadataArr[slot] = newMetadata.toByte()
+                newMetadata = currMetadata
+                val currEntry = kvArr[slot]
+                kvArr[slot] = newEntry
+                newEntry = currEntry
+            }
+
+            slot = (slot + 1) and mask
+            ++newMetadata
+        }
     }
 
     override operator fun iterator(): MutableFastIterator<MutableInt2IntMap.MutableEntry> = FastEntryIterator()
 
+    public fun forEach(action: (Int, Int) -> Unit) {
+        val metadataArr = metadataArr
+        val kvArr = kvArr
+
+        var slot = metadataArr.size - 1
+        while (slot >= 0) {
+            if (metadataArr[slot] != 0.toByte()) {
+                val entry = kvArr[slot]
+                action(entry.key(), entry.value())
+            }
+            --slot
+        }
+    }
+
     private open inner class SlotIterator {
+        private val metadataArr = this@Int2IntHashMap.metadataArr
         private val kvArr = this@Int2IntHashMap.kvArr
-        private var emptyEntry = this@Int2IntHashMap.emptyEntry
-        private val mask = kvArr.size - 1
+        private val mask = metadataArr.size - 1
 
         private var slotsLeft = size
         private var slot = kvArr.size
@@ -368,13 +437,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         fun updateValue(newValue: Int) {
             check(previousSlot != -1)
             if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()
-
-            val newEntry = arrayEntry(key(), newValue)
-            if (newEntry == emptyEntry) {
-                this@Int2IntHashMap.changeEmptyEntry()
-                emptyEntry = this@Int2IntHashMap.emptyEntry
-            }
-            kvArr[previousSlot] = newEntry
+            kvArr[previousSlot] = arrayEntry(key(), newValue)
         }
 
         fun remove() {
@@ -384,8 +447,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
             removeSlot(previousSlot)
             previousSlot = -1
 
-            // if removal wrapped all the way around to our next slot then we need to adjust
-            if (kvArr[slot] == emptyEntry) {
+            // if backward shift moved the entry at our next slot one position left, back up to follow it
+            if (metadataArr[slot] == 0.toByte()) {
                 slot = (slot - 1) and mask
             }
         }
@@ -393,7 +456,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         private fun decrement() {
             do {
                 slot = (slot - 1) and mask
-            } while (kvArr[slot] == emptyEntry)
+            } while (metadataArr[slot] == 0.toByte())
         }
     }
 
@@ -443,7 +506,9 @@ public class Int2IntHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private fun Int.slot(mask: Int): Int {
+    private fun Int.slot1(mask: Int): Int = hashCode() and mask
+
+    private fun Int.slot2(mask: Int): Int {
         var h = hashCode()
         h = h xor (h ushr 16)
         h = h * PHI
@@ -451,26 +516,18 @@ public class Int2IntHashMap @JvmOverloads constructor(
         return h and mask
     }
 
-    private fun Int.slotDistance(slot: Int, mask: Int): Int {
-        var h = hashCode()
-        h = h xor (h ushr 16)
-        h = h * PHI
-        h = h xor (h ushr 16)
-        return (slot - h) and mask
-    }
-
     private fun Long.key(): Int = toInt()
     private fun Long.value(): Int = (this shr (8 * Int.SIZE_BYTES)).toInt()
     private fun arrayEntry(key: Int, value: Int): Long = (value.toLong() shl (8 * Int.SIZE_BYTES)) or (key.toLong() and 0xFFFFFFFFL)
 
     internal companion object {
-        // the value of a field in an uninitialized primitive array
-        @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-        private const val ZERO_ENTRY: Long = 0.toLong()
-
-        private val EMPTY_ARRAY = longArrayOf(ZERO_ENTRY)
+        private val EMPTY_METADATA_ARRAY = ByteArray(1)
+        private val EMPTY_KV_ARRAY = LongArray(1)
 
         private const val PHI: Int = 0x9E3779B9.toInt()
+
+        private const val HASH2_BIT = 0x80
+        private const val PSL_MASK  = 0x7F
 
         internal const val DEFAULT_INITIAL_CAPACITY = 7
 
