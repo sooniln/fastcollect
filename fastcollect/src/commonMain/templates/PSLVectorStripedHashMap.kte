@@ -10,17 +10,12 @@ import io.github.sooniln.fastcollect.${subpackage}.Mutable${KVType}Iterator
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
-import java.lang.foreign.MemorySegment
-import java.lang.foreign.ValueLayout
-import java.nio.ByteOrder
 
 /**
  * A [HashMap](https://en.wikipedia.org/wiki/Hash_table) implementation for storing ${KVType} to ${KVType}
  * relationships using Robin Hood hashing with a parallel PSL (Probe Sequence Length) [ByteArray].
  *
  * Each slot in the PSL array stores PSL+1 (displacement + 1) for occupied slots, or 0 for empty slots.
- * Using 0 as the empty sentinel means the JVM's default ByteArray zero-initialization is sufficient, and
- * the empty check is subsumed by the Robin Hood early-exit condition in SWAR without any extra mask term.
  * Valid stored values are 1..128 (PSL 0..127); 0 means empty.
  * This enables:
  * - O(1) amortized early exit during lookup: the first slot where stored PSL+1 < expected PSL+1
@@ -54,9 +49,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
     private var kvArr = EMPTY_KV_ARRAY
 
     // parallel PSL array: pslArr[slot] == 0 means empty; stored value is PSL+1 (1..128 for PSL 0..127).
-    // allocated as N + SWAR_WIDTH - 1 bytes; pslArr[N + j] == pslArr[j] for j in 0..<SWAR_WIDTH - 1 (mirror region)
     private var pslArr = EMPTY_PSL_ARRAY
-    private var pslArrSegment: MemorySegment = MemorySegment.ofArray(pslArr)
 
     // use threshold to store the initial size before we allocate anything, after that it's the size at which we rehash
     private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
@@ -89,10 +82,10 @@ public class ${Name}HashMap @JvmOverloads constructor(
     override fun containsKey(key: ${KVType}): Boolean = findSlot(key, { _, _ -> true }, { false })
 
     override fun containsValue(value: ${KVType}): Boolean {
-        val kvArr = kvArr
         val pslArr = pslArr
-        for (slot in kvArr.indices) {
-            if (kvArr[slot].value() == value && pslArr[slot].toInt() != 0) return true
+        val kvArr = kvArr
+        for (slot in pslArr.indices) {
+            if (pslArr[slot].toInt() != 0 && kvArr[slot].value() == value) return true
         }
         return false
     }
@@ -106,7 +99,6 @@ public class ${Name}HashMap @JvmOverloads constructor(
         val pslArr = pslArr
         val mask = kvArr.size - 1
 
-        val n = kvArr.size
         var newEntry = arrayEntry(key, value)
         var slot = key.slot(mask)
         var newPsl: Byte = 1
@@ -114,7 +106,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
             val currPsl = pslArr[slot]
             if (currPsl.toInt() == 0) {
                 kvArr[slot] = newEntry
-                pslArr.writePsl(slot, newPsl, n)
+                pslArr[slot] = newPsl
                 ++size
                 return defaultValue
             }
@@ -128,7 +120,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
             // Robin Hood: steal from the richer entry (lower displacement)
             if (newPsl > currPsl) {
                 kvArr[slot] = newEntry
-                pslArr.writePsl(slot, newPsl, n)
+                pslArr[slot] = newPsl
                 newEntry = currEntry
                 newPsl = currPsl
             }
@@ -156,32 +148,23 @@ public class ${Name}HashMap @JvmOverloads constructor(
     }
 
     private inline fun <T> findSlot(key: ${KVType}, onFind: (slot: Int, entry: ${ArrayType}) -> T, onFail: () -> T): T {
-        val pslArrSegment = pslArrSegment
+        val pslArr = pslArr
         val kvArr = kvArr
         val mask = kvArr.size - 1
 
         var slot = key.slot(mask)
-        // initial expected vector [1,2,3,4,5,6,7,8]: stored PSL+1 we'd expect at each lane for slotDistance=0
-        var expectedLong = INC_VEC + BROADCAST_BYTE
+        var expectedPsl: Byte = 1
         while (true) {
-            val storedLong = pslArrSegment.get(LONG_LAYOUT, slot.toLong())
-            val sub = (storedLong or MSB_MASK) - expectedLong
-
-            // empty slots (stored=0) and slots with stored < expected both produce sub_i < 0x80 → bit 7 of sub.inv() set
-            val earlyExit = sub.inv() and MSB_MASK
-
-            val subFlipped = sub xor MSB_MASK
-            var candidates = (subFlipped - BROADCAST_BYTE) and subFlipped.inv() and MSB_MASK
-            while (candidates != 0L) {
-                val index = (slot + (candidates.countTrailingZeroBits() ushr 3)) and mask
-                val entry = kvArr[index]
-                if (entry.key() == key) return onFind(index, entry)
-                candidates = candidates and (candidates - 1)
+            val storedPsl = pslArr[slot]
+            if (storedPsl == expectedPsl) {
+                val entry = kvArr[slot]
+                if (entry.key() == key) return onFind(slot, entry)
+            } else if (storedPsl < expectedPsl) {
+                return onFail()
             }
 
-            if (earlyExit != 0L) return onFail()
-            slot = (slot + SWAR_WIDTH) and mask
-            expectedLong += EXPECTED_STEP
+            slot = (slot + 1) and mask
+            ++expectedPsl
         }
     }
 
@@ -189,18 +172,17 @@ public class ${Name}HashMap @JvmOverloads constructor(
         val kvArr = kvArr
         val pslArr = pslArr
         val mask = kvArr.size - 1
-        val n = kvArr.size
 
         // backward shift: pull each following entry one slot back while it has PSL > 0 (stored > 1)
         var currSlot = slot
         var nextSlot = (currSlot + 1) and mask
         while (pslArr[nextSlot] > 1) {
             kvArr[currSlot] = kvArr[nextSlot]
-            pslArr.writePsl(currSlot, (pslArr[nextSlot] - 1).toByte(), n)
+            pslArr[currSlot] = (pslArr[nextSlot] - 1).toByte()
             currSlot = nextSlot
             nextSlot = (nextSlot + 1) and mask
         }
-        pslArr.writePsl(currSlot, 0, n)
+        pslArr[currSlot] = 0
         --size
     }
 
@@ -231,7 +213,6 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
         kvArr = from.kvArr.copyOf()
         pslArr = from.pslArr.copyOf()
-        pslArrSegment = MemorySegment.ofArray(pslArr)
         size = from.size
         threshold = from.threshold
     }
@@ -280,7 +261,6 @@ public class ${Name}HashMap @JvmOverloads constructor(
             if (kvArr !== EMPTY_KV_ARRAY) {
                 kvArr = EMPTY_KV_ARRAY
                 pslArr = EMPTY_PSL_ARRAY
-                pslArrSegment = MemorySegment.ofArray(pslArr)
                 threshold = DEFAULT_INITIAL_CAPACITY
             }
             return
@@ -293,7 +273,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
         if (kvArr.size == newLength) return
 
         val newKvArr = ${ArrayType}Array(newLength)
-        val newPslArr = ByteArray(newLength + SWAR_WIDTH - 1)  // zero-initialized; 0 means empty
+        val newPslArr = ByteArray(newLength)  // zero-initialized; 0 means empty
         val newMask = newKvArr.size - 1
 
         val oldKvArr = kvArr
@@ -301,11 +281,9 @@ public class ${Name}HashMap @JvmOverloads constructor(
         for (slot in oldKvArr.indices) {
             if (oldPslArr[slot].toInt() != 0) putRehashing(newKvArr, newPslArr, newMask, oldKvArr[slot])
         }
-        for (j in 0 ..< SWAR_WIDTH - 1) newPslArr[newLength + j] = newPslArr[j]
 
         kvArr = newKvArr
         pslArr = newPslArr
-        pslArrSegment = MemorySegment.ofArray(pslArr)
 
         // threshold must always maintain the invariant of at least 1 slot being open
         val newCapacity = newLength / 2
@@ -314,7 +292,6 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
     // assumes key doesn't exist in array
     private fun putRehashing(kvArr: ${ArrayType}Array, pslArr: ByteArray, mask: Int, entry: ${ArrayType}) {
-        val n = mask + 1
         var slot = entry.key().slot(mask)
         var newEntry = entry
         var newPsl: Byte = 1
@@ -322,13 +299,13 @@ public class ${Name}HashMap @JvmOverloads constructor(
             val currPsl = pslArr[slot]
             if (currPsl.toInt() == 0) {
                 kvArr[slot] = newEntry
-                pslArr.writePsl(slot, newPsl, n)
+                pslArr[slot] = newPsl
                 return
             }
             if (newPsl > currPsl) {
                 val tmpEntry = kvArr[slot]
                 kvArr[slot] = newEntry
-                pslArr.writePsl(slot, newPsl, n)
+                pslArr[slot] = newPsl
                 newEntry = tmpEntry
                 newPsl = currPsl
             }
@@ -457,32 +434,29 @@ public class ${Name}HashMap @JvmOverloads constructor(
         h = h * PHI
         h = h xor (h ushr 16)
         return h and mask
+
+        /*var h = hashCode()
+        h = h xor (h ushr 16)
+        h = h * MURMUR3_C1
+        h = h xor (h ushr 13)
+        h = h * MURMUR3_C2
+        h = h xor (h ushr 16)
+        return h and mask*/
     }
 
     private fun ${ArrayType}.key(): ${KVType} = to${KVType}()
     private fun ${ArrayType}.value(): ${KVType} = (this shr (8 * ${KVType}.SIZE_BYTES)).to${KVType}()
     private fun arrayEntry(key: ${KVType}, value: ${KVType}): ${ArrayType} = (value.to${ArrayType}() shl (8 * ${KVType}.SIZE_BYTES)) or (key.toLong() and 0xFFFFFFFFL)
 
-    private fun ByteArray.writePsl(slot: Int, value: Byte, n: Int) {
-        this[slot] = value
-        if (slot < SWAR_WIDTH - 1) this[n + slot] = value
-    }
-
     internal companion object {
         private val EMPTY_KV_ARRAY = ${lowerArrayType}ArrayOf(0.to${ArrayType}())
 
-        private const val SWAR_WIDTH = Long.SIZE_BYTES
-
-        // stored value 0 means empty; SWAR reads on an empty table (size=1) must be in-bounds
-        private val EMPTY_PSL_ARRAY = ByteArray(SWAR_WIDTH)
-
-        private const val BROADCAST_BYTE: Long = 0x0101010101010101L
-        private const val INC_VEC:        Long = 0x0706050403020100L
-        private const val MSB_MASK:       Long = BROADCAST_BYTE * 0x80L
-        private const val EXPECTED_STEP:  Long = BROADCAST_BYTE * SWAR_WIDTH.toLong()
-        private val LONG_LAYOUT = ValueLayout.JAVA_LONG_UNALIGNED.withOrder(ByteOrder.LITTLE_ENDIAN)
+        // stored value 0 means empty
+        private val EMPTY_PSL_ARRAY = ByteArray(1)
 
         private const val PHI: Int = 0x9E3779B9.toInt()
+        private const val MURMUR3_C1: Int = 0x85ebca6b.toInt()
+        private const val MURMUR3_C2: Int = 0xc2b2ae35.toInt()
 
         internal const val DEFAULT_INITIAL_CAPACITY = 7
 

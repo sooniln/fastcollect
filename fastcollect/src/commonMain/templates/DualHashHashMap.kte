@@ -82,8 +82,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
     override fun containsValue(value: ${KVType}): Boolean {
         val kvArr = kvArr
         val metadataArr = metadataArr
-        for (slot in kvArr.indices) {
-            if (kvArr[slot].value() == value && metadataArr[slot] != 0.toByte()) return true
+        for (slot in metadataArr.indices) {
+            if (metadataArr[slot] != 0.toByte() && kvArr[slot].value() == value) return true
         }
         return false
     }
@@ -102,7 +102,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
         var slot = key.slot1(mask)
 
         // hash 1 insertion
-        for (i in 0 until HALF_CACHE_LINE_SIZE) {
+        for (i in 0 until HASH1_ITERATIONS) {
             val currMetadata = metadataArr[slot].toInt() and 0xFF
             if (currMetadata == 0) {
                 metadataArr[slot] = newMetadata.toByte()
@@ -183,32 +183,21 @@ public class ${Name}HashMap @JvmOverloads constructor(
         val kvArr = kvArr
         val mask = metadataArr.size - 1
 
-        // Phase 1: cache-line scan from hash1(K).
-        // metadata == distance: PSL+1 matches expected; implies metadata > 0 (hash1), since hash2 bytes
-        // are negative as signed Int and distance is always positive.
-        // An empty slot breaks early; cannot return onFail() — K may still be a hash2 element.
+        // Phase 1: scan from hash1(K). cannot return onFail() — K may still be a hash2 element.
         var slot = key.slot1(mask)
-        for (distance in 1..HALF_CACHE_LINE_SIZE) {
-            if (metadataArr[slot].toInt() == distance && kvArr[slot].key() == key) {
-                return onFind(slot, kvArr[slot])
-            }
-
-            slot = (slot + 1) and mask
+        if (metadataArr[slot] == 1.toByte() && kvArr[slot].key() == key) {
+            return onFind(slot, kvArr[slot])
         }
 
         // Phase 2: linear probe from hash2(K) with Robin Hood early termination.
-        // (metadata and 0x7F) extracts PSL+1 uniformly with a single mask for both hash types.
-        // metadata < 0 filters key comparisons to hash2 elements only.
-        // Empty always triggers onFail() — Robin Hood ordering guarantees K absent past empty in phase 2.
         slot = key.slot2(mask)
         var currDistance = 1
         while (true) {
-            val metadata = metadataArr[slot].toInt()
-            val slotDistance = metadata and PSL_MASK
-            if (slotDistance < currDistance) {
-                return onFail()
-            } else if (slotDistance == currDistance && metadata < 0 && kvArr[slot].key() == key) {
+            val metadata = metadataArr[slot].toInt() and 0xFF
+            if (metadata == (currDistance or HASH2_BIT) && kvArr[slot].key() == key) {
                 return onFind(slot, kvArr[slot])
+            } else if ((metadata and PSL_MASK) < currDistance) {
+                return onFail()
             }
 
             slot = (slot + 1) and mask
@@ -346,7 +335,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
         var newMetadata = 1
         var slot = newEntry.key().slot1(mask)
 
-        for (i in 0 until HALF_CACHE_LINE_SIZE) {
+        for (i in 0 until HASH1_ITERATIONS) {
             val currMetadata = metadataArr[slot].toInt() and 0xFF
             if (currMetadata == 0) {
                 metadataArr[slot] = newMetadata.toByte()
@@ -531,8 +520,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
         internal const val DEFAULT_INITIAL_CAPACITY = 7
 
-        private const val CACHE_LINE_SIZE = 64 / ${ArrayType}.SIZE_BYTES
-        private const val HALF_CACHE_LINE_SIZE = CACHE_LINE_SIZE / 2
+        private const val CACHE_LINE_SIZE = 64 / Byte.SIZE_BYTES
+        private const val HASH1_ITERATIONS = 1
 
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE

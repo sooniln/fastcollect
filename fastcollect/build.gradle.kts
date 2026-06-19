@@ -114,6 +114,7 @@ private object Generate {
             "HashMap.kte",
         )
         val Expansions = listOf(
+            //mapOf("KeyType" to "Int", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
             mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
             mapOf("KeyType" to "Int", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
             mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
@@ -126,6 +127,7 @@ private object Generate {
             "StripedHashMap.kte",
         )
         val Expansions = listOf<Map<String, Any>>(
+            //mapOf("KVType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
             mapOf("KVType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
         )
     }
@@ -266,7 +268,7 @@ private fun List<Map<String, Any>>.generateFullExpansion(): List<Map<String, Any
     }
 }
 
-private fun Copy.generate(
+private fun Sync.generate(
         inputFiles: List<String>,
         expansions: List<Map<String, Any>>,
         subpackage: (String, Map<String, Any>) -> String = { _, expansion -> expansion["subpackage"] as String },
@@ -282,7 +284,7 @@ private fun Copy.generate(
     }
 }
 
-tasks.register<Copy>("GenerateCollections") {
+tasks.register<Sync>("GenerateCollections") {
     description = "Generates source code for primitively typed collection classes from templates."
     group = "generate"
     into(Generate.OUT_DIR)
@@ -407,7 +409,7 @@ kotlin {
     applyDefaultHierarchyTemplate()
     sourceSets {
         commonMain {
-            kotlin.srcDir(tasks.named<Copy>("GenerateCollections"))
+            kotlin.srcDir(tasks.named<Sync>("GenerateCollections"))
         }
 
         commonTest.dependencies {
