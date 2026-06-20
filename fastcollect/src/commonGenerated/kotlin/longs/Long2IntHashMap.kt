@@ -137,6 +137,47 @@ public class Long2IntHashMap @JvmOverloads constructor(
         }
     }
 
+    override fun set(key: Long, value: Int) {
+        resizeIfNecessary()
+
+        if (key == emptyKey) changeEmptyKey()
+
+        val keysArr = keysArr
+        val valuesArr = valuesArr
+        val emptyKey = emptyKey
+        val mask = keysArr.size - 1
+
+        var newKey = key
+        var newValue: Int = value
+
+        var slot = key.slot(mask)
+        var newSlotDistance = 0
+        while (true) {
+            val currKey = keysArr[slot]
+            if (currKey == emptyKey) {
+                keysArr[slot] = newKey
+                valuesArr[slot] = newValue
+                ++size
+                return
+            } else if (currKey == newKey) {
+                valuesArr[slot] = newValue
+            }
+
+            val currSlotDistance = currKey.slotDistance(slot, mask)
+            if (newSlotDistance > currSlotDistance) {
+                val currValue = valuesArr[slot]
+                keysArr[slot] = newKey
+                valuesArr[slot] = newValue
+                newKey = currKey
+                newValue = currValue
+                newSlotDistance = currSlotDistance
+            }
+
+            slot = (slot + 1) and mask
+            ++newSlotDistance
+        }
+    }
+
     override fun remove(key: Long): Int {
         return findSlot(
             key,
@@ -492,20 +533,30 @@ public class Long2IntHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
+    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
     private fun Long.slot(mask: Int): Int {
-        var h = hashCode()
-        h = h xor (h ushr 16)
-        h = h * PHI
-        h = h xor (h ushr 16)
-        return h and mask
+        if ((this.toInt() or mask) == mask) {
+            return this.toInt()
+        } else {
+            var h = hashCode()
+            h = h xor (h ushr 16)
+            h = h * PHI
+            h = h xor (h ushr 16)
+            return h and mask
+        }
     }
 
+    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
     private fun Long.slotDistance(slot: Int, mask: Int): Int {
-        var h = hashCode()
-        h = h xor (h ushr 16)
-        h = h * PHI
-        h = h xor (h ushr 16)
-        return (slot - h) and mask
+        if ((this.toInt() or mask) == mask) {
+            return (slot - this.toInt()) and mask
+        } else {
+            var h = hashCode()
+            h = h xor (h ushr 16)
+            h = h * PHI
+            h = h xor (h ushr 16)
+            return (slot - h) and mask
+        }
     }
 
     internal companion object {

@@ -121,6 +121,41 @@ public class ${Name}HashMap @JvmOverloads constructor(
         }
     }
 
+    override fun set(key: ${KVType}, value: ${KVType}) {
+        resizeIfNecessary()
+
+        var newEntry = arrayEntry(key, value)
+        if (newEntry == emptyEntry) changeEmptyEntry()
+
+        val kvArr = kvArr
+        val emptyEntry = emptyEntry
+        val mask = kvArr.size - 1
+
+        var slot = key.slot(mask)
+        var newSlotDistance = 0
+        while (true) {
+            val currEntry = kvArr[slot]
+            if (currEntry == emptyEntry) {
+                kvArr[slot] = newEntry
+                ++size
+                return
+            } else if(currEntry.key() == newEntry.key()) {
+                kvArr[slot] = newEntry
+                return
+            }
+
+            val currSlotDistance = currEntry.key().slotDistance(slot, mask)
+            if (newSlotDistance > currSlotDistance) {
+                kvArr[slot] = newEntry
+                newEntry = currEntry
+                newSlotDistance = currSlotDistance
+            }
+
+            slot = (slot + 1) and mask
+            ++newSlotDistance
+        }
+    }
+
     override fun remove(key: ${KVType}): ${KVType} {
         return findSlot(
             key,
@@ -457,20 +492,30 @@ public class ${Name}HashMap @JvmOverloads constructor(
         override fun toString(): String = "\$key=\$value"
     }
 
+    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
     private fun ${KVType}.slot(mask: Int): Int {
-        var h = hashCode()
-        h = h xor (h ushr 16)
-        h = h * PHI
-        h = h xor (h ushr 16)
-        return h and mask
+        if ((this.toInt() or mask) == mask) {
+            return this.toInt()
+        } else {
+            var h = hashCode()
+            h = h xor (h ushr 16)
+            h = h * PHI
+            h = h xor (h ushr 16)
+            return h and mask
+        }
     }
 
+    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
     private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int {
-        var h = hashCode()
-        h = h xor (h ushr 16)
-        h = h * PHI
-        h = h xor (h ushr 16)
-        return (slot - h) and mask
+        if ((this.toInt() or mask) == mask) {
+            return (slot - this.toInt()) and mask
+        } else {
+            var h = hashCode()
+            h = h xor (h ushr 16)
+            h = h * PHI
+            h = h xor (h ushr 16)
+            return (slot - h) and mask
+        }
     }
 
     private fun ${ArrayType}.key(): ${KVType} = to${KVType}()

@@ -75,8 +75,7 @@ private val exclusiveServiceProvider = gradle.sharedServices.registerIfAbsent("e
     maxParallelUsages.set(1)
 }
 
-private val jmhPow2: Provider<String> = providers.gradleProperty("jmhPow2")
-private val jmhLoadFactor: Provider<String> = providers.gradleProperty("jmhLoadFactor")
+private val jmhSize: Provider<String> = providers.gradleProperty("jmhSize")
 private val jmhOrder: Provider<String> = providers.gradleProperty("jmhOrder")
 
 tasks.withType<JMHTask> {
@@ -88,9 +87,8 @@ tasks.withType<JMHTask> {
     usesService(exclusiveServiceProvider)
 
     // forward various parameters to JMH
-    if (jmhPow2.isPresent) benchmarkParameters.put("pow2", decodeArgs(jmhPow2.get()))
-    if (jmhLoadFactor.isPresent) benchmarkParameters.put("loadFactor", decodeArgs(jmhLoadFactor.get()))
     if (jmhOrder.isPresent) benchmarkParameters.put("order", decodeArgs(jmhOrder.get()))
+    if (jmhSize.isPresent) benchmarkParameters.put("size", decodeArgs(jmhSize.get()))
 }
 
 private fun decodeArgs(args: String): ListProperty<String> {

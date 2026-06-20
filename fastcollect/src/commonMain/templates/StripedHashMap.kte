@@ -126,6 +126,47 @@ public class ${Name}HashMap @JvmOverloads constructor(
         }
     }
 
+    override fun set(key: ${KVType}, value: ${KVType}) {
+        resizeIfNecessary()
+
+        if (key == emptyKey) changeEmptyKey()
+
+        val kvArr = kvArr
+        val emptyKey = emptyKey
+        val mask = kvArr.size - 1
+
+        var newKey = key
+        var newValue = value
+
+        var slot = key.slot(mask)
+        var newSlotDistance = 0
+        while (true) {
+            val currKey = kvArr[slot]
+            if (currKey == emptyKey) {
+                kvArr[slot] = newKey
+                kvArr[slot + 1] = newValue
+                ++size
+                return
+            } else if(currKey == newKey) {
+                kvArr[slot + 1] = newValue
+                return
+            }
+
+            val currSlotDistance = currKey.slotDistance(slot, mask)
+            if (newSlotDistance > currSlotDistance) {
+                val currValue = kvArr[slot + 1]
+                kvArr[slot] = newKey
+                kvArr[slot + 1] = newValue
+                newKey = currKey
+                newValue = currValue
+                newSlotDistance = currSlotDistance
+            }
+
+            slot = (slot + 2) and mask
+            newSlotDistance += 2
+        }
+    }
+
     override fun remove(key: ${KVType}): ${KVType} {
         return findSlot(
             key,
@@ -460,20 +501,30 @@ public class ${Name}HashMap @JvmOverloads constructor(
         override fun toString(): String = "\$key=\$value"
     }
 
+    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
     private fun ${KVType}.slot(mask: Int): Int {
-        var h = hashCode()
-        h = h xor (h ushr 16)
-        h = h * PHI
-        h = h xor (h ushr 16)
-        return h and mask and 1.inv()
+        if ((this.toInt() or mask) == mask) {
+            return this.toInt()
+        } else {
+            var h = hashCode()
+            h = h xor (h ushr 16)
+            h = h * PHI
+            h = h xor (h ushr 16)
+            return h and mask and 1.inv()
+        }
     }
 
+    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
     private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int {
-        var h = hashCode()
-        h = h xor (h ushr 16)
-        h = h * PHI
-        h = h xor (h ushr 16)
-        return (slot - (h and 1.inv())) and mask
+        if ((this.toInt() or mask) == mask) {
+            return (slot - this.toInt()) and mask
+        } else {
+            var h = hashCode()
+            h = h xor (h ushr 16)
+            h = h * PHI
+            h = h xor (h ushr 16)
+            return (slot - (h and 1.inv())) and mask
+        }
     }
 
     internal companion object {

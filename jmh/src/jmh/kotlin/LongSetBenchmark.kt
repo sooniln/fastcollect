@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit
  */
 @Fork(1)
 @Timeout(time = 10, timeUnit = TimeUnit.SECONDS)
-@Warmup(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 10, time = 200, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class LongSetBenchmark {
@@ -35,18 +35,13 @@ open class LongSetBenchmark {
     @State(Scope.Benchmark)
     open class BaseState {
 
-        @Param("12", "14", "16", "18", "20", "22", "24")
-        var pow2: Int = 12
+        @Param("514","766","1026","1534","2050","3070","4098","6142","8194","12286","16386","24574","32770","49150","65538","98302","131074","196606","262146","393214","524290","786430","1048578","1572862","2097154","3145726","4194306","6291454","8388610","12582910","16777218","25165822","33554434","50331646","67108866","100663294")
+        var size: Int = 514
 
-        @Param(".50", ".75")
-        var loadFactor: Float = .75f
-
-        var size: Int = 0
         lateinit var set: LongHashSet
 
         @Setup(Level.Trial)
         open fun setup() {
-            size = ((1 shl pow2) * loadFactor).toInt() - 2
             set = LongHashSet()
         }
     }

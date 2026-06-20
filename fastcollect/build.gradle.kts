@@ -137,7 +137,7 @@ private object Generate {
             "VectorStripedHashMap.kte",
         )
         val Expansions = listOf<Map<String, Any>>(
-            //mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
+            mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
         )
     }
 
@@ -147,15 +147,6 @@ private object Generate {
         )
         val Expansions = listOf<Map<String, Any>>(
             //mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
-        )
-    }
-
-    object DualHashHashMapTypes {
-        val Files = listOf(
-            "DualHashHashMap.kte",
-        )
-        val Expansions = listOf<Map<String, Any>>(
-            mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
         )
     }
 
@@ -352,12 +343,6 @@ tasks.register<Sync>("GenerateCollections") {
     generate(
         Generate.PSLVectorStripedHashMapTypes.Files,
         Generate.PSLVectorStripedHashMapTypes.Expansions.generateFullExpansion()) { _, expansion ->
-        (expansion["Name"] as String) + "HashMap.kt"
-    }
-
-    generate(
-        Generate.DualHashHashMapTypes.Files,
-        Generate.DualHashHashMapTypes.Expansions.generateFullExpansion()) { _, expansion ->
         (expansion["Name"] as String) + "HashMap.kt"
     }
 

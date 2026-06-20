@@ -109,21 +109,58 @@ public class ${Name}HashMap @JvmOverloads constructor(
                 pslArr[slot] = newPsl
                 ++size
                 return defaultValue
+            } else if (currPsl == newPsl) {
+                val currEntry = kvArr[slot]
+                if (currEntry.key() == newEntry.key()) {
+                    val oldValue = currEntry.value()
+                    kvArr[slot] = newEntry
+                    return oldValue
+                }
             }
-            val currEntry = kvArr[slot]
-            if (currEntry.key() == newEntry.key()) {
-                val oldValue = currEntry.value()
-                kvArr[slot] = newEntry
-                // PSL is unchanged: same slot, same key
-                return oldValue
-            }
-            // Robin Hood: steal from the richer entry (lower displacement)
+
             if (newPsl > currPsl) {
+                val currEntry = kvArr[slot]
                 kvArr[slot] = newEntry
                 pslArr[slot] = newPsl
                 newEntry = currEntry
                 newPsl = currPsl
             }
+
+            slot = (slot + 1) and mask
+            ++newPsl
+        }
+    }
+
+    override fun set(key: ${KVType}, value: ${KVType}) {
+        resizeIfNecessary()
+
+        val kvArr = kvArr
+        val pslArr = pslArr
+        val mask = kvArr.size - 1
+
+        var newEntry = arrayEntry(key, value)
+        var slot = key.slot(mask)
+        var newPsl: Byte = 1
+        while (true) {
+            val currPsl = pslArr[slot]
+            if (currPsl == 0.toByte()) {
+                kvArr[slot] = newEntry
+                pslArr[slot] = newPsl
+                ++size
+                return
+            } else if (currPsl == newPsl && kvArr[slot].key() == newEntry.key()) {
+                kvArr[slot] = newEntry
+                return
+            }
+
+            if (newPsl > currPsl) {
+                val currEntry = kvArr[slot]
+                kvArr[slot] = newEntry
+                pslArr[slot] = newPsl
+                newEntry = currEntry
+                newPsl = currPsl
+            }
+
             slot = (slot + 1) and mask
             ++newPsl
         }
@@ -428,20 +465,17 @@ public class ${Name}HashMap @JvmOverloads constructor(
         override fun toString(): String = "\$key=\$value"
     }
 
+    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
     private fun ${KVType}.slot(mask: Int): Int {
-        var h = hashCode()
-        h = h xor (h ushr 16)
-        h = h * PHI
-        h = h xor (h ushr 16)
-        return h and mask
-
-        /*var h = hashCode()
-        h = h xor (h ushr 16)
-        h = h * MURMUR3_C1
-        h = h xor (h ushr 13)
-        h = h * MURMUR3_C2
-        h = h xor (h ushr 16)
-        return h and mask*/
+        if ((this.toInt() or mask) == mask) {
+            return this.toInt()
+        } else {
+            var h = hashCode()
+            h = h xor (h ushr 16)
+            h = h * PHI
+            h = h xor (h ushr 16)
+            return h and mask
+        }
     }
 
     private fun ${ArrayType}.key(): ${KVType} = to${KVType}()
