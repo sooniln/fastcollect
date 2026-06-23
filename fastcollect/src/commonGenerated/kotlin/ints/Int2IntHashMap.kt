@@ -7,6 +7,10 @@ import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.MutableFastIterator
 import io.github.sooniln.fastcollect.ints.MutableIntCollection
 import io.github.sooniln.fastcollect.ints.MutableIntIterator
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
@@ -26,14 +30,10 @@ import kotlin.random.Random
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  */
 public class Int2IntHashMap @JvmOverloads constructor(
-    capacity: Int = DEFAULT_INITIAL_CAPACITY,
+    capacity: Int = 0,
     /** The default value should be the value that is ideally least likely to occur in the map. */
     private val defaultValue: Int = Int.MIN_VALUE,
 ) : AbstractMutableInt2IntMap() {
-
-    init {
-        require(capacity >= 0) { "Capacity must be >= 0" }
-    }
 
     public constructor(map: Int2IntMap): this() { putAll(map) }
 
@@ -43,11 +43,16 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     private var emptyEntry = ZERO_ENTRY
 
-    // use threshold to store the initial size before we allocate anything, after that it's the size at which we rehash
-    private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
+    // threshold + size == capacity (rehash once threshold <= 0, if we haven't allocated yet then threshold.inv() is
+    // our initial capacity)
+    private var threshold = MIN_INITIAL_CAPACITY.inv()
 
     override var size: Int = 0
         private set
+
+    init {
+        ensureCapacity(capacity)
+    }
 
     override fun isDefaultValue(value: Int): Boolean = value == defaultValue
 
@@ -56,10 +61,10 @@ public class Int2IntHashMap @JvmOverloads constructor(
      * backing array.
      */
     public fun ensureCapacity(capacity: Int) {
-        require(capacity >= 0) { "The expected number of elements must be nonnegative" }
+        require(capacity >= 0) { "Capacity must be >= 0" }
         if (kvArr === EMPTY_ARRAY) {
-            threshold = max(threshold, capacity)
-        } else if (capacity > threshold) {
+            threshold = min(threshold, capacity.inv())
+        } else if (capacity > threshold + size) {
             rehash(capacity)
         }
     }
@@ -75,85 +80,36 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     override fun containsValue(value: Int): Boolean {
         val kvArr = kvArr
-        val emptyEntry = emptyEntry
         for (slot in kvArr.indices) {
             val entry = kvArr[slot]
-            if (entry.value() == value && entry != emptyEntry) return true
+            if (entry != emptyEntry && entry.value() == value) return true
         }
         return false
     }
 
     override fun get(key: Int): Int = findSlot(key, { _, entry -> entry.value() }, { defaultValue })
 
+    public fun getOrDefault(key: Int, default: Int): Int = findSlot(key, { _, entry -> entry.value() }, { default })
+
     override fun put(key: Int, value: Int): Int {
-        resizeIfNecessary()
+        var returnValue = ZERO
+        set(key, {
+            returnValue = defaultValue
+            value
+        }, { entry ->
+            returnValue = entry.value()
+            value
+        })
+        return returnValue
+    }
 
-        var newEntry = arrayEntry(key, value)
-        if (newEntry == emptyEntry) changeEmptyEntry()
-
-        val kvArr = kvArr
-        val emptyEntry = emptyEntry
-        val mask = kvArr.size - 1
-
-        var slot = key.slot(mask)
-        var newSlotDistance = 0
-        while (true) {
-            val currEntry = kvArr[slot]
-            if (currEntry == emptyEntry) {
-                kvArr[slot] = newEntry
-                ++size
-                return defaultValue
-            } else if(currEntry.key() == newEntry.key()) {
-                val oldValue = currEntry.value()
-                kvArr[slot] = newEntry
-                return oldValue
-            }
-
-            val currSlotDistance = currEntry.key().slotDistance(slot, mask)
-            if (newSlotDistance > currSlotDistance) {
-                kvArr[slot] = newEntry
-                newEntry = currEntry
-                newSlotDistance = currSlotDistance
-            }
-
-            slot = (slot + 1) and mask
-            ++newSlotDistance
-        }
+    public fun putIfAbsent(key: Int, value: Int): Int {
+        set(key, { value }, { entry -> return entry.value() })
+        return defaultValue
     }
 
     override fun set(key: Int, value: Int) {
-        resizeIfNecessary()
-
-        var newEntry = arrayEntry(key, value)
-        if (newEntry == emptyEntry) changeEmptyEntry()
-
-        val kvArr = kvArr
-        val emptyEntry = emptyEntry
-        val mask = kvArr.size - 1
-
-        var slot = key.slot(mask)
-        var newSlotDistance = 0
-        while (true) {
-            val currEntry = kvArr[slot]
-            if (currEntry == emptyEntry) {
-                kvArr[slot] = newEntry
-                ++size
-                return
-            } else if(currEntry.key() == newEntry.key()) {
-                kvArr[slot] = newEntry
-                return
-            }
-
-            val currSlotDistance = currEntry.key().slotDistance(slot, mask)
-            if (newSlotDistance > currSlotDistance) {
-                kvArr[slot] = newEntry
-                newEntry = currEntry
-                newSlotDistance = currSlotDistance
-            }
-
-            slot = (slot + 1) and mask
-            ++newSlotDistance
-        }
+        set(key, { value }, { value })
     }
 
     override fun remove(key: Int): Int {
@@ -169,6 +125,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     override fun clear() {
         if (kvArr !== EMPTY_ARRAY) {
+            threshold += size
             kvArr.fill(emptyEntry)
         }
         size = 0
@@ -176,7 +133,6 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     private inline fun <T> findSlot(key: Int, onFind: (slot: Int, entry: Long) -> T, onFail: () -> T): T {
         val kvArr = kvArr
-        val emptyEntry = emptyEntry
         val mask = kvArr.size - 1
 
         var slot = key.slot(mask)
@@ -206,9 +162,43 @@ public class Int2IntHashMap @JvmOverloads constructor(
         }
     }
 
+    private inline fun set(key: Int, onAdd: () -> Int, onReplace: (entry: Long) -> Int) {
+        if (threshold <= 0) increaseCapacity()
+        if (key == emptyEntry.key()) changeEmptyEntry()
+
+        val kvArr = kvArr
+        val mask = kvArr.size - 1
+
+        var slot = key.slot(mask)
+        var distance = 0
+        while (true) {
+            var currEntry = kvArr[slot]
+            if (currEntry.key() == key) {
+                kvArr[slot] = arrayEntry(key, onReplace(currEntry))
+                return
+            } else if (currEntry == emptyEntry || distance > currEntry.key().slotDistance(slot, mask)) {
+                var newEntry = arrayEntry(key, onAdd())
+
+                while (currEntry != emptyEntry) {
+                    kvArr[slot] = newEntry
+                    newEntry = currEntry
+                    slot = (slot + 1) and mask
+                    currEntry = kvArr[slot]
+                }
+
+                kvArr[slot] = newEntry
+                --threshold
+                ++size
+                return
+            }
+
+            slot = (slot + 1) and mask
+            ++distance
+        }
+    }
+
     private fun removeSlot(slot: Int) {
         val kvArr = kvArr
-        val emptyEntry = emptyEntry
         val mask = kvArr.size - 1
 
         var currSlot = slot
@@ -222,6 +212,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             nextEntry = kvArr[nextSlot]
         }
         kvArr[currSlot] = emptyEntry
+        ++threshold
         --size
     }
 
@@ -230,7 +221,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             val old = iterator()
             resetTo(from)
             for ((key, value) in old) {
-                if (!containsKey(key)) set(key, value)
+                putIfAbsent(key, value)
             }
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
@@ -284,11 +275,12 @@ public class Int2IntHashMap @JvmOverloads constructor(
             .also { _values = it }
     }
 
-    private fun resizeIfNecessary() {
-        if (kvArr === EMPTY_ARRAY) {
-            rehash(threshold)
-        } else if (size >= threshold) {
-            rehash(threshold shl 1)
+    private fun increaseCapacity() {
+        check(threshold <= 0)
+        if (threshold < 0) {
+            rehash(threshold.inv())
+        } else {
+            rehash(size shl 1)
         }
     }
 
@@ -300,13 +292,13 @@ public class Int2IntHashMap @JvmOverloads constructor(
             if (kvArr !== EMPTY_ARRAY) {
                 kvArr = EMPTY_ARRAY
                 emptyEntry = ZERO_ENTRY
-                threshold = DEFAULT_INITIAL_CAPACITY
+                threshold = MIN_INITIAL_CAPACITY.inv()
             }
             return
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1f else .9f
+        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 0.9
 
         val newLength = arraySize(capacity, actualLoadFactor)
         if (kvArr.size == newLength) return
@@ -316,67 +308,66 @@ public class Int2IntHashMap @JvmOverloads constructor(
         val newMask = newKvArr.size - 1
 
         val oldKvArr = kvArr
-        val emptyEntry = emptyEntry
         for (slot in oldKvArr.indices) {
             val entry = oldKvArr[slot]
-            if (entry != emptyEntry) putRehashing(newKvArr, newMask, entry)
+            if (entry != emptyEntry) setRehashing(newKvArr, newMask, entry)
         }
 
         kvArr = newKvArr
 
         // threshold must always maintain the invariant of at least 1 slot being open
         val newCapacity = newLength / 2
-        threshold = min((newCapacity * actualLoadFactor).toInt(), newCapacity - 1)
+        threshold = min((newCapacity * actualLoadFactor).toInt(), newCapacity - 1) - size
     }
 
     // we can assume key doesn't exist in array and that we never insert emptyEntry
-    private fun putRehashing(kvArr: LongArray, mask: Int, entry: Long) {
-        val emptyEntry = emptyEntry
-
+    private fun setRehashing(kvArr: LongArray, mask: Int, entry: Long) {
         var slot = entry.key().slot(mask)
-        var newEntry = entry
-        var newSlotDistance = 0
+        var distance = 0
         while (true) {
-            val currEntry = kvArr[slot]
+            var currEntry = kvArr[slot]
             if (currEntry == emptyEntry) {
+                kvArr[slot] = entry
+                return
+            } else if (distance > currEntry.key().slotDistance(slot, mask)) {
+                var newEntry = entry
+                do {
+                    kvArr[slot] = newEntry
+                    newEntry = currEntry
+                    slot = (slot + 1) and mask
+                    currEntry = kvArr[slot]
+                } while (currEntry != emptyEntry)
+
                 kvArr[slot] = newEntry
                 return
             }
 
-            val currSlotDistance = currEntry.key().slotDistance(slot, mask)
-            if (newSlotDistance > currSlotDistance) {
-                kvArr[slot] = newEntry
-                newEntry = currEntry
-                newSlotDistance = currSlotDistance
-            }
-
             slot = (slot + 1) and mask
-            ++newSlotDistance
+            ++distance
         }
     }
 
     // changes emptyEntry to a value not currently in the map, rewriting all empty slots
     private fun changeEmptyEntry() {
-        val oldEmptyEntry = emptyEntry
-
-        // TODO: should we always try zero first or is that asking for trouble?
-        var candidate = ZERO_ENTRY
-        while (candidate == oldEmptyEntry || findSlot(candidate.key(), { _, entry -> entry == candidate }, { false })) {
-            candidate = Random.nextLong()
+        @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
+        var candidate = ZERO
+        while (candidate == emptyEntry.key() || containsKey(candidate)) {
+            candidate = Random.nextInt()
         }
+
+        val oldEmptyEntry = emptyEntry
+        emptyEntry = arrayEntry(candidate, 0)
 
         val kvArr = kvArr
         for (i in kvArr.indices) {
-            if (kvArr[i] == oldEmptyEntry) kvArr[i] = candidate
+            if (kvArr[i] == oldEmptyEntry) kvArr[i] = emptyEntry
         }
-        emptyEntry = candidate
     }
 
     override operator fun iterator(): MutableFastIterator<MutableInt2IntMap.MutableEntry> = FastEntryIterator()
 
     public fun forEach(action: (Int, Int) -> Unit) {
         val kvArr = kvArr
-        val emptyEntry = emptyEntry
 
         var slot = kvArr.size - 1
         while (slot >= 0) {
@@ -418,12 +409,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             check(previousSlot != -1)
             if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()
 
-            val newEntry = arrayEntry(key(), newValue)
-            if (newEntry == emptyEntry) {
-                this@Int2IntHashMap.changeEmptyEntry()
-                emptyEntry = this@Int2IntHashMap.emptyEntry
-            }
-            kvArr[previousSlot] = newEntry
+            kvArr[previousSlot] = arrayEntry(key(), newValue)
         }
 
         fun remove() {
@@ -493,53 +479,44 @@ public class Int2IntHashMap @JvmOverloads constructor(
     }
 
     @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-    private fun Int.slot(mask: Int): Int {
+    private fun Int.mix(mask: Int): Int {
         if ((this.toInt() or mask) == mask) {
             return this.toInt()
         } else {
             var h = hashCode()
             h = h xor (h ushr 16)
-            h = h * PHI
+            h *= PHI
             h = h xor (h ushr 16)
-            return h and mask
+            return h
         }
     }
 
-    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-    private fun Int.slotDistance(slot: Int, mask: Int): Int {
-        if ((this.toInt() or mask) == mask) {
-            return (slot - this.toInt()) and mask
-        } else {
-            var h = hashCode()
-            h = h xor (h ushr 16)
-            h = h * PHI
-            h = h xor (h ushr 16)
-            return (slot - h) and mask
-        }
-    }
+    private fun Int.slot(mask: Int): Int = mix(mask) and mask
+    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - mix(mask)) and mask
 
     private fun Long.key(): Int = toInt()
     private fun Long.value(): Int = (this shr (8 * Int.SIZE_BYTES)).toInt()
-    private fun arrayEntry(key: Int, value: Int): Long = (value.toLong() shl (8 * Int.SIZE_BYTES)) or (key.toLong() and 0xFFFFFFFFL)
+    private fun arrayEntry(key: Int, value: Int): Long = (value.toLong() shl (8 * Int.SIZE_BYTES)) or (key.toUInt().toLong())
 
-    internal companion object {
+    private companion object {
         // the value of a field in an uninitialized primitive array
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-        private const val ZERO_ENTRY: Long = 0.toLong()
+        private const val ZERO = 0.toInt()
+        private const val ZERO_ENTRY = 0.toLong()
 
         private val EMPTY_ARRAY = longArrayOf(ZERO_ENTRY)
 
-        private const val PHI: Int = 0x9E3779B9.toInt()
+        private const val PHI = 0x9E3779B9.toInt()
 
-        internal const val DEFAULT_INITIAL_CAPACITY = 7
+        private const val MIN_INITIAL_CAPACITY = 7 // may not be zero
 
         private const val CACHE_LINE_SIZE = 64 / Long.SIZE_BYTES
         private const val HALF_CACHE_LINE_SIZE = CACHE_LINE_SIZE / 2
 
         // we force the load factor to 1.0 up to the size of two cache lines
-        private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE
+        private const val FORCE_LOAD_FACTOR_MAX = 2 * CACHE_LINE_SIZE
 
-        private fun arraySize(capacity: Int, loadFactor: Float): Int {
+        private fun arraySize(capacity: Int, loadFactor: Double): Int {
             check(capacity >= 0)
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = 2 * max((capacity / loadFactor).toInt(), capacity + 1)

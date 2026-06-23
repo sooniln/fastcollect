@@ -12,7 +12,7 @@ public typealias Long2FloatHashMap = InlineLong2FloatHashMap
 public value class InlineLong2FloatHashMap private constructor(@PublishedApi internal val map: Long2IntHashMap) : MutableLong2FloatMap {
 
     public constructor(
-        capacity: Int = Long2IntHashMap.DEFAULT_INITIAL_CAPACITY,
+        capacity: Int = 0,
         /** The default value should be the value that is ideally least likely to occur in the map. */
         defaultValue: Float = Float.NaN
     ) : this(Long2IntHashMap(capacity, defaultValue.toBits()))

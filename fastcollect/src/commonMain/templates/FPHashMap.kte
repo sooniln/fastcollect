@@ -12,7 +12,7 @@ public typealias ${Name}HashMap = Inline${Name}HashMap
 public value class Inline${Name}HashMap private constructor(@PublishedApi internal val map: ${NonFPName}HashMap) : Mutable${Name}Map {
 
     public constructor(
-        capacity: Int = ${NonFPName}HashMap.DEFAULT_INITIAL_CAPACITY,
+        capacity: Int = 0,
         /** The default value should be the value that is ideally least likely to occur in the map. */
         defaultValue: ${ValueType} = ${DefaultValue}
     ) : this(${NonFPName}HashMap(capacity, defaultValue.toBits()))

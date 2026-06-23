@@ -12,7 +12,7 @@ public typealias Long2DoubleHashMap = InlineLong2DoubleHashMap
 public value class InlineLong2DoubleHashMap private constructor(@PublishedApi internal val map: Long2LongHashMap) : MutableLong2DoubleMap {
 
     public constructor(
-        capacity: Int = Long2LongHashMap.DEFAULT_INITIAL_CAPACITY,
+        capacity: Int = 0,
         /** The default value should be the value that is ideally least likely to occur in the map. */
         defaultValue: Double = Double.NaN
     ) : this(Long2LongHashMap(capacity, defaultValue.toBits()))
