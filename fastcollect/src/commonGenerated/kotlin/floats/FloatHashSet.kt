@@ -10,7 +10,7 @@ public typealias FloatHashSet = InlineFloatHashSet
 @JvmInline
 public value class InlineFloatHashSet internal constructor(@PublishedApi internal val set: IntHashSet) : MutableFloatSet {
 
-    public constructor(capacity: Int = IntHashSet.DEFAULT_INITIAL_CAPACITY) : this(IntHashSet(capacity))
+    public constructor(capacity: Int = 0) : this(IntHashSet(capacity))
     public constructor(elements: FloatCollection) : this() { addAll(elements) }
     public constructor(elements: Collection<Float>) : this() { addAll(elements) }
 

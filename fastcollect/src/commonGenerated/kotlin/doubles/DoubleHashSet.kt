@@ -10,7 +10,7 @@ public typealias DoubleHashSet = InlineDoubleHashSet
 @JvmInline
 public value class InlineDoubleHashSet internal constructor(@PublishedApi internal val set: LongHashSet) : MutableDoubleSet {
 
-    public constructor(capacity: Int = LongHashSet.DEFAULT_INITIAL_CAPACITY) : this(LongHashSet(capacity))
+    public constructor(capacity: Int = 0) : this(LongHashSet(capacity))
     public constructor(elements: DoubleCollection) : this() { addAll(elements) }
     public constructor(elements: Collection<Double>) : this() { addAll(elements) }
 

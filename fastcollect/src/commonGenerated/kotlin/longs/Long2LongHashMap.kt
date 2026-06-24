@@ -306,10 +306,9 @@ public class Long2LongHashMap @JvmOverloads constructor(
         if (emptyKey != ZERO) newKvArr.fill(emptyKey)
         val newMask = newKvArr.size - 1
 
-        val oldKvArr = kvArr
-        for (slot in oldKvArr.indices step 2) {
-            val key = oldKvArr[slot]
-            if (key != emptyKey) setRehashing(newKvArr, newMask, key, oldKvArr[slot + 1])
+        for (slot in kvArr.indices step 2) {
+            val key = kvArr[slot]
+            if (key != emptyKey) setRehashing(newKvArr, newMask, key, kvArr[slot + 1])
         }
 
         kvArr = newKvArr
@@ -360,13 +359,11 @@ public class Long2LongHashMap @JvmOverloads constructor(
             candidate = Random.nextLong()
         }
 
-        val oldEmptyKey = emptyKey
-        emptyKey = candidate
-
         val kvArr = kvArr
         for (i in kvArr.indices step 2) {
-            if (kvArr[i] == oldEmptyKey) kvArr[i] = candidate
+            if (kvArr[i] == emptyKey) kvArr[i] = candidate
         }
+        emptyKey = candidate
     }
 
     override operator fun iterator(): MutableFastIterator<MutableLong2LongMap.MutableEntry> = FastEntryIterator()

@@ -35,10 +35,6 @@ public class Int2LongHashMap @JvmOverloads constructor(
 
 ) : AbstractMutableInt2LongMap() {
 
-    init {
-        require(capacity >= 0) { "Capacity must be >= 0" }
-    }
-
     public constructor(map: Int2LongMap): this() { putAll(map) }
     public constructor(map: Map<Int, Long>): this() { putAll(map) }
 
@@ -80,7 +76,6 @@ public class Int2LongHashMap @JvmOverloads constructor(
     /**
      * Reduces the size of the backing array to the minimum required to hold the current number of elements.
      */
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     public fun trimToSize() {
         rehash(size)
     }
@@ -332,8 +327,7 @@ public class Int2LongHashMap @JvmOverloads constructor(
 
         val newMask = newKeysArr.size - 1
 
-        val oldKeysArr = keysArr
-        for (slot in oldKeysArr.indices) {
+        for (slot in keysArr.indices) {
             val key = keysArr[slot]
             if (key != emptyKey) setRehashing(newKeysArr, newValuesArr, newMask, key, valuesArr[slot])
         }
@@ -388,13 +382,11 @@ public class Int2LongHashMap @JvmOverloads constructor(
             candidate = Random.nextInt()
         }
 
-        val oldEmptyKey = emptyKey
-        emptyKey = candidate
-
         val keysArr = keysArr
         for (i in keysArr.indices) {
-            if (keysArr[i] == oldEmptyKey) keysArr[i] = emptyKey
+            if (keysArr[i] == emptyKey) keysArr[i] = candidate
         }
+        emptyKey = candidate
     }
 
     override operator fun iterator(): MutableFastIterator<MutableInt2LongMap.MutableEntry> = FastEntryIterator()

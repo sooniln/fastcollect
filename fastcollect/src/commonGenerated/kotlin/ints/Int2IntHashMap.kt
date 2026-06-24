@@ -307,9 +307,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
         if (emptyEntry != ZERO_ENTRY) newKvArr.fill(emptyEntry)
         val newMask = newKvArr.size - 1
 
-        val oldKvArr = kvArr
-        for (slot in oldKvArr.indices) {
-            val entry = oldKvArr[slot]
+        for (slot in kvArr.indices) {
+            val entry = kvArr[slot]
             if (entry != emptyEntry) setRehashing(newKvArr, newMask, entry)
         }
 

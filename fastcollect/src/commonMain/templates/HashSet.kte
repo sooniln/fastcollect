@@ -17,24 +17,26 @@ import kotlin.random.Random
  * ever remain free (i.e. the actual load factor is (capacity - 1)/capacity).
  */
 public class ${Type}HashSet @JvmOverloads constructor(
-    capacity: Int = DEFAULT_INITIAL_CAPACITY,
+    capacity: Int = 0,
 ) : AbstractMutable${Type}Set() {
-
-    init {
-        require(capacity >= 0) { "Capacity must be >= 0" }
-    }
 
     public constructor(elements: ${Type}Collection): this() { addAll(elements) }
     public constructor(elements: Collection<${Type}>): this() { addAll(elements) }
 
     private var keysArr = EMPTY_ARRAY
+
     private var emptyKey = ZERO
+
+    // threshold + size == capacity (rehash once threshold <= 0, if we haven't allocated yet then threshold.inv() is
+    // our initial capacity)
+    private var threshold = MIN_INITIAL_CAPACITY.inv()
 
     override var size: Int = 0
         private set
 
-    // use threshold to store the initial size before we allocate anything, after that it's the size at which we rehash
-    private var threshold: Int = if (capacity == 0) DEFAULT_INITIAL_CAPACITY else capacity
+    init {
+        ensureCapacity(capacity)
+    }
 
     /**
      * Ensures that the set can hold at least given number of elements without any further resizing of the backing
@@ -43,8 +45,8 @@ public class ${Type}HashSet @JvmOverloads constructor(
     public fun ensureCapacity(capacity: Int) {
         require(capacity >= 0) { "The expected number of elements must be nonnegative" }
         if (keysArr === EMPTY_ARRAY) {
-            threshold = if (capacity == 0) threshold else capacity
-        } else if (capacity > threshold) {
+            threshold = min(threshold, capacity.inv())
+        } else if (capacity > threshold + size) {
             rehash(capacity)
         }
     }
@@ -56,69 +58,33 @@ public class ${Type}HashSet @JvmOverloads constructor(
         rehash(size)
     }
 
-    override fun contains(element: ${Type}): Boolean {
-        return findSlot(element) >= 0
-    }
+    override fun contains(element: ${Type}): Boolean = findSlot(element, { true }, { false })
 
-    override fun add(element: ${Type}): Boolean {
-        resizeIfNecessary()
-
-        if (element == emptyKey) changeEmptyKey()
-
-        val keysArr = keysArr
-        val emptyKey = emptyKey
-        val mask = keysArr.size - 1
-        val pow2 = keysArr.size.countTrailingZeroBits()
-
-        var slot = element.slot(mask, pow2)
-        var newKey = element
-        var newSlotDistance = 0
-        while (true) {
-            val currKey = keysArr[slot]
-            if (currKey == newKey) {
-                return false
-            } else if (currKey == emptyKey) {
-                keysArr[slot] = newKey
-                ++size
-                return true
-            }
-
-            val currKeySlotDistance = currKey.slotDistance(slot, mask, pow2)
-            if (newSlotDistance > currKeySlotDistance) {
-                keysArr[slot] = newKey
-                newKey = currKey
-                newSlotDistance = currKeySlotDistance
-            }
-
-            slot = (slot + 1) and mask
-            ++newSlotDistance
-        }
-    }
+    override fun add(element: ${Type}): Boolean = add(element, { false }, { true })
 
     override fun remove(element: ${Type}): Boolean {
-        val slot = findSlot(element)
-        if (slot >= 0) {
-            removeSlot(slot)
-            return true
-        }
-
-        return false
+        return findSlot(
+            element,
+            { slot ->
+                removeSlot(slot)
+                true
+            },
+            { false })
     }
 
     override fun clear() {
         if (keysArr !== EMPTY_ARRAY) {
             keysArr.fill(emptyKey)
+            threshold += size
         }
         size = 0
     }
 
-    private fun findSlot(key: ${Type}): Int {
+    private inline fun <T> findSlot(key: ${Type}, onFind: (slot: Int) -> T, onFail: () -> T): T {
         val keysArr = keysArr
-        val emptyKey = emptyKey
         val mask = keysArr.size - 1
-        val pow2 = keysArr.size.countTrailingZeroBits()
 
-        var slot = key.slot(mask, pow2)
+        var slot = key.slot(mask)
         var currKey = keysArr[slot]
 
         var slotDistance = 0
@@ -129,9 +95,9 @@ public class ${Type}HashSet @JvmOverloads constructor(
             var i = 0
             do {
                 if (currKey == emptyKey) {
-                    return -1
+                    return onFail()
                 } else if (currKey == key) {
-                    return slot
+                    return onFind(slot)
                 }
 
                 slot = (slot + 1) and mask
@@ -139,30 +105,63 @@ public class ${Type}HashSet @JvmOverloads constructor(
             } while (++i < HALF_CACHE_LINE_SIZE)
 
             slotDistance += HALF_CACHE_LINE_SIZE
-            if (currKey.slotDistance(slot, mask, pow2) < slotDistance) {
-                return -1
+            if (currKey.slotDistance(slot, mask) < slotDistance) {
+                return onFail()
             }
+        }
+    }
+
+    private inline fun <T> add(key: ${Type}, onPresent: () -> T, onAbsent: () -> T): T {
+        if (threshold <= 0) increaseCapacity()
+        if (key == emptyKey) changeEmptyKey()
+
+        val keysArr = keysArr
+        val mask = keysArr.size - 1
+
+        var slot = key.slot(mask)
+        var distance = 0
+        while (true) {
+            var currKey = keysArr[slot]
+            if (currKey == key) {
+                return onPresent()
+            } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {
+                var newKey = key
+
+                while (currKey != emptyKey) {
+                    keysArr[slot] = newKey
+                    newKey = currKey
+                    slot = (slot + 1) and mask
+                    currKey = keysArr[slot]
+                }
+
+                keysArr[slot] = newKey
+                --threshold
+                ++size
+                return onAbsent()
+            }
+
+            slot = (slot + 1) and mask
+            ++distance
         }
     }
 
     private fun removeSlot(slot: Int) {
         val keysArr = keysArr
-        val emptyKey = emptyKey
         val mask = keysArr.size - 1
-        val pow2 = keysArr.size.countTrailingZeroBits()
 
-        // move all slots left until we hit a zero slot
         var currSlot = slot
         var nextSlot = (currSlot + 1) and mask
         var nextKey = keysArr[nextSlot]
-        while (nextKey != emptyKey && nextKey.slotDistance(nextSlot, mask, pow2) > 0) {
+        while (nextKey != emptyKey && nextKey.slotDistance(nextSlot, mask) > 0) {
             keysArr[currSlot] = nextKey
 
             currSlot = nextSlot
             nextSlot = (nextSlot + 1) and mask
             nextKey = keysArr[nextSlot]
         }
+
         keysArr[currSlot] = emptyKey
+        ++threshold
         --size
     }
 
@@ -203,11 +202,12 @@ public class ${Type}HashSet @JvmOverloads constructor(
         threshold = elements.threshold
     }
 
-    private fun resizeIfNecessary() {
-        if (keysArr === EMPTY_ARRAY) {
-            rehash(threshold)
-        } else if (size >= threshold) {
-            rehash(threshold shl 1)
+    private fun increaseCapacity() {
+        check(threshold <= 0)
+        if (threshold < 0) {
+            rehash(threshold.inv())
+        } else {
+            rehash(size shl 1)
         }
     }
 
@@ -217,7 +217,7 @@ public class ${Type}HashSet @JvmOverloads constructor(
         if (capacity == 0 && keysArr !== EMPTY_ARRAY) {
             keysArr = EMPTY_ARRAY
             emptyKey = ZERO
-            threshold = DEFAULT_INITIAL_CAPACITY
+            threshold = MIN_INITIAL_CAPACITY.inv()
             return
         }
 
@@ -230,58 +230,56 @@ public class ${Type}HashSet @JvmOverloads constructor(
         val newKeysArr = ${Type}Array(newLength)
         if (emptyKey != ZERO) newKeysArr.fill(emptyKey)
         val newMask = newKeysArr.size - 1
-        val newPow2 = newKeysArr.size.countTrailingZeroBits()
 
         for (slot in keysArr.indices) {
             val key = keysArr[slot]
-            if (key != emptyKey) addRehashing(newKeysArr, newMask, newPow2, key)
+            if (key != emptyKey) addRehashing(newKeysArr, newMask, key)
         }
 
         keysArr = newKeysArr
 
         // threshold must always maintain the invariant of at least 1 slot being open
-        threshold = min((newKeysArr.size * actualLoadFactor).toInt(), newKeysArr.size - 1)
+        threshold = min((newKeysArr.size * actualLoadFactor).toInt(), newKeysArr.size - 1) - size
     }
 
     // we can assume key doesn't exist in array and that we never insert zero
-    private fun addRehashing(keysArr: ${Type}Array, mask: Int, pow2: Int, key: ${Type}) {
-        val emptyKey = emptyKey
-
-        var slot = key.slot(mask, pow2)
-        var newKey = key
-        var newSlotDistance = 0
+    private fun addRehashing(keysArr: ${Type}Array, mask: Int, key: ${Type}) {
+        var slot = key.slot(mask)
+        var distance = 0
         while (true) {
-            val currKey = keysArr[slot]
+            var currKey = keysArr[slot]
             if (currKey == emptyKey) {
+                keysArr[slot] = key
+                return
+            } else if (distance > currKey.slotDistance(slot, mask)) {
+                var newKey = key
+
+                do {
+                    keysArr[slot] = newKey
+                    newKey = currKey
+                    slot = (slot + 1) and mask
+                    currKey = keysArr[slot]
+                } while (currKey != emptyKey)
+
                 keysArr[slot] = newKey
                 return
             }
 
-            val currKeySlotDistance = currKey.slotDistance(slot, mask, pow2)
-            if (newSlotDistance > currKeySlotDistance) {
-                keysArr[slot] = newKey
-                newKey = currKey
-                newSlotDistance = currKeySlotDistance
-            }
-
             slot = (slot + 1) and mask
-            ++newSlotDistance
+            ++distance
         }
     }
 
     // changes emptyKey to a value not currently in the set, rewriting all empty slots
     private fun changeEmptyKey() {
-        val oldEmptyKey = emptyKey
-
-        // TODO: should we always try zero first or is that asking for trouble?
         var candidate = ZERO
-        while (candidate == oldEmptyKey || findSlot(candidate) != -1) {
+        while (candidate == emptyKey || contains(candidate)) {
             candidate = Random.next${Type}()
         }
 
         val keysArr = keysArr
         for (i in keysArr.indices) {
-            if (keysArr[i] == oldEmptyKey) keysArr[i] = candidate
+            if (keysArr[i] == emptyKey) keysArr[i] = candidate
         }
         emptyKey = candidate
     }
@@ -290,7 +288,6 @@ public class ${Type}HashSet @JvmOverloads constructor(
 
     public fun forEach(action: (${Type}) -> Unit) {
         val keysArr = keysArr
-        val emptyKey = emptyKey
 
         var slot = keysArr.size - 1
         while (slot >= 0) {
@@ -346,15 +343,23 @@ public class ${Type}HashSet @JvmOverloads constructor(
         }
     }
 
-    private fun ${Type}.slot(mask: Int, pow2: Int): Int {
-        return (this.hashCode() * PHI).rotateLeft(pow2) and mask
+    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
+    private fun ${Type}.mix(mask: Int): Int {
+        if ((this.toInt() or mask) == mask) {
+            return this.toInt()
+        } else {
+            var h = hashCode()
+            h = h xor (h ushr 16)
+            h *= PHI
+            h = h xor (h ushr 16)
+            return h
+        }
     }
 
-    private fun ${Type}.slotDistance(slot: Int, mask: Int, pow2: Int): Int {
-        return (slot - (this.hashCode() * PHI).rotateLeft(pow2)) and mask
-    }
+    private fun ${Type}.slot(mask: Int): Int = mix(mask) and mask
+    private fun ${Type}.slotDistance(slot: Int, mask: Int): Int = (slot - mix(mask)) and mask
 
-    internal companion object {
+    private companion object {
         // the value of a field in an uninitialized primitive array
         @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
         private const val ZERO: ${Type} = 0.to${Type}()
@@ -364,10 +369,11 @@ public class ${Type}HashSet @JvmOverloads constructor(
         // Knuth multiplicative hash
         private const val PHI: Int = 0x93d765dd.toInt()
 
-        internal const val DEFAULT_INITIAL_CAPACITY = 7
+        private const val MIN_INITIAL_CAPACITY = 7
 
         private const val CACHE_LINE_SIZE = 64 / ${Type}.SIZE_BYTES
         private const val HALF_CACHE_LINE_SIZE = CACHE_LINE_SIZE / 2
+
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE
 

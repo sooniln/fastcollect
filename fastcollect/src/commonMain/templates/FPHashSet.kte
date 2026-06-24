@@ -10,7 +10,7 @@ public typealias ${Type}HashSet = Inline${Type}HashSet
 @JvmInline
 public value class Inline${Type}HashSet internal constructor(@PublishedApi internal val set: ${NonFPType}HashSet) : Mutable${Type}Set {
 
-    public constructor(capacity: Int = ${NonFPType}HashSet.DEFAULT_INITIAL_CAPACITY) : this(${NonFPType}HashSet(capacity))
+    public constructor(capacity: Int = 0) : this(${NonFPType}HashSet(capacity))
     public constructor(elements: ${Type}Collection) : this() { addAll(elements) }
     public constructor(elements: Collection<${Type}>) : this() { addAll(elements) }
 
