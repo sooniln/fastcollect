@@ -525,7 +525,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
         } else {
             var h = hashCode()
             h = h xor (h ushr 16)
-            h = h * PHI
+            h *= PHI
             h = h xor (h ushr 16)
             return h
         }

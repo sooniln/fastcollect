@@ -141,15 +141,6 @@ private object Generate {
         )
     }
 
-    object PSLVectorStripedHashMapTypes {
-        val Files = listOf(
-            "PSLVectorStripedHashMap.kte",
-        )
-        val Expansions = listOf<Map<String, Any>>(
-            //mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
-        )
-    }
-
     object FPHashMapTypes {
         val Files = listOf(
             "FPHashMap.kte",
@@ -337,12 +328,6 @@ tasks.register<Sync>("GenerateCollections") {
     generate(
         Generate.VectorStripedHashMapTypes.Files,
         Generate.VectorStripedHashMapTypes.Expansions.generateFullExpansion()) { _, expansion ->
-        (expansion["Name"] as String) + "HashMap.kt"
-    }
-
-    generate(
-        Generate.PSLVectorStripedHashMapTypes.Files,
-        Generate.PSLVectorStripedHashMapTypes.Expansions.generateFullExpansion()) { _, expansion ->
         (expansion["Name"] as String) + "HashMap.kt"
     }
 
