@@ -6,9 +6,9 @@
 A library for high-performance primitive collections in the Kotlin ecosystem.
 
 As a drop-in replacement for standard Kotlin collections, FastCollect generally reduces memory usage by 4–5× and
-improves CPU performance by 2-4× (and perhaps >10× on some iteration heavy workloads). Details and benchmarks are
-available in the performance section below. FastCollect distinguishes itself with a much smaller dependency size
-(supporting only necessary collections), but performance comparable to much larger and more complex libraries.
+improves CPU performance by 2-4×. Details and benchmarks are available in the performance section below. FastCollect
+distinguishes itself with a much smaller dependency size (supporting only necessary collections), but performance
+comparable to much larger and more complex libraries.
 
 FastCollect currently supports the following major platforms (minor platforms have not been listed for brevity, the
 Gradle build files are the source of truth):
@@ -23,6 +23,8 @@ Gradle build files are the source of truth):
 * macos (arm64)
 * mingw (x64)
 
+Note that performance has only been tested on JVM platforms.
+
 ## Quick Start ##
 
 You can add FastCollect as a dependency in your project with:
@@ -30,7 +32,7 @@ You can add FastCollect as a dependency in your project with:
 #### Gradle ####
 
 ```groovy
-implementation 'io.github.sooniln:fastcollect-kotlin:1.0.1'
+implementation 'io.github.sooniln:fastcollect-kotlin:2.0.0'
 ```
 
 #### Maven ####
@@ -39,7 +41,7 @@ implementation 'io.github.sooniln:fastcollect-kotlin:1.0.1'
 <dependency>
     <groupId>io.github.sooniln</groupId>
     <artifactId>fastcollect-kotlin</artifactId>
-    <version>1.0.1</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -137,31 +139,10 @@ map.getOrElse(1) { -1 }
 
 ### ConcurrentModificationException ###
 
-The standard Kotlin libraries make reasonable efforts to throw ConcurrentModificationException if they detect
+The standard JRE libraries make reasonable efforts to throw ConcurrentModificationException if they detect
 collections being modified in inappropriate ways. This already only a best effort with no guarantees made, but
 FastCollect makes even less of an effort in the interests of performance. Do not expect FastCollect to throw
 ConcurrentModificationException if you are shooting yourself in the foot, except in rare instances.
-
-## Competitors ##
-
-Competitors and alternatives to FastCollect can be grouped into two main types - those that support Kotlin
-Multiplatform, and those that are JVM only.
-
-Other multiplatform collection libraries include:
-
-* Kotlin standard library collections
-* [androidX](https://developer.android.com/jetpack/androidx/releases/collection) - AndroidX now offers multiplatform
-  primitive collections.
-
-Other JVM-only primitive collection libraries include:
-
-* [fastutil](https://github.com/vigna/fastutil) - the Java standard for primitive collections, supporting a wide variety
-  of scientific computing use cases.
-* [Eclipse Collections](https://github.com/eclipse-collections/eclipse-collections) - a large multipurpose collections
-  library that also includes primitive specific collections.
-
-There are further JVM-only collections libraries, but they tend to be older and relatively unsupported (Koloboke, Trove,
-etc...)
 
 ## Performance ##
 
