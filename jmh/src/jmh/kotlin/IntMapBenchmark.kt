@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 @Fork(1, jvmArgs = ["-Xmx4g"])
 @Timeout(time = 10, timeUnit = TimeUnit.SECONDS)
 @Warmup(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class IntMapBenchmark {
