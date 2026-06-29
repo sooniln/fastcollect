@@ -15,7 +15,7 @@ repositories {
 }
 
 group = "io.github.sooniln"
-version = "2.0.1"
+version = "2.0.2"
 
 private object Generate {
     const val IN_DIR = "src/commonMain/templates"
