@@ -30,6 +30,7 @@ public value class Inline${Name}HashMap private constructor(@PublishedApi intern
     override fun containsKey(key: ${KeyType}): Boolean = map.containsKey(key)
     override fun containsValue(value: ${ValueType}): Boolean = map.containsValue(value.toBits())
     override fun get(key: ${KeyType}): ${ValueType} = ${ValueType}.fromBits(map[key])
+    override fun set(key: ${KeyType}, value: ${ValueType}) { map[key] = value.toBits() }
     override fun put(key: ${KeyType}, value: ${ValueType}): ${ValueType} = ${ValueType}.fromBits(map.put(key, value.toBits()))
     override fun remove(key: ${KeyType}): ${ValueType} = ${ValueType}.fromBits(map.remove(key))
     override fun clear() { map.clear() }

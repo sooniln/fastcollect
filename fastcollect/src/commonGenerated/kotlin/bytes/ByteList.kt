@@ -267,22 +267,14 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other !is List<*>) return false
+        if (other !is ByteList) return false
         if (size != other.size) return false
 
         val it = listIterator()
         val otherIt = other.listIterator()
-        if (otherIt is ByteIterator) {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (!(it.nextByte() equalsBoxed otherIt.nextByte())) {
-                    return false
-                }
-            }
-        } else {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextByte() != otherIt.next()) {
-                    return false
-                }
+        while (it.hasNext() && otherIt.hasNext()) {
+            if (!(it.nextByte() equalsBoxed otherIt.nextByte())) {
+                return false
             }
         }
         return !(it.hasNext() || otherIt.hasNext())

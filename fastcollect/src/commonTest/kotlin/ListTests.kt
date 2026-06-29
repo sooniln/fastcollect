@@ -1051,10 +1051,8 @@ class FloatListTest {
 
     @Test
     fun equals_nanAndNegativeZero_matchBoxedSemantics() {
-        // a FloatList compares equal to a List<Float> (such as the asList view of another FloatList) - lists holding
-        // NaN are equal, and a -0.0f list is not equal to a 0.0f list
-        assertEquals<Any>(floatArrayOf(1f, Float.NaN).asFloatList(), floatArrayOf(1f, Float.NaN).asFloatList().asList())
-        assertNotEquals<Any>(floatArrayOf(-0.0f).asFloatList(), floatArrayOf(0.0f).asFloatList().asList())
+        assertEquals<Any>(floatArrayOf(1f, Float.NaN).asFloatList(), floatArrayOf(1f, Float.NaN).asFloatList())
+        assertNotEquals<Any>(floatArrayOf(-0.0f).asFloatList(), floatArrayOf(0.0f).asFloatList())
     }
 }
 
@@ -1278,9 +1276,7 @@ class DoubleListTest {
 
     @Test
     fun equals_nanAndNegativeZero_matchBoxedSemantics() {
-        // a DoubleList compares equal to a List<Double> (such as the asList view of another DoubleList) - lists holding
-        // NaN are equal, and a -0.0 list is not equal to a 0.0 list
-        assertEquals<Any>(doubleArrayOf(1.0, Double.NaN).asDoubleList(), doubleArrayOf(1.0, Double.NaN).asDoubleList().asList())
-        assertNotEquals<Any>(doubleArrayOf(-0.0).asDoubleList(), doubleArrayOf(0.0).asDoubleList().asList())
+        assertEquals<Any>(doubleArrayOf(1.0, Double.NaN).asDoubleList(), doubleArrayOf(1.0, Double.NaN).asDoubleList())
+        assertNotEquals<Any>(doubleArrayOf(-0.0).asDoubleList(), doubleArrayOf(0.0).asDoubleList())
     }
 }

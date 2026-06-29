@@ -1,6 +1,7 @@
 package io.github.sooniln.fastcollect.ints
 
 import io.github.sooniln.fastcollect.ArrayUtils
+import io.github.sooniln.fastcollect.Hash
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
@@ -343,21 +344,8 @@ public class IntHashSet @JvmOverloads constructor(
         }
     }
 
-    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-    private fun Int.mix(mask: Int): Int {
-        if ((this.toInt() or mask) == mask) {
-            return this.toInt()
-        } else {
-            var h = hashCode()
-            h = h xor (h ushr 16)
-            h *= PHI
-            h = h xor (h ushr 16)
-            return h
-        }
-    }
-
-    private fun Int.slot(mask: Int): Int = mix(mask) and mask
-    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - mix(mask)) and mask
+    private fun Int.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
+    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
 
     private companion object {
         // the value of a field in an uninitialized primitive array
@@ -365,9 +353,6 @@ public class IntHashSet @JvmOverloads constructor(
         private const val ZERO: Int = 0.toInt()
 
         private val EMPTY_ARRAY = intArrayOf(ZERO)
-
-        // Knuth multiplicative hash
-        private const val PHI: Int = 0x93d765dd.toInt()
 
         private const val MIN_INITIAL_CAPACITY = 7
 

@@ -1,5 +1,7 @@
 package io.github.sooniln.fastcollect
 
+// equalsBoxed implements comparisons that matches the semantics of boxed values on the JVM (notably NaN == NaN)
+
 public infix fun Byte.equalsBoxed(other: Byte): Boolean = this == other
 
 public infix fun Short.equalsBoxed(other: Short): Boolean = this == other

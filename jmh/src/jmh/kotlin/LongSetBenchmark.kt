@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 /**
  * A JVM specific benchmark which measures the performance of various set libraries.
  */
-@Fork(1)
+@Fork(1, jvmArgs = ["-Xmx4g"])
 @Timeout(time = 10, timeUnit = TimeUnit.SECONDS)
 @Warmup(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
@@ -58,9 +58,8 @@ open class LongSetBenchmark {
             keys = LongArray(size)
             KeyGenerators.generateRandomKeys(keys, seed = seed)
 
-            for (key in keys) {
-                set.add(key)
-            }
+            set.ensureCapacity(size)
+            keys.forEach { key -> set.add(key) }
         }
     }
 
@@ -82,9 +81,8 @@ open class LongSetBenchmark {
             outKeys = LongArray(size)
             KeyGenerators.generateKeys(order, inKeys, outKeys, seed = seed)
 
-            for (key in inKeys) {
-                set.add(key)
-            }
+            set.ensureCapacity(size)
+            inKeys.forEach { key -> set.add(key) }
         }
 
         inline fun <T> nextInKey(crossinline action: FullState.(Long) -> T): T {

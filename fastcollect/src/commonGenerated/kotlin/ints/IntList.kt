@@ -267,22 +267,14 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other !is List<*>) return false
+        if (other !is IntList) return false
         if (size != other.size) return false
 
         val it = listIterator()
         val otherIt = other.listIterator()
-        if (otherIt is IntIterator) {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (!(it.nextInt() equalsBoxed otherIt.nextInt())) {
-                    return false
-                }
-            }
-        } else {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextInt() != otherIt.next()) {
-                    return false
-                }
+        while (it.hasNext() && otherIt.hasNext()) {
+            if (!(it.nextInt() equalsBoxed otherIt.nextInt())) {
+                return false
             }
         }
         return !(it.hasNext() || otherIt.hasNext())

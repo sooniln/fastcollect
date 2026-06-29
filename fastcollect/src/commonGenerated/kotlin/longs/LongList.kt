@@ -267,22 +267,14 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other !is List<*>) return false
+        if (other !is LongList) return false
         if (size != other.size) return false
 
         val it = listIterator()
         val otherIt = other.listIterator()
-        if (otherIt is LongIterator) {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (!(it.nextLong() equalsBoxed otherIt.nextLong())) {
-                    return false
-                }
-            }
-        } else {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextLong() != otherIt.next()) {
-                    return false
-                }
+        while (it.hasNext() && otherIt.hasNext()) {
+            if (!(it.nextLong() equalsBoxed otherIt.nextLong())) {
+                return false
             }
         }
         return !(it.hasNext() || otherIt.hasNext())

@@ -4,6 +4,7 @@ package io.github.sooniln.fastcollect.longs
 
 import io.github.sooniln.fastcollect.ArrayUtils
 import io.github.sooniln.fastcollect.FastIterator
+import io.github.sooniln.fastcollect.Hash
 import io.github.sooniln.fastcollect.MutableFastIterator
 
 import io.github.sooniln.fastcollect.ints.MutableIntCollection
@@ -510,21 +511,8 @@ public class Long2IntHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-    private fun Long.mix(mask: Int): Int {
-        if ((this.toInt() or mask) == mask) {
-            return this.toInt()
-        } else {
-            var h = hashCode()
-            h = h xor (h ushr 16)
-            h *= PHI
-            h = h xor (h ushr 16)
-            return h
-        }
-    }
-
-    private fun Long.slot(mask: Int): Int = mix(mask) and mask
-    private fun Long.slotDistance(slot: Int, mask: Int): Int = (slot - mix(mask)) and mask
+    private fun Long.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
+    private fun Long.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
 
     private companion object {
         // the value of a field in an uninitialized primitive array
@@ -535,9 +523,6 @@ public class Long2IntHashMap @JvmOverloads constructor(
 
         private val EMPTY_VALUE_ARRAY = IntArray(1)
 
-
-        // Knuth multiplicative hash
-        private const val PHI = 0x9E3779B9.toInt()
 
         private const val MIN_INITIAL_CAPACITY = 7
 

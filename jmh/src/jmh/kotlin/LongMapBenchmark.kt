@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 /**
  * A JVM specific benchmark which measures the performance of various map libraries.
  */
-@Fork(1)
+@Fork(1, jvmArgs = ["-Xmx6g"])
 @Timeout(time = 10, timeUnit = TimeUnit.SECONDS)
 @Warmup(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
@@ -58,10 +58,8 @@ open class LongMapBenchmark {
             keys = LongArray(size)
             KeyGenerators.generateRandomKeys(keys, seed = seed)
 
-            var value = 0
-            for (key in keys) {
-                map.put(key, value++)
-            }
+            map.ensureCapacity(size)
+            keys.forEachIndexed { i, key -> map.put(key, i) }
         }
     }
 
@@ -83,6 +81,7 @@ open class LongMapBenchmark {
             outKeys = LongArray(size)
             KeyGenerators.generateKeys(order, inKeys, outKeys, seed = seed)
 
+            map.ensureCapacity(size)
             inKeys.forEachIndexed { i, key -> map.put(key, i) }
         }
 

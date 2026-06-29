@@ -30,6 +30,7 @@ public value class InlineLong2FloatHashMap private constructor(@PublishedApi int
     override fun containsKey(key: Long): Boolean = map.containsKey(key)
     override fun containsValue(value: Float): Boolean = map.containsValue(value.toBits())
     override fun get(key: Long): Float = Float.fromBits(map[key])
+    override fun set(key: Long, value: Float) { map[key] = value.toBits() }
     override fun put(key: Long, value: Float): Float = Float.fromBits(map.put(key, value.toBits()))
     override fun remove(key: Long): Float = Float.fromBits(map.remove(key))
     override fun clear() { map.clear() }

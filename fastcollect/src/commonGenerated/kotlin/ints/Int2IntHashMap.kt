@@ -4,6 +4,7 @@ package io.github.sooniln.fastcollect.ints
 
 import io.github.sooniln.fastcollect.ArrayUtils
 import io.github.sooniln.fastcollect.FastIterator
+import io.github.sooniln.fastcollect.Hash
 import io.github.sooniln.fastcollect.MutableFastIterator
 import io.github.sooniln.fastcollect.ints.MutableIntCollection
 import io.github.sooniln.fastcollect.ints.MutableIntIterator
@@ -477,21 +478,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-    private fun Int.mix(mask: Int): Int {
-        if ((this.toInt() or mask) == mask) {
-            return this.toInt()
-        } else {
-            var h = hashCode()
-            h = h xor (h ushr 16)
-            h *= PHI
-            h = h xor (h ushr 16)
-            return h
-        }
-    }
-
-    private fun Int.slot(mask: Int): Int = mix(mask) and mask
-    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - mix(mask)) and mask
+    private fun Int.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
+    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
 
     private fun Long.key(): Int = toInt()
     private fun Long.value(): Int = (this shr (8 * Int.SIZE_BYTES)).toInt()
@@ -504,8 +492,6 @@ public class Int2IntHashMap @JvmOverloads constructor(
         private const val ZERO_ENTRY = 0.toLong()
 
         private val EMPTY_ARRAY = longArrayOf(ZERO_ENTRY)
-
-        private const val PHI = 0x9E3779B9.toInt()
 
         private const val MIN_INITIAL_CAPACITY = 7 // may not be zero
 

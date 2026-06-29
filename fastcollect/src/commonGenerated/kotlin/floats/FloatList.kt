@@ -267,22 +267,14 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other !is List<*>) return false
+        if (other !is FloatList) return false
         if (size != other.size) return false
 
         val it = listIterator()
         val otherIt = other.listIterator()
-        if (otherIt is FloatIterator) {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (!(it.nextFloat() equalsBoxed otherIt.nextFloat())) {
-                    return false
-                }
-            }
-        } else {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextFloat() != otherIt.next()) {
-                    return false
-                }
+        while (it.hasNext() && otherIt.hasNext()) {
+            if (!(it.nextFloat() equalsBoxed otherIt.nextFloat())) {
+                return false
             }
         }
         return !(it.hasNext() || otherIt.hasNext())

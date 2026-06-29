@@ -267,22 +267,14 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other !is List<*>) return false
+        if (other !is DoubleList) return false
         if (size != other.size) return false
 
         val it = listIterator()
         val otherIt = other.listIterator()
-        if (otherIt is DoubleIterator) {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (!(it.nextDouble() equalsBoxed otherIt.nextDouble())) {
-                    return false
-                }
-            }
-        } else {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextDouble() != otherIt.next()) {
-                    return false
-                }
+        while (it.hasNext() && otherIt.hasNext()) {
+            if (!(it.nextDouble() equalsBoxed otherIt.nextDouble())) {
+                return false
             }
         }
         return !(it.hasNext() || otherIt.hasNext())

@@ -267,22 +267,14 @@ public abstract class AbstractShortList : AbstractShortCollection(), ShortList {
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other !is List<*>) return false
+        if (other !is ShortList) return false
         if (size != other.size) return false
 
         val it = listIterator()
         val otherIt = other.listIterator()
-        if (otherIt is ShortIterator) {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (!(it.nextShort() equalsBoxed otherIt.nextShort())) {
-                    return false
-                }
-            }
-        } else {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (it.nextShort() != otherIt.next()) {
-                    return false
-                }
+        while (it.hasNext() && otherIt.hasNext()) {
+            if (!(it.nextShort() equalsBoxed otherIt.nextShort())) {
+                return false
             }
         }
         return !(it.hasNext() || otherIt.hasNext())

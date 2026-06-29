@@ -267,22 +267,14 @@ public abstract class Abstract${Type}List : Abstract${Type}Collection(), ${Type}
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other !is List<*>) return false
+        if (other !is ${Type}List) return false
         if (size != other.size) return false
 
         val it = listIterator()
         val otherIt = other.listIterator()
-        if (otherIt is ${Type}Iterator) {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (!(it.next${Type}() equalsBoxed otherIt.next${Type}())) {
-                    return false
-                }
-            }
-        } else {
-            while (it.hasNext() && otherIt.hasNext()) {
-                if (it.next${Type}() != otherIt.next()) {
-                    return false
-                }
+        while (it.hasNext() && otherIt.hasNext()) {
+            if (!(it.next${Type}() equalsBoxed otherIt.next${Type}())) {
+                return false
             }
         }
         return !(it.hasNext() || otherIt.hasNext())

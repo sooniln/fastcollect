@@ -4,6 +4,7 @@ package io.github.sooniln.fastcollect.${subpackage}
 
 import io.github.sooniln.fastcollect.ArrayUtils
 import io.github.sooniln.fastcollect.FastIterator
+import io.github.sooniln.fastcollect.Hash
 import io.github.sooniln.fastcollect.MutableFastIterator
 import io.github.sooniln.fastcollect.${subpackage}.Mutable${KVType}Collection
 import io.github.sooniln.fastcollect.${subpackage}.Mutable${KVType}Iterator
@@ -477,21 +478,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
         override fun toString(): String = "\$key=\$value"
     }
 
-    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-    private fun ${KVType}.mix(mask: Int): Int {
-        if ((this.toInt() or mask) == mask) {
-            return this.toInt()
-        } else {
-            var h = hashCode()
-            h = h xor (h ushr 16)
-            h *= PHI
-            h = h xor (h ushr 16)
-            return h
-        }
-    }
-
-    private fun ${KVType}.slot(mask: Int): Int = mix(mask) and mask
-    private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int = (slot - mix(mask)) and mask
+    private fun ${KVType}.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
+    private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
 
     private fun ${ArrayType}.key(): ${KVType} = to${KVType}()
     private fun ${ArrayType}.value(): ${KVType} = (this shr (8 * ${KVType}.SIZE_BYTES)).to${KVType}()
@@ -504,8 +492,6 @@ public class ${Name}HashMap @JvmOverloads constructor(
         private const val ZERO_ENTRY = 0.to${ArrayType}()
 
         private val EMPTY_ARRAY = ${lowerArrayType}ArrayOf(ZERO_ENTRY)
-
-        private const val PHI = 0x9E3779B9.toInt()
 
         private const val MIN_INITIAL_CAPACITY = 7 // may not be zero
 

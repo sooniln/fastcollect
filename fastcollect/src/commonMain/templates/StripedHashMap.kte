@@ -4,6 +4,7 @@ package io.github.sooniln.fastcollect.${subpackage}
 
 import io.github.sooniln.fastcollect.ArrayUtils
 import io.github.sooniln.fastcollect.FastIterator
+import io.github.sooniln.fastcollect.Hash
 import io.github.sooniln.fastcollect.MutableFastIterator
 import io.github.sooniln.fastcollect.${subpackage}.Mutable${KVType}Collection
 import io.github.sooniln.fastcollect.${subpackage}.Mutable${KVType}Iterator
@@ -480,21 +481,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
         override fun toString(): String = "\$key=\$value"
     }
 
-    @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
-    private fun ${KVType}.mix(mask: Int): Int {
-        if ((this.toInt() or mask) == mask) {
-            return this.toInt() shl 1
-        } else {
-            var h = hashCode()
-            h = h xor (h ushr 16)
-            h = h * PHI
-            h = h xor (h ushr 16)
-            return h shl 1
-        }
-    }
-
-    private fun ${KVType}.slot(mask: Int): Int = mix(mask) and mask
-    private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int = (slot - slot(mask)) and mask
+    private fun ${KVType}.slot(mask: Int): Int = Hash.fibonacciHashEven(this) shl 1 and mask
+    private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHashEven(this)) and mask
 
     private companion object {
         // the value of a field in an uninitialized primitive array
@@ -502,8 +490,6 @@ public class ${Name}HashMap @JvmOverloads constructor(
         private const val ZERO = 0.to${KVType}()
 
         private val EMPTY_ARRAY = ${lowerKVType}ArrayOf(ZERO, ZERO)
-
-        private const val PHI = 0x9E3779B9.toInt()
 
         private const val MIN_INITIAL_CAPACITY = 7
 
