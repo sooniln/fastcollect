@@ -122,27 +122,51 @@ public class LongHashSet @JvmOverloads constructor(
         var slot = key.slot(mask)
         var distance = 0
         while (true) {
-            var currKey = keysArr[slot]
+            val currKey = keysArr[slot]
             if (currKey == key) {
                 return onPresent()
             } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {
-                var newKey = key
-
-                while (currKey != emptyKey) {
-                    keysArr[slot] = newKey
-                    newKey = currKey
-                    slot = (slot + 1) and mask
-                    currKey = keysArr[slot]
-                }
-
-                keysArr[slot] = newKey
-                threshold -= 1
-                size += 1
+                shiftAndInsert(keysArr, mask, slot, currKey, key)
                 return onAbsent()
             }
 
             slot = (slot + 1) and mask
             distance += 1
+        }
+    }
+
+    private fun shiftAndInsert(keysArr: LongArray, mask: Int, slot: Int, currKey: Long, newKey: Long) {
+        var nextSlot = slot
+        var currKey = currKey
+        var newKey = newKey
+
+        while (currKey != emptyKey) {
+            keysArr[nextSlot] = newKey
+            newKey = currKey
+            nextSlot = (nextSlot + 1) and mask
+            currKey = keysArr[nextSlot]
+        }
+
+        keysArr[nextSlot] = newKey
+        threshold -= 1
+        size += 1
+
+        // since Robin Hood hashing shifts chains of elements on inserts, it is a viable DoS attack strategy to create
+        // large chains of entries such that insertion devolves to O(n^2). Beyond DoS, this can be triggered even in
+        // unintentional ways, since the iteration order is hash order. It is not our intention to prevent or even
+        // mitigate DoS attacks (this class is not designed to be attack-resistant), but we do want to help the user
+        // out if they shoot themselves in the foot a bit.
+        //
+        // if we detect pathologically long chains of shifts on inserts (far greater than we would expect in any
+        // conceivable normal usage), and if the table is more than 50% full, we rehash to the next greater size to
+        // reduce chain length. to calculate expected chain length at a given size, formulas are given in
+        // https://www.cs.tau.ac.il//~zwick/Adv-Alg-2015/Linear-Probing.pdf and similar. i'd say i used those, but it
+        // was much simpler to do a monte carlo simulation and approximate the results for α=5/6:
+        //
+        // k* ≈ 44·log₂(n) − 200   -> overestimate with power-of-two ->   k* ≈ 64·b, b=log₂(n)
+
+        if (threshold < size && ((nextSlot - slot) and mask) > 64 * mask.countOneBits()) {
+            rehash((threshold + size) shl 1)
         }
     }
 
@@ -344,8 +368,8 @@ public class LongHashSet @JvmOverloads constructor(
         }
     }
 
-    private fun Long.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
-    private fun Long.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
+    private fun Long.slot(mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = Hash.fibonacciHash(this, shift) and mask
+    private fun Long.slotDistance(slot: Int, mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = (slot - Hash.fibonacciHash(this, shift)) and mask
 
     private companion object {
         // the value of a field in an uninitialized primitive array
@@ -366,7 +390,9 @@ public class LongHashSet @JvmOverloads constructor(
             check(capacity >= 0)
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = max((capacity / loadFactor).toInt(), capacity + 1)
-            return ArrayUtils.minPowerOfTwo(requiredArraySize)
+            val actualArraySize = ArrayUtils.minPowerOfTwo(requiredArraySize)
+            if (actualArraySize < requiredArraySize) throw Error("Required array length requiredArraySize is too large")
+            return actualArraySize
         }
     }
 }

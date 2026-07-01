@@ -171,7 +171,6 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         if (key == emptyKey) changeEmptyKey()
 
         val keysArr = keysArr
-        val valuesArr = valuesArr
         val mask = keysArr.size - 1
 
         var slot = key.slot(mask)
@@ -182,7 +181,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
                 valuesArr[slot] = onReplace(slot)
                 return
             } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {
-                shiftAndInsert(mask, slot, currKey, key, onAdd())
+                shiftAndInsert(keysArr, mask, slot, currKey, key, onAdd())
                 return
             }
 
@@ -191,8 +190,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         }
     }
 
-    private fun shiftAndInsert(mask: Int, slot: Int, currKey: Int, newKey: Int, newValue: V?) {
-        val keysArr = keysArr
+    private fun shiftAndInsert(keysArr: IntArray, mask: Int, slot: Int, currKey: Int, newKey: Int, newValue: V?) {
         val valuesArr = valuesArr
 
         var nextSlot = slot
@@ -215,8 +213,20 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         threshold -= 1
         size += 1
 
-        // TODO: derive expected run length in more detail and explain (currently a very rough approximation of
-        //       formulas from https://www.cs.tau.ac.il//~zwick/Adv-Alg-2015/Linear-Probing.pdf)
+        // since Robin Hood hashing shifts chains of elements on inserts, it is a viable DoS attack strategy to create
+        // large chains of entries such that insertion devolves to O(n^2). Beyond DoS, this can be triggered even in
+        // unintentional ways, since the iteration order is hash order. It is not our intention to prevent or even
+        // mitigate DoS attacks (this class is not designed to be attack-resistant), but we do want to help the user
+        // out if they shoot themselves in the foot a bit.
+        //
+        // if we detect pathologically long chains of shifts on inserts (far greater than we would expect in any
+        // conceivable normal usage), and if the table is more than 50% full, we rehash to the next greater size to
+        // reduce chain length. to calculate expected chain length at a given size, formulas are given in
+        // https://www.cs.tau.ac.il//~zwick/Adv-Alg-2015/Linear-Probing.pdf and similar. i'd say i used those, but it
+        // was much simpler to do a monte carlo simulation and approximate the results for α=5/6:
+        //
+        // k* ≈ 44·log₂(n) − 200   -> overestimate with power-of-two ->   k* ≈ 64·b, b=log₂(n)
+
         if (threshold < size && (nextSlot - slot) and mask > 64 * mask.countOneBits()) {
             val newCapacity = (threshold + size) shl 1
             if (newCapacity > size) rehash(newCapacity)
@@ -528,8 +538,8 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private fun Int.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
-    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
+    private fun Int.slot(mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = Hash.fibonacciHash(this, shift) and mask
+    private fun Int.slotDistance(slot: Int, mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = (slot - Hash.fibonacciHash(this, shift)) and mask
 
     private companion object {
         // the value of a field in an uninitialized primitive array
@@ -553,7 +563,9 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             check(capacity >= 0)
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = max((capacity / loadFactor).toInt(), capacity + 1)
-            return ArrayUtils.minPowerOfTwo(requiredArraySize)
+            val actualArraySize = ArrayUtils.minPowerOfTwo(requiredArraySize)
+            if (actualArraySize < requiredArraySize) throw Error("Required array length requiredArraySize is too large")
+            return actualArraySize
         }
     }
 }

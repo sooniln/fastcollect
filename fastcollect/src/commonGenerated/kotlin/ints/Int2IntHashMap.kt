@@ -178,7 +178,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
                 kvArr[slot] = arrayEntry(key, onReplace(currEntry))
                 return
             } else if (currEntry == emptyEntry || distance > currEntry.key().slotDistance(slot, mask)) {
-                shiftAndInsert(mask, slot, currEntry, arrayEntry(key, onAdd()))
+                shiftAndInsert(kvArr, mask, slot, currEntry, arrayEntry(key, onAdd()))
                 return
             }
 
@@ -187,9 +187,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         }
     }
 
-    private fun shiftAndInsert(mask: Int, slot: Int, currEntry: Long, newEntry: Long) {
-        val kvArr = kvArr
-
+    private fun shiftAndInsert(kvArr: LongArray, mask: Int, slot: Int, currEntry: Long, newEntry: Long) {
         var nextSlot = slot
         var currEntry = currEntry
         var newEntry = newEntry
@@ -205,11 +203,22 @@ public class Int2IntHashMap @JvmOverloads constructor(
         threshold -= 1
         size += 1
 
-        // TODO: derive expected run length in more detail and explain (currently a very rough approximation of
-        //       formulas from https://www.cs.tau.ac.il//~zwick/Adv-Alg-2015/Linear-Probing.pdf)
+        // since Robin Hood hashing shifts chains of elements on inserts, it is a viable DoS attack strategy to create
+        // large chains of entries such that insertion devolves to O(n^2). Beyond DoS, this can be triggered even in
+        // unintentional ways, since the iteration order is hash order. It is not our intention to prevent or even
+        // mitigate DoS attacks (this class is not designed to be attack-resistant), but we do want to help the user
+        // out if they shoot themselves in the foot a bit.
+        //
+        // if we detect pathologically long chains of shifts on inserts (far greater than we would expect in any
+        // conceivable normal usage), and if the table is more than 50% full, we rehash to the next greater size to
+        // reduce chain length. to calculate expected chain length at a given size, formulas are given in
+        // https://www.cs.tau.ac.il//~zwick/Adv-Alg-2015/Linear-Probing.pdf and similar. i'd say i used those, but it
+        // was much simpler to do a monte carlo simulation and approximate the results for α=5/6:
+        //
+        // k* ≈ 44·log₂(n) − 200   -> overestimate with power-of-two ->   k* ≈ 64·b, b=log₂(n)
+
         if (threshold < size && (nextSlot - slot) and mask > 64 * mask.countOneBits()) {
-            val newCapacity = (threshold + size) shl 1
-            if (newCapacity > size) rehash(newCapacity)
+            rehash((threshold + size) shl 1)
         }
     }
 
@@ -492,8 +501,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private fun Int.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
-    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
+    private fun Int.slot(mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = Hash.fibonacciHash(this, shift) and mask
+    private fun Int.slotDistance(slot: Int, mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = (slot - Hash.fibonacciHash(this, shift)) and mask
 
     private fun Long.key(): Int = toInt()
     private fun Long.value(): Int = (this shr (8 * Int.SIZE_BYTES)).toInt()
@@ -519,7 +528,9 @@ public class Int2IntHashMap @JvmOverloads constructor(
             check(capacity >= 0)
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = max((capacity / loadFactor).toInt(), capacity + 1)
-            return ArrayUtils.minPowerOfTwo(requiredArraySize)
+            val actualArraySize = ArrayUtils.minPowerOfTwo(requiredArraySize)
+            if (actualArraySize < requiredArraySize) throw Error("Required array length requiredArraySize is too large")
+            return actualArraySize
         }
     }
 }
