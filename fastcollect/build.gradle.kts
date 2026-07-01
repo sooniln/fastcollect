@@ -114,27 +114,17 @@ private object Generate {
             "HashMap.kte",
         )
         val Expansions = listOf(
-            //mapOf("KeyType" to "Int", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
             mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
             mapOf("KeyType" to "Int", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
             mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
+            mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
             mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
         )
     }
 
-    object StripedHashMapTypes {
+    object InterleavedHashMapTypes {
         val Files = listOf(
-            "StripedHashMap.kte",
-        )
-        val Expansions = listOf<Map<String, Any>>(
-            //mapOf("KVType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
-            mapOf("KVType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
-        )
-    }
-
-    object VectorStripedHashMapTypes {
-        val Files = listOf(
-            "VectorStripedHashMap.kte",
+            "InterleavedHashMap.kte",
         )
         val Expansions = listOf<Map<String, Any>>(
             mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
@@ -320,14 +310,8 @@ tasks.register<Sync>("GenerateCollections") {
     }
 
     generate(
-        Generate.StripedHashMapTypes.Files,
-        Generate.StripedHashMapTypes.Expansions.generateFullExpansion()) { _, expansion ->
-        (expansion["Name"] as String) + "HashMap.kt"
-    }
-
-    generate(
-        Generate.VectorStripedHashMapTypes.Files,
-        Generate.VectorStripedHashMapTypes.Expansions.generateFullExpansion()) { _, expansion ->
+        Generate.InterleavedHashMapTypes.Files,
+        Generate.InterleavedHashMapTypes.Expansions.generateFullExpansion()) { _, expansion ->
         (expansion["Name"] as String) + "HashMap.kt"
     }
 

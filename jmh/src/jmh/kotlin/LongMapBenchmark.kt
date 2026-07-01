@@ -135,12 +135,13 @@ open class LongMapBenchmark {
         }
     }
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun naiveCopy(state: RandomState): Long2IntHashMap {
         val copy = Long2IntHashMap()
         for ((key, value) in state.map) {
             if (Thread.interrupted()) throw InterruptedException()
-            copy.put(key, value)
+            copy[key] = value
         }
         return copy
     }

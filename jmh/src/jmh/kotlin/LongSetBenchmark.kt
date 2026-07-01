@@ -135,6 +135,7 @@ open class LongSetBenchmark {
         }
     }
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun naiveCopy(state: RandomState): LongHashSet {
         val copy = LongHashSet()

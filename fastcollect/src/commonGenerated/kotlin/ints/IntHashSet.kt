@@ -136,13 +136,13 @@ public class IntHashSet @JvmOverloads constructor(
                 }
 
                 keysArr[slot] = newKey
-                --threshold
-                ++size
+                threshold -= 1
+                size += 1
                 return onAbsent()
             }
 
             slot = (slot + 1) and mask
-            ++distance
+            distance += 1
         }
     }
 
@@ -162,8 +162,8 @@ public class IntHashSet @JvmOverloads constructor(
         }
 
         keysArr[currSlot] = emptyKey
-        ++threshold
-        --size
+        threshold += 1
+        size -= 1
     }
 
     override fun addAll(elements: IntCollection): Boolean {
@@ -223,7 +223,7 @@ public class IntHashSet @JvmOverloads constructor(
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1f else .9f
+        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 5.0/6.0
 
         val newLength = arraySize(capacity, actualLoadFactor)
         if (keysArr.size == newLength) return
@@ -267,7 +267,7 @@ public class IntHashSet @JvmOverloads constructor(
             }
 
             slot = (slot + 1) and mask
-            ++distance
+            distance += 1
         }
     }
 
@@ -296,7 +296,7 @@ public class IntHashSet @JvmOverloads constructor(
             if(key != emptyKey) {
                 action(key)
             }
-            --slot
+            slot -= 1
         }
     }
 
@@ -362,7 +362,7 @@ public class IntHashSet @JvmOverloads constructor(
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE
 
-        private fun arraySize(capacity: Int, loadFactor: Float): Int {
+        private fun arraySize(capacity: Int, loadFactor: Double): Int {
             check(capacity >= 0)
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = max((capacity / loadFactor).toInt(), capacity + 1)

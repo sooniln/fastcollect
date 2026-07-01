@@ -173,28 +173,43 @@ public class Int2IntHashMap @JvmOverloads constructor(
         var slot = key.slot(mask)
         var distance = 0
         while (true) {
-            var currEntry = kvArr[slot]
+            val currEntry = kvArr[slot]
             if (currEntry.key() == key) {
                 kvArr[slot] = arrayEntry(key, onReplace(currEntry))
                 return
             } else if (currEntry == emptyEntry || distance > currEntry.key().slotDistance(slot, mask)) {
-                var newEntry = arrayEntry(key, onAdd())
-
-                while (currEntry != emptyEntry) {
-                    kvArr[slot] = newEntry
-                    newEntry = currEntry
-                    slot = (slot + 1) and mask
-                    currEntry = kvArr[slot]
-                }
-
-                kvArr[slot] = newEntry
-                --threshold
-                ++size
+                shiftAndInsert(mask, slot, currEntry, arrayEntry(key, onAdd()))
                 return
             }
 
             slot = (slot + 1) and mask
-            ++distance
+            distance += 1
+        }
+    }
+
+    private fun shiftAndInsert(mask: Int, slot: Int, currEntry: Long, newEntry: Long) {
+        val kvArr = kvArr
+
+        var nextSlot = slot
+        var currEntry = currEntry
+        var newEntry = newEntry
+
+        while (currEntry != emptyEntry) {
+            kvArr[nextSlot] = newEntry
+            newEntry = currEntry
+            nextSlot = (nextSlot + 1) and mask
+            currEntry = kvArr[nextSlot]
+        }
+
+        kvArr[nextSlot] = newEntry
+        threshold -= 1
+        size += 1
+
+        // TODO: derive expected run length in more detail and explain (currently a very rough approximation of
+        //       formulas from https://www.cs.tau.ac.il//~zwick/Adv-Alg-2015/Linear-Probing.pdf)
+        if (threshold < size && (nextSlot - slot) and mask > 64 * mask.countOneBits()) {
+            val newCapacity = (threshold + size) shl 1
+            if (newCapacity > size) rehash(newCapacity)
         }
     }
 
@@ -213,8 +228,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
             nextEntry = kvArr[nextSlot]
         }
         kvArr[currSlot] = emptyEntry
-        ++threshold
-        --size
+        threshold += 1
+        size -= 1
     }
 
     override fun putAll(from: Int2IntMap) {
@@ -299,14 +314,14 @@ public class Int2IntHashMap @JvmOverloads constructor(
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 0.9
+        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 5.0/6.0
 
         val newLength = arraySize(capacity, actualLoadFactor)
         if (kvArr.size == newLength) return
 
         val newKvArr = LongArray(newLength)
         if (emptyEntry != ZERO_ENTRY) newKvArr.fill(emptyEntry)
-        val newMask = newKvArr.size - 1
+        val newMask = newLength - 1
 
         for (slot in kvArr.indices) {
             val entry = kvArr[slot]
@@ -316,8 +331,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         kvArr = newKvArr
 
         // threshold must always maintain the invariant of at least 1 slot being open
-        val newCapacity = newLength / 2
-        threshold = min((newCapacity * actualLoadFactor).toInt(), newCapacity - 1) - size
+        threshold = min((newLength * actualLoadFactor).toInt(), newMask) - size
     }
 
     // we can assume key doesn't exist in array and that we never insert emptyEntry
@@ -343,7 +357,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             }
 
             slot = (slot + 1) and mask
-            ++distance
+            distance += 1
         }
     }
 
@@ -375,7 +389,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             if(entry != emptyEntry) {
                 action(entry.key(), entry.value())
             }
-            --slot
+            slot -= 1
         }
     }
 
@@ -504,7 +518,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         private fun arraySize(capacity: Int, loadFactor: Double): Int {
             check(capacity >= 0)
             // array must always maintain the invariant of at least one slot remaining open
-            val requiredArraySize = 2 * max((capacity / loadFactor).toInt(), capacity + 1)
+            val requiredArraySize = max((capacity / loadFactor).toInt(), capacity + 1)
             return ArrayUtils.minPowerOfTwo(requiredArraySize)
         }
     }

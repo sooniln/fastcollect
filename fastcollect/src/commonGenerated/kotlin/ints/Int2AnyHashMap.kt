@@ -177,33 +177,49 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         var slot = key.slot(mask)
         var distance = 0
         while (true) {
-            var currKey = keysArr[slot]
+            val currKey = keysArr[slot]
             if (currKey == key) {
                 valuesArr[slot] = onReplace(slot)
                 return
             } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {
-                var newKey = key
-                var newValue: V? = onAdd()
-
-                while (currKey != emptyKey) {
-                    val currValue = valuesArr[slot]
-                    keysArr[slot] = newKey
-                    valuesArr[slot] = newValue
-                    newKey = currKey
-                    newValue = currValue
-                    slot = (slot + 1) and mask
-                    currKey = keysArr[slot]
-                }
-
-                keysArr[slot] = newKey
-                valuesArr[slot] = newValue
-                --threshold
-                ++size
+                shiftAndInsert(mask, slot, currKey, key, onAdd())
                 return
             }
 
             slot = (slot + 1) and mask
-            ++distance
+            distance += 1
+        }
+    }
+
+    private fun shiftAndInsert(mask: Int, slot: Int, currKey: Int, newKey: Int, newValue: V?) {
+        val keysArr = keysArr
+        val valuesArr = valuesArr
+
+        var nextSlot = slot
+        var currKey = currKey
+        var newKey = newKey
+        var newValue = newValue
+
+        while (currKey != emptyKey) {
+            val currValue = valuesArr[nextSlot]
+            keysArr[nextSlot] = newKey
+            valuesArr[nextSlot] = newValue
+            newKey = currKey
+            newValue = currValue
+            nextSlot = (nextSlot + 1) and mask
+            currKey = keysArr[nextSlot]
+        }
+
+        keysArr[nextSlot] = newKey
+        valuesArr[nextSlot] = newValue
+        threshold -= 1
+        size += 1
+
+        // TODO: derive expected run length in more detail and explain (currently a very rough approximation of
+        //       formulas from https://www.cs.tau.ac.il//~zwick/Adv-Alg-2015/Linear-Probing.pdf)
+        if (threshold < size && (nextSlot - slot) and mask > 64 * mask.countOneBits()) {
+            val newCapacity = (threshold + size) shl 1
+            if (newCapacity > size) rehash(newCapacity)
         }
     }
 
@@ -227,8 +243,8 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
 
         valuesArr[currSlot] = null
 
-        ++threshold
-        --size
+        threshold += 1
+        size -= 1
     }
 
     override fun putAll(from: Int2AnyMap<V>) {
@@ -317,7 +333,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 0.9
+        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 5.0/6.0
 
         val newLength = arraySize(capacity, actualLoadFactor)
         if (keysArr.size == newLength) return
@@ -327,7 +343,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
 
         val newValuesArr = arrayOfNulls<Any>(newLength) as Array<V?>
 
-        val newMask = newKeysArr.size - 1
+        val newMask = newLength - 1
 
         for (slot in keysArr.indices) {
             val key = keysArr[slot]
@@ -338,7 +354,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         valuesArr = newValuesArr
 
         // threshold must always maintain the invariant of at least 1 slot being open
-        threshold = min((newKeysArr.size * actualLoadFactor).toInt(), newKeysArr.size - 1) - size
+        threshold = min((newLength * actualLoadFactor).toInt(), newMask) - size
     }
 
     // we can assume key doesn't exist in array and that we never insert emptyKey
@@ -373,7 +389,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             }
 
             slot = (slot + 1) and mask
-            ++distance
+            distance += 1
         }
     }
 
@@ -404,7 +420,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
                 action(key, valuesArr[slot] as V)
             }
-            --slot
+            slot -= 1
         }
     }
 

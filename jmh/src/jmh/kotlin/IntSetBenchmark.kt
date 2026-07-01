@@ -135,6 +135,7 @@ open class IntSetBenchmark {
         }
     }
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun naiveCopy(state: RandomState): IntHashSet {
         val copy = IntHashSet()

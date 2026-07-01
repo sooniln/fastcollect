@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 /**
  * A JVM specific benchmark which measures the performance of various map libraries.
  */
-@Fork(1, jvmArgs = ["-Xmx4g"])
+@Fork(1, jvmArgs = ["-Xmx6g"])
 @Timeout(time = 10, timeUnit = TimeUnit.SECONDS)
 @Warmup(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @Measurement(iterations = 5, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
@@ -135,12 +135,13 @@ open class IntMapBenchmark {
         }
     }
 
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun naiveCopy(state: RandomState): Int2IntHashMap {
         val copy = Int2IntHashMap()
         for ((key, value) in state.map) {
             if (Thread.interrupted()) throw InterruptedException()
-            copy.put(key, value)
+            copy[key] = value
         }
         return copy
     }
