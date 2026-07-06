@@ -8,3 +8,8 @@ public actual fun Int.reverseBits(): Int {
     i = (i shl 24) or ((i and 0xff00) shl 8) or ((i ushr 8) and 0xff00) or (i ushr 24)
     return i
 }
+
+public actual fun Int.reverseBytes(): Int {
+    val i = this
+    return (i shl 24) or ((i and 0xff00) shl 8) or ((i ushr 8) and 0xff00) or (i ushr 24)
+}

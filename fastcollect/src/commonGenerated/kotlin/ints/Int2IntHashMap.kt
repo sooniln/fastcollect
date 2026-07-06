@@ -146,7 +146,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             // performance we only check once every half cache line.
             var i = 0
             do {
-                if (currEntry == emptyEntry) {
+                if (currEntry.key() == emptyEntry.key()) {
                     return onFail()
                 } else if (currEntry.key() == key) {
                     return onFind(slot, currEntry)
@@ -217,7 +217,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         //
         // k* ≈ 44·log₂(n) − 200   -> overestimate with power-of-two ->   k* ≈ 64·b, b=log₂(n)
 
-        if (threshold < size && (nextSlot - slot) and mask > 64 * mask.countOneBits()) {
+        if (threshold < size && ((nextSlot - slot) and mask) > 64 * mask.countOneBits()) {
             rehash((threshold + size) shl 1)
         }
     }
@@ -390,15 +390,10 @@ public class Int2IntHashMap @JvmOverloads constructor(
     override operator fun iterator(): MutableFastIterator<MutableInt2IntMap.MutableEntry> = FastEntryIterator()
 
     public fun forEach(action: (Int, Int) -> Unit) {
-        val kvArr = kvArr
-
-        var slot = kvArr.size - 1
-        while (slot >= 0) {
-            val entry = kvArr[slot]
+        for (entry in kvArr) {
             if(entry != emptyEntry) {
                 action(entry.key(), entry.value())
             }
-            slot -= 1
         }
     }
 
@@ -501,8 +496,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private fun Int.slot(mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = Hash.fibonacciHash(this, shift) and mask
-    private fun Int.slotDistance(slot: Int, mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = (slot - Hash.fibonacciHash(this, shift)) and mask
+    private fun Int.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
+    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
 
     private fun Long.key(): Int = toInt()
     private fun Long.value(): Int = (this shr (8 * Int.SIZE_BYTES)).toInt()

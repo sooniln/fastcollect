@@ -227,7 +227,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
         //
         // k* ≈ 44·log₂(n) − 200   -> overestimate with power-of-two ->   k* ≈ 64·b, b=log₂(n)
 
-        if (threshold < size && (nextSlot - slot) and mask > 64 * mask.countOneBits()) {
+        if (threshold < size && ((nextSlot - slot) and mask) > 64 * mask.countOneBits()) {
             val newCapacity = (threshold + size) shl 1
             if (newCapacity > size) rehash(newCapacity)
         }
@@ -423,14 +423,12 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
         val keysArr = keysArr
         val valuesArr = valuesArr
 
-        var slot = keysArr.size - 1
-        while (slot >= 0) {
+        for (slot in keysArr.indices) {
             val key = keysArr[slot]
             if(key != emptyKey) {
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
                 action(key, valuesArr[slot] as V)
             }
-            slot -= 1
         }
     }
 
@@ -538,8 +536,8 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private fun Long.slot(mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = Hash.fibonacciHash(this, shift) and mask
-    private fun Long.slotDistance(slot: Int, mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = (slot - Hash.fibonacciHash(this, shift)) and mask
+    private fun Long.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
+    private fun Long.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
 
     private companion object {
         // the value of a field in an uninitialized primitive array

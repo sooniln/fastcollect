@@ -312,15 +312,10 @@ public class LongHashSet @JvmOverloads constructor(
     override fun iterator(): MutableLongIterator = Iterator()
 
     public fun forEach(action: (Long) -> Unit) {
-        val keysArr = keysArr
-
-        var slot = keysArr.size - 1
-        while (slot >= 0) {
-            val key = keysArr[slot]
+        for (key in keysArr) {
             if(key != emptyKey) {
                 action(key)
             }
-            slot -= 1
         }
     }
 
@@ -368,8 +363,8 @@ public class LongHashSet @JvmOverloads constructor(
         }
     }
 
-    private fun Long.slot(mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = Hash.fibonacciHash(this, shift) and mask
-    private fun Long.slotDistance(slot: Int, mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = (slot - Hash.fibonacciHash(this, shift)) and mask
+    private fun Long.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
+    private fun Long.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
 
     private companion object {
         // the value of a field in an uninitialized primitive array

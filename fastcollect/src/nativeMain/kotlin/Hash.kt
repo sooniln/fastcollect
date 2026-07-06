@@ -9,3 +9,9 @@ public actual fun Int.reverseBits(): Int {
     i = (i shl 24) or ((i and 0xff00) shl 8) or ((i ushr 8) and 0xff00) or (i ushr 24)
     return i
 }
+
+// LLVM 21 (used by K/N) reduces this to BSWAP on x86-64, and to REV on ARM64
+public actual fun Int.reverseBytes(): Int {
+    val i = this
+    return (i shl 24) or ((i and 0xff00) shl 8) or ((i ushr 8) and 0xff00) or (i ushr 24)
+}

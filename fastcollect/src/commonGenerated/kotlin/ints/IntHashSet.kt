@@ -312,15 +312,10 @@ public class IntHashSet @JvmOverloads constructor(
     override fun iterator(): MutableIntIterator = Iterator()
 
     public fun forEach(action: (Int) -> Unit) {
-        val keysArr = keysArr
-
-        var slot = keysArr.size - 1
-        while (slot >= 0) {
-            val key = keysArr[slot]
+        for (key in keysArr) {
             if(key != emptyKey) {
                 action(key)
             }
-            slot -= 1
         }
     }
 
@@ -368,8 +363,8 @@ public class IntHashSet @JvmOverloads constructor(
         }
     }
 
-    private fun Int.slot(mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = Hash.fibonacciHash(this, shift) and mask
-    private fun Int.slotDistance(slot: Int, mask: Int, shift: Int = mask.countLeadingZeroBits()): Int = (slot - Hash.fibonacciHash(this, shift)) and mask
+    private fun Int.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
+    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
 
     private companion object {
         // the value of a field in an uninitialized primitive array
