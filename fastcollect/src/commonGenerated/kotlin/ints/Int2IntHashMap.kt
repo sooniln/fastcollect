@@ -496,8 +496,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private fun Int.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
-    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
+    private fun Int.slot(mask: Int): Int = Hash.mix(this) and mask
+    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask
 
     private fun Long.key(): Int = toInt()
     private fun Long.value(): Int = (this shr (8 * Int.SIZE_BYTES)).toInt()
@@ -524,7 +524,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = max((capacity / loadFactor).toInt(), capacity + 1)
             val actualArraySize = ArrayUtils.minPowerOfTwo(requiredArraySize)
-            if (actualArraySize < requiredArraySize) throw Error("Required array length requiredArraySize is too large")
+            if (actualArraySize < requiredArraySize) throw Error("Required array length $requiredArraySize is too large")
             return actualArraySize
         }
     }

@@ -363,8 +363,8 @@ public class LongHashSet @JvmOverloads constructor(
         }
     }
 
-    private fun Long.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
-    private fun Long.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
+    private fun Long.slot(mask: Int): Int = Hash.mix(this) and mask
+    private fun Long.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask
 
     private companion object {
         // the value of a field in an uninitialized primitive array
@@ -386,7 +386,7 @@ public class LongHashSet @JvmOverloads constructor(
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = max((capacity / loadFactor).toInt(), capacity + 1)
             val actualArraySize = ArrayUtils.minPowerOfTwo(requiredArraySize)
-            if (actualArraySize < requiredArraySize) throw Error("Required array length requiredArraySize is too large")
+            if (actualArraySize < requiredArraySize) throw Error("Required array length $requiredArraySize is too large")
             return actualArraySize
         }
     }

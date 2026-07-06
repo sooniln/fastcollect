@@ -496,8 +496,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
         override fun toString(): String = "\$key=\$value"
     }
 
-    private fun ${KVType}.slot(mask: Int): Int = Hash.fibonacciHash(this) and mask
-    private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.fibonacciHash(this)) and mask
+    private fun ${KVType}.slot(mask: Int): Int = Hash.mix(this) and mask
+    private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask
 
     private fun ${ArrayType}.key(): ${KVType} = to${KVType}()
     private fun ${ArrayType}.value(): ${KVType} = (this shr (8 * ${KVType}.SIZE_BYTES)).to${KVType}()
@@ -524,7 +524,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = max((capacity / loadFactor).toInt(), capacity + 1)
             val actualArraySize = ArrayUtils.minPowerOfTwo(requiredArraySize)
-            if (actualArraySize < requiredArraySize) throw Error("Required array length requiredArraySize is too large")
+            if (actualArraySize < requiredArraySize) throw Error("Required array length \$requiredArraySize is too large")
             return actualArraySize
         }
     }
