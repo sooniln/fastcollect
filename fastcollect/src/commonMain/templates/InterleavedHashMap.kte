@@ -243,11 +243,16 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
     override fun putAll(from: ${Name}Map) {
         if (from is ${Name}HashMap && from.size / 2 > size) {
-            val old = iterator()
+            val oldKvArr = kvArr
+            val oldEmptyEntry = emptyEntry
+
             resetTo(from)
-            for ((key, value) in old) {
-                putIfAbsent(key, value)
+            for (entry in oldKvArr) {
+                if (entry != oldEmptyEntry) {
+                    putIfAbsent(entry.key(), entry.value())
+                }
             }
+            trimToSize()
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
             for ((key, value) in from) {
@@ -391,7 +396,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
     public fun forEach(action: (${KVType}, ${KVType}) -> Unit) {
         for (entry in kvArr) {
-            if(entry != emptyEntry) {
+            if (entry != emptyEntry) {
                 action(entry.key(), entry.value())
             }
         }

@@ -191,16 +191,23 @@ public class ${Type}HashSet @JvmOverloads constructor(
     }
 
     override fun addAll(elements: ${Type}Collection): Boolean {
-        val it = if (elements is ${Type}HashSet && elements.size / 2 > size) {
-            iterator().also { resetTo(elements) }
-        } else {
-            elements.iterator()
-        }
-
-        ensureCapacity(max(size + (elements.size / 2), elements.size))
         var modified = false
-        for (element in it) {
-            modified = add(element) or modified
+        if (elements is ${Type}HashSet && elements.size / 2 > size) {
+            val oldKeysArr = keysArr
+            val oldEmptyKey = emptyKey
+
+            resetTo(elements)
+            for (key in oldKeysArr) {
+                if (key != oldEmptyKey) {
+                    modified = add(key) or modified
+                }
+            }
+            trimToSize()
+        } else {
+            ensureCapacity(max(size + (elements.size / 2), elements.size))
+            for (element in elements) {
+                modified = add(element) or modified
+            }
         }
         return modified
     }
@@ -313,7 +320,7 @@ public class ${Type}HashSet @JvmOverloads constructor(
 
     public fun forEach(action: (${Type}) -> Unit) {
         for (key in keysArr) {
-            if(key != emptyKey) {
+            if (key != emptyKey) {
                 action(key)
             }
         }
