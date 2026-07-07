@@ -32,7 +32,7 @@ You can add FastCollect as a dependency in your project with:
 #### Gradle ####
 
 ```groovy
-implementation 'io.github.sooniln:fastcollect-kotlin:2.0.1'
+implementation 'io.github.sooniln:fastcollect-kotlin:2.0.2'
 ```
 
 #### Maven ####
@@ -41,7 +41,7 @@ implementation 'io.github.sooniln:fastcollect-kotlin:2.0.1'
 <dependency>
     <groupId>io.github.sooniln</groupId>
     <artifactId>fastcollect-kotlin</artifactId>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
 </dependency>
 ```
 
@@ -171,8 +171,3 @@ present. Contrary to common practice, this project checks the generated code dir
 non-standard from a build pipeline perspective, this project has public APIs composed of generated code, and it is
 important for clients and users that the actual code (rather than just the generation templates) is viewable,
 searchable, and parseable within the repository itself.
-
-## HashSet/HashMap Development Notes
-
-Some extra details on the implementation and development of HashSet/HashMap can be found in the
-[Hashtable Implementation](docs/HASHTABLE_IMPLEMENTATION.md) docs.
