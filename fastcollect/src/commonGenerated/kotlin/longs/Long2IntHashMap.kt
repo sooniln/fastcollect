@@ -258,11 +258,19 @@ public class Long2IntHashMap @JvmOverloads constructor(
 
     override fun putAll(from: Long2IntMap) {
         if (from is Long2IntHashMap && from.size / 2 > size) {
-            val old = iterator()
+            val oldKeysArr = keysArr
+            val oldValuesArr = valuesArr
+            val oldEmptyKey = emptyKey
+
             resetTo(from)
-            for ((key, value) in old) {
-                putIfAbsent(key, value)
+            for (slot in oldKeysArr.indices) {
+                val key = oldKeysArr[slot]
+                if (key != oldEmptyKey) {
+                    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+                    putIfAbsent(key, oldValuesArr[slot] as Int)
+                }
             }
+            trimToSize()
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
             for ((key, value) in from) {
@@ -424,7 +432,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
 
         for (slot in keysArr.indices) {
             val key = keysArr[slot]
-            if(key != emptyKey) {
+            if (key != emptyKey) {
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
                 action(key, valuesArr[slot] as Int)
             }

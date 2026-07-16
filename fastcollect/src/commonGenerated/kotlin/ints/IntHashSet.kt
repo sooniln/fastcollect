@@ -191,16 +191,23 @@ public class IntHashSet @JvmOverloads constructor(
     }
 
     override fun addAll(elements: IntCollection): Boolean {
-        val it = if (elements is IntHashSet && elements.size / 2 > size) {
-            iterator().also { resetTo(elements) }
-        } else {
-            elements.iterator()
-        }
-
-        ensureCapacity(max(size + (elements.size / 2), elements.size))
         var modified = false
-        for (element in it) {
-            modified = add(element) or modified
+        if (elements is IntHashSet && elements.size / 2 > size) {
+            val oldKeysArr = keysArr
+            val oldEmptyKey = emptyKey
+
+            resetTo(elements)
+            for (key in oldKeysArr) {
+                if (key != oldEmptyKey) {
+                    modified = add(key) or modified
+                }
+            }
+            trimToSize()
+        } else {
+            ensureCapacity(max(size + (elements.size / 2), elements.size))
+            for (element in elements) {
+                modified = add(element) or modified
+            }
         }
         return modified
     }
@@ -313,7 +320,7 @@ public class IntHashSet @JvmOverloads constructor(
 
     public fun forEach(action: (Int) -> Unit) {
         for (key in keysArr) {
-            if(key != emptyKey) {
+            if (key != emptyKey) {
                 action(key)
             }
         }
