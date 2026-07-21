@@ -33,8 +33,6 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
     public constructor(map: Int2AnyMap<V>): this() { putAll(map) }
     public constructor(map: Map<Int, V>): this() { putAll(map) }
 
-    // when used in hashing mode, the last slot in the array is used to store the zero key/value respectively. when used
-    // in array mode, there is no special handling for zero.
     private var keysArr = EMPTY_KEY_ARRAY
 
     @Suppress("UNCHECKED_CAST")
@@ -91,7 +89,11 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
 
     override fun get(key: Int): V? = findSlot(key, { slot -> valuesArr[slot] }, { defaultValue })
 
-    public fun getOrDefault(key: Int, default: V): V? = findSlot(key, { slot -> valuesArr[slot] }, { default })
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    override fun getValue(key: Int): V = findSlot(key, { slot -> valuesArr[slot] as V }, { throw NoSuchElementException() })
+
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    override fun getOrDefault(key: Int, defaultValue: V): V = findSlot(key, { slot -> valuesArr[slot] as V }, { defaultValue })
 
     override fun put(key: Int, value: V): V? {
         var returnValue = defaultValue
@@ -223,11 +225,11 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         // conceivable normal usage), and if the table is more than 50% full, we rehash to the next greater size to
         // reduce chain length. to calculate expected chain length at a given size, formulas are given in
         // https://www.cs.tau.ac.il//~zwick/Adv-Alg-2015/Linear-Probing.pdf and similar. i'd say i used those, but it
-        // was much simpler to do a monte carlo simulation and approximate the results for α=5/6:
+        // was much simpler to do a monte carlo simulation and approximate the results for α=7/8:
         //
-        // k* ≈ 44·log₂(n) − 200   -> overestimate with power-of-two ->   k* ≈ 64·b, b=log₂(n)
+        // k* ≈ 80·log₂(n) − C   -> overestimate with power-of-two ->   k* ≈ 128·b, b=log₂(n)
 
-        if (threshold < size && ((nextSlot - slot) and mask) > 64 * mask.countOneBits()) {
+        if (threshold < size && ((nextSlot - slot) and mask) > 128 * mask.countOneBits()) {
             val newCapacity = (threshold + size) shl 1
             if (newCapacity > size) rehash(newCapacity)
         }
@@ -351,7 +353,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 5.0/6.0
+        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
 
         val newLength = arraySize(capacity, actualLoadFactor)
         if (keysArr.size == newLength) return

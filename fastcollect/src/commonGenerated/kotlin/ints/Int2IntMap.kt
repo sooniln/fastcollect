@@ -69,6 +69,10 @@ public interface Int2IntMap {
 
     public operator fun get(key: Int): Int
 
+    public fun getValue(key: Int): Int = getOrElse(key) { throw NoSuchElementException() }
+
+    public fun getOrDefault(key: Int, defaultValue: Int): Int = getOrElse(key) { defaultValue }
+
     public fun containsKey(key: Int): Boolean {
         for (k in keys) {
             if (k equalsBoxed key) return true
@@ -104,10 +108,6 @@ public interface Int2IntMap {
 }
 
 public fun  Int2IntMap.asMap(): Map<Int, Int> = Int2IntMapWrapper(this)
-
-public fun  Int2IntMap.getOrDefault(key: Int, defaultValue: Int): Int = getOrElse(key) { defaultValue }
-
-public fun  Int2IntMap.getValue(key: Int): Int = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2IntMap.getOrElse(key: Int, defaultValue: () -> Int): Int {

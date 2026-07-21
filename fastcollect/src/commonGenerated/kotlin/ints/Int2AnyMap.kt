@@ -64,6 +64,10 @@ public interface Int2AnyMap<V> {
 
     public operator fun get(key: Int): V?
 
+    public fun getValue(key: Int): V = getOrElse(key) { throw NoSuchElementException() }
+
+    public fun getOrDefault(key: Int, defaultValue: V): V = getOrElse(key) { defaultValue }
+
     public fun containsKey(key: Int): Boolean {
         for (k in keys) {
             if (k equalsBoxed key) return true
@@ -99,10 +103,6 @@ public interface Int2AnyMap<V> {
 }
 
 public fun <V> Int2AnyMap<V>.asMap(): Map<Int, V> = Int2AnyMapWrapper(this)
-
-public fun <V> Int2AnyMap<V>.getOrDefault(key: Int, defaultValue: V): V = getOrElse(key) { defaultValue }
-
-public fun <V> Int2AnyMap<V>.getValue(key: Int): V = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun <V> Int2AnyMap<V>.getOrElse(key: Int, defaultValue: () -> V): V {

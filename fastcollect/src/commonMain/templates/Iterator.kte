@@ -1,6 +1,7 @@
 package io.github.sooniln.fastcollect.${subpackage}
 
 public fun empty${Type}Iterator(): ${Type}ListIterator = Empty${Type}Iterator
+public fun emptyMutable${Type}Iterator(): Mutable${Type}Iterator = EmptyMutable${Type}Iterator
 
 public abstract class Mutable${Type}Iterator : ${Type}Iterator(), MutableIterator<${Type}>
 
@@ -15,7 +16,7 @@ public abstract class ${Type}ListIterator: ${Type}Iterator(), ListIterator<${Typ
 
 public abstract class Mutable${Type}ListIterator: ${Type}ListIterator(), MutableListIterator<${Type}>
 
-private object Empty${Type}Iterator : ${Type}ListIterator() {
+private object Empty${Type}Iterator : Mutable${Type}ListIterator() {
     override fun previous${Type}(): ${Type} = throw NoSuchElementException()
     override fun next${Type}(): ${Type} = throw NoSuchElementException()
 
@@ -24,4 +25,16 @@ private object Empty${Type}Iterator : ${Type}ListIterator() {
 
     override fun nextIndex(): Int = 0
     override fun previousIndex(): Int = -1
+
+    override fun remove() = throw IllegalStateException()
+    override fun set(element: ${Type}) = throw IllegalStateException()
+    override fun add(element: ${Type}) = throw UnsupportedOperationException()
+}
+
+private object EmptyMutable${Type}Iterator : Mutable${Type}Iterator() {
+    override fun next${Type}(): ${Type} = throw NoSuchElementException()
+
+    override fun hasNext(): Boolean = false
+
+    override fun remove() = throw IllegalStateException()
 }

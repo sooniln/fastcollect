@@ -69,6 +69,10 @@ public interface Int2LongMap {
 
     public operator fun get(key: Int): Long
 
+    public fun getValue(key: Int): Long = getOrElse(key) { throw NoSuchElementException() }
+
+    public fun getOrDefault(key: Int, defaultValue: Long): Long = getOrElse(key) { defaultValue }
+
     public fun containsKey(key: Int): Boolean {
         for (k in keys) {
             if (k equalsBoxed key) return true
@@ -104,10 +108,6 @@ public interface Int2LongMap {
 }
 
 public fun  Int2LongMap.asMap(): Map<Int, Long> = Int2LongMapWrapper(this)
-
-public fun  Int2LongMap.getOrDefault(key: Int, defaultValue: Long): Long = getOrElse(key) { defaultValue }
-
-public fun  Int2LongMap.getValue(key: Int): Long = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2LongMap.getOrElse(key: Int, defaultValue: () -> Long): Long {

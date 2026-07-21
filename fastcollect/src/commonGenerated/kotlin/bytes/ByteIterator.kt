@@ -1,6 +1,7 @@
 package io.github.sooniln.fastcollect.bytes
 
 public fun emptyByteIterator(): ByteListIterator = EmptyByteIterator
+public fun emptyMutableByteIterator(): MutableByteIterator = EmptyMutableByteIterator
 
 public abstract class MutableByteIterator : ByteIterator(), MutableIterator<Byte>
 
@@ -15,7 +16,7 @@ public abstract class ByteListIterator: ByteIterator(), ListIterator<Byte> {
 
 public abstract class MutableByteListIterator: ByteListIterator(), MutableListIterator<Byte>
 
-private object EmptyByteIterator : ByteListIterator() {
+private object EmptyByteIterator : MutableByteListIterator() {
     override fun previousByte(): Byte = throw NoSuchElementException()
     override fun nextByte(): Byte = throw NoSuchElementException()
 
@@ -24,4 +25,16 @@ private object EmptyByteIterator : ByteListIterator() {
 
     override fun nextIndex(): Int = 0
     override fun previousIndex(): Int = -1
+
+    override fun remove() = throw IllegalStateException()
+    override fun set(element: Byte) = throw IllegalStateException()
+    override fun add(element: Byte) = throw UnsupportedOperationException()
+}
+
+private object EmptyMutableByteIterator : MutableByteIterator() {
+    override fun nextByte(): Byte = throw NoSuchElementException()
+
+    override fun hasNext(): Boolean = false
+
+    override fun remove() = throw IllegalStateException()
 }

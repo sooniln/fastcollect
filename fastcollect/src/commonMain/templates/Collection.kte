@@ -218,7 +218,7 @@ public abstract class Abstract${Type}Collection : ${Type}Collection {
 
 @Suppress("OVERRIDE_BY_INLINE")
 @JvmInline
-public value class Inline${Type}Collection @PublishedApi internal constructor(@PublishedApi internal val collection: Mutable${NonFPType}Collection) : Mutable${Type}Collection {
+public value class Inline${Type}Collection public constructor(@PublishedApi internal val collection: Mutable${NonFPType}Collection) : Mutable${Type}Collection {
     override val size: Int
         inline get() = collection.size
     override fun contains(element: ${Type}): Boolean = collection.contains(element.toBits())
@@ -227,7 +227,7 @@ public value class Inline${Type}Collection @PublishedApi internal constructor(@P
     override fun iterator(): InlineMutable${Type}Iterator = InlineMutable${Type}Iterator(collection.iterator())
 }
 
-public class InlineMutable${Type}Iterator internal constructor(@PublishedApi internal val it: Mutable${NonFPType}Iterator) : Mutable${Type}Iterator() {
+public class InlineMutable${Type}Iterator public constructor(@PublishedApi internal val it: Mutable${NonFPType}Iterator) : Mutable${Type}Iterator() {
     override fun hasNext(): Boolean = it.hasNext()
     override fun next${Type}(): ${Type} = ${Type}.fromBits(it.next${NonFPType}())
     override fun remove() { it.remove() }

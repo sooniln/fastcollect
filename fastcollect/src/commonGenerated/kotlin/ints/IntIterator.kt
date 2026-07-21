@@ -1,6 +1,7 @@
 package io.github.sooniln.fastcollect.ints
 
 public fun emptyIntIterator(): IntListIterator = EmptyIntIterator
+public fun emptyMutableIntIterator(): MutableIntIterator = EmptyMutableIntIterator
 
 public abstract class MutableIntIterator : IntIterator(), MutableIterator<Int>
 
@@ -15,7 +16,7 @@ public abstract class IntListIterator: IntIterator(), ListIterator<Int> {
 
 public abstract class MutableIntListIterator: IntListIterator(), MutableListIterator<Int>
 
-private object EmptyIntIterator : IntListIterator() {
+private object EmptyIntIterator : MutableIntListIterator() {
     override fun previousInt(): Int = throw NoSuchElementException()
     override fun nextInt(): Int = throw NoSuchElementException()
 
@@ -24,4 +25,16 @@ private object EmptyIntIterator : IntListIterator() {
 
     override fun nextIndex(): Int = 0
     override fun previousIndex(): Int = -1
+
+    override fun remove() = throw IllegalStateException()
+    override fun set(element: Int) = throw IllegalStateException()
+    override fun add(element: Int) = throw UnsupportedOperationException()
+}
+
+private object EmptyMutableIntIterator : MutableIntIterator() {
+    override fun nextInt(): Int = throw NoSuchElementException()
+
+    override fun hasNext(): Boolean = false
+
+    override fun remove() = throw IllegalStateException()
 }

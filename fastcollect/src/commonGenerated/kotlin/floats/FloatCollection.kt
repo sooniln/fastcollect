@@ -218,7 +218,7 @@ public abstract class AbstractFloatCollection : FloatCollection {
 
 @Suppress("OVERRIDE_BY_INLINE")
 @JvmInline
-public value class InlineFloatCollection @PublishedApi internal constructor(@PublishedApi internal val collection: MutableIntCollection) : MutableFloatCollection {
+public value class InlineFloatCollection public constructor(@PublishedApi internal val collection: MutableIntCollection) : MutableFloatCollection {
     override val size: Int
         inline get() = collection.size
     override fun contains(element: Float): Boolean = collection.contains(element.toBits())
@@ -227,7 +227,7 @@ public value class InlineFloatCollection @PublishedApi internal constructor(@Pub
     override fun iterator(): InlineMutableFloatIterator = InlineMutableFloatIterator(collection.iterator())
 }
 
-public class InlineMutableFloatIterator internal constructor(@PublishedApi internal val it: MutableIntIterator) : MutableFloatIterator() {
+public class InlineMutableFloatIterator public constructor(@PublishedApi internal val it: MutableIntIterator) : MutableFloatIterator() {
     override fun hasNext(): Boolean = it.hasNext()
     override fun nextFloat(): Float = Float.fromBits(it.nextInt())
     override fun remove() { it.remove() }

@@ -69,6 +69,10 @@ public interface Int2DoubleMap {
 
     public operator fun get(key: Int): Double
 
+    public fun getValue(key: Int): Double = getOrElse(key) { throw NoSuchElementException() }
+
+    public fun getOrDefault(key: Int, defaultValue: Double): Double = getOrElse(key) { defaultValue }
+
     public fun containsKey(key: Int): Boolean {
         for (k in keys) {
             if (k equalsBoxed key) return true
@@ -104,10 +108,6 @@ public interface Int2DoubleMap {
 }
 
 public fun  Int2DoubleMap.asMap(): Map<Int, Double> = Int2DoubleMapWrapper(this)
-
-public fun  Int2DoubleMap.getOrDefault(key: Int, defaultValue: Double): Double = getOrElse(key) { defaultValue }
-
-public fun  Int2DoubleMap.getValue(key: Int): Double = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double): Double {

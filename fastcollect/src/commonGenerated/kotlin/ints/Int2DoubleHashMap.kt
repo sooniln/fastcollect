@@ -30,7 +30,8 @@ public value class InlineInt2DoubleHashMap private constructor(@PublishedApi int
     override fun containsKey(key: Int): Boolean = map.containsKey(key)
     override fun containsValue(value: Double): Boolean = map.containsValue(value.toBits())
     override fun get(key: Int): Double = Double.fromBits(map[key])
-    public fun getOrDefault(key: Int, default: Double): Double = Double.fromBits(map.getOrDefault(key, default.toBits()))
+    override fun getValue(key: Int): Double = Double.fromBits(map.getValue(key))
+    override fun getOrDefault(key: Int, defaultValue: Double): Double = Double.fromBits(map.getOrDefault(key, defaultValue.toBits()))
     override fun put(key: Int, value: Double): Double = Double.fromBits(map.put(key, value.toBits()))
     public fun putIfAbsent(key: Int, value: Double): Double = Double.fromBits(map.putIfAbsent(key, value.toBits()))
     override fun set(key: Int, value: Double) { map[key] = value.toBits() }

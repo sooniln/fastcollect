@@ -69,6 +69,10 @@ public interface ${Name}Map${Generics} {
 
     public operator fun get(key: ${KeyType}): ${ValueType}${Nullable}
 
+    public fun getValue(key: ${KeyType}): ${ValueType} = getOrElse(key) { throw NoSuchElementException() }
+
+    public fun getOrDefault(key: ${KeyType}, defaultValue: ${ValueType}): ${ValueType} = getOrElse(key) { defaultValue }
+
     public fun containsKey(key: ${KeyType}): Boolean {
         for (k in keys) {
             if (k equalsBoxed key) return true
@@ -104,10 +108,6 @@ public interface ${Name}Map${Generics} {
 }
 
 public fun ${Generics} ${Name}Map${Generics}.asMap(): Map<${KeyType}, ${ValueType}> = ${Name}MapWrapper(this)
-
-public fun ${Generics} ${Name}Map${Generics}.getOrDefault(key: ${KeyType}, defaultValue: ${ValueType}): ${ValueType} = getOrElse(key) { defaultValue }
-
-public fun ${Generics} ${Name}Map${Generics}.getValue(key: ${KeyType}): ${ValueType} = getOrElse(key) { throw NoSuchElementException() }
 
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} ${Name}Map${Generics}.getOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {

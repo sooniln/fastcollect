@@ -90,7 +90,9 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     override fun get(key: Int): Int = findSlot(key, { _, entry -> entry.value() }, { defaultValue })
 
-    public fun getOrDefault(key: Int, default: Int): Int = findSlot(key, { _, entry -> entry.value() }, { default })
+    override fun getValue(key: Int): Int = findSlot(key, { _, entry -> entry.value() }, { throw NoSuchElementException() })
+
+    override fun getOrDefault(key: Int, defaultValue: Int): Int = findSlot(key, { _, entry -> entry.value() }, { defaultValue })
 
     override fun put(key: Int, value: Int): Int {
         var returnValue = ZERO
@@ -213,11 +215,11 @@ public class Int2IntHashMap @JvmOverloads constructor(
         // conceivable normal usage), and if the table is more than 50% full, we rehash to the next greater size to
         // reduce chain length. to calculate expected chain length at a given size, formulas are given in
         // https://www.cs.tau.ac.il//~zwick/Adv-Alg-2015/Linear-Probing.pdf and similar. i'd say i used those, but it
-        // was much simpler to do a monte carlo simulation and approximate the results for α=5/6:
+        // was much simpler to do a monte carlo simulation and approximate the results for α=7/8:
         //
-        // k* ≈ 44·log₂(n) − 200   -> overestimate with power-of-two ->   k* ≈ 64·b, b=log₂(n)
+        // k* ≈ 80·log₂(n) − C   -> overestimate with power-of-two ->   k* ≈ 128·b, b=log₂(n)
 
-        if (threshold < size && ((nextSlot - slot) and mask) > 64 * mask.countOneBits()) {
+        if (threshold < size && ((nextSlot - slot) and mask) > 128 * mask.countOneBits()) {
             rehash((threshold + size) shl 1)
         }
     }
@@ -328,7 +330,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 5.0/6.0
+        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
 
         val newLength = arraySize(capacity, actualLoadFactor)
         if (kvArr.size == newLength) return

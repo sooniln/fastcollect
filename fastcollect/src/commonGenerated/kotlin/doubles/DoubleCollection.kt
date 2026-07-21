@@ -218,7 +218,7 @@ public abstract class AbstractDoubleCollection : DoubleCollection {
 
 @Suppress("OVERRIDE_BY_INLINE")
 @JvmInline
-public value class InlineDoubleCollection @PublishedApi internal constructor(@PublishedApi internal val collection: MutableLongCollection) : MutableDoubleCollection {
+public value class InlineDoubleCollection public constructor(@PublishedApi internal val collection: MutableLongCollection) : MutableDoubleCollection {
     override val size: Int
         inline get() = collection.size
     override fun contains(element: Double): Boolean = collection.contains(element.toBits())
@@ -227,7 +227,7 @@ public value class InlineDoubleCollection @PublishedApi internal constructor(@Pu
     override fun iterator(): InlineMutableDoubleIterator = InlineMutableDoubleIterator(collection.iterator())
 }
 
-public class InlineMutableDoubleIterator internal constructor(@PublishedApi internal val it: MutableLongIterator) : MutableDoubleIterator() {
+public class InlineMutableDoubleIterator public constructor(@PublishedApi internal val it: MutableLongIterator) : MutableDoubleIterator() {
     override fun hasNext(): Boolean = it.hasNext()
     override fun nextDouble(): Double = Double.fromBits(it.nextLong())
     override fun remove() { it.remove() }
