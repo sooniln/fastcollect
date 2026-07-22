@@ -58,6 +58,10 @@ public value class InlineInt2DoubleHashMap private constructor(@PublishedApi int
 
     override fun iterator(): EntryIterator = EntryIterator(map.iterator())
 
+    override fun fastForEach(action: (Int, Double) -> Unit) {
+        map.fastForEach { key, value -> action(key, Double.fromBits(value)) }
+    }
+
     override fun toString(): String {
         return Iterable { iterator() }.joinToString(", ", "{", "}")
     }

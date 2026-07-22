@@ -100,6 +100,14 @@ public interface Long2AnyMap<V> {
 
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry<V>>
+
+    public fun fastForEach(action: (Long, V) -> Unit) {
+        val it = iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            action(entry.key, entry.value)
+        }
+    }
 }
 
 public fun <V> Long2AnyMap<V>.asMap(): Map<Long, V> = Long2AnyMapWrapper(this)

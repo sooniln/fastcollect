@@ -20,6 +20,13 @@ public interface FloatCollection : Collection<Float> {
 
     override fun iterator(): FloatIterator
 
+    public fun fastForEach(action: (Float) -> Unit) {
+        val it = iterator()
+        while (it.hasNext()) {
+            action(it.next())
+        }
+    }
+
     override fun contains(element: Float): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true
@@ -225,6 +232,7 @@ public value class InlineFloatCollection public constructor(@PublishedApi intern
     override fun add(element: Float): Boolean = collection.add(element.toBits())
     override fun remove(element: Float): Boolean = collection.remove(element.toBits())
     override fun iterator(): InlineMutableFloatIterator = InlineMutableFloatIterator(collection.iterator())
+    override fun fastForEach(action: (Float) -> Unit): Unit = collection.fastForEach { element -> action(Float.fromBits(element)) }
 }
 
 public class InlineMutableFloatIterator public constructor(@PublishedApi internal val it: MutableIntIterator) : MutableFloatIterator() {

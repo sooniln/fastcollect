@@ -318,7 +318,7 @@ public class ${Type}HashSet @JvmOverloads constructor(
 
     override fun iterator(): Mutable${Type}Iterator = Iterator()
 
-    public fun forEach(action: (${Type}) -> Unit) {
+    override fun fastForEach(action: (${Type}) -> Unit) {
         for (key in keysArr) {
             if (key != emptyKey) {
                 action(key)

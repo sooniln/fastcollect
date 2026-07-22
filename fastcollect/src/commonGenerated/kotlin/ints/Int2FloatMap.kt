@@ -105,6 +105,14 @@ public interface Int2FloatMap {
 
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry>
+
+    public fun fastForEach(action: (Int, Float) -> Unit) {
+        val it = iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            action(entry.key, entry.value)
+        }
+    }
 }
 
 public fun  Int2FloatMap.asMap(): Map<Int, Float> = Int2FloatMapWrapper(this)

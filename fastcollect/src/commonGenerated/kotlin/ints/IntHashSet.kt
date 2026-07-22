@@ -318,7 +318,7 @@ public class IntHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableIntIterator = Iterator()
 
-    public fun forEach(action: (Int) -> Unit) {
+    override fun fastForEach(action: (Int) -> Unit) {
         for (key in keysArr) {
             if (key != emptyKey) {
                 action(key)

@@ -87,6 +87,10 @@ public value class InlineFloatArrayDeque private constructor(@PublishedApi inter
     override fun listIterator(index: Int): InlineMutableFloatListIterator = InlineMutableFloatListIterator(list.listIterator(index))
     override fun subList(fromIndex: Int, toIndex: Int): InlineFloatList = InlineFloatList(list.subList(fromIndex, toIndex))
 
+    override fun fastForEach(action: (Float) -> Unit) {
+        list.fastForEach { element -> action(Float.fromBits(element))}
+    }
+
     override fun toString(): String = list.toFloatListString()
 }
 

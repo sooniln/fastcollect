@@ -308,6 +308,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
                 override fun add(element: Long): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableLongIterator = KeyIterator()
+                override fun fastForEach(action: (Long) -> Unit) = fastForEachKey(action)
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -324,6 +325,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
                 override fun add(element: V): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: V): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableIterator<V> = ValueIterator()
+
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _values = it }
@@ -429,7 +431,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<MutableLong2AnyMap.MutableEntry<V>> = FastEntryIterator()
 
-    public fun forEach(action: (Long, V) -> Unit) {
+    override fun fastForEach(action: (Long, V) -> Unit) {
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -438,6 +440,17 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
             if (key != emptyKey) {
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
                 action(key, valuesArr[slot] as V)
+            }
+        }
+    }
+
+    public fun fastForEachKey(action: (Long) -> Unit) {
+        val keysArr = keysArr
+
+        for (slot in keysArr.indices) {
+            val key = keysArr[slot]
+            if (key != emptyKey) {
+                action(key)
             }
         }
     }

@@ -105,6 +105,14 @@ public interface Int2DoubleMap {
 
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry>
+
+    public fun fastForEach(action: (Int, Double) -> Unit) {
+        val it = iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            action(entry.key, entry.value)
+        }
+    }
 }
 
 public fun  Int2DoubleMap.asMap(): Map<Int, Double> = Int2DoubleMapWrapper(this)

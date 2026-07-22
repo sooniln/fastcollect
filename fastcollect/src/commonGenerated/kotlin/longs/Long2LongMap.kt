@@ -105,6 +105,14 @@ public interface Long2LongMap {
 
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry>
+
+    public fun fastForEach(action: (Long, Long) -> Unit) {
+        val it = iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            action(entry.key, entry.value)
+        }
+    }
 }
 
 public fun  Long2LongMap.asMap(): Map<Long, Long> = Long2LongMapWrapper(this)

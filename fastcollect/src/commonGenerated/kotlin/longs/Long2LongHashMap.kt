@@ -307,6 +307,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
                 override fun add(element: Long): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableLongIterator = KeyIterator()
+                override fun fastForEach(action: (Long) -> Unit) = fastForEachKey(action)
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -323,6 +324,9 @@ public class Long2LongHashMap @JvmOverloads constructor(
                 override fun add(element: Long): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableLongIterator = ValueIterator()
+
+                override fun fastForEach(action: (Long) -> Unit) = fastForEach { _, value -> action(value) }
+
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _values = it }
@@ -428,7 +432,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<MutableLong2LongMap.MutableEntry> = FastEntryIterator()
 
-    public fun forEach(action: (Long, Long) -> Unit) {
+    override fun fastForEach(action: (Long, Long) -> Unit) {
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -437,6 +441,17 @@ public class Long2LongHashMap @JvmOverloads constructor(
             if (key != emptyKey) {
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
                 action(key, valuesArr[slot] as Long)
+            }
+        }
+    }
+
+    public fun fastForEachKey(action: (Long) -> Unit) {
+        val keysArr = keysArr
+
+        for (slot in keysArr.indices) {
+            val key = keysArr[slot]
+            if (key != emptyKey) {
+                action(key)
             }
         }
     }

@@ -17,6 +17,13 @@ public interface IntCollection : Collection<Int> {
 
     override fun iterator(): IntIterator
 
+    public fun fastForEach(action: (Int) -> Unit) {
+        val it = iterator()
+        while (it.hasNext()) {
+            action(it.next())
+        }
+    }
+
     override fun contains(element: Int): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true

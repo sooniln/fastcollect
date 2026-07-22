@@ -17,6 +17,13 @@ public interface LongCollection : Collection<Long> {
 
     override fun iterator(): LongIterator
 
+    public fun fastForEach(action: (Long) -> Unit) {
+        val it = iterator()
+        while (it.hasNext()) {
+            action(it.next())
+        }
+    }
+
     override fun contains(element: Long): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true

@@ -396,7 +396,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<MutableInt2IntMap.MutableEntry> = FastEntryIterator()
 
-    public fun forEach(action: (Int, Int) -> Unit) {
+    override fun fastForEach(action: (Int, Int) -> Unit) {
         for (entry in kvArr) {
             if (entry != emptyEntry) {
                 action(entry.key(), entry.value())

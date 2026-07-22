@@ -20,6 +20,13 @@ public interface DoubleCollection : Collection<Double> {
 
     override fun iterator(): DoubleIterator
 
+    public fun fastForEach(action: (Double) -> Unit) {
+        val it = iterator()
+        while (it.hasNext()) {
+            action(it.next())
+        }
+    }
+
     override fun contains(element: Double): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true
@@ -225,6 +232,7 @@ public value class InlineDoubleCollection public constructor(@PublishedApi inter
     override fun add(element: Double): Boolean = collection.add(element.toBits())
     override fun remove(element: Double): Boolean = collection.remove(element.toBits())
     override fun iterator(): InlineMutableDoubleIterator = InlineMutableDoubleIterator(collection.iterator())
+    override fun fastForEach(action: (Double) -> Unit): Unit = collection.fastForEach { element -> action(Double.fromBits(element)) }
 }
 
 public class InlineMutableDoubleIterator public constructor(@PublishedApi internal val it: MutableLongIterator) : MutableDoubleIterator() {

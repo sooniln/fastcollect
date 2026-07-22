@@ -17,6 +17,13 @@ public interface ByteCollection : Collection<Byte> {
 
     override fun iterator(): ByteIterator
 
+    public fun fastForEach(action: (Byte) -> Unit) {
+        val it = iterator()
+        while (it.hasNext()) {
+            action(it.next())
+        }
+    }
+
     override fun contains(element: Byte): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true

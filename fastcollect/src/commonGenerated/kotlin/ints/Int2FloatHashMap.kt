@@ -58,6 +58,10 @@ public value class InlineInt2FloatHashMap private constructor(@PublishedApi inte
 
     override fun iterator(): EntryIterator = EntryIterator(map.iterator())
 
+    override fun fastForEach(action: (Int, Float) -> Unit) {
+        map.fastForEach { key, value -> action(key, Float.fromBits(value)) }
+    }
+
     override fun toString(): String {
         return Iterable { iterator() }.joinToString(", ", "{", "}")
     }

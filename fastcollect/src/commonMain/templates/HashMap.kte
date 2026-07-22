@@ -316,6 +316,7 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
                 override fun add(element: ${KeyType}): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: ${KeyType}): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): Mutable${KeyType}Iterator = KeyIterator()
+                override fun fastForEach(action: (${KeyType}) -> Unit) = fastForEachKey(action)
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -334,6 +335,9 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
                 override fun add(element: ${ValueType}): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: ${ValueType}): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): Mutable${ValueIteratorType}${Generics} = ValueIterator()
+<% if (!isReferenceValue) { %>
+                override fun fastForEach(action: (${ValueType}) -> Unit) = fastForEach { _, value -> action(value) }
+<% } %>
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _values = it }
@@ -445,7 +449,7 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry${Generics}> = FastEntryIterator()
 
-    public fun forEach(action: (${KeyType}, ${ValueType}) -> Unit) {
+    override fun fastForEach(action: (${KeyType}, ${ValueType}) -> Unit) {
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -454,6 +458,17 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
             if (key != emptyKey) {
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
                 action(key, valuesArr[slot] as ${ValueType})
+            }
+        }
+    }
+
+    public fun fastForEachKey(action: (${KeyType}) -> Unit) {
+        val keysArr = keysArr
+
+        for (slot in keysArr.indices) {
+            val key = keysArr[slot]
+            if (key != emptyKey) {
+                action(key)
             }
         }
     }

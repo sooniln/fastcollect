@@ -318,7 +318,7 @@ public class LongHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableLongIterator = Iterator()
 
-    public fun forEach(action: (Long) -> Unit) {
+    override fun fastForEach(action: (Long) -> Unit) {
         for (key in keysArr) {
             if (key != emptyKey) {
                 action(key)

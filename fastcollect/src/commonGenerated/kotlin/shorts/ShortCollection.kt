@@ -17,6 +17,13 @@ public interface ShortCollection : Collection<Short> {
 
     override fun iterator(): ShortIterator
 
+    public fun fastForEach(action: (Short) -> Unit) {
+        val it = iterator()
+        while (it.hasNext()) {
+            action(it.next())
+        }
+    }
+
     override fun contains(element: Short): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true

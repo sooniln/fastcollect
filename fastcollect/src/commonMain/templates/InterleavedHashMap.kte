@@ -396,7 +396,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry> = FastEntryIterator()
 
-    public fun forEach(action: (${KVType}, ${KVType}) -> Unit) {
+    override fun fastForEach(action: (${KVType}, ${KVType}) -> Unit) {
         for (entry in kvArr) {
             if (entry != emptyEntry) {
                 action(entry.key(), entry.value())
