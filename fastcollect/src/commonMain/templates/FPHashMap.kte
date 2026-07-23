@@ -58,8 +58,12 @@ public value class Inline${Name}HashMap private constructor(@PublishedApi intern
 
     override fun iterator(): EntryIterator = EntryIterator(map.iterator())
 
-    override fun fastForEach(action: (${KeyType}, ${ValueType}) -> Unit) {
-        map.fastForEach { key, value -> action(key, ${ValueType}.fromBits(value)) }
+    override fun foreach(action: ${KeyType}${ValueType}Consumer) {
+        map.foreach { key, value -> action.accept(key, ${ValueType}.fromBits(value)) }
+    }
+
+    override fun foreachKey(action: ${KeyType}Consumer) {
+        map.foreachKey(action)
     }
 
     override fun toString(): String {

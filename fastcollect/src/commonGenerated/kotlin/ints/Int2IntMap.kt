@@ -106,11 +106,27 @@ public interface Int2IntMap {
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry>
 
-    public fun fastForEach(action: (Int, Int) -> Unit) {
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+ 
+    public fun foreach(action: IntIntConsumer) {
+ 
         val it = iterator()
         while (it.hasNext()) {
             val entry = it.next()
-            action(entry.key, entry.value)
+            action.accept(entry.key, entry.value)
+        }
+    }
+
+    /**
+     * A method for iteration over keys guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreachKey(action: IntConsumer) {
+        val it = iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            action.accept(entry.key)
         }
     }
 }
@@ -372,4 +388,10 @@ private class MutableInt2IntMapWrapper(private val map: MutableInt2IntMap) : Abs
     }
 
     override fun putAll(from: Map<out Int, Int>): Unit = map.putAll(from)
+}
+
+
+public fun interface IntIntConsumer {
+
+    public fun accept(key: Int, value: Int)
 }

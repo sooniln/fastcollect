@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.github.sooniln.fastcollect.longs
 
 
@@ -17,10 +19,13 @@ public interface LongCollection : Collection<Long> {
 
     override fun iterator(): LongIterator
 
-    public fun fastForEach(action: (Long) -> Unit) {
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreach(action: LongConsumer) {
         val it = iterator()
         while (it.hasNext()) {
-            action(it.next())
+            action.accept(it.next())
         }
     }
 
@@ -219,3 +224,7 @@ public abstract class AbstractLongCollection : LongCollection {
 }
 
 
+
+public fun interface LongConsumer {
+    public fun accept(value: Long)
+}

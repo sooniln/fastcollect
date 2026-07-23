@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.github.sooniln.fastcollect.${subpackage}
 
 <% if (isFPType) { %>
@@ -20,10 +22,13 @@ public interface ${Type}Collection : Collection<${Type}> {
 
     override fun iterator(): ${Type}Iterator
 
-    public fun fastForEach(action: (${Type}) -> Unit) {
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreach(action: ${Type}Consumer) {
         val it = iterator()
         while (it.hasNext()) {
-            action(it.next())
+            action.accept(it.next())
         }
     }
 
@@ -232,7 +237,7 @@ public value class Inline${Type}Collection public constructor(@PublishedApi inte
     override fun add(element: ${Type}): Boolean = collection.add(element.toBits())
     override fun remove(element: ${Type}): Boolean = collection.remove(element.toBits())
     override fun iterator(): InlineMutable${Type}Iterator = InlineMutable${Type}Iterator(collection.iterator())
-    override fun fastForEach(action: (${Type}) -> Unit): Unit = collection.fastForEach { element -> action(${Type}.fromBits(element)) }
+    override fun foreach(action: ${Type}Consumer): Unit = collection.foreach { value -> action.accept(${Type}.fromBits(value)) }
 }
 
 public class InlineMutable${Type}Iterator public constructor(@PublishedApi internal val it: Mutable${NonFPType}Iterator) : Mutable${Type}Iterator() {
@@ -242,3 +247,7 @@ public class InlineMutable${Type}Iterator public constructor(@PublishedApi inter
 }
 
 <% } %>
+
+public fun interface ${Type}Consumer {
+    public fun accept(value: ${Type})
+}

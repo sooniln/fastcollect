@@ -318,10 +318,10 @@ public class LongHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableLongIterator = Iterator()
 
-    override fun fastForEach(action: (Long) -> Unit) {
+    override fun foreach(action: LongConsumer) {
         for (key in keysArr) {
             if (key != emptyKey) {
-                action(key)
+                action.accept(key)
             }
         }
     }

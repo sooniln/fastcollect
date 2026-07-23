@@ -288,6 +288,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
                 override fun add(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableIntIterator = KeyIterator()
+                override fun foreach(action: IntConsumer) = foreachKey(action)
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -302,6 +303,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
                 override fun add(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableIntIterator = ValueIterator()
+                override fun foreach(action: IntConsumer) = this@Int2IntHashMap.foreach { _, value -> action.accept(value) }
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _values = it }
@@ -396,10 +398,18 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<MutableInt2IntMap.MutableEntry> = FastEntryIterator()
 
-    override fun fastForEach(action: (Int, Int) -> Unit) {
+    override fun foreach(action: IntIntConsumer) {
         for (entry in kvArr) {
             if (entry != emptyEntry) {
-                action(entry.key(), entry.value())
+                action.accept(entry.key(), entry.value())
+            }
+        }
+    }
+
+    override fun foreachKey(action: IntConsumer) {
+        for (entry in kvArr) {
+            if (entry != emptyEntry) {
+                action.accept(entry.key())
             }
         }
     }

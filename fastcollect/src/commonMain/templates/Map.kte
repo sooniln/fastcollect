@@ -106,11 +106,29 @@ public interface ${Name}Map${Generics} {
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry${Generics}>
 
-    public fun fastForEach(action: (${KeyType}, ${ValueType}) -> Unit) {
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+ <% if (!isReferenceValue) { %>
+    public fun foreach(action: ${KeyType}${ValueType}Consumer) {
+ <% } else { %>
+    public fun foreach(action: ${KeyType}AnyConsumer${Generics}) {
+ <% } %>
         val it = iterator()
         while (it.hasNext()) {
             val entry = it.next()
-            action(entry.key, entry.value)
+            action.accept(entry.key, entry.value)
+        }
+    }
+
+    /**
+     * A method for iteration over keys guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreachKey(action: ${KeyType}Consumer) {
+        val it = iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            action.accept(entry.key)
         }
     }
 }
@@ -384,4 +402,12 @@ private class Mutable${Name}MapWrapper${Generics}(private val map: Mutable${Name
     }
 
     override fun putAll(from: Map<out ${KeyType}, ${ValueType}>): Unit = map.putAll(from)
+}
+
+<% if (!isReferenceValue) { %>
+public fun interface ${KeyType}${ValueType}Consumer {
+<% } else { %>
+public fun interface ${KeyType}AnyConsumer${Generics} {
+<% } %>
+    public fun accept(key: ${KeyType}, value: ${ValueType})
 }

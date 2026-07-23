@@ -52,7 +52,7 @@ public value class InlineFloatHashSet internal constructor(@PublishedApi interna
 
     override fun iterator(): InlineMutableFloatIterator = InlineMutableFloatIterator(set.iterator())
 
-    override fun fastForEach(action: (Float) -> Unit) {
-        set.fastForEach { element -> action(Float.fromBits(element)) }
+    override fun foreach(action: FloatConsumer) {
+        set.foreach { element -> action.accept(Float.fromBits(element)) }
     }
 }

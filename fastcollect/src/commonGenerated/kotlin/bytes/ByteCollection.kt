@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.github.sooniln.fastcollect.bytes
 
 
@@ -17,10 +19,13 @@ public interface ByteCollection : Collection<Byte> {
 
     override fun iterator(): ByteIterator
 
-    public fun fastForEach(action: (Byte) -> Unit) {
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreach(action: ByteConsumer) {
         val it = iterator()
         while (it.hasNext()) {
-            action(it.next())
+            action.accept(it.next())
         }
     }
 
@@ -219,3 +224,7 @@ public abstract class AbstractByteCollection : ByteCollection {
 }
 
 
+
+public fun interface ByteConsumer {
+    public fun accept(value: Byte)
+}

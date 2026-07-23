@@ -106,11 +106,27 @@ public interface Int2LongMap {
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry>
 
-    public fun fastForEach(action: (Int, Long) -> Unit) {
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+ 
+    public fun foreach(action: IntLongConsumer) {
+ 
         val it = iterator()
         while (it.hasNext()) {
             val entry = it.next()
-            action(entry.key, entry.value)
+            action.accept(entry.key, entry.value)
+        }
+    }
+
+    /**
+     * A method for iteration over keys guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreachKey(action: IntConsumer) {
+        val it = iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            action.accept(entry.key)
         }
     }
 }
@@ -372,4 +388,10 @@ private class MutableInt2LongMapWrapper(private val map: MutableInt2LongMap) : A
     }
 
     override fun putAll(from: Map<out Int, Long>): Unit = map.putAll(from)
+}
+
+
+public fun interface IntLongConsumer {
+
+    public fun accept(key: Int, value: Long)
 }

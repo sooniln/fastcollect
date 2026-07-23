@@ -9,6 +9,7 @@ import io.github.sooniln.fastcollect.MutableFastIterator
 
 import io.github.sooniln.fastcollect.longs.MutableLongCollection
 import io.github.sooniln.fastcollect.longs.MutableLongIterator
+import io.github.sooniln.fastcollect.longs.LongConsumer
 
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
@@ -307,7 +308,7 @@ public class Int2LongHashMap @JvmOverloads constructor(
                 override fun add(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableIntIterator = KeyIterator()
-                override fun fastForEach(action: (Int) -> Unit) = fastForEachKey(action)
+                override fun foreach(action: IntConsumer) = foreachKey(action)
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -325,7 +326,7 @@ public class Int2LongHashMap @JvmOverloads constructor(
                 override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableLongIterator = ValueIterator()
 
-                override fun fastForEach(action: (Long) -> Unit) = fastForEach { _, value -> action(value) }
+                override fun foreach(action: LongConsumer) = foreach { _, value -> action.accept(value) }
 
                 override fun clear() = throw UnsupportedOperationException()
             }
@@ -432,7 +433,9 @@ public class Int2LongHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<MutableInt2LongMap.MutableEntry> = FastEntryIterator()
 
-    override fun fastForEach(action: (Int, Long) -> Unit) {
+
+    override fun foreach(action: IntLongConsumer) {
+
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -440,18 +443,18 @@ public class Int2LongHashMap @JvmOverloads constructor(
             val key = keysArr[slot]
             if (key != emptyKey) {
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                action(key, valuesArr[slot] as Long)
+                action.accept(key, valuesArr[slot] as Long)
             }
         }
     }
 
-    public fun fastForEachKey(action: (Int) -> Unit) {
+    override fun foreachKey(action: IntConsumer) {
         val keysArr = keysArr
 
         for (slot in keysArr.indices) {
             val key = keysArr[slot]
             if (key != emptyKey) {
-                action(key)
+                action.accept(key)
             }
         }
     }

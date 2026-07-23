@@ -52,7 +52,7 @@ public value class InlineDoubleHashSet internal constructor(@PublishedApi intern
 
     override fun iterator(): InlineMutableDoubleIterator = InlineMutableDoubleIterator(set.iterator())
 
-    override fun fastForEach(action: (Double) -> Unit) {
-        set.fastForEach { element -> action(Double.fromBits(element)) }
+    override fun foreach(action: DoubleConsumer) {
+        set.foreach { element -> action.accept(Double.fromBits(element)) }
     }
 }

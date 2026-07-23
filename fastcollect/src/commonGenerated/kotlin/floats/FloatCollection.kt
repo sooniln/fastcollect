@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.github.sooniln.fastcollect.floats
 
 
@@ -20,10 +22,13 @@ public interface FloatCollection : Collection<Float> {
 
     override fun iterator(): FloatIterator
 
-    public fun fastForEach(action: (Float) -> Unit) {
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreach(action: FloatConsumer) {
         val it = iterator()
         while (it.hasNext()) {
-            action(it.next())
+            action.accept(it.next())
         }
     }
 
@@ -232,7 +237,7 @@ public value class InlineFloatCollection public constructor(@PublishedApi intern
     override fun add(element: Float): Boolean = collection.add(element.toBits())
     override fun remove(element: Float): Boolean = collection.remove(element.toBits())
     override fun iterator(): InlineMutableFloatIterator = InlineMutableFloatIterator(collection.iterator())
-    override fun fastForEach(action: (Float) -> Unit): Unit = collection.fastForEach { element -> action(Float.fromBits(element)) }
+    override fun foreach(action: FloatConsumer): Unit = collection.foreach { value -> action.accept(Float.fromBits(value)) }
 }
 
 public class InlineMutableFloatIterator public constructor(@PublishedApi internal val it: MutableIntIterator) : MutableFloatIterator() {
@@ -242,3 +247,7 @@ public class InlineMutableFloatIterator public constructor(@PublishedApi interna
 }
 
 
+
+public fun interface FloatConsumer {
+    public fun accept(value: Float)
+}

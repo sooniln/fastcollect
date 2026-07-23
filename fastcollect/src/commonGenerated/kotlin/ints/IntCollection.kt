@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.github.sooniln.fastcollect.ints
 
 
@@ -17,10 +19,13 @@ public interface IntCollection : Collection<Int> {
 
     override fun iterator(): IntIterator
 
-    public fun fastForEach(action: (Int) -> Unit) {
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreach(action: IntConsumer) {
         val it = iterator()
         while (it.hasNext()) {
-            action(it.next())
+            action.accept(it.next())
         }
     }
 
@@ -219,3 +224,7 @@ public abstract class AbstractIntCollection : IntCollection {
 }
 
 
+
+public fun interface IntConsumer {
+    public fun accept(value: Int)
+}

@@ -441,6 +441,16 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
         }
     }
 
+    override fun foreach(action: ShortConsumer) {
+        var remaining = size
+        var position = head
+        while (remaining > 0) {
+            action.accept(ring[position])
+            position = ring.incrementPosition(position)
+            --remaining
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ShortList) return false

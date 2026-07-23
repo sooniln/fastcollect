@@ -58,8 +58,12 @@ public value class InlineLong2DoubleHashMap private constructor(@PublishedApi in
 
     override fun iterator(): EntryIterator = EntryIterator(map.iterator())
 
-    override fun fastForEach(action: (Long, Double) -> Unit) {
-        map.fastForEach { key, value -> action(key, Double.fromBits(value)) }
+    override fun foreach(action: LongDoubleConsumer) {
+        map.foreach { key, value -> action.accept(key, Double.fromBits(value)) }
+    }
+
+    override fun foreachKey(action: LongConsumer) {
+        map.foreachKey(action)
     }
 
     override fun toString(): String {

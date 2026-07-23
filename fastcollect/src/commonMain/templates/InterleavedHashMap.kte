@@ -288,6 +288,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
                 override fun add(element: ${KVType}): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: ${KVType}): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): Mutable${KVType}Iterator = KeyIterator()
+                override fun foreach(action: ${KVType}Consumer) = foreachKey(action)
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -302,6 +303,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
                 override fun add(element: ${KVType}): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: ${KVType}): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): Mutable${KVType}Iterator = ValueIterator()
+                override fun foreach(action: ${KVType}Consumer) = this@${Name}HashMap.foreach { _, value -> action.accept(value) }
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _values = it }
@@ -396,10 +398,18 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry> = FastEntryIterator()
 
-    override fun fastForEach(action: (${KVType}, ${KVType}) -> Unit) {
+    override fun foreach(action: ${KVType}${KVType}Consumer) {
         for (entry in kvArr) {
             if (entry != emptyEntry) {
-                action(entry.key(), entry.value())
+                action.accept(entry.key(), entry.value())
+            }
+        }
+    }
+
+    override fun foreachKey(action: ${KVType}Consumer) {
+        for (entry in kvArr) {
+            if (entry != emptyEntry) {
+                action.accept(entry.key())
             }
         }
     }

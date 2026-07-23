@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.github.sooniln.fastcollect.shorts
 
 
@@ -17,10 +19,13 @@ public interface ShortCollection : Collection<Short> {
 
     override fun iterator(): ShortIterator
 
-    public fun fastForEach(action: (Short) -> Unit) {
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreach(action: ShortConsumer) {
         val it = iterator()
         while (it.hasNext()) {
-            action(it.next())
+            action.accept(it.next())
         }
     }
 
@@ -219,3 +224,7 @@ public abstract class AbstractShortCollection : ShortCollection {
 }
 
 
+
+public fun interface ShortConsumer {
+    public fun accept(value: Short)
+}

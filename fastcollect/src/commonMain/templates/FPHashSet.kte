@@ -52,7 +52,7 @@ public value class Inline${Type}HashSet internal constructor(@PublishedApi inter
 
     override fun iterator(): InlineMutable${Type}Iterator = InlineMutable${Type}Iterator(set.iterator())
 
-    override fun fastForEach(action: (${Type}) -> Unit) {
-        set.fastForEach { element -> action(${Type}.fromBits(element)) }
+    override fun foreach(action: ${Type}Consumer) {
+        set.foreach { element -> action.accept(${Type}.fromBits(element)) }
     }
 }

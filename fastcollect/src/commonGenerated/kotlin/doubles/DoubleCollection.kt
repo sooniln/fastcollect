@@ -1,3 +1,5 @@
+@file:Suppress("UnusedImport")
+
 package io.github.sooniln.fastcollect.doubles
 
 
@@ -20,10 +22,13 @@ public interface DoubleCollection : Collection<Double> {
 
     override fun iterator(): DoubleIterator
 
-    public fun fastForEach(action: (Double) -> Unit) {
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreach(action: DoubleConsumer) {
         val it = iterator()
         while (it.hasNext()) {
-            action(it.next())
+            action.accept(it.next())
         }
     }
 
@@ -232,7 +237,7 @@ public value class InlineDoubleCollection public constructor(@PublishedApi inter
     override fun add(element: Double): Boolean = collection.add(element.toBits())
     override fun remove(element: Double): Boolean = collection.remove(element.toBits())
     override fun iterator(): InlineMutableDoubleIterator = InlineMutableDoubleIterator(collection.iterator())
-    override fun fastForEach(action: (Double) -> Unit): Unit = collection.fastForEach { element -> action(Double.fromBits(element)) }
+    override fun foreach(action: DoubleConsumer): Unit = collection.foreach { value -> action.accept(Double.fromBits(value)) }
 }
 
 public class InlineMutableDoubleIterator public constructor(@PublishedApi internal val it: MutableLongIterator) : MutableDoubleIterator() {
@@ -242,3 +247,7 @@ public class InlineMutableDoubleIterator public constructor(@PublishedApi intern
 }
 
 
+
+public fun interface DoubleConsumer {
+    public fun accept(value: Double)
+}

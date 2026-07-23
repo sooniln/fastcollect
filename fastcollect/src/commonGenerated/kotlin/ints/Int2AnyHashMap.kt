@@ -308,7 +308,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
                 override fun add(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableIntIterator = KeyIterator()
-                override fun fastForEach(action: (Int) -> Unit) = fastForEachKey(action)
+                override fun foreach(action: IntConsumer) = foreachKey(action)
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -431,7 +431,9 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<MutableInt2AnyMap.MutableEntry<V>> = FastEntryIterator()
 
-    override fun fastForEach(action: (Int, V) -> Unit) {
+
+    override fun foreach(action: IntAnyConsumer<V>) {
+
         val keysArr = keysArr
         val valuesArr = valuesArr
 
@@ -439,18 +441,18 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             val key = keysArr[slot]
             if (key != emptyKey) {
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                action(key, valuesArr[slot] as V)
+                action.accept(key, valuesArr[slot] as V)
             }
         }
     }
 
-    public fun fastForEachKey(action: (Int) -> Unit) {
+    override fun foreachKey(action: IntConsumer) {
         val keysArr = keysArr
 
         for (slot in keysArr.indices) {
             val key = keysArr[slot]
             if (key != emptyKey) {
-                action(key)
+                action.accept(key)
             }
         }
     }

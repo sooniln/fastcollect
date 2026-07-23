@@ -87,8 +87,8 @@ public value class InlineDoubleArrayDeque private constructor(@PublishedApi inte
     override fun listIterator(index: Int): InlineMutableDoubleListIterator = InlineMutableDoubleListIterator(list.listIterator(index))
     override fun subList(fromIndex: Int, toIndex: Int): InlineDoubleList = InlineDoubleList(list.subList(fromIndex, toIndex))
 
-    override fun fastForEach(action: (Double) -> Unit) {
-        list.fastForEach { element -> action(Double.fromBits(element))}
+    override fun foreach(action: DoubleConsumer) {
+        list.foreach { element -> action.accept(Double.fromBits(element))}
     }
 
     override fun toString(): String = list.toDoubleListString()

@@ -87,8 +87,8 @@ public value class Inline${Type}ArrayDeque private constructor(@PublishedApi int
     override fun listIterator(index: Int): InlineMutable${Type}ListIterator = InlineMutable${Type}ListIterator(list.listIterator(index))
     override fun subList(fromIndex: Int, toIndex: Int): Inline${Type}List = Inline${Type}List(list.subList(fromIndex, toIndex))
 
-    override fun fastForEach(action: (${Type}) -> Unit) {
-        list.fastForEach { element -> action(${Type}.fromBits(element))}
+    override fun foreach(action: ${Type}Consumer) {
+        list.foreach { element -> action.accept(${Type}.fromBits(element))}
     }
 
     override fun toString(): String = list.to${Type}ListString()

@@ -318,10 +318,10 @@ public class IntHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableIntIterator = Iterator()
 
-    override fun fastForEach(action: (Int) -> Unit) {
+    override fun foreach(action: IntConsumer) {
         for (key in keysArr) {
             if (key != emptyKey) {
-                action(key)
+                action.accept(key)
             }
         }
     }
