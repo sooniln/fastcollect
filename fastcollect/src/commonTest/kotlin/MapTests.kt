@@ -300,6 +300,25 @@ class Int2IntMapTest {
         assertEquals(0, map[0])
         assertEquals(1, map[1])
     }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Int2IntHashMap()
+        for (i in 1..50) map[i] = i + 1000
+        map[0] = 9999
+
+        val fromIterator = mutableListOf<Pair<Int, Int>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value)
+        }
+
+        val fromForeach = mutableListOf<Pair<Int, Int>>()
+        map.foreach { k, v -> fromForeach.add(k to v) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
 }
 
 // ============================= Int2Long =============================
@@ -548,6 +567,25 @@ class Int2LongMapTest {
         }
         assertTrue(map.isEmpty())
         assertEquals((1..200).toList(), visited.sorted())
+    }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Int2LongHashMap()
+        for (i in 1..50) map[i] = i + 1000L
+        map[0] = 9999L
+
+        val fromIterator = mutableListOf<Pair<Int, Long>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value)
+        }
+
+        val fromForeach = mutableListOf<Pair<Int, Long>>()
+        map.foreach { k, v -> fromForeach.add(k to v) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
     }
 }
 
@@ -808,6 +846,25 @@ class Int2FloatMapTest {
         assertTrue(map.isEmpty())
         assertEquals((1..200).toList(), visited.sorted())
     }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Int2FloatHashMap()
+        for (i in 1..50) map[i] = (i + 1000).toFloat()
+        map[0] = 9999f
+
+        val fromIterator = mutableListOf<Pair<Int, Int>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value.toBits())
+        }
+
+        val fromForeach = mutableListOf<Pair<Int, Int>>()
+        map.foreach { k, v -> fromForeach.add(k to v.toBits()) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
 }
 
 // ============================= Int2Double =============================
@@ -1067,6 +1124,25 @@ class Int2DoubleMapTest {
         assertTrue(map.isEmpty())
         assertEquals((1..200).toList(), visited.sorted())
     }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Int2DoubleHashMap()
+        for (i in 1..50) map[i] = (i + 1000).toDouble()
+        map[0] = 9999.0
+
+        val fromIterator = mutableListOf<Pair<Int, Long>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value.toBits())
+        }
+
+        val fromForeach = mutableListOf<Pair<Int, Long>>()
+        map.foreach { k, v -> fromForeach.add(k to v.toBits()) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
 }
 
 // ============================= Int2Any =============================
@@ -1315,6 +1391,25 @@ class Int2AnyMapTest {
         }
         assertTrue(map.isEmpty())
         assertEquals((1..200).toList(), visited.sorted())
+    }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Int2AnyHashMap<String>()
+        for (i in 1..50) map[i] = "v$i"
+        map[0] = "v0"
+
+        val fromIterator = mutableListOf<Pair<Int, String>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value)
+        }
+
+        val fromForeach = mutableListOf<Pair<Int, String>>()
+        map.foreach { k, v -> fromForeach.add(k to v) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
     }
 }
 
@@ -1565,6 +1660,25 @@ class Long2IntMapTest {
         assertTrue(map.isEmpty())
         assertEquals((1L..200L).toList(), visited.sorted())
     }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Long2IntHashMap()
+        for (i in 1L..50L) map[i] = (i + 1000).toInt()
+        map[0L] = 9999
+
+        val fromIterator = mutableListOf<Pair<Long, Int>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value)
+        }
+
+        val fromForeach = mutableListOf<Pair<Long, Int>>()
+        map.foreach { k, v -> fromForeach.add(k to v) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
 }
 
 // ============================= Long2Long =============================
@@ -1813,6 +1927,25 @@ class Long2LongMapTest {
         }
         assertTrue(map.isEmpty())
         assertEquals((1L..200L).toList(), visited.sorted())
+    }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Long2LongHashMap()
+        for (i in 1L..50L) map[i] = i + 1000L
+        map[0L] = 9999L
+
+        val fromIterator = mutableListOf<Pair<Long, Long>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value)
+        }
+
+        val fromForeach = mutableListOf<Pair<Long, Long>>()
+        map.foreach { k, v -> fromForeach.add(k to v) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
     }
 }
 
@@ -2073,6 +2206,25 @@ class Long2FloatMapTest {
         assertTrue(map.isEmpty())
         assertEquals((1L..200L).toList(), visited.sorted())
     }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Long2FloatHashMap()
+        for (i in 1L..50L) map[i] = (i + 1000).toFloat()
+        map[0L] = 9999f
+
+        val fromIterator = mutableListOf<Pair<Long, Int>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value.toBits())
+        }
+
+        val fromForeach = mutableListOf<Pair<Long, Int>>()
+        map.foreach { k, v -> fromForeach.add(k to v.toBits()) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
 }
 
 // ============================= Long2Double =============================
@@ -2332,6 +2484,25 @@ class Long2DoubleMapTest {
         assertTrue(map.isEmpty())
         assertEquals((1L..200L).toList(), visited.sorted())
     }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Long2DoubleHashMap()
+        for (i in 1L..50L) map[i] = (i + 1000).toDouble()
+        map[0L] = 9999.0
+
+        val fromIterator = mutableListOf<Pair<Long, Long>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value.toBits())
+        }
+
+        val fromForeach = mutableListOf<Pair<Long, Long>>()
+        map.foreach { k, v -> fromForeach.add(k to v.toBits()) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
 }
 
 // ============================= Long2Any =============================
@@ -2580,5 +2751,24 @@ class Long2AnyMapTest {
         }
         assertTrue(map.isEmpty())
         assertEquals((1L..200L).toList(), visited.sorted())
+    }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Long2AnyHashMap<String>()
+        for (i in 1L..50L) map[i] = "v$i"
+        map[0L] = "v0"
+
+        val fromIterator = mutableListOf<Pair<Long, String>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value)
+        }
+
+        val fromForeach = mutableListOf<Pair<Long, String>>()
+        map.foreach { k, v -> fromForeach.add(k to v) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
     }
 }

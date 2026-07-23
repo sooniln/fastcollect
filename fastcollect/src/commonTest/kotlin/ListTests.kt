@@ -235,6 +235,21 @@ class ByteListTest {
     fun lastIndex_empty_isMinusOne() {
         assertEquals(-1, byteListOf().lastIndex)
     }
+
+    @Test
+    fun foreach_matchesIteratorInOrder() {
+        val list = mutableByteListOf()
+        for (i in 1..50) list.add(i.toByte())
+
+        val fromIterator = mutableListOf<Byte>()
+        val it = list.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextByte())
+
+        val fromForeach = mutableListOf<Byte>()
+        list.foreach { v -> fromForeach.add(v) }
+
+        assertEquals(fromIterator, fromForeach)
+    }
 }
 
 // ============================= Short =============================
@@ -432,6 +447,21 @@ class ShortListTest {
     @Test
     fun lastIndex_empty_isMinusOne() {
         assertEquals(-1, shortListOf().lastIndex)
+    }
+
+    @Test
+    fun foreach_matchesIteratorInOrder() {
+        val list = mutableShortListOf()
+        for (i in 1..50) list.add(i.toShort())
+
+        val fromIterator = mutableListOf<Short>()
+        val it = list.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextShort())
+
+        val fromForeach = mutableListOf<Short>()
+        list.foreach { v -> fromForeach.add(v) }
+
+        assertEquals(fromIterator, fromForeach)
     }
 }
 
@@ -631,6 +661,21 @@ class IntListTest {
     fun lastIndex_empty_isMinusOne() {
         assertEquals(-1, intListOf().lastIndex)
     }
+
+    @Test
+    fun foreach_matchesIteratorInOrder() {
+        val list = mutableIntListOf()
+        for (i in 1..50) list.add(i)
+
+        val fromIterator = mutableListOf<Int>()
+        val it = list.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextInt())
+
+        val fromForeach = mutableListOf<Int>()
+        list.foreach { v -> fromForeach.add(v) }
+
+        assertEquals(fromIterator, fromForeach)
+    }
 }
 
 // ============================= Long =============================
@@ -828,6 +873,21 @@ class LongListTest {
     @Test
     fun lastIndex_empty_isMinusOne() {
         assertEquals(-1, longListOf().lastIndex)
+    }
+
+    @Test
+    fun foreach_matchesIteratorInOrder() {
+        val list = mutableLongListOf()
+        for (i in 1L..50L) list.add(i)
+
+        val fromIterator = mutableListOf<Long>()
+        val it = list.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextLong())
+
+        val fromForeach = mutableListOf<Long>()
+        list.foreach { v -> fromForeach.add(v) }
+
+        assertEquals(fromIterator, fromForeach)
     }
 }
 
@@ -1054,6 +1114,21 @@ class FloatListTest {
         assertEquals<Any>(floatArrayOf(1f, Float.NaN).asFloatList(), floatArrayOf(1f, Float.NaN).asFloatList())
         assertNotEquals<Any>(floatArrayOf(-0.0f).asFloatList(), floatArrayOf(0.0f).asFloatList())
     }
+
+    @Test
+    fun foreach_matchesIteratorInOrder() {
+        val list = mutableFloatListOf()
+        for (i in 1..50) list.add(i.toFloat())
+
+        val fromIterator = mutableListOf<Int>()
+        val it = list.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextFloat().toBits())
+
+        val fromForeach = mutableListOf<Int>()
+        list.foreach { v -> fromForeach.add(v.toBits()) }
+
+        assertEquals(fromIterator, fromForeach)
+    }
 }
 
 // ============================= Double =============================
@@ -1278,5 +1353,20 @@ class DoubleListTest {
     fun equals_nanAndNegativeZero_matchBoxedSemantics() {
         assertEquals<Any>(doubleArrayOf(1.0, Double.NaN).asDoubleList(), doubleArrayOf(1.0, Double.NaN).asDoubleList())
         assertNotEquals<Any>(doubleArrayOf(-0.0).asDoubleList(), doubleArrayOf(0.0).asDoubleList())
+    }
+
+    @Test
+    fun foreach_matchesIteratorInOrder() {
+        val list = mutableDoubleListOf()
+        for (i in 1..50) list.add(i.toDouble())
+
+        val fromIterator = mutableListOf<Long>()
+        val it = list.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextDouble().toBits())
+
+        val fromForeach = mutableListOf<Long>()
+        list.foreach { v -> fromForeach.add(v.toBits()) }
+
+        assertEquals(fromIterator, fromForeach)
     }
 }

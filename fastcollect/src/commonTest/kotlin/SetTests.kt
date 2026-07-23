@@ -153,6 +153,22 @@ class IntSetTest {
         assertTrue(set.contains(0))
         assertEquals(3, set.size)
     }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val set = IntHashSet()
+        for (i in 1..50) set.add(i)
+        set.add(0)
+
+        val fromIterator = mutableListOf<Int>()
+        val it = set.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextInt())
+
+        val fromForeach = mutableListOf<Int>()
+        set.foreach { v -> fromForeach.add(v) }
+
+        assertEquals(fromIterator.toSet(), fromForeach.toSet())
+    }
 }
 
 // ============================= Long =============================
@@ -299,6 +315,22 @@ class LongSetTest {
         assertTrue(set.add(0L))
         assertTrue(set.contains(0L))
         assertEquals(3, set.size)
+    }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val set = LongHashSet()
+        for (i in 1L..50L) set.add(i)
+        set.add(0L)
+
+        val fromIterator = mutableListOf<Long>()
+        val it = set.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextLong())
+
+        val fromForeach = mutableListOf<Long>()
+        set.foreach { v -> fromForeach.add(v) }
+
+        assertEquals(fromIterator.toSet(), fromForeach.toSet())
     }
 }
 
@@ -458,6 +490,22 @@ class FloatSetTest {
         assertTrue(set.contains(0f))
         assertEquals(3, set.size)
     }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val set = FloatHashSet()
+        for (i in 1..50) set.add(i.toFloat())
+        set.add(0f)
+
+        val fromIterator = mutableListOf<Int>()
+        val it = set.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextFloat().toBits())
+
+        val fromForeach = mutableListOf<Int>()
+        set.foreach { v -> fromForeach.add(v.toBits()) }
+
+        assertEquals(fromIterator.toSet(), fromForeach.toSet())
+    }
 }
 
 // ============================= Double =============================
@@ -615,5 +663,21 @@ class DoubleSetTest {
         assertTrue(set.add(0.0))
         assertTrue(set.contains(0.0))
         assertEquals(3, set.size)
+    }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val set = DoubleHashSet()
+        for (i in 1..50) set.add(i.toDouble())
+        set.add(0.0)
+
+        val fromIterator = mutableListOf<Long>()
+        val it = set.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextDouble().toBits())
+
+        val fromForeach = mutableListOf<Long>()
+        set.foreach { v -> fromForeach.add(v.toBits()) }
+
+        assertEquals(fromIterator.toSet(), fromForeach.toSet())
     }
 }
