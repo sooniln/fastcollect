@@ -442,6 +442,24 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
     }
 
     override fun foreach(action: LongConsumer) {
+        val ring = ring
+        val tail = head + size
+        if (tail > ring.size) {
+            foreachDiscrete(ring, action)
+        } else {
+            foreachContinuous(ring, tail, action)
+        }
+    }
+
+    private fun foreachContinuous(ring: LongArray, tail: Int, action: LongConsumer) {
+        var position = head
+        while (position < tail) {
+            action.accept(ring[position])
+            ++position
+        }
+    }
+
+    private fun foreachDiscrete(ring: LongArray, action: LongConsumer) {
         var remaining = size
         var position = head
         while (remaining > 0) {
@@ -541,23 +559,20 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+    private fun LongArray.positiveMod(position: Int): Int = if (position < size) position else position - size
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+    private fun LongArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.position(index: Int): Int = positiveMod(head + index)
+    private fun LongArray.position(index: Int): Int = positiveMod(head + index)
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.index(position: Int): Int = negativeMod(position - head)
+    private fun LongArray.index(position: Int): Int = negativeMod(position - head)
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.incrementPosition(position: Int): Int = if (position == size - 1) 0 else position + 1
+    private fun LongArray.incrementPosition(position: Int): Int {
+        val next = position + 1
+        return if (next == size) 0 else next
+    }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun LongArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
+    private fun LongArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
     internal companion object {
         private val EMPTY_ARRAY = LongArray(0)

@@ -442,6 +442,24 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
     }
 
     override fun foreach(action: IntConsumer) {
+        val ring = ring
+        val tail = head + size
+        if (tail > ring.size) {
+            foreachDiscrete(ring, action)
+        } else {
+            foreachContinuous(ring, tail, action)
+        }
+    }
+
+    private fun foreachContinuous(ring: IntArray, tail: Int, action: IntConsumer) {
+        var position = head
+        while (position < tail) {
+            action.accept(ring[position])
+            ++position
+        }
+    }
+
+    private fun foreachDiscrete(ring: IntArray, action: IntConsumer) {
         var remaining = size
         var position = head
         while (remaining > 0) {
@@ -541,23 +559,20 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun IntArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+    private fun IntArray.positiveMod(position: Int): Int = if (position < size) position else position - size
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun IntArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+    private fun IntArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun IntArray.position(index: Int): Int = positiveMod(head + index)
+    private fun IntArray.position(index: Int): Int = positiveMod(head + index)
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun IntArray.index(position: Int): Int = negativeMod(position - head)
+    private fun IntArray.index(position: Int): Int = negativeMod(position - head)
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun IntArray.incrementPosition(position: Int): Int = if (position == size - 1) 0 else position + 1
+    private fun IntArray.incrementPosition(position: Int): Int {
+        val next = position + 1
+        return if (next == size) 0 else next
+    }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun IntArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
+    private fun IntArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
     internal companion object {
         private val EMPTY_ARRAY = IntArray(0)

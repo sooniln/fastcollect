@@ -140,7 +140,6 @@ open class LongMapBenchmark {
     fun naiveCopy(state: RandomState): Long2IntHashMap {
         val copy = Long2IntHashMap()
         for ((key, value) in state.map) {
-            if (Thread.interrupted()) throw InterruptedException()
             copy[key] = value
         }
         return copy
@@ -172,7 +171,6 @@ open class LongMapBenchmark {
     @Benchmark
     fun iterate(state: RandomState, bh: Blackhole) {
         for ((key, value) in state.map) {
-            if (Thread.interrupted()) throw InterruptedException()
             bh.consume(key)
             bh.consume(value)
         }
@@ -181,8 +179,7 @@ open class LongMapBenchmark {
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun forEach(state: RandomState, bh: Blackhole) {
-        state.map.forEach { key, value ->
-            if (Thread.interrupted()) throw InterruptedException()
+        state.map.foreach { key, value ->
             bh.consume(key)
             bh.consume(value)
         }

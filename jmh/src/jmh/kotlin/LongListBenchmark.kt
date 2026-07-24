@@ -106,5 +106,15 @@ open class LongListBenchmark {
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun iterate(state: BaseState, bh: Blackhole) = state.list.forEach { element -> bh.consume(element) }
+    fun iterate(state: BaseState, bh: Blackhole) {
+        for (element in state.list) {
+            bh.consume(element)
+        }
+    }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun foreach(state: BaseState, bh: Blackhole) {
+        state.list.foreach { element -> bh.consume(element) }
+    }
 }

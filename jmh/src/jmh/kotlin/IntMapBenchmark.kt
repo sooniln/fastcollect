@@ -140,7 +140,6 @@ open class IntMapBenchmark {
     fun naiveCopy(state: RandomState): Int2IntHashMap {
         val copy = Int2IntHashMap()
         for ((key, value) in state.map) {
-            if (Thread.interrupted()) throw InterruptedException()
             copy[key] = value
         }
         return copy
@@ -172,7 +171,6 @@ open class IntMapBenchmark {
     @Benchmark
     fun iterate(state: RandomState, bh: Blackhole) {
         for ((key, value) in state.map) {
-            if (Thread.interrupted()) throw InterruptedException()
             bh.consume(key)
             bh.consume(value)
         }
@@ -181,8 +179,7 @@ open class IntMapBenchmark {
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun forEach(state: RandomState, bh: Blackhole) {
-        state.map.forEach { key, value ->
-            if (Thread.interrupted()) throw InterruptedException()
+        state.map.foreach { key, value ->
             bh.consume(key)
             bh.consume(value)
         }

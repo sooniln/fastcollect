@@ -1,5 +1,7 @@
 import me.champeau.jmh.JMHTask
 import org.gradle.kotlin.dsl.kotlin
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 plugins {
     kotlin("jvm")
@@ -70,6 +72,14 @@ private fun registerJMHTask(name: String, configuration: JMHTask.()->Unit): Task
     configuration()
 }
 
+private val copyTask = tasks.register<Copy>("CopyJmhResults") {
+    description = "Copy last JMH results into benchmark-results directory."
+
+    from("build/results/jmh/results.json")
+    into("benchmark-results")
+    rename { "${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))}.json" }
+}
+
 private abstract class ExclusiveTaskService : BuildService<BuildServiceParameters.None>
 private val exclusiveServiceProvider = gradle.sharedServices.registerIfAbsent("exclusiveTask", ExclusiveTaskService::class.java) {
     maxParallelUsages.set(1)
@@ -85,6 +95,9 @@ tasks.withType<JMHTask> {
 
     // ensure jmh tasks cannot run in parallel
     usesService(exclusiveServiceProvider)
+
+    // save all benchmark data
+    finalizedBy(copyTask)
 
     // forward various parameters to JMH
     if (jmhOrder.isPresent) benchmarkParameters.put("order", decodeArgs(jmhOrder.get()))

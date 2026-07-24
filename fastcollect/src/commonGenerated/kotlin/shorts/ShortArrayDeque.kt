@@ -442,6 +442,24 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
     }
 
     override fun foreach(action: ShortConsumer) {
+        val ring = ring
+        val tail = head + size
+        if (tail > ring.size) {
+            foreachDiscrete(ring, action)
+        } else {
+            foreachContinuous(ring, tail, action)
+        }
+    }
+
+    private fun foreachContinuous(ring: ShortArray, tail: Int, action: ShortConsumer) {
+        var position = head
+        while (position < tail) {
+            action.accept(ring[position])
+            ++position
+        }
+    }
+
+    private fun foreachDiscrete(ring: ShortArray, action: ShortConsumer) {
         var remaining = size
         var position = head
         while (remaining > 0) {
@@ -541,23 +559,20 @@ public class ShortArrayDeque private constructor(array: ShortArray, size: Int = 
         }
     }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ShortArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+    private fun ShortArray.positiveMod(position: Int): Int = if (position < size) position else position - size
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ShortArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+    private fun ShortArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ShortArray.position(index: Int): Int = positiveMod(head + index)
+    private fun ShortArray.position(index: Int): Int = positiveMod(head + index)
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ShortArray.index(position: Int): Int = negativeMod(position - head)
+    private fun ShortArray.index(position: Int): Int = negativeMod(position - head)
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ShortArray.incrementPosition(position: Int): Int = if (position == size - 1) 0 else position + 1
+    private fun ShortArray.incrementPosition(position: Int): Int {
+        val next = position + 1
+        return if (next == size) 0 else next
+    }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ShortArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
+    private fun ShortArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
     internal companion object {
         private val EMPTY_ARRAY = ShortArray(0)

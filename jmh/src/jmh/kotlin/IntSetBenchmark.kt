@@ -140,7 +140,6 @@ open class IntSetBenchmark {
     fun naiveCopy(state: RandomState): IntHashSet {
         val copy = IntHashSet()
         state.set.forEach { key ->
-            if (Thread.interrupted()) throw InterruptedException()
             copy.add(key)
         }
         return copy
@@ -172,7 +171,6 @@ open class IntSetBenchmark {
     @Benchmark
     fun iterate(state: RandomState, bh: Blackhole) {
         for (key in state.set) {
-            if (Thread.interrupted()) throw InterruptedException()
             bh.consume(key)
         }
     }
@@ -180,9 +178,6 @@ open class IntSetBenchmark {
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun forEach(state: RandomState, bh: Blackhole) {
-        state.set.forEach { key ->
-            if (Thread.interrupted()) throw InterruptedException()
-            bh.consume(key)
-        }
+        state.set.foreach { key -> bh.consume(key) }
     }
 }

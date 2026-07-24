@@ -442,6 +442,24 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
     }
 
     override fun foreach(action: ByteConsumer) {
+        val ring = ring
+        val tail = head + size
+        if (tail > ring.size) {
+            foreachDiscrete(ring, action)
+        } else {
+            foreachContinuous(ring, tail, action)
+        }
+    }
+
+    private fun foreachContinuous(ring: ByteArray, tail: Int, action: ByteConsumer) {
+        var position = head
+        while (position < tail) {
+            action.accept(ring[position])
+            ++position
+        }
+    }
+
+    private fun foreachDiscrete(ring: ByteArray, action: ByteConsumer) {
         var remaining = size
         var position = head
         while (remaining > 0) {
@@ -541,23 +559,20 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ByteArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+    private fun ByteArray.positiveMod(position: Int): Int = if (position < size) position else position - size
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ByteArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+    private fun ByteArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ByteArray.position(index: Int): Int = positiveMod(head + index)
+    private fun ByteArray.position(index: Int): Int = positiveMod(head + index)
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ByteArray.index(position: Int): Int = negativeMod(position - head)
+    private fun ByteArray.index(position: Int): Int = negativeMod(position - head)
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ByteArray.incrementPosition(position: Int): Int = if (position == size - 1) 0 else position + 1
+    private fun ByteArray.incrementPosition(position: Int): Int {
+        val next = position + 1
+        return if (next == size) 0 else next
+    }
 
-    @Suppress("NOTHING_TO_INLINE")
-    private inline fun ByteArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
+    private fun ByteArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
     internal companion object {
         private val EMPTY_ARRAY = ByteArray(0)
