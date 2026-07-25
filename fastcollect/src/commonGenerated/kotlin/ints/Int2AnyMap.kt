@@ -150,7 +150,7 @@ public interface MutableInt2AnyMap<V> : Int2AnyMap<V> {
     }
 
     /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
-    public fun replace(key: Int, value: V): V = putOrElse(key, value) { throw NoSuchElementException() }
+    public fun replace(key: Int, value: V): V = replaceOrElse(key, value) { throw NoSuchElementException() }
 
     /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: Int): V?
@@ -214,15 +214,16 @@ public inline fun <V> MutableInt2AnyMap<V>.getOrPut(key: Int, defaultValue: () -
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun <V> MutableInt2AnyMap<V>.putOrElse(key: Int, value: V, defaultValue: () -> V): V {
+public inline fun <V> MutableInt2AnyMap<V>.replaceOrElse(key: Int, value: V, defaultValue: () -> V): V {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     if (containsKey(key)) {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return put(key, value) as V
     } else {
+        val oldValue = defaultValue()
         set(key, value)
-        return defaultValue()
+        return oldValue
     }
 }
 
