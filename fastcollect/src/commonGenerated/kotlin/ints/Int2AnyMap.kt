@@ -64,6 +64,7 @@ public interface Int2AnyMap<V> {
 
     public operator fun get(key: Int): V?
 
+    /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
     public fun getValue(key: Int): V = getOrElse(key) { throw NoSuchElementException() }
 
     public fun getOrDefault(key: Int, defaultValue: V): V = getOrElse(key) { defaultValue }
@@ -148,7 +149,14 @@ public interface MutableInt2AnyMap<V> : Int2AnyMap<V> {
         put(key, value)
     }
 
+    /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
+    public fun replace(key: Int, value: V): V = putOrElse(key, value) { throw NoSuchElementException() }
+
+    /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: Int): V?
+
+    /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
+    public fun removeKey(key: Int): V = removeOrElse(key) { throw NoSuchElementException() }
 
     public fun clear()
 
@@ -202,6 +210,31 @@ public inline fun <V> MutableInt2AnyMap<V>.getOrPut(key: Int, defaultValue: () -
     } else {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return value as V
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <V> MutableInt2AnyMap<V>.putOrElse(key: Int, value: V, defaultValue: () -> V): V {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return put(key, value) as V
+    } else {
+        set(key, value)
+        return defaultValue()
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <V> MutableInt2AnyMap<V>.removeOrElse(key: Int, defaultValue: () -> V): V {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    return if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        remove(key) as V
+    } else {
+        defaultValue()
     }
 }
 

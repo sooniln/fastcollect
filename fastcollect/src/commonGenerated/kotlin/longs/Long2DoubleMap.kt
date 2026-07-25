@@ -69,6 +69,7 @@ public interface Long2DoubleMap {
 
     public operator fun get(key: Long): Double
 
+    /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
     public fun getValue(key: Long): Double = getOrElse(key) { throw NoSuchElementException() }
 
     public fun getOrDefault(key: Long, defaultValue: Double): Double = getOrElse(key) { defaultValue }
@@ -153,7 +154,14 @@ public interface MutableLong2DoubleMap : Long2DoubleMap {
         put(key, value)
     }
 
+    /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
+    public fun replace(key: Long, value: Double): Double = putOrElse(key, value) { throw NoSuchElementException() }
+
+    /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: Long): Double
+
+    /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
+    public fun removeKey(key: Long): Double = removeOrElse(key) { throw NoSuchElementException() }
 
     public fun clear()
 
@@ -207,6 +215,31 @@ public inline fun  MutableLong2DoubleMap.getOrPut(key: Long, defaultValue: () ->
     } else {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return value as Double
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableLong2DoubleMap.putOrElse(key: Long, value: Double, defaultValue: () -> Double): Double {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return put(key, value) as Double
+    } else {
+        set(key, value)
+        return defaultValue()
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableLong2DoubleMap.removeOrElse(key: Long, defaultValue: () -> Double): Double {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    return if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        remove(key) as Double
+    } else {
+        defaultValue()
     }
 }
 

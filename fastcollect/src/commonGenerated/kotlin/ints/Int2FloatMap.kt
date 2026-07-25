@@ -69,6 +69,7 @@ public interface Int2FloatMap {
 
     public operator fun get(key: Int): Float
 
+    /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
     public fun getValue(key: Int): Float = getOrElse(key) { throw NoSuchElementException() }
 
     public fun getOrDefault(key: Int, defaultValue: Float): Float = getOrElse(key) { defaultValue }
@@ -153,7 +154,14 @@ public interface MutableInt2FloatMap : Int2FloatMap {
         put(key, value)
     }
 
+    /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
+    public fun replace(key: Int, value: Float): Float = putOrElse(key, value) { throw NoSuchElementException() }
+
+    /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: Int): Float
+
+    /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
+    public fun removeKey(key: Int): Float = removeOrElse(key) { throw NoSuchElementException() }
 
     public fun clear()
 
@@ -207,6 +215,31 @@ public inline fun  MutableInt2FloatMap.getOrPut(key: Int, defaultValue: () -> Fl
     } else {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return value as Float
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableInt2FloatMap.putOrElse(key: Int, value: Float, defaultValue: () -> Float): Float {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return put(key, value) as Float
+    } else {
+        set(key, value)
+        return defaultValue()
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableInt2FloatMap.removeOrElse(key: Int, defaultValue: () -> Float): Float {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    return if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        remove(key) as Float
+    } else {
+        defaultValue()
     }
 }
 

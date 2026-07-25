@@ -69,6 +69,7 @@ public interface Long2LongMap {
 
     public operator fun get(key: Long): Long
 
+    /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
     public fun getValue(key: Long): Long = getOrElse(key) { throw NoSuchElementException() }
 
     public fun getOrDefault(key: Long, defaultValue: Long): Long = getOrElse(key) { defaultValue }
@@ -153,7 +154,14 @@ public interface MutableLong2LongMap : Long2LongMap {
         put(key, value)
     }
 
+    /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
+    public fun replace(key: Long, value: Long): Long = putOrElse(key, value) { throw NoSuchElementException() }
+
+    /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: Long): Long
+
+    /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
+    public fun removeKey(key: Long): Long = removeOrElse(key) { throw NoSuchElementException() }
 
     public fun clear()
 
@@ -207,6 +215,31 @@ public inline fun  MutableLong2LongMap.getOrPut(key: Long, defaultValue: () -> L
     } else {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return value as Long
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableLong2LongMap.putOrElse(key: Long, value: Long, defaultValue: () -> Long): Long {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return put(key, value) as Long
+    } else {
+        set(key, value)
+        return defaultValue()
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableLong2LongMap.removeOrElse(key: Long, defaultValue: () -> Long): Long {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    return if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        remove(key) as Long
+    } else {
+        defaultValue()
     }
 }
 

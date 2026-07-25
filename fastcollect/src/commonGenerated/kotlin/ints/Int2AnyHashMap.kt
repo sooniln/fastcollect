@@ -115,6 +115,18 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         set(key, { value }, { value })
     }
 
+    override fun replace(key: Int, value: V): V {
+        var returnValue = defaultValue
+        set(key, {
+            throw NoSuchElementException()
+        }, { slot ->
+            returnValue = valuesArr[slot]
+            value
+        })
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return returnValue as V
+    }
+
     override fun remove(key: Int): V? {
         return findSlot(
             key,
@@ -124,6 +136,18 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
                 oldValue
             },
             { defaultValue })
+    }
+
+    override fun removeKey(key: Int): V {
+        return findSlot(
+            key,
+            { slot ->
+                val oldValue = valuesArr[slot]
+                removeSlot(slot)
+                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+                oldValue as V
+            },
+            { throw NoSuchElementException() })
     }
 
     override fun clear() {

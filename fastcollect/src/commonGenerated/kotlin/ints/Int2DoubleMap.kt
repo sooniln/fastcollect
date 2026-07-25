@@ -69,6 +69,7 @@ public interface Int2DoubleMap {
 
     public operator fun get(key: Int): Double
 
+    /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
     public fun getValue(key: Int): Double = getOrElse(key) { throw NoSuchElementException() }
 
     public fun getOrDefault(key: Int, defaultValue: Double): Double = getOrElse(key) { defaultValue }
@@ -153,7 +154,14 @@ public interface MutableInt2DoubleMap : Int2DoubleMap {
         put(key, value)
     }
 
+    /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
+    public fun replace(key: Int, value: Double): Double = putOrElse(key, value) { throw NoSuchElementException() }
+
+    /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: Int): Double
+
+    /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
+    public fun removeKey(key: Int): Double = removeOrElse(key) { throw NoSuchElementException() }
 
     public fun clear()
 
@@ -207,6 +215,31 @@ public inline fun  MutableInt2DoubleMap.getOrPut(key: Int, defaultValue: () -> D
     } else {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return value as Double
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableInt2DoubleMap.putOrElse(key: Int, value: Double, defaultValue: () -> Double): Double {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return put(key, value) as Double
+    } else {
+        set(key, value)
+        return defaultValue()
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableInt2DoubleMap.removeOrElse(key: Int, defaultValue: () -> Double): Double {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    return if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        remove(key) as Double
+    } else {
+        defaultValue()
     }
 }
 

@@ -69,6 +69,7 @@ public interface ${Name}Map${Generics} {
 
     public operator fun get(key: ${KeyType}): ${ValueType}${Nullable}
 
+    /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
     public fun getValue(key: ${KeyType}): ${ValueType} = getOrElse(key) { throw NoSuchElementException() }
 
     public fun getOrDefault(key: ${KeyType}, defaultValue: ${ValueType}): ${ValueType} = getOrElse(key) { defaultValue }
@@ -155,7 +156,14 @@ public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics} {
         put(key, value)
     }
 
+    /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
+    public fun replace(key: ${KeyType}, value: ${ValueType}): ${ValueType} = putOrElse(key, value) { throw NoSuchElementException() }
+
+    /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: ${KeyType}): ${ValueType}${Nullable}
+
+    /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
+    public fun removeKey(key: ${KeyType}): ${ValueType} = removeOrElse(key) { throw NoSuchElementException() }
 
     public fun clear()
 
@@ -209,6 +217,31 @@ public inline fun ${Generics} Mutable${Name}Map${Generics}.getOrPut(key: ${KeyTy
     } else {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return value as ${ValueType}
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Generics} Mutable${Name}Map${Generics}.putOrElse(key: ${KeyType}, value: $ValueType, defaultValue: () -> ${ValueType}): ${ValueType} {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return put(key, value) as ${ValueType}
+    } else {
+        set(key, value)
+        return defaultValue()
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Generics} Mutable${Name}Map${Generics}.removeOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    return if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        remove(key) as ${ValueType}
+    } else {
+        defaultValue()
     }
 }
 

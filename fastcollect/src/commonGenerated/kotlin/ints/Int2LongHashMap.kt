@@ -119,6 +119,18 @@ public class Int2LongHashMap @JvmOverloads constructor(
         set(key, { value }, { value })
     }
 
+    override fun replace(key: Int, value: Long): Long {
+        var returnValue = defaultValue
+        set(key, {
+            throw NoSuchElementException()
+        }, { slot ->
+            returnValue = valuesArr[slot]
+            value
+        })
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return returnValue as Long
+    }
+
     override fun remove(key: Int): Long {
         return findSlot(
             key,
@@ -128,6 +140,18 @@ public class Int2LongHashMap @JvmOverloads constructor(
                 oldValue
             },
             { defaultValue })
+    }
+
+    override fun removeKey(key: Int): Long {
+        return findSlot(
+            key,
+            { slot ->
+                val oldValue = valuesArr[slot]
+                removeSlot(slot)
+                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+                oldValue as Long
+            },
+            { throw NoSuchElementException() })
     }
 
     override fun clear() {

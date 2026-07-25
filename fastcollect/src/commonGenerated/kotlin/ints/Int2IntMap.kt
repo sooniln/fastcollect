@@ -69,6 +69,7 @@ public interface Int2IntMap {
 
     public operator fun get(key: Int): Int
 
+    /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
     public fun getValue(key: Int): Int = getOrElse(key) { throw NoSuchElementException() }
 
     public fun getOrDefault(key: Int, defaultValue: Int): Int = getOrElse(key) { defaultValue }
@@ -153,7 +154,14 @@ public interface MutableInt2IntMap : Int2IntMap {
         put(key, value)
     }
 
+    /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
+    public fun replace(key: Int, value: Int): Int = putOrElse(key, value) { throw NoSuchElementException() }
+
+    /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: Int): Int
+
+    /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
+    public fun removeKey(key: Int): Int = removeOrElse(key) { throw NoSuchElementException() }
 
     public fun clear()
 
@@ -207,6 +215,31 @@ public inline fun  MutableInt2IntMap.getOrPut(key: Int, defaultValue: () -> Int)
     } else {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return value as Int
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableInt2IntMap.putOrElse(key: Int, value: Int, defaultValue: () -> Int): Int {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return put(key, value) as Int
+    } else {
+        set(key, value)
+        return defaultValue()
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableInt2IntMap.removeOrElse(key: Int, defaultValue: () -> Int): Int {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    return if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        remove(key) as Int
+    } else {
+        defaultValue()
     }
 }
 

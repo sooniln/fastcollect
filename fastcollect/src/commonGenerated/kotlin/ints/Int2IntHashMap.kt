@@ -115,6 +115,17 @@ public class Int2IntHashMap @JvmOverloads constructor(
         set(key, { value }, { value })
     }
 
+    override fun replace(key: Int, value: Int): Int {
+        var returnValue = defaultValue
+        set(key, {
+            throw NoSuchElementException()
+        }, { entry ->
+            returnValue = entry.value()
+            value
+        })
+        return returnValue
+    }
+
     override fun remove(key: Int): Int {
         return findSlot(
             key,
@@ -124,6 +135,17 @@ public class Int2IntHashMap @JvmOverloads constructor(
                 oldValue
             },
             { defaultValue })
+    }
+
+    override fun removeKey(key: Int): Int {
+        return findSlot(
+            key,
+            { slot, entry ->
+                val oldValue = entry.value()
+                removeSlot(slot)
+                oldValue
+            },
+            { throw NoSuchElementException() })
     }
 
     override fun clear() {

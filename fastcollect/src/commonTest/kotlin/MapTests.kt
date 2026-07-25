@@ -160,6 +160,32 @@ class Int2IntMapTest {
     }
 
     @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableInt2IntMapOf(1 to 10)
+        assertEquals(10, map.replace(1, 20))
+        assertEquals(20, map[1])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2IntMapOf(1 to 10).replace(99, 20) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableInt2IntMapOf(1 to 10, 2 to 20)
+        assertEquals(10, map.removeKey(1))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2IntMapOf(1 to 10).removeKey(99) }
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = int2IntMapOf(1 to 10, 2 to 20)
         val dest = mutableInt2IntMapOf(3 to 30)
@@ -477,6 +503,32 @@ class Int2LongMapTest {
     }
 
     @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableInt2LongMapOf(1 to 10L)
+        assertEquals(10L, map.replace(1, 20L))
+        assertEquals(20L, map[1])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2LongMapOf(1 to 10L).replace(99, 20L) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableInt2LongMapOf(1 to 10L, 2 to 20L)
+        assertEquals(10L, map.removeKey(1))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2LongMapOf(1 to 10L).removeKey(99) }
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = int2LongMapOf(1 to 10L, 2 to 20L)
         val dest = mutableInt2LongMapOf(3 to 30L)
@@ -772,6 +824,32 @@ class Int2FloatMapTest {
     }
 
     @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableInt2FloatMapOf(1 to 10f)
+        assertEquals(10f, map.replace(1, 20f))
+        assertEquals(20f, map[1])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2FloatMapOf(1 to 10f).replace(99, 20f) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableInt2FloatMapOf(1 to 10f, 2 to 20f)
+        assertEquals(10f, map.removeKey(1))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2FloatMapOf(1 to 10f).removeKey(99) }
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = int2FloatMapOf(1 to 10f, 2 to 20f)
         val dest = mutableInt2FloatMapOf(3 to 30f)
@@ -1050,6 +1128,32 @@ class Int2DoubleMapTest {
     }
 
     @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableInt2DoubleMapOf(1 to 10.0)
+        assertEquals(10.0, map.replace(1, 20.0))
+        assertEquals(20.0, map[1])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2DoubleMapOf(1 to 10.0).replace(99, 20.0) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableInt2DoubleMapOf(1 to 10.0, 2 to 20.0)
+        assertEquals(10.0, map.removeKey(1))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2DoubleMapOf(1 to 10.0).removeKey(99) }
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = int2DoubleMapOf(1 to 10.0, 2 to 20.0)
         val dest = mutableInt2DoubleMapOf(3 to 30.0)
@@ -1298,6 +1402,32 @@ class Int2AnyMapTest {
         val result = map.getOrPut(1) { invoked = true; "x" }
         assertFalse(invoked)
         assertEquals("a", result)
+    }
+
+    @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableInt2AnyMapOf(1 to "a")
+        assertEquals("a", map.replace(1, "z"))
+        assertEquals("z", map[1])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2AnyMapOf(1 to "a").replace(99, "z") }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableInt2AnyMapOf(1 to "a", 2 to "b")
+        assertEquals("a", map.removeKey(1))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2AnyMapOf(1 to "a").removeKey(99) }
     }
 
     @Test
@@ -1569,6 +1699,32 @@ class Long2IntMapTest {
     }
 
     @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableLong2IntMapOf(1L to 10)
+        assertEquals(10, map.replace(1L, 20))
+        assertEquals(20, map[1L])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2IntMapOf(1L to 10).replace(99L, 20) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableLong2IntMapOf(1L to 10, 2L to 20)
+        assertEquals(10, map.removeKey(1L))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2IntMapOf(1L to 10).removeKey(99L) }
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = long2IntMapOf(1L to 10, 2L to 20)
         val dest = mutableLong2IntMapOf(3L to 30)
@@ -1834,6 +1990,32 @@ class Long2LongMapTest {
         val result = map.getOrPut(1L) { invoked = true; 99L }
         assertFalse(invoked)
         assertEquals(10L, result)
+    }
+
+    @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableLong2LongMapOf(1L to 10L)
+        assertEquals(10L, map.replace(1L, 20L))
+        assertEquals(20L, map[1L])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2LongMapOf(1L to 10L).replace(99L, 20L) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableLong2LongMapOf(1L to 10L, 2L to 20L)
+        assertEquals(10L, map.removeKey(1L))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2LongMapOf(1L to 10L).removeKey(99L) }
     }
 
     @Test
@@ -2132,6 +2314,32 @@ class Long2FloatMapTest {
     }
 
     @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableLong2FloatMapOf(1L to 10f)
+        assertEquals(10f, map.replace(1L, 20f))
+        assertEquals(20f, map[1L])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2FloatMapOf(1L to 10f).replace(99L, 20f) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableLong2FloatMapOf(1L to 10f, 2L to 20f)
+        assertEquals(10f, map.removeKey(1L))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2FloatMapOf(1L to 10f).removeKey(99L) }
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = long2FloatMapOf(1L to 10f, 2L to 20f)
         val dest = mutableLong2FloatMapOf(3L to 30f)
@@ -2410,6 +2618,32 @@ class Long2DoubleMapTest {
     }
 
     @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableLong2DoubleMapOf(1L to 10.0)
+        assertEquals(10.0, map.replace(1L, 20.0))
+        assertEquals(20.0, map[1L])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2DoubleMapOf(1L to 10.0).replace(99L, 20.0) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableLong2DoubleMapOf(1L to 10.0, 2L to 20.0)
+        assertEquals(10.0, map.removeKey(1L))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2DoubleMapOf(1L to 10.0).removeKey(99L) }
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = long2DoubleMapOf(1L to 10.0, 2L to 20.0)
         val dest = mutableLong2DoubleMapOf(3L to 30.0)
@@ -2658,6 +2892,32 @@ class Long2AnyMapTest {
         val result = map.getOrPut(1L) { invoked = true; "x" }
         assertFalse(invoked)
         assertEquals("a", result)
+    }
+
+    @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableLong2AnyMapOf(1L to "a")
+        assertEquals("a", map.replace(1L, "z"))
+        assertEquals("z", map[1L])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2AnyMapOf(1L to "a").replace(99L, "z") }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableLong2AnyMapOf(1L to "a", 2L to "b")
+        assertEquals("a", map.removeKey(1L))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2AnyMapOf(1L to "a").removeKey(99L) }
     }
 
     @Test
