@@ -3,6 +3,8 @@ package io.github.sooniln.fastcollect.floats
 public fun emptyFloatIterator(): FloatListIterator = EmptyFloatIterator
 public fun emptyMutableFloatIterator(): MutableFloatIterator = EmptyMutableFloatIterator
 
+public fun floatIteratorOf(value: Float): FloatListIterator = SingletonFloatIterator(value)
+
 public abstract class MutableFloatIterator : FloatIterator(), MutableIterator<Float>
 
 public abstract class FloatListIterator: FloatIterator(), ListIterator<Float> {
@@ -37,4 +39,25 @@ private object EmptyMutableFloatIterator : MutableFloatIterator() {
     override fun hasNext(): Boolean = false
 
     override fun remove() = throw IllegalStateException()
+}
+
+private class SingletonFloatIterator(private val value: Float) : FloatListIterator() {
+    private var pos = 0
+
+    override fun previousFloat(): Float {
+        if (pos == 0) throw NoSuchElementException()
+        --pos
+        return value
+    }
+    override fun nextFloat(): Float {
+        if (pos == 1) throw NoSuchElementException()
+        ++pos
+        return value
+    }
+
+    override fun hasNext(): Boolean = pos == 0
+    override fun hasPrevious(): Boolean = pos == 1
+
+    override fun nextIndex(): Int = pos
+    override fun previousIndex(): Int = pos - 1
 }

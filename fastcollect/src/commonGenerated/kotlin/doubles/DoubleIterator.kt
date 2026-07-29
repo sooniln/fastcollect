@@ -3,6 +3,8 @@ package io.github.sooniln.fastcollect.doubles
 public fun emptyDoubleIterator(): DoubleListIterator = EmptyDoubleIterator
 public fun emptyMutableDoubleIterator(): MutableDoubleIterator = EmptyMutableDoubleIterator
 
+public fun doubleIteratorOf(value: Double): DoubleListIterator = SingletonDoubleIterator(value)
+
 public abstract class MutableDoubleIterator : DoubleIterator(), MutableIterator<Double>
 
 public abstract class DoubleListIterator: DoubleIterator(), ListIterator<Double> {
@@ -37,4 +39,25 @@ private object EmptyMutableDoubleIterator : MutableDoubleIterator() {
     override fun hasNext(): Boolean = false
 
     override fun remove() = throw IllegalStateException()
+}
+
+private class SingletonDoubleIterator(private val value: Double) : DoubleListIterator() {
+    private var pos = 0
+
+    override fun previousDouble(): Double {
+        if (pos == 0) throw NoSuchElementException()
+        --pos
+        return value
+    }
+    override fun nextDouble(): Double {
+        if (pos == 1) throw NoSuchElementException()
+        ++pos
+        return value
+    }
+
+    override fun hasNext(): Boolean = pos == 0
+    override fun hasPrevious(): Boolean = pos == 1
+
+    override fun nextIndex(): Int = pos
+    override fun previousIndex(): Int = pos - 1
 }

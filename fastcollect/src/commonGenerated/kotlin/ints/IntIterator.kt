@@ -3,6 +3,8 @@ package io.github.sooniln.fastcollect.ints
 public fun emptyIntIterator(): IntListIterator = EmptyIntIterator
 public fun emptyMutableIntIterator(): MutableIntIterator = EmptyMutableIntIterator
 
+public fun intIteratorOf(value: Int): IntListIterator = SingletonIntIterator(value)
+
 public abstract class MutableIntIterator : IntIterator(), MutableIterator<Int>
 
 public abstract class IntListIterator: IntIterator(), ListIterator<Int> {
@@ -37,4 +39,25 @@ private object EmptyMutableIntIterator : MutableIntIterator() {
     override fun hasNext(): Boolean = false
 
     override fun remove() = throw IllegalStateException()
+}
+
+private class SingletonIntIterator(private val value: Int) : IntListIterator() {
+    private var pos = 0
+
+    override fun previousInt(): Int {
+        if (pos == 0) throw NoSuchElementException()
+        --pos
+        return value
+    }
+    override fun nextInt(): Int {
+        if (pos == 1) throw NoSuchElementException()
+        ++pos
+        return value
+    }
+
+    override fun hasNext(): Boolean = pos == 0
+    override fun hasPrevious(): Boolean = pos == 1
+
+    override fun nextIndex(): Int = pos
+    override fun previousIndex(): Int = pos - 1
 }

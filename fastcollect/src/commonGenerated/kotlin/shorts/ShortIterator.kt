@@ -3,6 +3,8 @@ package io.github.sooniln.fastcollect.shorts
 public fun emptyShortIterator(): ShortListIterator = EmptyShortIterator
 public fun emptyMutableShortIterator(): MutableShortIterator = EmptyMutableShortIterator
 
+public fun shortIteratorOf(value: Short): ShortListIterator = SingletonShortIterator(value)
+
 public abstract class MutableShortIterator : ShortIterator(), MutableIterator<Short>
 
 public abstract class ShortListIterator: ShortIterator(), ListIterator<Short> {
@@ -37,4 +39,25 @@ private object EmptyMutableShortIterator : MutableShortIterator() {
     override fun hasNext(): Boolean = false
 
     override fun remove() = throw IllegalStateException()
+}
+
+private class SingletonShortIterator(private val value: Short) : ShortListIterator() {
+    private var pos = 0
+
+    override fun previousShort(): Short {
+        if (pos == 0) throw NoSuchElementException()
+        --pos
+        return value
+    }
+    override fun nextShort(): Short {
+        if (pos == 1) throw NoSuchElementException()
+        ++pos
+        return value
+    }
+
+    override fun hasNext(): Boolean = pos == 0
+    override fun hasPrevious(): Boolean = pos == 1
+
+    override fun nextIndex(): Int = pos
+    override fun previousIndex(): Int = pos - 1
 }

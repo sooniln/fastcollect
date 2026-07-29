@@ -3,6 +3,8 @@ package io.github.sooniln.fastcollect.longs
 public fun emptyLongIterator(): LongListIterator = EmptyLongIterator
 public fun emptyMutableLongIterator(): MutableLongIterator = EmptyMutableLongIterator
 
+public fun longIteratorOf(value: Long): LongListIterator = SingletonLongIterator(value)
+
 public abstract class MutableLongIterator : LongIterator(), MutableIterator<Long>
 
 public abstract class LongListIterator: LongIterator(), ListIterator<Long> {
@@ -37,4 +39,25 @@ private object EmptyMutableLongIterator : MutableLongIterator() {
     override fun hasNext(): Boolean = false
 
     override fun remove() = throw IllegalStateException()
+}
+
+private class SingletonLongIterator(private val value: Long) : LongListIterator() {
+    private var pos = 0
+
+    override fun previousLong(): Long {
+        if (pos == 0) throw NoSuchElementException()
+        --pos
+        return value
+    }
+    override fun nextLong(): Long {
+        if (pos == 1) throw NoSuchElementException()
+        ++pos
+        return value
+    }
+
+    override fun hasNext(): Boolean = pos == 0
+    override fun hasPrevious(): Boolean = pos == 1
+
+    override fun nextIndex(): Int = pos
+    override fun previousIndex(): Int = pos - 1
 }
