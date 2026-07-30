@@ -66,7 +66,7 @@ public interface MutableDoubleSet : DoubleSet, MutableDoubleCollection
 public abstract class AbstractDoubleSet : AbstractDoubleCollection(), DoubleSet {
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other is Set<*>) {
+        if (other is DoubleSet) {
             if (size != other.size) return false
             return other.containsAll(this)
         }

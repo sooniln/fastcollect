@@ -6,6 +6,7 @@ import io.github.sooniln.fastcollect.ArrayUtils
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.Hash
 import io.github.sooniln.fastcollect.MutableFastIterator
+import io.github.sooniln.fastcollect.equalsBoxed
 import io.github.sooniln.fastcollect.ints.MutableIntCollection
 import io.github.sooniln.fastcollect.ints.MutableIntIterator
 import kotlin.contracts.ExperimentalContracts
@@ -530,7 +531,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             return this
         }
 
-        override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+        override fun equals(other: Any?): Boolean = other is Int2IntMap.Entry && other.key equalsBoxed key && other.value equalsBoxed value
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         override fun toString(): String = "$key=$value"
     }

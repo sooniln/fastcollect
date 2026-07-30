@@ -243,11 +243,11 @@ public abstract class AbstractLong2AnyMap<V> : Long2AnyMap<V> {
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other is Map<*, *>) {
+        if (other is Long2AnyMap<*>) {
             if (other.size != size) return false
 
             for (entry in this) {
-                if (other[entry.key] != entry.value) return false
+                if (!(other[entry.key] equalsBoxed entry.value)) return false
             }
 
             return true

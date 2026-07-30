@@ -97,6 +97,7 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
                 putIfAbsent("ValueIteratorType", "Iterator")
                 putIfAbsent("Nullable", "?")
                 putIfAbsent("Generics", "<$valueType>")
+                putIfAbsent("StarGenerics", "<*>")
             } else {
                 putIfAbsent("Name", "${keyType}2${valueType}")
                 putIfAbsent("lowerName", "${get("lowerKeyType")}2${valueType}")
@@ -104,6 +105,7 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
                 putIfAbsent("ValueIteratorType", "${valueType}Iterator")
                 putIfAbsent("Nullable", "")
                 putIfAbsent("Generics", "")
+                putIfAbsent("StarGenerics", "")
             }
 
             val isFPKeyOrValue = get("isFPKey") as Boolean || get("isFPValue") as Boolean

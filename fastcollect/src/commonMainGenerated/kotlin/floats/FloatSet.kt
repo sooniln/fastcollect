@@ -66,7 +66,7 @@ public interface MutableFloatSet : FloatSet, MutableFloatCollection
 public abstract class AbstractFloatSet : AbstractFloatCollection(), FloatSet {
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other is Set<*>) {
+        if (other is FloatSet) {
             if (size != other.size) return false
             return other.containsAll(this)
         }

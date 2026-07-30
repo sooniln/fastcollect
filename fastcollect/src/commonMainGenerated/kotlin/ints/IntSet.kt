@@ -66,7 +66,7 @@ public interface MutableIntSet : IntSet, MutableIntCollection
 public abstract class AbstractIntSet : AbstractIntCollection(), IntSet {
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other is Set<*>) {
+        if (other is IntSet) {
             if (size != other.size) return false
             return other.containsAll(this)
         }

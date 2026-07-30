@@ -1,6 +1,7 @@
 package io.github.sooniln.fastcollect.ints
 
 import io.github.sooniln.fastcollect.MutableFastIterator
+import io.github.sooniln.fastcollect.equalsBoxed
 import io.github.sooniln.fastcollect.floats.InlineFloatCollection
 import kotlin.jvm.JvmInline
 import kotlin.math.max
@@ -79,7 +80,7 @@ public class Int2FloatHashMap private constructor(@PublishedApi internal val map
             inline get() = Float.fromBits(entry.value)
             inline set(value) { entry.value = value.toBits() }
 
-        override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+        override fun equals(other: Any?): Boolean = other is Int2FloatMap.Entry && other.key equalsBoxed key && other.value equalsBoxed value
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         override fun toString(): String = "$key=$value"
     }

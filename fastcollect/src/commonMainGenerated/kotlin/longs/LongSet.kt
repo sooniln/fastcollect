@@ -66,7 +66,7 @@ public interface MutableLongSet : LongSet, MutableLongCollection
 public abstract class AbstractLongSet : AbstractLongCollection(), LongSet {
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other is Set<*>) {
+        if (other is LongSet) {
             if (size != other.size) return false
             return other.containsAll(this)
         }

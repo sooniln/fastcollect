@@ -581,7 +581,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             return this
         }
 
-        override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+        override fun equals(other: Any?): Boolean = other is Int2AnyMap.Entry<*> && other.key equalsBoxed key && other.value equalsBoxed value
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         override fun toString(): String = "$key=$value"
     }

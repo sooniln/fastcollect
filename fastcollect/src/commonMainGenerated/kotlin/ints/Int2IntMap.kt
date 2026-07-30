@@ -248,11 +248,11 @@ public abstract class AbstractInt2IntMap : Int2IntMap {
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
-        if (other is Map<*, *>) {
+        if (other is Int2IntMap) {
             if (other.size != size) return false
 
             for (entry in this) {
-                if (other[entry.key] != entry.value) return false
+                if (!(other[entry.key] equalsBoxed entry.value)) return false
             }
 
             return true
