@@ -47,7 +47,9 @@ public inline fun  buildLong2FloatMap(expectedSize: Int = 0, builderAction: Muta
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
+
 public interface Long2FloatMap {
+
 
     public val size: Int
 
@@ -65,14 +67,14 @@ public interface Long2FloatMap {
      * mutable public API method. A map may not change its default value outside of the invocation of any mutable public
      * API method. For this reason clients should not store or make other assumptions about the default value.
      */
-    public fun isDefaultValue(value: Float): Boolean
+    public fun isDefaultValue(value: @UnsafeVariance Float): Boolean
 
     public operator fun get(key: Long): Float
 
     /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
     public fun getValue(key: Long): Float = getOrElse(key) { throw NoSuchElementException() }
 
-    public fun getOrDefault(key: Long, defaultValue: Float): Float = getOrElse(key) { defaultValue }
+    public fun getOrDefault(key: Long, defaultValue: @UnsafeVariance Float): Float = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Long): Boolean {
         for (k in keys) {
@@ -81,7 +83,7 @@ public interface Long2FloatMap {
         return false
     }
 
-    public fun containsValue(value: Float): Boolean {
+    public fun containsValue(value: @UnsafeVariance Float): Boolean {
         for (v in values) {
             if (v equalsBoxed value) return true
         }
@@ -96,7 +98,9 @@ public interface Long2FloatMap {
     @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
     public fun values(): FloatCollection = values
 
+
     public interface Entry {
+
         public val key: Long
         public val value: Float
 

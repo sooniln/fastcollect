@@ -42,7 +42,9 @@ public inline fun <V> buildInt2AnyMap(expectedSize: Int = 0, builderAction: Muta
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
-public interface Int2AnyMap<V> {
+
+public interface Int2AnyMap<out V> {
+
 
     public val size: Int
 
@@ -60,14 +62,14 @@ public interface Int2AnyMap<V> {
      * mutable public API method. A map may not change its default value outside of the invocation of any mutable public
      * API method. For this reason clients should not store or make other assumptions about the default value.
      */
-    public fun isDefaultValue(value: V?): Boolean
+    public fun isDefaultValue(value: @UnsafeVariance V?): Boolean
 
     public operator fun get(key: Int): V?
 
     /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
     public fun getValue(key: Int): V = getOrElse(key) { throw NoSuchElementException() }
 
-    public fun getOrDefault(key: Int, defaultValue: V): V = getOrElse(key) { defaultValue }
+    public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance V): V = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
         for (k in keys) {
@@ -76,7 +78,7 @@ public interface Int2AnyMap<V> {
         return false
     }
 
-    public fun containsValue(value: V): Boolean {
+    public fun containsValue(value: @UnsafeVariance V): Boolean {
         for (v in values) {
             if (v equalsBoxed value) return true
         }
@@ -91,7 +93,9 @@ public interface Int2AnyMap<V> {
     @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
     public fun values(): Collection<V> = values
 
-    public interface Entry<V> {
+
+    public interface Entry<out V> {
+
         public val key: Int
         public val value: V
 
@@ -420,7 +424,7 @@ private class MutableInt2AnyMapWrapper<V>(private val map: MutableInt2AnyMap<V>)
 }
 
 
-public fun interface IntAnyConsumer<V> {
+public fun interface IntAnyConsumer<in V> {
 
     public fun accept(key: Int, value: V)
 }

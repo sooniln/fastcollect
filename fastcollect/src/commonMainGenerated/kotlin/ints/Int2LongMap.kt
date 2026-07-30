@@ -47,7 +47,9 @@ public inline fun  buildInt2LongMap(expectedSize: Int = 0, builderAction: Mutabl
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
+
 public interface Int2LongMap {
+
 
     public val size: Int
 
@@ -65,14 +67,14 @@ public interface Int2LongMap {
      * mutable public API method. A map may not change its default value outside of the invocation of any mutable public
      * API method. For this reason clients should not store or make other assumptions about the default value.
      */
-    public fun isDefaultValue(value: Long): Boolean
+    public fun isDefaultValue(value: @UnsafeVariance Long): Boolean
 
     public operator fun get(key: Int): Long
 
     /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
     public fun getValue(key: Int): Long = getOrElse(key) { throw NoSuchElementException() }
 
-    public fun getOrDefault(key: Int, defaultValue: Long): Long = getOrElse(key) { defaultValue }
+    public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance Long): Long = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
         for (k in keys) {
@@ -81,7 +83,7 @@ public interface Int2LongMap {
         return false
     }
 
-    public fun containsValue(value: Long): Boolean {
+    public fun containsValue(value: @UnsafeVariance Long): Boolean {
         for (v in values) {
             if (v equalsBoxed value) return true
         }
@@ -96,7 +98,9 @@ public interface Int2LongMap {
     @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
     public fun values(): LongCollection = values
 
+
     public interface Entry {
+
         public val key: Int
         public val value: Long
 
