@@ -5,9 +5,6 @@ import io.github.sooniln.fastcollect.${lowerNonFPType}s.${NonFPType}List
 import io.github.sooniln.fastcollect.${lowerNonFPType}s.Mutable${NonFPType}List
 import io.github.sooniln.fastcollect.${lowerNonFPType}s.Mutable${NonFPType}ListIterator
 import io.github.sooniln.fastcollect.${lowerNonFPType}s.filterInPlace
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 import kotlin.jvm.JvmInline
 
 public typealias ${Type}ArrayDeque = Inline${Type}ArrayDeque
@@ -74,8 +71,8 @@ public value class Inline${Type}ArrayDeque private constructor(@PublishedApi int
         }
     }
 
-    public override fun removeAll(elements: Collection<${Type}>): Boolean = list.filter${Type}InPlace { e -> elements.contains(e) }
-    public override fun retainAll(elements: Collection<${Type}>): Boolean = list.filter${Type}InPlace { e -> !elements.contains(e) }
+    public override fun removeAll(elements: Collection<${Type}>): Boolean = list.filterInPlace { elements.contains(${Type}.fromBits(it)) }
+    public override fun retainAll(elements: Collection<${Type}>): Boolean = list.filterInPlace { !elements.contains(${Type}.fromBits(it)) }
 
     override fun sort() { list.sort${Type}() }
     override fun sortDescending() { list.sortDescending${Type}() }
@@ -93,6 +90,9 @@ public value class Inline${Type}ArrayDeque private constructor(@PublishedApi int
 
     override fun toString(): String = list.to${Type}ListString()
 }
+
+public fun Inline${Type}ArrayDeque.removeAll(predicate: ${Type}Predicate): Boolean = list.removeAll { predicate.test(${Type}.fromBits(it)) }
+public fun Inline${Type}ArrayDeque.retainAll(predicate: ${Type}Predicate): Boolean = list.retainAll { predicate.test(${Type}.fromBits(it)) }
 
 @Suppress("OVERRIDE_BY_INLINE")
 @JvmInline
@@ -114,8 +114,8 @@ public value class Inline${Type}List internal constructor(@PublishedApi internal
     override fun indexOf(element: ${Type}): Int = list.indexOf(element.toBits())
     override fun lastIndexOf(element: ${Type}): Int = list.lastIndexOf(element.toBits())
 
-    public override fun removeAll(elements: Collection<${Type}>): Boolean = list.filter${Type}InPlace { e -> elements.contains(e) }
-    public override fun retainAll(elements: Collection<${Type}>): Boolean = list.filter${Type}InPlace { e -> !elements.contains(e) }
+    public override fun removeAll(elements: Collection<${Type}>): Boolean = list.filterInPlace { elements.contains(${Type}.fromBits(it)) }
+    public override fun retainAll(elements: Collection<${Type}>): Boolean = list.filterInPlace { !elements.contains(${Type}.fromBits(it)) }
 
     override fun sort() { list.sort${Type}() }
     override fun sortDescending() { list.sortDescending${Type}() }
@@ -140,15 +140,6 @@ public class InlineMutable${Type}ListIterator internal constructor(private val i
     override fun remove() { it.remove() }
     override fun set(element: ${Type}) { it.set(element.toBits()) }
     override fun add(element: ${Type}) { it.add(element.toBits()) }
-}
-
-@OptIn(ExperimentalContracts::class)
-private inline fun Mutable${NonFPType}List.filter${Type}InPlace(removePredicate: (${Type}) -> Boolean): Boolean {
-    contract {
-        callsInPlace(removePredicate, InvocationKind.UNKNOWN)
-    }
-
-    return filterInPlace { removePredicate(${Type}.fromBits(it)) }
 }
 
 private fun Mutable${NonFPType}List.sort${Type}() {

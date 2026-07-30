@@ -1,0 +1,5 @@
+package io.github.sooniln.fastcollect.${subpackage}
+
+public fun interface ${Type}Predicate {
+    public fun test(value: ${Type}): Boolean
+}

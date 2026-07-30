@@ -5,9 +5,6 @@ import io.github.sooniln.fastcollect.longs.LongList
 import io.github.sooniln.fastcollect.longs.MutableLongList
 import io.github.sooniln.fastcollect.longs.MutableLongListIterator
 import io.github.sooniln.fastcollect.longs.filterInPlace
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 import kotlin.jvm.JvmInline
 
 public typealias DoubleArrayDeque = InlineDoubleArrayDeque
@@ -74,8 +71,8 @@ public value class InlineDoubleArrayDeque private constructor(@PublishedApi inte
         }
     }
 
-    public override fun removeAll(elements: Collection<Double>): Boolean = list.filterDoubleInPlace { e -> elements.contains(e) }
-    public override fun retainAll(elements: Collection<Double>): Boolean = list.filterDoubleInPlace { e -> !elements.contains(e) }
+    public override fun removeAll(elements: Collection<Double>): Boolean = list.filterInPlace { elements.contains(Double.fromBits(it)) }
+    public override fun retainAll(elements: Collection<Double>): Boolean = list.filterInPlace { !elements.contains(Double.fromBits(it)) }
 
     override fun sort() { list.sortDouble() }
     override fun sortDescending() { list.sortDescendingDouble() }
@@ -93,6 +90,9 @@ public value class InlineDoubleArrayDeque private constructor(@PublishedApi inte
 
     override fun toString(): String = list.toDoubleListString()
 }
+
+public fun InlineDoubleArrayDeque.removeAll(predicate: DoublePredicate): Boolean = list.removeAll { predicate.test(Double.fromBits(it)) }
+public fun InlineDoubleArrayDeque.retainAll(predicate: DoublePredicate): Boolean = list.retainAll { predicate.test(Double.fromBits(it)) }
 
 @Suppress("OVERRIDE_BY_INLINE")
 @JvmInline
@@ -114,8 +114,8 @@ public value class InlineDoubleList internal constructor(@PublishedApi internal 
     override fun indexOf(element: Double): Int = list.indexOf(element.toBits())
     override fun lastIndexOf(element: Double): Int = list.lastIndexOf(element.toBits())
 
-    public override fun removeAll(elements: Collection<Double>): Boolean = list.filterDoubleInPlace { e -> elements.contains(e) }
-    public override fun retainAll(elements: Collection<Double>): Boolean = list.filterDoubleInPlace { e -> !elements.contains(e) }
+    public override fun removeAll(elements: Collection<Double>): Boolean = list.filterInPlace { elements.contains(Double.fromBits(it)) }
+    public override fun retainAll(elements: Collection<Double>): Boolean = list.filterInPlace { !elements.contains(Double.fromBits(it)) }
 
     override fun sort() { list.sortDouble() }
     override fun sortDescending() { list.sortDescendingDouble() }
@@ -140,15 +140,6 @@ public class InlineMutableDoubleListIterator internal constructor(private val it
     override fun remove() { it.remove() }
     override fun set(element: Double) { it.set(element.toBits()) }
     override fun add(element: Double) { it.add(element.toBits()) }
-}
-
-@OptIn(ExperimentalContracts::class)
-private inline fun MutableLongList.filterDoubleInPlace(removePredicate: (Double) -> Boolean): Boolean {
-    contract {
-        callsInPlace(removePredicate, InvocationKind.UNKNOWN)
-    }
-
-    return filterInPlace { removePredicate(Double.fromBits(it)) }
 }
 
 private fun MutableLongList.sortDouble() {

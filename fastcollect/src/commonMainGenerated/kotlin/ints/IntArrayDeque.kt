@@ -1,36 +1,37 @@
-package io.github.sooniln.fastcollect.bytes
+package io.github.sooniln.fastcollect.ints
 
 import io.github.sooniln.fastcollect.ArrayUtils
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.math.max
 import kotlin.math.min
 
-public typealias ByteArrayList = ByteArrayDeque
+public typealias IntArrayList = IntArrayDeque
 
 /**
- * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing Bytes. Can be
+ * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing Ints. Can be
  * used in place of the Kotlin standard library [ArrayList] and [ArrayDeque] implementations to improve performance and
  * memory usage. Has the same API contracts as the standard library [ArrayList] and [ArrayDeque] unless noted otherwise.
  *
  * This implementation supports amortized O(1) `addFirst/addLast/removeFirst/removeLast` functionality. The
  * [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  */
-public class ByteArrayDeque private constructor(array: ByteArray, size: Int = array.size) : AbstractMutableByteList(), RandomAccess {
+public class IntArrayDeque private constructor(array: IntArray, size: Int = array.size) : AbstractMutableIntList(), RandomAccess {
 
     private var head: Int = 0
-    private var ring: ByteArray = array
+    private var ring: IntArray = array
     override var size: Int = size
         private set
 
-    public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else ByteArray(capacity), 0)
+    public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else IntArray(capacity), 0)
 
-    public constructor(elements: ByteCollection) : this(if (elements is ByteList) elements.toByteArray() else elements.toByteArray())
+    public constructor(elements: IntCollection) : this(if (elements is IntList) elements.toIntArray() else elements.toIntArray())
 
-    public constructor(elements: Collection<Byte>) : this(if (elements is ByteList) elements.toByteArray() else elements.toByteArray())
+    public constructor(elements: Collection<Int>) : this(if (elements is IntList) elements.toIntArray() else elements.toIntArray())
 
-    public constructor(elements: ByteArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex))
+    public constructor(elements: IntArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex))
 
     public fun ensureCapacity(capacity: Int) {
         if (capacity > ring.size) grow(capacity)
@@ -47,12 +48,12 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         if (head == 0) {
             ring = ring.copyOf(newCapacity)
         } else {
-            ring = copyFromRing(ByteArray(newCapacity))
+            ring = copyFromRing(IntArray(newCapacity))
             head = 0
         }
     }
 
-    private fun copyFromRing(dest: ByteArray): ByteArray {
+    private fun copyFromRing(dest: IntArray): IntArray {
         check(dest.size >= size)
         val tail = head + size
         if (tail <= ring.size) {
@@ -66,20 +67,20 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
     public fun trimToSize() {
         if (size < ring.size) {
-            ring = if (isEmpty()) EMPTY_ARRAY else copyFromRing(ByteArray(size))
+            ring = if (isEmpty()) EMPTY_ARRAY else copyFromRing(IntArray(size))
             head = 0
         }
     }
 
-    override fun get(index: Int): Byte {
+    override fun get(index: Int): Int {
         return ring[ring.position(rangeCheck(index))]
     }
 
-    override fun set(index: Int, element: Byte) {
+    override fun set(index: Int, element: Int) {
         ring[ring.position(rangeCheck(index))] = element
     }
 
-    override fun addFirst(element: Byte) {
+    override fun addFirst(element: Int) {
         val newSize = size + 1
         ensureCapacity(newSize)
         head = ring.decrementPosition(head)
@@ -87,7 +88,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         size = newSize
     }
 
-    override fun addLast(element: Byte) {
+    override fun addLast(element: Int) {
         val s = size
         val newSize = s + 1
         ensureCapacity(newSize)
@@ -95,7 +96,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         size = newSize
     }
 
-    override fun add(index: Int, element: Byte) {
+    override fun add(index: Int, element: Int) {
         rangeCheckInclusive(index)
         when (index) {
             size -> addLast(element)
@@ -104,7 +105,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    private fun addMiddle(index: Int, element: Byte) {
+    private fun addMiddle(index: Int, element: Int) {
         val newSize = size + 1
         ensureCapacity(newSize)
 
@@ -144,7 +145,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         size = newSize
     }
 
-    override fun removeFirst(): Byte {
+    override fun removeFirst(): Int {
         if (isEmpty()) throw NoSuchElementException()
         val element = ring[head]
         head = ring.incrementPosition(head)
@@ -152,12 +153,12 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         return element
     }
 
-    override fun removeLast(): Byte {
+    override fun removeLast(): Int {
         if (isEmpty()) throw NoSuchElementException()
         return ring[ring.position(--size)]
     }
 
-    override fun removeAt(index: Int): Byte {
+    override fun removeAt(index: Int): Int {
         rangeCheck(index)
 
         val position = ring.position(index)
@@ -228,29 +229,29 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         size = 0
     }
 
-    override fun indexOf(element: Byte): Int {
+    override fun indexOf(element: Int): Int {
         val tail = head + size
         return if (tail <= ring.size) indexOfContinuous(tail, element) else indexOfDiscrete(tail, element)
     }
 
-    private fun indexOfContinuous(tail: Int, element: Byte): Int {
+    private fun indexOfContinuous(tail: Int, element: Int): Int {
         for (i in head..<tail) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
         }
         return -1
     }
 
-    private fun indexOfDiscrete(tail: Int, element: Byte): Int {
+    private fun indexOfDiscrete(tail: Int, element: Int): Int {
         for (i in head..<ring.size) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
         }
         for (i in 0..<tail-ring.size) {
-            if (ring[i] == element) return i + ring.size - head
+            if (ring[i] equalsBoxed element) return i + ring.size - head
         }
         return -1
     }
 
-    override fun lastIndexOf(element: Byte): Int {
+    override fun lastIndexOf(element: Int): Int {
         val tail = head + size - 1
         return if (tail < ring.size) {
             lastIndexOfContinuous(tail, element)
@@ -259,34 +260,34 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    private fun lastIndexOfContinuous(tail: Int, element: Byte): Int {
+    private fun lastIndexOfContinuous(tail: Int, element: Int): Int {
         // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
         val head = head
         var i = tail
         while (i >= head) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
             --i
         }
         return -1
     }
 
-    private fun lastIndexOfDiscrete(tail: Int, element: Byte): Int {
+    private fun lastIndexOfDiscrete(tail: Int, element: Int): Int {
         // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
         val head = head
         var i = tail - ring.size
         while (i >= 0) {
-            if (ring[i] == element) return i + ring.size - head
+            if (ring[i] equalsBoxed element) return i + ring.size - head
             --i
         }
         i = ring.size - 1
         while (i >= head) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
             --i
         }
         return -1
     }
 
-    public fun addAll(elements: ByteArrayDeque): Boolean {
+    public fun addAll(elements: IntArrayDeque): Boolean {
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
@@ -300,7 +301,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         return true
     }
 
-    private fun addToRing(src: ByteArray, fromIndex: Int, toIndex: Int) {
+    private fun addToRing(src: IntArray, fromIndex: Int, toIndex: Int) {
         val srcLength = toIndex - fromIndex
         check(srcLength >= 0 && srcLength <= ring.size - size)
 
@@ -317,8 +318,8 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         size += srcLength
     }
 
-    override fun addAll(elements: ByteCollection): Boolean {
-        if (elements is ByteArrayDeque) return addAll(elements)
+    override fun addAll(elements: IntCollection): Boolean {
+        if (elements is IntArrayDeque) return addAll(elements)
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
@@ -328,8 +329,8 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         return true
     }
 
-    override fun addAll(elements: Collection<Byte>): Boolean {
-        if (elements is ByteCollection) return addAll(elements)
+    override fun addAll(elements: Collection<Int>): Boolean {
+        if (elements is IntCollection) return addAll(elements)
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
@@ -339,16 +340,16 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         return true
     }
 
-    public override fun removeAll(elements: Collection<Byte>): Boolean {
+    public override fun removeAll(elements: Collection<Int>): Boolean {
         return filterInPlace { e -> elements.contains(e) }
     }
 
-    public override fun retainAll(elements: Collection<Byte>): Boolean {
+    public override fun retainAll(elements: Collection<Int>): Boolean {
         return filterInPlace { e -> !elements.contains(e) }
     }
 
     @OptIn(ExperimentalContracts::class)
-    internal inline fun filterInPlace(removePredicate: (Byte) -> Boolean): Boolean {
+    internal inline fun filterInPlace(removePredicate: (Int) -> Boolean): Boolean {
         contract {
             callsInPlace(removePredicate, InvocationKind.UNKNOWN)
         }
@@ -408,7 +409,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    override fun fill(element: Byte) {
+    override fun fill(element: Int) {
         ring.fill(element, 0, size)
         head = 0
     }
@@ -428,11 +429,11 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    override fun toByteArray(): ByteArray {
-        return copyFromRing(ByteArray(size))
+    override fun toIntArray(): IntArray {
+        return copyFromRing(IntArray(size))
     }
 
-    override fun iterator(): MutableByteIterator {
+    override fun iterator(): MutableIntIterator {
         val tail = head + size
         return if (tail > ring.size) {
             DiscreteIterator()
@@ -441,7 +442,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    override fun foreach(action: ByteConsumer) {
+    override fun foreach(action: IntConsumer) {
         val ring = ring
         val tail = head + size
         if (tail > ring.size) {
@@ -451,7 +452,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    private fun foreachContinuous(ring: ByteArray, tail: Int, action: ByteConsumer) {
+    private fun foreachContinuous(ring: IntArray, tail: Int, action: IntConsumer) {
         var position = head
         while (position < tail) {
             action.accept(ring[position])
@@ -459,7 +460,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    private fun foreachDiscrete(ring: ByteArray, action: ByteConsumer) {
+    private fun foreachDiscrete(ring: IntArray, action: IntConsumer) {
         var remaining = size
         var position = head
         while (remaining > 0) {
@@ -471,7 +472,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is ByteList) return false
+        if (other !is IntList) return false
 
         if (size != other.size) return false
         if (other is RandomAccess) {
@@ -482,7 +483,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
             val it = other.iterator()
             var i = 0
             while (it.hasNext()) {
-                if (it.nextByte() != this[i++]) return false
+                if (it.nextInt() != this[i++]) return false
             }
         }
         return true
@@ -501,8 +502,8 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         return hashCode
     }
 
-    private inner class ContinuousIterator(private var tail: Int) : MutableByteIterator() {
-        private val ring = this@ByteArrayDeque.ring
+    private inner class ContinuousIterator(private var tail: Int) : MutableIntIterator() {
+        private val ring = this@IntArrayDeque.ring
 
         private var position = head
         private var previousPosition = -1
@@ -513,7 +514,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
         override fun hasNext() = position < tail
 
-        override fun nextByte(): Byte {
+        override fun nextInt(): Int {
             if (!hasNext()) throw NoSuchElementException()
 
             previousPosition = position++
@@ -521,7 +522,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
 
         override fun remove() {
-            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
+            if (ring !== this@IntArrayDeque.ring) throw ConcurrentModificationException()
             check(previousPosition != -1)
 
             val d = removeAtInternal(previousPosition)
@@ -531,8 +532,8 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    private inner class DiscreteIterator : MutableByteIterator() {
-        private val ring = this@ByteArrayDeque.ring
+    private inner class DiscreteIterator : MutableIntIterator() {
+        private val ring = this@IntArrayDeque.ring
 
         private var remaining = size
         private var position = head
@@ -540,7 +541,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
         override fun hasNext() = remaining > 0
 
-        override fun nextByte(): Byte {
+        override fun nextInt(): Int {
             if (!hasNext()) throw NoSuchElementException()
 
             --remaining
@@ -550,7 +551,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
 
         override fun remove() {
-            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
+            if (ring !== this@IntArrayDeque.ring) throw ConcurrentModificationException()
             check(previousPosition != -1)
 
             val d = removeAtInternal(previousPosition)
@@ -559,28 +560,28 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    private fun ByteArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+    private fun IntArray.positiveMod(position: Int): Int = if (position < size) position else position - size
 
-    private fun ByteArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+    private fun IntArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
 
-    private fun ByteArray.position(index: Int): Int = positiveMod(head + index)
+    private fun IntArray.position(index: Int): Int = positiveMod(head + index)
 
-    private fun ByteArray.index(position: Int): Int = negativeMod(position - head)
+    private fun IntArray.index(position: Int): Int = negativeMod(position - head)
 
-    private fun ByteArray.incrementPosition(position: Int): Int {
+    private fun IntArray.incrementPosition(position: Int): Int {
         val next = position + 1
         return if (next == size) 0 else next
     }
 
-    private fun ByteArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
+    private fun IntArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
     internal companion object {
-        private val EMPTY_ARRAY = ByteArray(0)
+        private val EMPTY_ARRAY = IntArray(0)
         private const val DEFAULT_CAPACITY = 8
 
-        fun wrap(array: ByteArray): ByteArrayDeque = ByteArrayDeque(array)
+        fun wrap(array: IntArray): IntArrayDeque = IntArrayDeque(array)
     }
 }
 
-public fun ByteArrayDeque.removeAll(predicate: (Byte) -> Boolean): Boolean = filterInPlace(predicate)
-public fun ByteArrayDeque.retainAll(predicate: (Byte) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+public fun IntArrayDeque.removeAll(predicate: IntPredicate): Boolean = filterInPlace { predicate.test(it) }
+public fun IntArrayDeque.retainAll(predicate: IntPredicate): Boolean = filterInPlace { !predicate.test(it) }

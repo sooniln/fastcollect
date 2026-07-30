@@ -5,9 +5,6 @@ import io.github.sooniln.fastcollect.ints.IntList
 import io.github.sooniln.fastcollect.ints.MutableIntList
 import io.github.sooniln.fastcollect.ints.MutableIntListIterator
 import io.github.sooniln.fastcollect.ints.filterInPlace
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
 import kotlin.jvm.JvmInline
 
 public typealias FloatArrayDeque = InlineFloatArrayDeque
@@ -74,8 +71,8 @@ public value class InlineFloatArrayDeque private constructor(@PublishedApi inter
         }
     }
 
-    public override fun removeAll(elements: Collection<Float>): Boolean = list.filterFloatInPlace { e -> elements.contains(e) }
-    public override fun retainAll(elements: Collection<Float>): Boolean = list.filterFloatInPlace { e -> !elements.contains(e) }
+    public override fun removeAll(elements: Collection<Float>): Boolean = list.filterInPlace { elements.contains(Float.fromBits(it)) }
+    public override fun retainAll(elements: Collection<Float>): Boolean = list.filterInPlace { !elements.contains(Float.fromBits(it)) }
 
     override fun sort() { list.sortFloat() }
     override fun sortDescending() { list.sortDescendingFloat() }
@@ -93,6 +90,9 @@ public value class InlineFloatArrayDeque private constructor(@PublishedApi inter
 
     override fun toString(): String = list.toFloatListString()
 }
+
+public fun InlineFloatArrayDeque.removeAll(predicate: FloatPredicate): Boolean = list.removeAll { predicate.test(Float.fromBits(it)) }
+public fun InlineFloatArrayDeque.retainAll(predicate: FloatPredicate): Boolean = list.retainAll { predicate.test(Float.fromBits(it)) }
 
 @Suppress("OVERRIDE_BY_INLINE")
 @JvmInline
@@ -114,8 +114,8 @@ public value class InlineFloatList internal constructor(@PublishedApi internal v
     override fun indexOf(element: Float): Int = list.indexOf(element.toBits())
     override fun lastIndexOf(element: Float): Int = list.lastIndexOf(element.toBits())
 
-    public override fun removeAll(elements: Collection<Float>): Boolean = list.filterFloatInPlace { e -> elements.contains(e) }
-    public override fun retainAll(elements: Collection<Float>): Boolean = list.filterFloatInPlace { e -> !elements.contains(e) }
+    public override fun removeAll(elements: Collection<Float>): Boolean = list.filterInPlace { elements.contains(Float.fromBits(it)) }
+    public override fun retainAll(elements: Collection<Float>): Boolean = list.filterInPlace { !elements.contains(Float.fromBits(it)) }
 
     override fun sort() { list.sortFloat() }
     override fun sortDescending() { list.sortDescendingFloat() }
@@ -140,15 +140,6 @@ public class InlineMutableFloatListIterator internal constructor(private val it:
     override fun remove() { it.remove() }
     override fun set(element: Float) { it.set(element.toBits()) }
     override fun add(element: Float) { it.add(element.toBits()) }
-}
-
-@OptIn(ExperimentalContracts::class)
-private inline fun MutableIntList.filterFloatInPlace(removePredicate: (Float) -> Boolean): Boolean {
-    contract {
-        callsInPlace(removePredicate, InvocationKind.UNKNOWN)
-    }
-
-    return filterInPlace { removePredicate(Float.fromBits(it)) }
 }
 
 private fun MutableIntList.sortFloat() {

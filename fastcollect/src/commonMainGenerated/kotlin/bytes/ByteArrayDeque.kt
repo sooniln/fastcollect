@@ -1,36 +1,37 @@
-package io.github.sooniln.fastcollect.longs
+package io.github.sooniln.fastcollect.bytes
 
 import io.github.sooniln.fastcollect.ArrayUtils
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.math.max
 import kotlin.math.min
 
-public typealias LongArrayList = LongArrayDeque
+public typealias ByteArrayList = ByteArrayDeque
 
 /**
- * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing Longs. Can be
+ * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing Bytes. Can be
  * used in place of the Kotlin standard library [ArrayList] and [ArrayDeque] implementations to improve performance and
  * memory usage. Has the same API contracts as the standard library [ArrayList] and [ArrayDeque] unless noted otherwise.
  *
  * This implementation supports amortized O(1) `addFirst/addLast/removeFirst/removeLast` functionality. The
  * [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  */
-public class LongArrayDeque private constructor(array: LongArray, size: Int = array.size) : AbstractMutableLongList(), RandomAccess {
+public class ByteArrayDeque private constructor(array: ByteArray, size: Int = array.size) : AbstractMutableByteList(), RandomAccess {
 
     private var head: Int = 0
-    private var ring: LongArray = array
+    private var ring: ByteArray = array
     override var size: Int = size
         private set
 
-    public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else LongArray(capacity), 0)
+    public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else ByteArray(capacity), 0)
 
-    public constructor(elements: LongCollection) : this(if (elements is LongList) elements.toLongArray() else elements.toLongArray())
+    public constructor(elements: ByteCollection) : this(if (elements is ByteList) elements.toByteArray() else elements.toByteArray())
 
-    public constructor(elements: Collection<Long>) : this(if (elements is LongList) elements.toLongArray() else elements.toLongArray())
+    public constructor(elements: Collection<Byte>) : this(if (elements is ByteList) elements.toByteArray() else elements.toByteArray())
 
-    public constructor(elements: LongArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex))
+    public constructor(elements: ByteArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex))
 
     public fun ensureCapacity(capacity: Int) {
         if (capacity > ring.size) grow(capacity)
@@ -47,12 +48,12 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         if (head == 0) {
             ring = ring.copyOf(newCapacity)
         } else {
-            ring = copyFromRing(LongArray(newCapacity))
+            ring = copyFromRing(ByteArray(newCapacity))
             head = 0
         }
     }
 
-    private fun copyFromRing(dest: LongArray): LongArray {
+    private fun copyFromRing(dest: ByteArray): ByteArray {
         check(dest.size >= size)
         val tail = head + size
         if (tail <= ring.size) {
@@ -66,20 +67,20 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
 
     public fun trimToSize() {
         if (size < ring.size) {
-            ring = if (isEmpty()) EMPTY_ARRAY else copyFromRing(LongArray(size))
+            ring = if (isEmpty()) EMPTY_ARRAY else copyFromRing(ByteArray(size))
             head = 0
         }
     }
 
-    override fun get(index: Int): Long {
+    override fun get(index: Int): Byte {
         return ring[ring.position(rangeCheck(index))]
     }
 
-    override fun set(index: Int, element: Long) {
+    override fun set(index: Int, element: Byte) {
         ring[ring.position(rangeCheck(index))] = element
     }
 
-    override fun addFirst(element: Long) {
+    override fun addFirst(element: Byte) {
         val newSize = size + 1
         ensureCapacity(newSize)
         head = ring.decrementPosition(head)
@@ -87,7 +88,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         size = newSize
     }
 
-    override fun addLast(element: Long) {
+    override fun addLast(element: Byte) {
         val s = size
         val newSize = s + 1
         ensureCapacity(newSize)
@@ -95,7 +96,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         size = newSize
     }
 
-    override fun add(index: Int, element: Long) {
+    override fun add(index: Int, element: Byte) {
         rangeCheckInclusive(index)
         when (index) {
             size -> addLast(element)
@@ -104,7 +105,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    private fun addMiddle(index: Int, element: Long) {
+    private fun addMiddle(index: Int, element: Byte) {
         val newSize = size + 1
         ensureCapacity(newSize)
 
@@ -144,7 +145,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         size = newSize
     }
 
-    override fun removeFirst(): Long {
+    override fun removeFirst(): Byte {
         if (isEmpty()) throw NoSuchElementException()
         val element = ring[head]
         head = ring.incrementPosition(head)
@@ -152,12 +153,12 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         return element
     }
 
-    override fun removeLast(): Long {
+    override fun removeLast(): Byte {
         if (isEmpty()) throw NoSuchElementException()
         return ring[ring.position(--size)]
     }
 
-    override fun removeAt(index: Int): Long {
+    override fun removeAt(index: Int): Byte {
         rangeCheck(index)
 
         val position = ring.position(index)
@@ -228,29 +229,29 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         size = 0
     }
 
-    override fun indexOf(element: Long): Int {
+    override fun indexOf(element: Byte): Int {
         val tail = head + size
         return if (tail <= ring.size) indexOfContinuous(tail, element) else indexOfDiscrete(tail, element)
     }
 
-    private fun indexOfContinuous(tail: Int, element: Long): Int {
+    private fun indexOfContinuous(tail: Int, element: Byte): Int {
         for (i in head..<tail) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
         }
         return -1
     }
 
-    private fun indexOfDiscrete(tail: Int, element: Long): Int {
+    private fun indexOfDiscrete(tail: Int, element: Byte): Int {
         for (i in head..<ring.size) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
         }
         for (i in 0..<tail-ring.size) {
-            if (ring[i] == element) return i + ring.size - head
+            if (ring[i] equalsBoxed element) return i + ring.size - head
         }
         return -1
     }
 
-    override fun lastIndexOf(element: Long): Int {
+    override fun lastIndexOf(element: Byte): Int {
         val tail = head + size - 1
         return if (tail < ring.size) {
             lastIndexOfContinuous(tail, element)
@@ -259,34 +260,34 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    private fun lastIndexOfContinuous(tail: Int, element: Long): Int {
+    private fun lastIndexOfContinuous(tail: Int, element: Byte): Int {
         // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
         val head = head
         var i = tail
         while (i >= head) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
             --i
         }
         return -1
     }
 
-    private fun lastIndexOfDiscrete(tail: Int, element: Long): Int {
+    private fun lastIndexOfDiscrete(tail: Int, element: Byte): Int {
         // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
         val head = head
         var i = tail - ring.size
         while (i >= 0) {
-            if (ring[i] == element) return i + ring.size - head
+            if (ring[i] equalsBoxed element) return i + ring.size - head
             --i
         }
         i = ring.size - 1
         while (i >= head) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
             --i
         }
         return -1
     }
 
-    public fun addAll(elements: LongArrayDeque): Boolean {
+    public fun addAll(elements: ByteArrayDeque): Boolean {
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
@@ -300,7 +301,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         return true
     }
 
-    private fun addToRing(src: LongArray, fromIndex: Int, toIndex: Int) {
+    private fun addToRing(src: ByteArray, fromIndex: Int, toIndex: Int) {
         val srcLength = toIndex - fromIndex
         check(srcLength >= 0 && srcLength <= ring.size - size)
 
@@ -317,8 +318,8 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         size += srcLength
     }
 
-    override fun addAll(elements: LongCollection): Boolean {
-        if (elements is LongArrayDeque) return addAll(elements)
+    override fun addAll(elements: ByteCollection): Boolean {
+        if (elements is ByteArrayDeque) return addAll(elements)
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
@@ -328,8 +329,8 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         return true
     }
 
-    override fun addAll(elements: Collection<Long>): Boolean {
-        if (elements is LongCollection) return addAll(elements)
+    override fun addAll(elements: Collection<Byte>): Boolean {
+        if (elements is ByteCollection) return addAll(elements)
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
@@ -339,16 +340,16 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         return true
     }
 
-    public override fun removeAll(elements: Collection<Long>): Boolean {
+    public override fun removeAll(elements: Collection<Byte>): Boolean {
         return filterInPlace { e -> elements.contains(e) }
     }
 
-    public override fun retainAll(elements: Collection<Long>): Boolean {
+    public override fun retainAll(elements: Collection<Byte>): Boolean {
         return filterInPlace { e -> !elements.contains(e) }
     }
 
     @OptIn(ExperimentalContracts::class)
-    internal inline fun filterInPlace(removePredicate: (Long) -> Boolean): Boolean {
+    internal inline fun filterInPlace(removePredicate: (Byte) -> Boolean): Boolean {
         contract {
             callsInPlace(removePredicate, InvocationKind.UNKNOWN)
         }
@@ -408,7 +409,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    override fun fill(element: Long) {
+    override fun fill(element: Byte) {
         ring.fill(element, 0, size)
         head = 0
     }
@@ -428,11 +429,11 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    override fun toLongArray(): LongArray {
-        return copyFromRing(LongArray(size))
+    override fun toByteArray(): ByteArray {
+        return copyFromRing(ByteArray(size))
     }
 
-    override fun iterator(): MutableLongIterator {
+    override fun iterator(): MutableByteIterator {
         val tail = head + size
         return if (tail > ring.size) {
             DiscreteIterator()
@@ -441,7 +442,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    override fun foreach(action: LongConsumer) {
+    override fun foreach(action: ByteConsumer) {
         val ring = ring
         val tail = head + size
         if (tail > ring.size) {
@@ -451,7 +452,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    private fun foreachContinuous(ring: LongArray, tail: Int, action: LongConsumer) {
+    private fun foreachContinuous(ring: ByteArray, tail: Int, action: ByteConsumer) {
         var position = head
         while (position < tail) {
             action.accept(ring[position])
@@ -459,7 +460,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    private fun foreachDiscrete(ring: LongArray, action: LongConsumer) {
+    private fun foreachDiscrete(ring: ByteArray, action: ByteConsumer) {
         var remaining = size
         var position = head
         while (remaining > 0) {
@@ -471,7 +472,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is LongList) return false
+        if (other !is ByteList) return false
 
         if (size != other.size) return false
         if (other is RandomAccess) {
@@ -482,7 +483,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
             val it = other.iterator()
             var i = 0
             while (it.hasNext()) {
-                if (it.nextLong() != this[i++]) return false
+                if (it.nextByte() != this[i++]) return false
             }
         }
         return true
@@ -501,8 +502,8 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         return hashCode
     }
 
-    private inner class ContinuousIterator(private var tail: Int) : MutableLongIterator() {
-        private val ring = this@LongArrayDeque.ring
+    private inner class ContinuousIterator(private var tail: Int) : MutableByteIterator() {
+        private val ring = this@ByteArrayDeque.ring
 
         private var position = head
         private var previousPosition = -1
@@ -513,7 +514,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
 
         override fun hasNext() = position < tail
 
-        override fun nextLong(): Long {
+        override fun nextByte(): Byte {
             if (!hasNext()) throw NoSuchElementException()
 
             previousPosition = position++
@@ -521,7 +522,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
 
         override fun remove() {
-            if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
+            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
             check(previousPosition != -1)
 
             val d = removeAtInternal(previousPosition)
@@ -531,8 +532,8 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    private inner class DiscreteIterator : MutableLongIterator() {
-        private val ring = this@LongArrayDeque.ring
+    private inner class DiscreteIterator : MutableByteIterator() {
+        private val ring = this@ByteArrayDeque.ring
 
         private var remaining = size
         private var position = head
@@ -540,7 +541,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
 
         override fun hasNext() = remaining > 0
 
-        override fun nextLong(): Long {
+        override fun nextByte(): Byte {
             if (!hasNext()) throw NoSuchElementException()
 
             --remaining
@@ -550,7 +551,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
 
         override fun remove() {
-            if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
+            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
             check(previousPosition != -1)
 
             val d = removeAtInternal(previousPosition)
@@ -559,28 +560,28 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
     }
 
-    private fun LongArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+    private fun ByteArray.positiveMod(position: Int): Int = if (position < size) position else position - size
 
-    private fun LongArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+    private fun ByteArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
 
-    private fun LongArray.position(index: Int): Int = positiveMod(head + index)
+    private fun ByteArray.position(index: Int): Int = positiveMod(head + index)
 
-    private fun LongArray.index(position: Int): Int = negativeMod(position - head)
+    private fun ByteArray.index(position: Int): Int = negativeMod(position - head)
 
-    private fun LongArray.incrementPosition(position: Int): Int {
+    private fun ByteArray.incrementPosition(position: Int): Int {
         val next = position + 1
         return if (next == size) 0 else next
     }
 
-    private fun LongArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
+    private fun ByteArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
     internal companion object {
-        private val EMPTY_ARRAY = LongArray(0)
+        private val EMPTY_ARRAY = ByteArray(0)
         private const val DEFAULT_CAPACITY = 8
 
-        fun wrap(array: LongArray): LongArrayDeque = LongArrayDeque(array)
+        fun wrap(array: ByteArray): ByteArrayDeque = ByteArrayDeque(array)
     }
 }
 
-public fun LongArrayDeque.removeAll(predicate: (Long) -> Boolean): Boolean = filterInPlace(predicate)
-public fun LongArrayDeque.retainAll(predicate: (Long) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+public fun ByteArrayDeque.removeAll(predicate: BytePredicate): Boolean = filterInPlace { predicate.test(it) }
+public fun ByteArrayDeque.retainAll(predicate: BytePredicate): Boolean = filterInPlace { !predicate.test(it) }

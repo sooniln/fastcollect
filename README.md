@@ -59,15 +59,76 @@ maps, primitive keys with reference or primitive values).
 > useful. If you feel you have a compelling use case that is not currently supported, please reach out, as support is
 > generally trivial to add.
 
+### Overview ###
+
+Concrete primitive collection types supported:
+* **Iterator**
+* **ArrayDeque** (and ArrayList via the same API)
+* **HashSet**
+* **HashMap**
+* **PriorityQueue** (and optionally indirect priority queues)
+* **Mutable and read-only types** for all of the above
+
+Unsupported collection types:
+* **LinkedList** - primitive linked lists are assumed useless in any reasonable scenarios until proven otherwise.
+* **ConcurrentHashMap** - supporting arbitrary concurrency within a hashmap is assumed to be useless in any reasonable
+  scenario until proven otherwise. In scenarios where arbitrary levels of concurrency are useful (such as in a cache
+  perhaps), ConcurrentHashMap is almost always inferior to specialized designs for the problem domain. In scenarios
+  where a lower level of concurrency is required, locking is assumed to be superior.
+* **LinkedHashSet/Map** - stable ordering within a HashSet/Map is assumed to be unnecessary until proven otherwise.
+* **TreeSet/Map** - useful in some scenarios, but often too niche to justify including for the moment.
+* **Big collections (64-bit indexing)** - useful only in very niche scenarios.
+* **Fully immutable types** - occasionally useful, but do not currently appear to give a sufficient benefit vs read-only
+  types and effective immutability to justify inclusion.
+
+#### Floating-Point Comparisons ####
+
+On the JVM, primitive floating-point types obey IEEE floating-point comparisons (positive and negative zeros are equal,
+NaN is never equal to anything including itself). Boxed floating-point types however do not obey normal IEEE
+floating-point rules (positive and negative zeros are not equal, NaN can be equal to other Nan values).
+
+In order to make the primitive collections in this library maximally useful, all collections internally implement
+equality as bit-wise equality. This means that equality used in this library is closer to JVM boxed type equality
+than primitive type equality. Within the collections for example, Float.NaN == Float.Nan and -0.0 != 0.0. Care must
+be used when interacting with these collections via external lambdas, for example:
+
+```kotlin
+var set = mutableFloatSetOf(Float.NaN)
+// option 1 - removes NaN from the set
+set.remove(Float.NaN)
+// option 2 - does not remove NaN from the set
+set.removeAll(value -> value == Float.Nan)
+```
+
+Default Kotlin equality uses IEEE conventions for primitives. For this reason, FastUtil exposes publicly the comparison
+methods it uses internally, as `equalsBoxed()`.
+
+```kotlin
+import io.github.sooniln.fastcollect.equalsBoxed
+
+var set = mutableFloatSetOf(Float.NaN)
+// option 1 - removes NaN from the set
+set.remove(Float.NaN)
+// option 2 - removes NaN from the set
+set.removeAll(value -> value equalsBoxed Float.Nan)
+```
+
+#### ConcurrentModificationException ####
+
+The standard JRE libraries make reasonable efforts to throw ConcurrentModificationException if they detect
+collections being modified in inappropriate ways. This already only a best effort with no guarantees made, but
+FastCollect makes even less of an effort in the interests of performance. Do not expect FastCollect to throw
+ConcurrentModificationException if you are shooting yourself in the foot, except in very rare instances.
+
 ### Examples ###
 
-You'll find that FastCollect collection usage is pretty much exactly like Kotlin collection usage. A few examples of
-common APIs follow:
+You'll find that FastCollect collection usage is pretty much exactly like Kotlin collection usage. A few
+(non-exhaustive) examples of common APIs follow:
 
 ```kotlin
 // creating a list
-var list = IntArrayList() // create FastCollect list directly
-list = mutableIntList(1, 2, 3) // directly create FastCollect list
+var list = IntArrayList()
+list = mutableIntList(1, 2, 3)
 
 // get/set by index
 var i = list[1]
@@ -136,32 +197,38 @@ map.clear()
 map.getOrElse(1) { -1 }
 ```
 
-### ConcurrentModificationException ###
+```kotlin
+// creating a priority queue
+var priorityQueue = IntPriorityQueue(descending = true)
 
-The standard JRE libraries make reasonable efforts to throw ConcurrentModificationException if they detect
-collections being modified in inappropriate ways. This already only a best effort with no guarantees made, but
-FastCollect makes even less of an effort in the interests of performance. Do not expect FastCollect to throw
-ConcurrentModificationException if you are shooting yourself in the foot, except in rare instances.
+// mutate priority queue
+priorityQueue.add(5)
+priorityQueue.add(2)
+priorityQueue.add(8)
+priorityQueue.remove(5) // O(N)
+priorityQueue.first() // returns 8
+priorityQueue.removeFirst() // returns 8
+priorityQueue.clear()
 
-## Performance ##
+// iterate over priority queue
+for (e in priorityQueue) { ... }
+```
+
+## Performance and Memory Usage ##
 
 A key advantage of primitive collections is not just reduced CPU usage, but substantially lower memory usage, which
 has compounding benefits — more data fitting in CPU caches further reduces memory access latency.
 
-A more detailed examination of performance can be found in
+A more detailed examination of performance and memory usage can be found in
 [this post](https://sooniln.github.io/posts/hashmap-benchmarks-2026/). In benchmarking, FastCollect unsurprisingly
 outperforms standard Kotlin collections, as well as many other primitive collection libraries.
 
 ### Memory Usage ###
 
-A more detailed examination of memory usage can be found in the [Memory Benchmarks](docs/MEMORY_BENCHMARKS.md) doc. The
-overall takeaways are that FastCollect has the lowest memory usage of all benchmarked libraries in virtually all
-scenarios, and especially so with empty/small maps and sets (a scenario not uncommon in many areas of scientific
-computing such as graphs, but a consideration that many collections neglect).
-
-Map memory usage as a function of collection size:
-
-![Map Memory Usage](docs/map_memory.svg)
+A more detailed examination of memory usage can be found in the [Memory Benchmarks](docs/MEMORY_BENCHMARKS.md) doc.
+FastCollect has put effort into ensuring that not only are large collections memory efficient (which most primitive
+collections libraries accomplish), but also that small/empty collections are memory efficient (which some primitive
+collections are shockingly bad at).
 
 ## Generated Code
 

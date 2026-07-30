@@ -1,0 +1,32 @@
+package io.github.sooniln.fastcollect.${subpackage}
+
+import java.util.AbstractQueue
+import java.util.Queue
+
+public fun ${Type}PriorityQueue.asQueue(): Queue<${Type}> = ${Type}PriorityQueueWrapper(this)
+
+private class ${Type}PriorityQueueWrapper(private val queue: ${Type}PriorityQueue) : AbstractQueue<${Type}>() {
+    override val size: Int get() = queue.size
+
+    override fun iterator(): MutableIterator<${Type}> {
+        val it = queue.iterator()
+        return object : MutableIterator<${Type}> {
+            override fun hasNext(): Boolean = it.hasNext()
+            override fun next(): ${Type} = it.next${Type}()
+            override fun remove(): Unit = throw UnsupportedOperationException()
+        }
+    }
+
+    override fun offer(e: ${Type}): Boolean {
+        queue.add(e)
+        return true
+    }
+    override fun poll(): ${Type}? = if (queue.isEmpty()) null else queue.removeFirst()
+    override fun peek(): ${Type}? = if (queue.isEmpty()) null else queue.first()
+
+    override fun contains(element: ${Type}): Boolean = queue.contains(element)
+    override fun remove(element: ${Type}): Boolean = queue.remove(element)
+    override fun clear() { queue.clear() }
+    override fun removeAll(elements: Collection<${Type}>): Boolean = queue.removeAll(elements)
+    override fun retainAll(elements: Collection<${Type}>): Boolean = queue.retainAll(elements)
+}

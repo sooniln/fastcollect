@@ -1,36 +1,37 @@
-package io.github.sooniln.fastcollect.ints
+package io.github.sooniln.fastcollect.shorts
 
 import io.github.sooniln.fastcollect.ArrayUtils
+import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.math.max
 import kotlin.math.min
 
-public typealias IntArrayList = IntArrayDeque
+public typealias ShortArrayList = ShortArrayDeque
 
 /**
- * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing Ints. Can be
+ * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing Shorts. Can be
  * used in place of the Kotlin standard library [ArrayList] and [ArrayDeque] implementations to improve performance and
  * memory usage. Has the same API contracts as the standard library [ArrayList] and [ArrayDeque] unless noted otherwise.
  *
  * This implementation supports amortized O(1) `addFirst/addLast/removeFirst/removeLast` functionality. The
  * [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  */
-public class IntArrayDeque private constructor(array: IntArray, size: Int = array.size) : AbstractMutableIntList(), RandomAccess {
+public class ShortArrayDeque private constructor(array: ShortArray, size: Int = array.size) : AbstractMutableShortList(), RandomAccess {
 
     private var head: Int = 0
-    private var ring: IntArray = array
+    private var ring: ShortArray = array
     override var size: Int = size
         private set
 
-    public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else IntArray(capacity), 0)
+    public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else ShortArray(capacity), 0)
 
-    public constructor(elements: IntCollection) : this(if (elements is IntList) elements.toIntArray() else elements.toIntArray())
+    public constructor(elements: ShortCollection) : this(if (elements is ShortList) elements.toShortArray() else elements.toShortArray())
 
-    public constructor(elements: Collection<Int>) : this(if (elements is IntList) elements.toIntArray() else elements.toIntArray())
+    public constructor(elements: Collection<Short>) : this(if (elements is ShortList) elements.toShortArray() else elements.toShortArray())
 
-    public constructor(elements: IntArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex))
+    public constructor(elements: ShortArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex))
 
     public fun ensureCapacity(capacity: Int) {
         if (capacity > ring.size) grow(capacity)
@@ -47,12 +48,12 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         if (head == 0) {
             ring = ring.copyOf(newCapacity)
         } else {
-            ring = copyFromRing(IntArray(newCapacity))
+            ring = copyFromRing(ShortArray(newCapacity))
             head = 0
         }
     }
 
-    private fun copyFromRing(dest: IntArray): IntArray {
+    private fun copyFromRing(dest: ShortArray): ShortArray {
         check(dest.size >= size)
         val tail = head + size
         if (tail <= ring.size) {
@@ -66,20 +67,20 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
 
     public fun trimToSize() {
         if (size < ring.size) {
-            ring = if (isEmpty()) EMPTY_ARRAY else copyFromRing(IntArray(size))
+            ring = if (isEmpty()) EMPTY_ARRAY else copyFromRing(ShortArray(size))
             head = 0
         }
     }
 
-    override fun get(index: Int): Int {
+    override fun get(index: Int): Short {
         return ring[ring.position(rangeCheck(index))]
     }
 
-    override fun set(index: Int, element: Int) {
+    override fun set(index: Int, element: Short) {
         ring[ring.position(rangeCheck(index))] = element
     }
 
-    override fun addFirst(element: Int) {
+    override fun addFirst(element: Short) {
         val newSize = size + 1
         ensureCapacity(newSize)
         head = ring.decrementPosition(head)
@@ -87,7 +88,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         size = newSize
     }
 
-    override fun addLast(element: Int) {
+    override fun addLast(element: Short) {
         val s = size
         val newSize = s + 1
         ensureCapacity(newSize)
@@ -95,7 +96,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         size = newSize
     }
 
-    override fun add(index: Int, element: Int) {
+    override fun add(index: Int, element: Short) {
         rangeCheckInclusive(index)
         when (index) {
             size -> addLast(element)
@@ -104,7 +105,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    private fun addMiddle(index: Int, element: Int) {
+    private fun addMiddle(index: Int, element: Short) {
         val newSize = size + 1
         ensureCapacity(newSize)
 
@@ -144,7 +145,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         size = newSize
     }
 
-    override fun removeFirst(): Int {
+    override fun removeFirst(): Short {
         if (isEmpty()) throw NoSuchElementException()
         val element = ring[head]
         head = ring.incrementPosition(head)
@@ -152,12 +153,12 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         return element
     }
 
-    override fun removeLast(): Int {
+    override fun removeLast(): Short {
         if (isEmpty()) throw NoSuchElementException()
         return ring[ring.position(--size)]
     }
 
-    override fun removeAt(index: Int): Int {
+    override fun removeAt(index: Int): Short {
         rangeCheck(index)
 
         val position = ring.position(index)
@@ -228,29 +229,29 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         size = 0
     }
 
-    override fun indexOf(element: Int): Int {
+    override fun indexOf(element: Short): Int {
         val tail = head + size
         return if (tail <= ring.size) indexOfContinuous(tail, element) else indexOfDiscrete(tail, element)
     }
 
-    private fun indexOfContinuous(tail: Int, element: Int): Int {
+    private fun indexOfContinuous(tail: Int, element: Short): Int {
         for (i in head..<tail) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
         }
         return -1
     }
 
-    private fun indexOfDiscrete(tail: Int, element: Int): Int {
+    private fun indexOfDiscrete(tail: Int, element: Short): Int {
         for (i in head..<ring.size) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
         }
         for (i in 0..<tail-ring.size) {
-            if (ring[i] == element) return i + ring.size - head
+            if (ring[i] equalsBoxed element) return i + ring.size - head
         }
         return -1
     }
 
-    override fun lastIndexOf(element: Int): Int {
+    override fun lastIndexOf(element: Short): Int {
         val tail = head + size - 1
         return if (tail < ring.size) {
             lastIndexOfContinuous(tail, element)
@@ -259,34 +260,34 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    private fun lastIndexOfContinuous(tail: Int, element: Int): Int {
+    private fun lastIndexOfContinuous(tail: Int, element: Short): Int {
         // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
         val head = head
         var i = tail
         while (i >= head) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
             --i
         }
         return -1
     }
 
-    private fun lastIndexOfDiscrete(tail: Int, element: Int): Int {
+    private fun lastIndexOfDiscrete(tail: Int, element: Short): Int {
         // kotlin produces inefficient bytecode for downTo for some reason, so we use a manual loop
         val head = head
         var i = tail - ring.size
         while (i >= 0) {
-            if (ring[i] == element) return i + ring.size - head
+            if (ring[i] equalsBoxed element) return i + ring.size - head
             --i
         }
         i = ring.size - 1
         while (i >= head) {
-            if (ring[i] == element) return i - head
+            if (ring[i] equalsBoxed element) return i - head
             --i
         }
         return -1
     }
 
-    public fun addAll(elements: IntArrayDeque): Boolean {
+    public fun addAll(elements: ShortArrayDeque): Boolean {
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
@@ -300,7 +301,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         return true
     }
 
-    private fun addToRing(src: IntArray, fromIndex: Int, toIndex: Int) {
+    private fun addToRing(src: ShortArray, fromIndex: Int, toIndex: Int) {
         val srcLength = toIndex - fromIndex
         check(srcLength >= 0 && srcLength <= ring.size - size)
 
@@ -317,8 +318,8 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         size += srcLength
     }
 
-    override fun addAll(elements: IntCollection): Boolean {
-        if (elements is IntArrayDeque) return addAll(elements)
+    override fun addAll(elements: ShortCollection): Boolean {
+        if (elements is ShortArrayDeque) return addAll(elements)
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
@@ -328,8 +329,8 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         return true
     }
 
-    override fun addAll(elements: Collection<Int>): Boolean {
-        if (elements is IntCollection) return addAll(elements)
+    override fun addAll(elements: Collection<Short>): Boolean {
+        if (elements is ShortCollection) return addAll(elements)
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
@@ -339,16 +340,16 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         return true
     }
 
-    public override fun removeAll(elements: Collection<Int>): Boolean {
+    public override fun removeAll(elements: Collection<Short>): Boolean {
         return filterInPlace { e -> elements.contains(e) }
     }
 
-    public override fun retainAll(elements: Collection<Int>): Boolean {
+    public override fun retainAll(elements: Collection<Short>): Boolean {
         return filterInPlace { e -> !elements.contains(e) }
     }
 
     @OptIn(ExperimentalContracts::class)
-    internal inline fun filterInPlace(removePredicate: (Int) -> Boolean): Boolean {
+    internal inline fun filterInPlace(removePredicate: (Short) -> Boolean): Boolean {
         contract {
             callsInPlace(removePredicate, InvocationKind.UNKNOWN)
         }
@@ -408,7 +409,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    override fun fill(element: Int) {
+    override fun fill(element: Short) {
         ring.fill(element, 0, size)
         head = 0
     }
@@ -428,11 +429,11 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    override fun toIntArray(): IntArray {
-        return copyFromRing(IntArray(size))
+    override fun toShortArray(): ShortArray {
+        return copyFromRing(ShortArray(size))
     }
 
-    override fun iterator(): MutableIntIterator {
+    override fun iterator(): MutableShortIterator {
         val tail = head + size
         return if (tail > ring.size) {
             DiscreteIterator()
@@ -441,7 +442,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    override fun foreach(action: IntConsumer) {
+    override fun foreach(action: ShortConsumer) {
         val ring = ring
         val tail = head + size
         if (tail > ring.size) {
@@ -451,7 +452,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    private fun foreachContinuous(ring: IntArray, tail: Int, action: IntConsumer) {
+    private fun foreachContinuous(ring: ShortArray, tail: Int, action: ShortConsumer) {
         var position = head
         while (position < tail) {
             action.accept(ring[position])
@@ -459,7 +460,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    private fun foreachDiscrete(ring: IntArray, action: IntConsumer) {
+    private fun foreachDiscrete(ring: ShortArray, action: ShortConsumer) {
         var remaining = size
         var position = head
         while (remaining > 0) {
@@ -471,7 +472,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is IntList) return false
+        if (other !is ShortList) return false
 
         if (size != other.size) return false
         if (other is RandomAccess) {
@@ -482,7 +483,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
             val it = other.iterator()
             var i = 0
             while (it.hasNext()) {
-                if (it.nextInt() != this[i++]) return false
+                if (it.nextShort() != this[i++]) return false
             }
         }
         return true
@@ -501,8 +502,8 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         return hashCode
     }
 
-    private inner class ContinuousIterator(private var tail: Int) : MutableIntIterator() {
-        private val ring = this@IntArrayDeque.ring
+    private inner class ContinuousIterator(private var tail: Int) : MutableShortIterator() {
+        private val ring = this@ShortArrayDeque.ring
 
         private var position = head
         private var previousPosition = -1
@@ -513,7 +514,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
 
         override fun hasNext() = position < tail
 
-        override fun nextInt(): Int {
+        override fun nextShort(): Short {
             if (!hasNext()) throw NoSuchElementException()
 
             previousPosition = position++
@@ -521,7 +522,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
 
         override fun remove() {
-            if (ring !== this@IntArrayDeque.ring) throw ConcurrentModificationException()
+            if (ring !== this@ShortArrayDeque.ring) throw ConcurrentModificationException()
             check(previousPosition != -1)
 
             val d = removeAtInternal(previousPosition)
@@ -531,8 +532,8 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    private inner class DiscreteIterator : MutableIntIterator() {
-        private val ring = this@IntArrayDeque.ring
+    private inner class DiscreteIterator : MutableShortIterator() {
+        private val ring = this@ShortArrayDeque.ring
 
         private var remaining = size
         private var position = head
@@ -540,7 +541,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
 
         override fun hasNext() = remaining > 0
 
-        override fun nextInt(): Int {
+        override fun nextShort(): Short {
             if (!hasNext()) throw NoSuchElementException()
 
             --remaining
@@ -550,7 +551,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
 
         override fun remove() {
-            if (ring !== this@IntArrayDeque.ring) throw ConcurrentModificationException()
+            if (ring !== this@ShortArrayDeque.ring) throw ConcurrentModificationException()
             check(previousPosition != -1)
 
             val d = removeAtInternal(previousPosition)
@@ -559,28 +560,28 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    private fun IntArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+    private fun ShortArray.positiveMod(position: Int): Int = if (position < size) position else position - size
 
-    private fun IntArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+    private fun ShortArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
 
-    private fun IntArray.position(index: Int): Int = positiveMod(head + index)
+    private fun ShortArray.position(index: Int): Int = positiveMod(head + index)
 
-    private fun IntArray.index(position: Int): Int = negativeMod(position - head)
+    private fun ShortArray.index(position: Int): Int = negativeMod(position - head)
 
-    private fun IntArray.incrementPosition(position: Int): Int {
+    private fun ShortArray.incrementPosition(position: Int): Int {
         val next = position + 1
         return if (next == size) 0 else next
     }
 
-    private fun IntArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
+    private fun ShortArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
     internal companion object {
-        private val EMPTY_ARRAY = IntArray(0)
+        private val EMPTY_ARRAY = ShortArray(0)
         private const val DEFAULT_CAPACITY = 8
 
-        fun wrap(array: IntArray): IntArrayDeque = IntArrayDeque(array)
+        fun wrap(array: ShortArray): ShortArrayDeque = ShortArrayDeque(array)
     }
 }
 
-public fun IntArrayDeque.removeAll(predicate: (Int) -> Boolean): Boolean = filterInPlace(predicate)
-public fun IntArrayDeque.retainAll(predicate: (Int) -> Boolean): Boolean = filterInPlace { e -> !predicate(e) }
+public fun ShortArrayDeque.removeAll(predicate: ShortPredicate): Boolean = filterInPlace { predicate.test(it) }
+public fun ShortArrayDeque.retainAll(predicate: ShortPredicate): Boolean = filterInPlace { !predicate.test(it) }
