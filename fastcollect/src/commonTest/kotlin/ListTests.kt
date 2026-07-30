@@ -250,6 +250,15 @@ class ByteListTest {
 
         assertEquals(fromIterator, fromForeach)
     }
+
+    @Test
+    fun equals_matchesAnyByteListImplementation() {
+        // ByteList contract (Abstract*List.equals()) requires equality against ANY ByteList
+        // implementation, not just the same concrete class.
+        val deque: Any = mutableByteListOf(1, 2, 3)
+        val arrayBacked = byteArrayOf(1, 2, 3).asByteList()
+        assertEquals(arrayBacked, deque)
+    }
 }
 
 // ============================= Short =============================
@@ -462,6 +471,15 @@ class ShortListTest {
         list.foreach { v -> fromForeach.add(v) }
 
         assertEquals(fromIterator, fromForeach)
+    }
+
+    @Test
+    fun equals_matchesAnyShortListImplementation() {
+        // ShortList contract (Abstract*List.equals()) requires equality against ANY ShortList
+        // implementation, not just the same concrete class.
+        val deque: Any = mutableShortListOf(1, 2, 3)
+        val arrayBacked = shortArrayOf(1, 2, 3).asShortList()
+        assertEquals(arrayBacked, deque)
     }
 }
 
@@ -676,6 +694,15 @@ class IntListTest {
 
         assertEquals(fromIterator, fromForeach)
     }
+
+    @Test
+    fun equals_matchesAnyIntListImplementation() {
+        // IntList contract (Abstract*List.equals()) requires equality against ANY IntList
+        // implementation, not just the same concrete class.
+        val deque: Any = mutableIntListOf(1, 2, 3)
+        val arrayBacked = intArrayOf(1, 2, 3).asIntList()
+        assertEquals(arrayBacked, deque)
+    }
 }
 
 // ============================= Long =============================
@@ -888,6 +915,15 @@ class LongListTest {
         list.foreach { v -> fromForeach.add(v) }
 
         assertEquals(fromIterator, fromForeach)
+    }
+
+    @Test
+    fun equals_matchesAnyLongListImplementation() {
+        // LongList contract (Abstract*List.equals()) requires equality against ANY LongList
+        // implementation, not just the same concrete class.
+        val deque: Any = mutableLongListOf(1L, 2L, 3L)
+        val arrayBacked = longArrayOf(1L, 2L, 3L).asLongList()
+        assertEquals(arrayBacked, deque)
     }
 }
 
@@ -1113,6 +1149,17 @@ class FloatListTest {
     fun equals_nanAndNegativeZero_matchBoxedSemantics() {
         assertEquals<Any>(floatArrayOf(1f, Float.NaN).asFloatList(), floatArrayOf(1f, Float.NaN).asFloatList())
         assertNotEquals<Any>(floatArrayOf(-0.0f).asFloatList(), floatArrayOf(0.0f).asFloatList())
+    }
+
+    @Test
+    fun equals_matchesAnyFloatListImplementation() {
+        // FloatList contract (Abstract*List.equals()) requires equality against ANY FloatList
+        // implementation. InlineFloatArrayDeque is a @JvmInline value class and can't define a custom
+        // equals(), so it falls back to the compiler-synthesized one, which only matches the same
+        // wrapper class - this currently fails against a different FloatList implementation.
+        val deque: Any = mutableFloatListOf(1f, 2f, 3f)
+        val arrayBacked = floatArrayOf(1f, 2f, 3f).asFloatList()
+        assertEquals(arrayBacked, deque)
     }
 
     @Test
@@ -1353,6 +1400,14 @@ class DoubleListTest {
     fun equals_nanAndNegativeZero_matchBoxedSemantics() {
         assertEquals<Any>(doubleArrayOf(1.0, Double.NaN).asDoubleList(), doubleArrayOf(1.0, Double.NaN).asDoubleList())
         assertNotEquals<Any>(doubleArrayOf(-0.0).asDoubleList(), doubleArrayOf(0.0).asDoubleList())
+    }
+
+    @Test
+    fun equals_matchesAnyDoubleListImplementation() {
+        // See FloatListTest.equals_matchesAnyFloatListImplementation - same value-class limitation.
+        val deque: Any = mutableDoubleListOf(1.0, 2.0, 3.0)
+        val arrayBacked = doubleArrayOf(1.0, 2.0, 3.0).asDoubleList()
+        assertEquals(arrayBacked, deque)
     }
 
     @Test

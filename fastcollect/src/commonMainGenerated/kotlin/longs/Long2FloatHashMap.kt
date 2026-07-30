@@ -5,11 +5,8 @@ import io.github.sooniln.fastcollect.floats.InlineFloatCollection
 import kotlin.jvm.JvmInline
 import kotlin.math.max
 
-public typealias Long2FloatHashMap = InlineLong2FloatHashMap
-
 @Suppress("OVERRIDE_BY_INLINE")
-@JvmInline
-public value class InlineLong2FloatHashMap private constructor(@PublishedApi internal val map: Long2IntHashMap) : MutableLong2FloatMap {
+public class Long2FloatHashMap private constructor(@PublishedApi internal val map: Long2IntHashMap) : AbstractMutableLong2FloatMap() {
 
     public constructor(
         capacity: Int = 0,
@@ -39,7 +36,7 @@ public value class InlineLong2FloatHashMap private constructor(@PublishedApi int
     override fun clear() { map.clear() }
 
     override fun putAll(from: Long2FloatMap) {
-        if (from is InlineLong2FloatHashMap) {
+        if (from is Long2FloatHashMap) {
             map.putAll(from.map)
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
@@ -66,9 +63,7 @@ public value class InlineLong2FloatHashMap private constructor(@PublishedApi int
         map.foreachKey(action)
     }
 
-    override fun toString(): String {
-        return Iterable { iterator() }.joinToString(", ", "{", "}")
-    }
+    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
     @JvmInline
     public value class EntryIterator(@PublishedApi internal val it: MutableFastIterator<MutableLong2IntMap.MutableEntry>) : MutableFastIterator<MutableLong2FloatMap.MutableEntry> {
@@ -77,14 +72,15 @@ public value class InlineLong2FloatHashMap private constructor(@PublishedApi int
         override fun remove() { it.remove() }
     }
 
-    @JvmInline
-    public value class Entry(@PublishedApi internal val entry: MutableLong2IntMap.MutableEntry) : MutableLong2FloatMap.MutableEntry {
+    public class Entry(@PublishedApi internal val entry: MutableLong2IntMap.MutableEntry) : MutableLong2FloatMap.MutableEntry {
         override val key: Long
             inline get() = entry.key
         override var value: Float
             inline get() = Float.fromBits(entry.value)
             inline set(value) { entry.value = value.toBits() }
 
+        override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+        override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         override fun toString(): String = "$key=$value"
     }
 }

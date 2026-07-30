@@ -6,6 +6,8 @@ public object Hash {
 
     public fun mix(k: Int): Int = ((k xor (k ushr 16)) * INT_PHI).reverseBytes()
     public fun mix(k: Long): Int = (((k xor (k ushr 32)) * LONG_PHI) ushr 32).toInt().reverseBytes()
+    public fun mix(k: Float): Int = mix(k.toBits())
+    public fun mix(k: Double): Int = mix(k.toBits())
 }
 
 public expect fun Int.reverseBits(): Int

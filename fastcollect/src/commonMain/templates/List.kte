@@ -112,13 +112,13 @@ public inline fun <R> ${Type}List.foldRight(initial: R, operation: (${Type}, acc
 }
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
-public inline fun ${Type}List.reduceRight(operation: (accumulated: ${Type}, ${Type}) -> ${Type}) : ${Type} {
+public inline fun ${Type}List.reduceRight(operation: (${Type}, accumulated: ${Type}) -> ${Type}) : ${Type} {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     val it = listIterator(size)
     var accumulated = it.previous${Type}()
     while (it.hasPrevious()) {
-        accumulated = operation(accumulated, it.previous${Type}())
+        accumulated = operation(it.previous${Type}(), accumulated)
     }
     return accumulated
 }

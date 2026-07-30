@@ -19,9 +19,9 @@ group = "io.github.sooniln"
 version = "2.0.3"
 
 private data class TemplateInstantiation(
-    val InputFile: String,
-    val Expansions: List<Map<String, Any>>,
-    val OutputFile: (Map<String, Any>) -> String,
+    val inputFile: String,
+    val expansions: List<Map<String, Any>>,
+    val outputFile: (Map<String, Any>) -> String,
 )
 
 private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
@@ -121,14 +121,14 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
 
 private fun Sync.generate(sourceSet: String, templates: List<TemplateInstantiation>) {
     templates.forEach { template ->
-        template.Expansions.forEach { expansion ->
+        template.expansions.forEach { expansion ->
             val fullExpansion = expansion.generateFullExpansion()
-            val path = NioPath.of(template.OutputFile(fullExpansion))
+            val path = NioPath.of(template.outputFile(fullExpansion))
             val outputFolder = (path.parent ?: NioPath.of(".")).toString()
             val outputFile = path.fileName.toString()
             check(outputFile.endsWith(".kt")) { "$outputFile must end with .kt" }
             into(outputFolder) {
-                from("src/$sourceSet/templates/${template.InputFile}")
+                from("src/$sourceSet/templates/${template.inputFile}")
                 rename { outputFile }
                 expand(*fullExpansion.toList().toTypedArray())
             }
@@ -152,8 +152,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Predicate.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Predicate.kt" },
             TemplateInstantiation(
                 "Iterator.kte",
                 listOf(
@@ -163,8 +162,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Iterator.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Iterator.kt" },
             TemplateInstantiation(
                 "Collection.kte",
                 listOf(
@@ -174,8 +172,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Collection.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Collection.kt" },
             TemplateInstantiation(
                 "List.kte",
                 listOf(
@@ -185,8 +182,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}List.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}List.kt" },
             TemplateInstantiation(
                 "ArrayDeque.kte",
                 listOf(
@@ -194,11 +190,6 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}ArrayDeque.kt" },
-            TemplateInstantiation(
-                "FPArrayDeque.kte",
-                listOf(
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
                 )
@@ -210,22 +201,15 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Set.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Set.kt" },
             TemplateInstantiation(
                 "HashSet.kte",
                 listOf(
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}HashSet.kt" },
-            TemplateInstantiation(
-                "FPHashSet.kte",
-                listOf(
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}HashSet.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}HashSet.kt" },
             TemplateInstantiation(
                 "Map.kte",
                 listOf(
@@ -239,8 +223,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
                     mapOf("KeyType" to "Long", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
                     mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}Map.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}Map.kt" },
             TemplateInstantiation(
                 "HashMap.kte",
                 listOf(
@@ -249,14 +232,12 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}HashMap.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}HashMap.kt" },
             TemplateInstantiation(
                 "InterleavedHashMap.kte",
                 listOf(
                     mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}HashMap.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}HashMap.kt" },
             TemplateInstantiation(
                 "FPHashMap.kte",
                 listOf(
@@ -264,8 +245,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("KeyType" to "Int", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
                     mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
                     mapOf("KeyType" to "Long", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}HashMap.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}HashMap.kt" },
             TemplateInstantiation(
                 "PriorityQueue.kte",
                 listOf(
@@ -273,8 +253,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}PriorityQueue.kt" },
+                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}PriorityQueue.kt" },
         ))
 }
 

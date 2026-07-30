@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect.ints
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import io.github.sooniln.fastcollect.ArrayUtils
 import io.github.sooniln.fastcollect.Hash
 import kotlin.jvm.JvmOverloads
@@ -97,7 +98,7 @@ public class IntHashSet @JvmOverloads constructor(
             do {
                 if (currKey == emptyKey) {
                     return onFail()
-                } else if (currKey == key) {
+                } else if (currKey equalsBoxed key) {
                     return onFind(slot)
                 }
 
@@ -123,7 +124,7 @@ public class IntHashSet @JvmOverloads constructor(
         var distance = 0
         while (true) {
             val currKey = keysArr[slot]
-            if (currKey == key) {
+            if (currKey equalsBoxed key) {
                 return onPresent()
             } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {
                 shiftAndInsert(keysArr, mask, slot, currKey, key)

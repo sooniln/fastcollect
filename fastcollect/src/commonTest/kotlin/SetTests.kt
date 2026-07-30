@@ -169,6 +169,14 @@ class IntSetTest {
 
         assertEquals(fromIterator.toSet(), fromForeach.toSet())
     }
+
+    @Test
+    fun equals_matchesAnySetImplementation() {
+        // Set contract (Abstract*Set.equals()) requires equality against ANY Set<*>, not just the same
+        // concrete class.
+        val set: Any = mutableIntSetOf(1, 2, 3)
+        assertEquals(setOf(1, 2, 3), set)
+    }
 }
 
 // ============================= Long =============================
@@ -332,6 +340,14 @@ class LongSetTest {
 
         assertEquals(fromIterator.toSet(), fromForeach.toSet())
     }
+
+    @Test
+    fun equals_matchesAnySetImplementation() {
+        // Set contract (Abstract*Set.equals()) requires equality against ANY Set<*>, not just the same
+        // concrete class.
+        val set: Any = mutableLongSetOf(1L, 2L, 3L)
+        assertEquals(setOf(1L, 2L, 3L), set)
+    }
 }
 
 // ============================= Float =============================
@@ -489,6 +505,14 @@ class FloatSetTest {
         assertTrue(set.add(0f))
         assertTrue(set.contains(0f))
         assertEquals(3, set.size)
+    }
+
+    @Test
+    fun equals_matchesAnySetImplementation() {
+        // Set contract (Abstract*Set.equals()) requires equality against ANY Set<*>. InlineFloatHashSet
+        // is a @JvmInline value class and can't define a custom equals(), so this currently fails.
+        val set: Any = mutableFloatSetOf(1f, 2f, 3f)
+        assertEquals(setOf(1f, 2f, 3f), set)
     }
 
     @Test
@@ -663,6 +687,13 @@ class DoubleSetTest {
         assertTrue(set.add(0.0))
         assertTrue(set.contains(0.0))
         assertEquals(3, set.size)
+    }
+
+    @Test
+    fun equals_matchesAnySetImplementation() {
+        // See FloatSetTest.equals_matchesAnySetImplementation - same value-class limitation.
+        val set: Any = mutableDoubleSetOf(1.0, 2.0, 3.0)
+        assertEquals(setOf(1.0, 2.0, 3.0), set)
     }
 
     @Test

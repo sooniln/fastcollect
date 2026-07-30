@@ -112,13 +112,13 @@ public inline fun <R> ByteList.foldRight(initial: R, operation: (Byte, accumulat
 }
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
-public inline fun ByteList.reduceRight(operation: (accumulated: Byte, Byte) -> Byte) : Byte {
+public inline fun ByteList.reduceRight(operation: (Byte, accumulated: Byte) -> Byte) : Byte {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     val it = listIterator(size)
     var accumulated = it.previousByte()
     while (it.hasPrevious()) {
-        accumulated = operation(accumulated, it.previousByte())
+        accumulated = operation(it.previousByte(), accumulated)
     }
     return accumulated
 }

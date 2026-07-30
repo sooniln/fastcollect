@@ -345,6 +345,23 @@ class Int2IntMapTest {
 
         assertEquals(fromIterator.toMap(), fromForeach.toMap())
     }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Map<*,*>, not just the
+        // same concrete class.
+        val map: Any = mutableInt2IntMapOf(1 to 1, 2 to 2)
+        assertEquals(mapOf(1 to 1, 2 to 2), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Map.Entry<*,*>. Built via a plain Kotlin map, not java.util.AbstractMap - these test
+        // files are commonTest/multiplatform, so JVM-only APIs aren't available.
+        val entry: Any = mutableInt2IntMapOf(1 to 1).iterator().next()
+        assertEquals(mapOf(1 to 1).entries.first(), entry)
+    }
 }
 
 // ============================= Int2Long =============================
@@ -638,6 +655,22 @@ class Int2LongMapTest {
         map.foreach { k, v -> fromForeach.add(k to v) }
 
         assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Map<*,*>, not just the
+        // same concrete class.
+        val map: Any = mutableInt2LongMapOf(1 to 1L, 2 to 2L)
+        assertEquals(mapOf(1 to 1L, 2 to 2L), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Map.Entry<*,*>.
+        val entry: Any = mutableInt2LongMapOf(1 to 1L).iterator().next()
+        assertEquals(mapOf(1 to 1L).entries.first(), entry)
     }
 }
 
@@ -943,6 +976,26 @@ class Int2FloatMapTest {
 
         assertEquals(fromIterator.toMap(), fromForeach.toMap())
     }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Map<*,*>.
+        // InlineInt2FloatHashMap is a @JvmInline value class and can't define a custom equals(), so
+        // this currently fails.
+        val map: Any = mutableInt2FloatMapOf(1 to 1f, 2 to 2f)
+        assertEquals(mapOf(1 to 1f, 2 to 2f), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Map.Entry<*,*>. InlineInt2FloatHashMap.Entry is a @JvmInline value class and can't define
+        // a custom equals(), so this currently fails. Built via a plain Kotlin map, not
+        // java.util.AbstractMap - these test files are commonTest/multiplatform, so JVM-only APIs
+        // aren't available.
+        val entry: Any = mutableInt2FloatMapOf(1 to 1f).iterator().next()
+        assertEquals(mapOf(1 to 1f).entries.first(), entry)
+    }
 }
 
 // ============================= Int2Double =============================
@@ -1247,6 +1300,24 @@ class Int2DoubleMapTest {
 
         assertEquals(fromIterator.toMap(), fromForeach.toMap())
     }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Map<*,*>.
+        // InlineInt2DoubleHashMap is a @JvmInline value class and can't define a custom equals(), so
+        // this currently fails.
+        val map: Any = mutableInt2DoubleMapOf(1 to 1.0, 2 to 2.0)
+        assertEquals(mapOf(1 to 1.0, 2 to 2.0), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Map.Entry<*,*>. InlineInt2DoubleHashMap.Entry is a @JvmInline value class and can't
+        // define a custom equals(), so this currently fails.
+        val entry: Any = mutableInt2DoubleMapOf(1 to 1.0).iterator().next()
+        assertEquals(mapOf(1 to 1.0).entries.first(), entry)
+    }
 }
 
 // ============================= Int2Any =============================
@@ -1540,6 +1611,22 @@ class Int2AnyMapTest {
         map.foreach { k, v -> fromForeach.add(k to v) }
 
         assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Map<*,*>, not just the
+        // same concrete class.
+        val map: Any = mutableInt2AnyMapOf(1 to "a", 2 to "b")
+        assertEquals(mapOf(1 to "a", 2 to "b"), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Map.Entry<*,*>.
+        val entry: Any = mutableInt2AnyMapOf(1 to "a").iterator().next()
+        assertEquals(mapOf(1 to "a").entries.first(), entry)
     }
 }
 
@@ -1835,6 +1922,22 @@ class Long2IntMapTest {
 
         assertEquals(fromIterator.toMap(), fromForeach.toMap())
     }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Map<*,*>, not just the
+        // same concrete class.
+        val map: Any = mutableLong2IntMapOf(1L to 1, 2L to 2)
+        assertEquals(mapOf(1L to 1, 2L to 2), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Map.Entry<*,*>.
+        val entry: Any = mutableLong2IntMapOf(1L to 1).iterator().next()
+        assertEquals(mapOf(1L to 1).entries.first(), entry)
+    }
 }
 
 // ============================= Long2Long =============================
@@ -2128,6 +2231,22 @@ class Long2LongMapTest {
         map.foreach { k, v -> fromForeach.add(k to v) }
 
         assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Map<*,*>, not just the
+        // same concrete class.
+        val map: Any = mutableLong2LongMapOf(1L to 1L, 2L to 2L)
+        assertEquals(mapOf(1L to 1L, 2L to 2L), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Map.Entry<*,*>.
+        val entry: Any = mutableLong2LongMapOf(1L to 1L).iterator().next()
+        assertEquals(mapOf(1L to 1L).entries.first(), entry)
     }
 }
 
@@ -2433,6 +2552,24 @@ class Long2FloatMapTest {
 
         assertEquals(fromIterator.toMap(), fromForeach.toMap())
     }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Map<*,*>.
+        // InlineLong2FloatHashMap is a @JvmInline value class and can't define a custom equals(), so
+        // this currently fails.
+        val map: Any = mutableLong2FloatMapOf(1L to 1f, 2L to 2f)
+        assertEquals(mapOf(1L to 1f, 2L to 2f), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Map.Entry<*,*>. InlineLong2FloatHashMap.Entry is a @JvmInline value class and can't
+        // define a custom equals(), so this currently fails.
+        val entry: Any = mutableLong2FloatMapOf(1L to 1f).iterator().next()
+        assertEquals(mapOf(1L to 1f).entries.first(), entry)
+    }
 }
 
 // ============================= Long2Double =============================
@@ -2737,6 +2874,24 @@ class Long2DoubleMapTest {
 
         assertEquals(fromIterator.toMap(), fromForeach.toMap())
     }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Map<*,*>.
+        // InlineLong2DoubleHashMap is a @JvmInline value class and can't define a custom equals(), so
+        // this currently fails.
+        val map: Any = mutableLong2DoubleMapOf(1L to 1.0, 2L to 2.0)
+        assertEquals(mapOf(1L to 1.0, 2L to 2.0), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Map.Entry<*,*>. InlineLong2DoubleHashMap.Entry is a @JvmInline value class and can't
+        // define a custom equals(), so this currently fails.
+        val entry: Any = mutableLong2DoubleMapOf(1L to 1.0).iterator().next()
+        assertEquals(mapOf(1L to 1.0).entries.first(), entry)
+    }
 }
 
 // ============================= Long2Any =============================
@@ -3030,5 +3185,21 @@ class Long2AnyMapTest {
         map.foreach { k, v -> fromForeach.add(k to v) }
 
         assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Map<*,*>, not just the
+        // same concrete class.
+        val map: Any = mutableLong2AnyMapOf(1L to "a", 2L to "b")
+        assertEquals(mapOf(1L to "a", 2L to "b"), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Map.Entry<*,*>.
+        val entry: Any = mutableLong2AnyMapOf(1L to "a").iterator().next()
+        assertEquals(mapOf(1L to "a").entries.first(), entry)
     }
 }

@@ -2,6 +2,7 @@
 
 package io.github.sooniln.fastcollect.longs
 
+import io.github.sooniln.fastcollect.equalsBoxed
 import io.github.sooniln.fastcollect.ArrayUtils
 import io.github.sooniln.fastcollect.FastIterator
 import io.github.sooniln.fastcollect.Hash
@@ -58,7 +59,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
         ensureCapacity(capacity)
     }
 
-    override fun isDefaultValue(value: Long): Boolean = value == defaultValue
+    override fun isDefaultValue(value: Long): Boolean = value equalsBoxed defaultValue
 
     /**
      * Ensures that the map can hold at least given number of key/value pairs without any further resizing of the
@@ -86,7 +87,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
         val keysArr = keysArr
         val valuesArr = valuesArr
         for (slot in keysArr.indices) {
-            if (valuesArr[slot] == value && keysArr[slot] != emptyKey) return true
+            if (valuesArr[slot] equalsBoxed value && keysArr[slot] != emptyKey) return true
         }
         return false
     }
@@ -179,7 +180,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
             do {
                 if (currKey == emptyKey) {
                     return onFail()
-                } else if (currKey == key) {
+                } else if (currKey equalsBoxed key) {
                     return onFind(slot)
                 }
 
@@ -205,7 +206,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
         var distance = 0
         while (true) {
             val currKey = keysArr[slot]
-            if (currKey == key) {
+            if (currKey equalsBoxed key) {
                 valuesArr[slot] = onReplace(slot)
                 return
             } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {

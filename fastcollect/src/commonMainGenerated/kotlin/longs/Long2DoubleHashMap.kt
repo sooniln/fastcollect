@@ -5,11 +5,8 @@ import io.github.sooniln.fastcollect.doubles.InlineDoubleCollection
 import kotlin.jvm.JvmInline
 import kotlin.math.max
 
-public typealias Long2DoubleHashMap = InlineLong2DoubleHashMap
-
 @Suppress("OVERRIDE_BY_INLINE")
-@JvmInline
-public value class InlineLong2DoubleHashMap private constructor(@PublishedApi internal val map: Long2LongHashMap) : MutableLong2DoubleMap {
+public class Long2DoubleHashMap private constructor(@PublishedApi internal val map: Long2LongHashMap) : AbstractMutableLong2DoubleMap() {
 
     public constructor(
         capacity: Int = 0,
@@ -39,7 +36,7 @@ public value class InlineLong2DoubleHashMap private constructor(@PublishedApi in
     override fun clear() { map.clear() }
 
     override fun putAll(from: Long2DoubleMap) {
-        if (from is InlineLong2DoubleHashMap) {
+        if (from is Long2DoubleHashMap) {
             map.putAll(from.map)
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
@@ -66,9 +63,7 @@ public value class InlineLong2DoubleHashMap private constructor(@PublishedApi in
         map.foreachKey(action)
     }
 
-    override fun toString(): String {
-        return Iterable { iterator() }.joinToString(", ", "{", "}")
-    }
+    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
     @JvmInline
     public value class EntryIterator(@PublishedApi internal val it: MutableFastIterator<MutableLong2LongMap.MutableEntry>) : MutableFastIterator<MutableLong2DoubleMap.MutableEntry> {
@@ -77,14 +72,15 @@ public value class InlineLong2DoubleHashMap private constructor(@PublishedApi in
         override fun remove() { it.remove() }
     }
 
-    @JvmInline
-    public value class Entry(@PublishedApi internal val entry: MutableLong2LongMap.MutableEntry) : MutableLong2DoubleMap.MutableEntry {
+    public class Entry(@PublishedApi internal val entry: MutableLong2LongMap.MutableEntry) : MutableLong2DoubleMap.MutableEntry {
         override val key: Long
             inline get() = entry.key
         override var value: Double
             inline get() = Double.fromBits(entry.value)
             inline set(value) { entry.value = value.toBits() }
 
+        override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+        override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         override fun toString(): String = "$key=$value"
     }
 }

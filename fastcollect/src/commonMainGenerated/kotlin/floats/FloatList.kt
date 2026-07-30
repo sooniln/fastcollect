@@ -112,13 +112,13 @@ public inline fun <R> FloatList.foldRight(initial: R, operation: (Float, accumul
 }
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
-public inline fun FloatList.reduceRight(operation: (accumulated: Float, Float) -> Float) : Float {
+public inline fun FloatList.reduceRight(operation: (Float, accumulated: Float) -> Float) : Float {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     val it = listIterator(size)
     var accumulated = it.previousFloat()
     while (it.hasPrevious()) {
-        accumulated = operation(accumulated, it.previousFloat())
+        accumulated = operation(it.previousFloat(), accumulated)
     }
     return accumulated
 }

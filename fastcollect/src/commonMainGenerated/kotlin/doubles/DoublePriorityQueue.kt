@@ -81,7 +81,7 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0) {
      * Invoked whenever [element] is stored at [index] in the backing heap. Subclasses can use this to store element ⟷
      * index mappings, and in turn use the index to interact with [updatePriority].
      */
-    protected abstract fun onIndexChanged(element: Double, index: Int)
+    protected open fun onIndexChanged(element: Double, index: Int) {}
 
     /**
      * Returns the head of this priority queue without removing it. Throws [NoSuchElementException] if the queue is
@@ -116,10 +116,7 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0) {
     public fun remove(element: Double): Boolean {
         for (i in 0..<size) {
             if (heap[i] equalsBoxed element) {
-                if (--size != i) {
-                    setHeap(i, heap[size])
-                    updatePriority(i)
-                }
+                removeAt(i)
                 return true
             }
         }
@@ -216,6 +213,16 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0) {
         if (siftDown(index) == index) siftUp(index)
     }
 
+    /**
+     * Removes the element at the given index and re-establishes the heap invariant.
+     */
+    protected fun removeAt(index: Int) {
+        if (--size != index) {
+            setHeap(index, heap[size])
+            updatePriority(index)
+        }
+    }
+
     protected fun heapify() {
         for (i in size / 2 - 1 downTo 0) {
             siftDown(i)
@@ -306,6 +313,4 @@ public class DoublePriorityQueue : AbstractDoublePriorityQueue {
     override fun isHigherPriority(element1: Double, element2: Double): Boolean {
         return if (descending) element1 > element2 else element2 > element1
     }
-
-    override fun onIndexChanged(element: Double, index: Int) {}
 }

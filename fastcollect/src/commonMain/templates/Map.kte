@@ -157,7 +157,7 @@ public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics} {
     }
 
     /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
-    public fun replace(key: ${KeyType}, value: ${ValueType}): ${ValueType} = replaceOrElse(key, value) { throw NoSuchElementException() }
+    public fun replace(key: ${KeyType}, value: ${ValueType}): ${ValueType} = replaceOrSet(key, value) { throw NoSuchElementException() }
 
     /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: ${KeyType}): ${ValueType}${Nullable}
@@ -221,16 +221,16 @@ public inline fun ${Generics} Mutable${Name}Map${Generics}.getOrPut(key: ${KeyTy
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun ${Generics} Mutable${Name}Map${Generics}.replaceOrElse(key: ${KeyType}, value: $ValueType, defaultValue: () -> ${ValueType}): ${ValueType} {
-    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+public inline fun ${Generics} Mutable${Name}Map${Generics}.replaceOrSet(key: ${KeyType}, value: $ValueType, oldValue: () -> ${ValueType}): ${ValueType} {
+    contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
 
     if (containsKey(key)) {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return put(key, value) as ${ValueType}
     } else {
-        val oldValue = defaultValue()
+        val returnValue = oldValue()
         set(key, value)
-        return oldValue
+        return returnValue
     }
 }
 

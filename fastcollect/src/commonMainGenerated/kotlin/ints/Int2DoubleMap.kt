@@ -155,7 +155,7 @@ public interface MutableInt2DoubleMap : Int2DoubleMap {
     }
 
     /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
-    public fun replace(key: Int, value: Double): Double = replaceOrElse(key, value) { throw NoSuchElementException() }
+    public fun replace(key: Int, value: Double): Double = replaceOrSet(key, value) { throw NoSuchElementException() }
 
     /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: Int): Double
@@ -219,16 +219,16 @@ public inline fun  MutableInt2DoubleMap.getOrPut(key: Int, defaultValue: () -> D
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun  MutableInt2DoubleMap.replaceOrElse(key: Int, value: Double, defaultValue: () -> Double): Double {
-    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+public inline fun  MutableInt2DoubleMap.replaceOrSet(key: Int, value: Double, oldValue: () -> Double): Double {
+    contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
 
     if (containsKey(key)) {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return put(key, value) as Double
     } else {
-        val oldValue = defaultValue()
+        val returnValue = oldValue()
         set(key, value)
-        return oldValue
+        return returnValue
     }
 }
 

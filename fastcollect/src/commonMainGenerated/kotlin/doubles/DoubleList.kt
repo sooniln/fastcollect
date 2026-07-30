@@ -112,13 +112,13 @@ public inline fun <R> DoubleList.foldRight(initial: R, operation: (Double, accum
 }
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
-public inline fun DoubleList.reduceRight(operation: (accumulated: Double, Double) -> Double) : Double {
+public inline fun DoubleList.reduceRight(operation: (Double, accumulated: Double) -> Double) : Double {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     val it = listIterator(size)
     var accumulated = it.previousDouble()
     while (it.hasPrevious()) {
-        accumulated = operation(accumulated, it.previousDouble())
+        accumulated = operation(it.previousDouble(), accumulated)
     }
     return accumulated
 }

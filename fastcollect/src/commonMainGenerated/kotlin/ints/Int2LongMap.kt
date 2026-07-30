@@ -155,7 +155,7 @@ public interface MutableInt2LongMap : Int2LongMap {
     }
 
     /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
-    public fun replace(key: Int, value: Long): Long = replaceOrElse(key, value) { throw NoSuchElementException() }
+    public fun replace(key: Int, value: Long): Long = replaceOrSet(key, value) { throw NoSuchElementException() }
 
     /** Removes the given key and returns it's value, or the default value if the key is not present. */
     public fun remove(key: Int): Long
@@ -219,16 +219,16 @@ public inline fun  MutableInt2LongMap.getOrPut(key: Int, defaultValue: () -> Lon
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun  MutableInt2LongMap.replaceOrElse(key: Int, value: Long, defaultValue: () -> Long): Long {
-    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+public inline fun  MutableInt2LongMap.replaceOrSet(key: Int, value: Long, oldValue: () -> Long): Long {
+    contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
 
     if (containsKey(key)) {
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         return put(key, value) as Long
     } else {
-        val oldValue = defaultValue()
+        val returnValue = oldValue()
         set(key, value)
-        return oldValue
+        return returnValue
     }
 }
 

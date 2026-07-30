@@ -112,13 +112,13 @@ public inline fun <R> LongList.foldRight(initial: R, operation: (Long, accumulat
 }
 
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
-public inline fun LongList.reduceRight(operation: (accumulated: Long, Long) -> Long) : Long {
+public inline fun LongList.reduceRight(operation: (Long, accumulated: Long) -> Long) : Long {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     val it = listIterator(size)
     var accumulated = it.previousLong()
     while (it.hasPrevious()) {
-        accumulated = operation(accumulated, it.previousLong())
+        accumulated = operation(it.previousLong(), accumulated)
     }
     return accumulated
 }

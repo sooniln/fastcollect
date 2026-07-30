@@ -477,13 +477,13 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         if (size != other.size) return false
         if (other is RandomAccess) {
             for (i in indices) {
-                if (ring[ring.position(i)] != other[i]) return false
+                if (!(ring[ring.position(i)] equalsBoxed other[i])) return false
             }
         } else {
             val it = other.iterator()
             var i = 0
             while (it.hasNext()) {
-                if (it.nextByte() != this[i++]) return false
+                if (!(it.nextByte() equalsBoxed this[i++])) return false
             }
         }
         return true
