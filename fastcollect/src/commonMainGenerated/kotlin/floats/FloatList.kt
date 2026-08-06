@@ -83,6 +83,10 @@ public interface FloatList : FloatCollection {
 
 public val FloatList.lastIndex: Int inline get() = size - 1
 
+public fun FloatList.first(): Float = if (isEmpty()) throw NoSuchElementException() else this[0]
+
+public fun FloatList.last(): Float = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
+
 public fun FloatList.rangeCheck(index: Int, size: Int = this.size): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
     return index

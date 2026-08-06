@@ -116,6 +116,42 @@ public inline fun FloatCollection.reduce(operation: (accumulated: Float, Float) 
     return accumulated
 }
 
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.sumOf(selector: (Float) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0
+    while (it.hasNext()) {
+        sum += selector(it.nextFloat())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.sumOf(selector: (Float) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0L
+    while (it.hasNext()) {
+        sum += selector(it.nextFloat())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.sumOf(selector: (Float) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0.0
+    while (it.hasNext()) {
+        sum += selector(it.nextFloat())
+    }
+    return sum
+}
+
 /**
  * A mutable collection of Floats which inherits from [MutableCollection].
  */

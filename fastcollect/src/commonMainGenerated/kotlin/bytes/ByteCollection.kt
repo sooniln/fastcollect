@@ -113,6 +113,42 @@ public inline fun ByteCollection.reduce(operation: (accumulated: Byte, Byte) -> 
     return accumulated
 }
 
+@OptIn(ExperimentalContracts::class)
+public inline fun ByteCollection.sumOf(selector: (Byte) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0
+    while (it.hasNext()) {
+        sum += selector(it.nextByte())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ByteCollection.sumOf(selector: (Byte) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0L
+    while (it.hasNext()) {
+        sum += selector(it.nextByte())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ByteCollection.sumOf(selector: (Byte) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0.0
+    while (it.hasNext()) {
+        sum += selector(it.nextByte())
+    }
+    return sum
+}
+
 /**
  * A mutable collection of Bytes which inherits from [MutableCollection].
  */

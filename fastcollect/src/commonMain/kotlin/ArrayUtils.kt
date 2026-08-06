@@ -21,7 +21,7 @@ internal object ArrayUtils {
      * and the preferred growth. Will attempt to grow by the preferred amount if possible, but will always grow by at
      * least the minimum amount.
      */
-    fun growArraySize(oldSize: Int, minGrowth: Int, prefGrowth: Int = oldSize shr 1): Int {
+    internal fun growArraySize(oldSize: Int, minGrowth: Int, prefGrowth: Int = oldSize shr 1): Int {
         require(minGrowth > 0)
         val prefSize = oldSize + max(minGrowth, prefGrowth) // might overflow
         return if (prefSize in 1..SOFT_MAX_ARRAY_SIZE) {
@@ -46,7 +46,7 @@ internal object ArrayUtils {
 
     private const val MAXIMUM_CAPACITY: Int = 1 shl 30
 
-    fun minPowerOfTwo(cap: Int): Int {
+    internal fun minPowerOfTwo(cap: Int): Int {
         val n = -1 ushr (cap - 1).countLeadingZeroBits()
         return if (n < 0) 1 else if (n >= MAXIMUM_CAPACITY) MAXIMUM_CAPACITY else n + 1
     }

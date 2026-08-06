@@ -83,6 +83,10 @@ public interface IntList : IntCollection {
 
 public val IntList.lastIndex: Int inline get() = size - 1
 
+public fun IntList.first(): Int = if (isEmpty()) throw NoSuchElementException() else this[0]
+
+public fun IntList.last(): Int = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
+
 public fun IntList.rangeCheck(index: Int, size: Int = this.size): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
     return index

@@ -83,6 +83,10 @@ public interface DoubleList : DoubleCollection {
 
 public val DoubleList.lastIndex: Int inline get() = size - 1
 
+public fun DoubleList.first(): Double = if (isEmpty()) throw NoSuchElementException() else this[0]
+
+public fun DoubleList.last(): Double = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
+
 public fun DoubleList.rangeCheck(index: Int, size: Int = this.size): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
     return index

@@ -113,6 +113,42 @@ public inline fun ShortCollection.reduce(operation: (accumulated: Short, Short) 
     return accumulated
 }
 
+@OptIn(ExperimentalContracts::class)
+public inline fun ShortCollection.sumOf(selector: (Short) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0
+    while (it.hasNext()) {
+        sum += selector(it.nextShort())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ShortCollection.sumOf(selector: (Short) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0L
+    while (it.hasNext()) {
+        sum += selector(it.nextShort())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ShortCollection.sumOf(selector: (Short) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0.0
+    while (it.hasNext()) {
+        sum += selector(it.nextShort())
+    }
+    return sum
+}
+
 /**
  * A mutable collection of Shorts which inherits from [MutableCollection].
  */

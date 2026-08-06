@@ -83,6 +83,10 @@ public interface ShortList : ShortCollection {
 
 public val ShortList.lastIndex: Int inline get() = size - 1
 
+public fun ShortList.first(): Short = if (isEmpty()) throw NoSuchElementException() else this[0]
+
+public fun ShortList.last(): Short = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
+
 public fun ShortList.rangeCheck(index: Int, size: Int = this.size): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
     return index

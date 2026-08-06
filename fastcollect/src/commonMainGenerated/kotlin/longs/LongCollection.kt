@@ -113,6 +113,42 @@ public inline fun LongCollection.reduce(operation: (accumulated: Long, Long) -> 
     return accumulated
 }
 
+@OptIn(ExperimentalContracts::class)
+public inline fun LongCollection.sumOf(selector: (Long) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0
+    while (it.hasNext()) {
+        sum += selector(it.nextLong())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongCollection.sumOf(selector: (Long) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0L
+    while (it.hasNext()) {
+        sum += selector(it.nextLong())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongCollection.sumOf(selector: (Long) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0.0
+    while (it.hasNext()) {
+        sum += selector(it.nextLong())
+    }
+    return sum
+}
+
 /**
  * A mutable collection of Longs which inherits from [MutableCollection].
  */

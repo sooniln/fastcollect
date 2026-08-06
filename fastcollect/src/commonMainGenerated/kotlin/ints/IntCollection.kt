@@ -113,6 +113,42 @@ public inline fun IntCollection.reduce(operation: (accumulated: Int, Int) -> Int
     return accumulated
 }
 
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.sumOf(selector: (Int) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0
+    while (it.hasNext()) {
+        sum += selector(it.nextInt())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.sumOf(selector: (Int) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0L
+    while (it.hasNext()) {
+        sum += selector(it.nextInt())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.sumOf(selector: (Int) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0.0
+    while (it.hasNext()) {
+        sum += selector(it.nextInt())
+    }
+    return sum
+}
+
 /**
  * A mutable collection of Ints which inherits from [MutableCollection].
  */

@@ -116,6 +116,42 @@ public inline fun DoubleCollection.reduce(operation: (accumulated: Double, Doubl
     return accumulated
 }
 
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.sumOf(selector: (Double) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0
+    while (it.hasNext()) {
+        sum += selector(it.nextDouble())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.sumOf(selector: (Double) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0L
+    while (it.hasNext()) {
+        sum += selector(it.nextDouble())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.sumOf(selector: (Double) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0.0
+    while (it.hasNext()) {
+        sum += selector(it.nextDouble())
+    }
+    return sum
+}
+
 /**
  * A mutable collection of Doubles which inherits from [MutableCollection].
  */

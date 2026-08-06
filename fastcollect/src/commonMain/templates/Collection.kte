@@ -116,6 +116,42 @@ public inline fun ${Type}Collection.reduce(operation: (accumulated: ${Type}, ${T
     return accumulated
 }
 
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Collection.sumOf(selector: (${Type}) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0
+    while (it.hasNext()) {
+        sum += selector(it.next${Type}())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Collection.sumOf(selector: (${Type}) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0L
+    while (it.hasNext()) {
+        sum += selector(it.next${Type}())
+    }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Collection.sumOf(selector: (${Type}) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    val it = iterator()
+    var sum = 0.0
+    while (it.hasNext()) {
+        sum += selector(it.next${Type}())
+    }
+    return sum
+}
+
 /**
  * A mutable collection of ${Type}s which inherits from [MutableCollection].
  */

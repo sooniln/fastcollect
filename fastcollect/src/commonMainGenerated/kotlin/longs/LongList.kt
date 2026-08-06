@@ -83,6 +83,10 @@ public interface LongList : LongCollection {
 
 public val LongList.lastIndex: Int inline get() = size - 1
 
+public fun LongList.first(): Long = if (isEmpty()) throw NoSuchElementException() else this[0]
+
+public fun LongList.last(): Long = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
+
 public fun LongList.rangeCheck(index: Int, size: Int = this.size): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
     return index
