@@ -326,7 +326,7 @@ kotlin {
 
 tasks.named("jvmTest") {
     // some tests read the abi file for verifications
-    dependsOn("updateKotlinAbi")
+    dependsOn("checkKotlinAbi")
 }
 
 dokka {
