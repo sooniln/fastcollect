@@ -1,7 +1,6 @@
 package io.github.sooniln.fastcollect
 
-import kotlin.jvm.JvmExposeBoxed
-import kotlin.jvm.JvmInline
+import kotlin.jvm.JvmName
 import kotlin.math.max
 
 @Suppress("OVERRIDE_BY_INLINE")
@@ -50,9 +49,9 @@ public class Int2DoubleHashMap private constructor(@PublishedApi internal val ma
     override val keys: MutableIntSet
         inline get() = map.keys
     override val values: InlineDoubleCollection
-        inline get() = InlineDoubleCollection(map.values)
+        @JvmName("getValues") inline get() = InlineDoubleCollection(map.values)
 
-    override fun iterator(): EntryIterator = EntryIterator(map.iterator())
+    override fun iterator(): MutableFastIterator<MutableInt2DoubleMap.MutableEntry> = EntryIterator(map.iterator())
 
     override fun foreach(action: IntDoubleConsumer) {
         map.foreach { key, value -> action.accept(key, Double.fromBits(value)) }
@@ -64,21 +63,24 @@ public class Int2DoubleHashMap private constructor(@PublishedApi internal val ma
 
     override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
-    @OptIn(ExperimentalStdlibApi::class)
-    @JvmExposeBoxed
-    @JvmInline
-    public value class EntryIterator(@PublishedApi internal val it: MutableFastIterator<MutableInt2LongMap.MutableEntry>) : MutableFastIterator<MutableInt2DoubleMap.MutableEntry> {
-        override fun hasNext(): Boolean = it.hasNext()
-        override fun next(): Entry = Entry(it.next())
-        override fun remove() { it.remove() }
-    }
+    private class EntryIterator(
+        private val it: MutableFastIterator<MutableInt2LongMap.MutableEntry>
+    ) : MutableFastIterator<MutableInt2DoubleMap.MutableEntry>, MutableInt2DoubleMap.MutableEntry {
 
-    public class Entry(@PublishedApi internal val entry: MutableInt2LongMap.MutableEntry) : MutableInt2DoubleMap.MutableEntry {
+        private var entry: MutableInt2LongMap.MutableEntry? = null
+
+        override fun hasNext(): Boolean = it.hasNext()
+        override fun next(): MutableInt2DoubleMap.MutableEntry {
+            entry = it.next()
+            return this
+        }
+        override fun remove() { it.remove() }
+
         override val key: Int
-            inline get() = entry.key
+            inline get() = entry!!.key
         override var value: Double
-            inline get() = Double.fromBits(entry.value)
-            inline set(value) { entry.value = value.toBits() }
+            inline get() = Double.fromBits(entry!!.value)
+            inline set(value) { entry!!.value = value.toBits() }
 
         override fun equals(other: Any?): Boolean = other is Int2DoubleMap.Entry && other.key equalsBoxed key && other.value equalsBoxed value
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()

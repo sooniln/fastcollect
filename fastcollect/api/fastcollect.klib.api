@@ -2029,7 +2029,7 @@ final class io.github.sooniln.fastcollect/Int2DoubleHashMap : io.github.sooniln.
     final fun getOrDefault(kotlin/Int, kotlin/Double): kotlin/Double // io.github.sooniln.fastcollect/Int2DoubleHashMap.getOrDefault|getOrDefault(kotlin.Int;kotlin.Double){}[0]
     final fun getValue(kotlin/Int): kotlin/Double // io.github.sooniln.fastcollect/Int2DoubleHashMap.getValue|getValue(kotlin.Int){}[0]
     final fun isDefaultValue(kotlin/Double): kotlin/Boolean // io.github.sooniln.fastcollect/Int2DoubleHashMap.isDefaultValue|isDefaultValue(kotlin.Double){}[0]
-    final fun iterator(): io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator // io.github.sooniln.fastcollect/Int2DoubleHashMap.iterator|iterator(){}[0]
+    final fun iterator(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableInt2DoubleMap.MutableEntry> // io.github.sooniln.fastcollect/Int2DoubleHashMap.iterator|iterator(){}[0]
     final fun put(kotlin/Int, kotlin/Double): kotlin/Double // io.github.sooniln.fastcollect/Int2DoubleHashMap.put|put(kotlin.Int;kotlin.Double){}[0]
     final fun putAll(io.github.sooniln.fastcollect/Int2DoubleMap) // io.github.sooniln.fastcollect/Int2DoubleHashMap.putAll|putAll(io.github.sooniln.fastcollect.Int2DoubleMap){}[0]
     final fun putAll(kotlin.collections/Map<out kotlin/Int, kotlin/Double>) // io.github.sooniln.fastcollect/Int2DoubleHashMap.putAll|putAll(kotlin.collections.Map<out|kotlin.Int,kotlin.Double>){}[0]
@@ -2038,37 +2038,6 @@ final class io.github.sooniln.fastcollect/Int2DoubleHashMap : io.github.sooniln.
     final fun set(kotlin/Int, kotlin/Double) // io.github.sooniln.fastcollect/Int2DoubleHashMap.set|set(kotlin.Int;kotlin.Double){}[0]
     final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Int2DoubleHashMap.toString|toString(){}[0]
     final fun trimToSize() // io.github.sooniln.fastcollect/Int2DoubleHashMap.trimToSize|trimToSize(){}[0]
-
-    final class Entry : io.github.sooniln.fastcollect/MutableInt2DoubleMap.MutableEntry { // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry|null[0]
-        constructor <init>(io.github.sooniln.fastcollect/MutableInt2LongMap.MutableEntry) // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.<init>|<init>(io.github.sooniln.fastcollect.MutableInt2LongMap.MutableEntry){}[0]
-
-        final val entry // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.entry|{}entry[0]
-            final fun <get-entry>(): io.github.sooniln.fastcollect/MutableInt2LongMap.MutableEntry // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.entry.<get-entry>|<get-entry>(){}[0]
-        final val key // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.key|{}key[0]
-            final inline fun <get-key>(): kotlin/Int // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.key.<get-key>|<get-key>(){}[0]
-
-        final var value // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.value|{}value[0]
-            final inline fun <get-value>(): kotlin/Double // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.value.<get-value>|<get-value>(){}[0]
-            final inline fun <set-value>(kotlin/Double) // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.value.<set-value>|<set-value>(kotlin.Double){}[0]
-
-        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.equals|equals(kotlin.Any?){}[0]
-        final fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry.toString|toString(){}[0]
-    }
-
-    final value class EntryIterator : io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableInt2DoubleMap.MutableEntry> { // io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator|null[0]
-        constructor <init>(io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableInt2LongMap.MutableEntry>) // io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator.<init>|<init>(io.github.sooniln.fastcollect.MutableFastIterator<io.github.sooniln.fastcollect.MutableInt2LongMap.MutableEntry>){}[0]
-
-        final val it // io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator.it|{}it[0]
-            final fun <get-it>(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableInt2LongMap.MutableEntry> // io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator.it.<get-it>|<get-it>(){}[0]
-
-        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator.equals|equals(kotlin.Any?){}[0]
-        final fun hasNext(): kotlin/Boolean // io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator.hasNext|hasNext(){}[0]
-        final fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator.hashCode|hashCode(){}[0]
-        final fun next(): io.github.sooniln.fastcollect/Int2DoubleHashMap.Entry // io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator.next|next(){}[0]
-        final fun remove() // io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator.remove|remove(){}[0]
-        final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Int2DoubleHashMap.EntryIterator.toString|toString(){}[0]
-    }
 }
 
 final class io.github.sooniln.fastcollect/Int2FloatHashMap : io.github.sooniln.fastcollect/AbstractMutableInt2FloatMap { // io.github.sooniln.fastcollect/Int2FloatHashMap|null[0]
@@ -2095,7 +2064,7 @@ final class io.github.sooniln.fastcollect/Int2FloatHashMap : io.github.sooniln.f
     final fun getOrDefault(kotlin/Int, kotlin/Float): kotlin/Float // io.github.sooniln.fastcollect/Int2FloatHashMap.getOrDefault|getOrDefault(kotlin.Int;kotlin.Float){}[0]
     final fun getValue(kotlin/Int): kotlin/Float // io.github.sooniln.fastcollect/Int2FloatHashMap.getValue|getValue(kotlin.Int){}[0]
     final fun isDefaultValue(kotlin/Float): kotlin/Boolean // io.github.sooniln.fastcollect/Int2FloatHashMap.isDefaultValue|isDefaultValue(kotlin.Float){}[0]
-    final fun iterator(): io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator // io.github.sooniln.fastcollect/Int2FloatHashMap.iterator|iterator(){}[0]
+    final fun iterator(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableInt2FloatMap.MutableEntry> // io.github.sooniln.fastcollect/Int2FloatHashMap.iterator|iterator(){}[0]
     final fun put(kotlin/Int, kotlin/Float): kotlin/Float // io.github.sooniln.fastcollect/Int2FloatHashMap.put|put(kotlin.Int;kotlin.Float){}[0]
     final fun putAll(io.github.sooniln.fastcollect/Int2FloatMap) // io.github.sooniln.fastcollect/Int2FloatHashMap.putAll|putAll(io.github.sooniln.fastcollect.Int2FloatMap){}[0]
     final fun putAll(kotlin.collections/Map<out kotlin/Int, kotlin/Float>) // io.github.sooniln.fastcollect/Int2FloatHashMap.putAll|putAll(kotlin.collections.Map<out|kotlin.Int,kotlin.Float>){}[0]
@@ -2104,37 +2073,6 @@ final class io.github.sooniln.fastcollect/Int2FloatHashMap : io.github.sooniln.f
     final fun set(kotlin/Int, kotlin/Float) // io.github.sooniln.fastcollect/Int2FloatHashMap.set|set(kotlin.Int;kotlin.Float){}[0]
     final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Int2FloatHashMap.toString|toString(){}[0]
     final fun trimToSize() // io.github.sooniln.fastcollect/Int2FloatHashMap.trimToSize|trimToSize(){}[0]
-
-    final class Entry : io.github.sooniln.fastcollect/MutableInt2FloatMap.MutableEntry { // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry|null[0]
-        constructor <init>(io.github.sooniln.fastcollect/MutableInt2IntMap.MutableEntry) // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.<init>|<init>(io.github.sooniln.fastcollect.MutableInt2IntMap.MutableEntry){}[0]
-
-        final val entry // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.entry|{}entry[0]
-            final fun <get-entry>(): io.github.sooniln.fastcollect/MutableInt2IntMap.MutableEntry // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.entry.<get-entry>|<get-entry>(){}[0]
-        final val key // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.key|{}key[0]
-            final inline fun <get-key>(): kotlin/Int // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.key.<get-key>|<get-key>(){}[0]
-
-        final var value // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.value|{}value[0]
-            final inline fun <get-value>(): kotlin/Float // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.value.<get-value>|<get-value>(){}[0]
-            final inline fun <set-value>(kotlin/Float) // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.value.<set-value>|<set-value>(kotlin.Float){}[0]
-
-        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.equals|equals(kotlin.Any?){}[0]
-        final fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Int2FloatHashMap.Entry.toString|toString(){}[0]
-    }
-
-    final value class EntryIterator : io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableInt2FloatMap.MutableEntry> { // io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator|null[0]
-        constructor <init>(io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableInt2IntMap.MutableEntry>) // io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator.<init>|<init>(io.github.sooniln.fastcollect.MutableFastIterator<io.github.sooniln.fastcollect.MutableInt2IntMap.MutableEntry>){}[0]
-
-        final val it // io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator.it|{}it[0]
-            final fun <get-it>(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableInt2IntMap.MutableEntry> // io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator.it.<get-it>|<get-it>(){}[0]
-
-        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator.equals|equals(kotlin.Any?){}[0]
-        final fun hasNext(): kotlin/Boolean // io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator.hasNext|hasNext(){}[0]
-        final fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator.hashCode|hashCode(){}[0]
-        final fun next(): io.github.sooniln.fastcollect/Int2FloatHashMap.Entry // io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator.next|next(){}[0]
-        final fun remove() // io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator.remove|remove(){}[0]
-        final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Int2FloatHashMap.EntryIterator.toString|toString(){}[0]
-    }
 }
 
 final class io.github.sooniln.fastcollect/Int2IntHashMap : io.github.sooniln.fastcollect/AbstractMutableInt2IntMap { // io.github.sooniln.fastcollect/Int2IntHashMap|null[0]
@@ -2297,7 +2235,7 @@ final class io.github.sooniln.fastcollect/Long2DoubleHashMap : io.github.sooniln
     final fun getOrDefault(kotlin/Long, kotlin/Double): kotlin/Double // io.github.sooniln.fastcollect/Long2DoubleHashMap.getOrDefault|getOrDefault(kotlin.Long;kotlin.Double){}[0]
     final fun getValue(kotlin/Long): kotlin/Double // io.github.sooniln.fastcollect/Long2DoubleHashMap.getValue|getValue(kotlin.Long){}[0]
     final fun isDefaultValue(kotlin/Double): kotlin/Boolean // io.github.sooniln.fastcollect/Long2DoubleHashMap.isDefaultValue|isDefaultValue(kotlin.Double){}[0]
-    final fun iterator(): io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator // io.github.sooniln.fastcollect/Long2DoubleHashMap.iterator|iterator(){}[0]
+    final fun iterator(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableLong2DoubleMap.MutableEntry> // io.github.sooniln.fastcollect/Long2DoubleHashMap.iterator|iterator(){}[0]
     final fun put(kotlin/Long, kotlin/Double): kotlin/Double // io.github.sooniln.fastcollect/Long2DoubleHashMap.put|put(kotlin.Long;kotlin.Double){}[0]
     final fun putAll(io.github.sooniln.fastcollect/Long2DoubleMap) // io.github.sooniln.fastcollect/Long2DoubleHashMap.putAll|putAll(io.github.sooniln.fastcollect.Long2DoubleMap){}[0]
     final fun putAll(kotlin.collections/Map<out kotlin/Long, kotlin/Double>) // io.github.sooniln.fastcollect/Long2DoubleHashMap.putAll|putAll(kotlin.collections.Map<out|kotlin.Long,kotlin.Double>){}[0]
@@ -2306,37 +2244,6 @@ final class io.github.sooniln.fastcollect/Long2DoubleHashMap : io.github.sooniln
     final fun set(kotlin/Long, kotlin/Double) // io.github.sooniln.fastcollect/Long2DoubleHashMap.set|set(kotlin.Long;kotlin.Double){}[0]
     final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Long2DoubleHashMap.toString|toString(){}[0]
     final fun trimToSize() // io.github.sooniln.fastcollect/Long2DoubleHashMap.trimToSize|trimToSize(){}[0]
-
-    final class Entry : io.github.sooniln.fastcollect/MutableLong2DoubleMap.MutableEntry { // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry|null[0]
-        constructor <init>(io.github.sooniln.fastcollect/MutableLong2LongMap.MutableEntry) // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.<init>|<init>(io.github.sooniln.fastcollect.MutableLong2LongMap.MutableEntry){}[0]
-
-        final val entry // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.entry|{}entry[0]
-            final fun <get-entry>(): io.github.sooniln.fastcollect/MutableLong2LongMap.MutableEntry // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.entry.<get-entry>|<get-entry>(){}[0]
-        final val key // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.key|{}key[0]
-            final inline fun <get-key>(): kotlin/Long // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.key.<get-key>|<get-key>(){}[0]
-
-        final var value // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.value|{}value[0]
-            final inline fun <get-value>(): kotlin/Double // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.value.<get-value>|<get-value>(){}[0]
-            final inline fun <set-value>(kotlin/Double) // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.value.<set-value>|<set-value>(kotlin.Double){}[0]
-
-        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.equals|equals(kotlin.Any?){}[0]
-        final fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry.toString|toString(){}[0]
-    }
-
-    final value class EntryIterator : io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableLong2DoubleMap.MutableEntry> { // io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator|null[0]
-        constructor <init>(io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableLong2LongMap.MutableEntry>) // io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator.<init>|<init>(io.github.sooniln.fastcollect.MutableFastIterator<io.github.sooniln.fastcollect.MutableLong2LongMap.MutableEntry>){}[0]
-
-        final val it // io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator.it|{}it[0]
-            final fun <get-it>(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableLong2LongMap.MutableEntry> // io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator.it.<get-it>|<get-it>(){}[0]
-
-        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator.equals|equals(kotlin.Any?){}[0]
-        final fun hasNext(): kotlin/Boolean // io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator.hasNext|hasNext(){}[0]
-        final fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator.hashCode|hashCode(){}[0]
-        final fun next(): io.github.sooniln.fastcollect/Long2DoubleHashMap.Entry // io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator.next|next(){}[0]
-        final fun remove() // io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator.remove|remove(){}[0]
-        final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Long2DoubleHashMap.EntryIterator.toString|toString(){}[0]
-    }
 }
 
 final class io.github.sooniln.fastcollect/Long2FloatHashMap : io.github.sooniln.fastcollect/AbstractMutableLong2FloatMap { // io.github.sooniln.fastcollect/Long2FloatHashMap|null[0]
@@ -2363,7 +2270,7 @@ final class io.github.sooniln.fastcollect/Long2FloatHashMap : io.github.sooniln.
     final fun getOrDefault(kotlin/Long, kotlin/Float): kotlin/Float // io.github.sooniln.fastcollect/Long2FloatHashMap.getOrDefault|getOrDefault(kotlin.Long;kotlin.Float){}[0]
     final fun getValue(kotlin/Long): kotlin/Float // io.github.sooniln.fastcollect/Long2FloatHashMap.getValue|getValue(kotlin.Long){}[0]
     final fun isDefaultValue(kotlin/Float): kotlin/Boolean // io.github.sooniln.fastcollect/Long2FloatHashMap.isDefaultValue|isDefaultValue(kotlin.Float){}[0]
-    final fun iterator(): io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator // io.github.sooniln.fastcollect/Long2FloatHashMap.iterator|iterator(){}[0]
+    final fun iterator(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableLong2FloatMap.MutableEntry> // io.github.sooniln.fastcollect/Long2FloatHashMap.iterator|iterator(){}[0]
     final fun put(kotlin/Long, kotlin/Float): kotlin/Float // io.github.sooniln.fastcollect/Long2FloatHashMap.put|put(kotlin.Long;kotlin.Float){}[0]
     final fun putAll(io.github.sooniln.fastcollect/Long2FloatMap) // io.github.sooniln.fastcollect/Long2FloatHashMap.putAll|putAll(io.github.sooniln.fastcollect.Long2FloatMap){}[0]
     final fun putAll(kotlin.collections/Map<out kotlin/Long, kotlin/Float>) // io.github.sooniln.fastcollect/Long2FloatHashMap.putAll|putAll(kotlin.collections.Map<out|kotlin.Long,kotlin.Float>){}[0]
@@ -2372,37 +2279,6 @@ final class io.github.sooniln.fastcollect/Long2FloatHashMap : io.github.sooniln.
     final fun set(kotlin/Long, kotlin/Float) // io.github.sooniln.fastcollect/Long2FloatHashMap.set|set(kotlin.Long;kotlin.Float){}[0]
     final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Long2FloatHashMap.toString|toString(){}[0]
     final fun trimToSize() // io.github.sooniln.fastcollect/Long2FloatHashMap.trimToSize|trimToSize(){}[0]
-
-    final class Entry : io.github.sooniln.fastcollect/MutableLong2FloatMap.MutableEntry { // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry|null[0]
-        constructor <init>(io.github.sooniln.fastcollect/MutableLong2IntMap.MutableEntry) // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.<init>|<init>(io.github.sooniln.fastcollect.MutableLong2IntMap.MutableEntry){}[0]
-
-        final val entry // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.entry|{}entry[0]
-            final fun <get-entry>(): io.github.sooniln.fastcollect/MutableLong2IntMap.MutableEntry // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.entry.<get-entry>|<get-entry>(){}[0]
-        final val key // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.key|{}key[0]
-            final inline fun <get-key>(): kotlin/Long // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.key.<get-key>|<get-key>(){}[0]
-
-        final var value // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.value|{}value[0]
-            final inline fun <get-value>(): kotlin/Float // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.value.<get-value>|<get-value>(){}[0]
-            final inline fun <set-value>(kotlin/Float) // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.value.<set-value>|<set-value>(kotlin.Float){}[0]
-
-        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.equals|equals(kotlin.Any?){}[0]
-        final fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.hashCode|hashCode(){}[0]
-        final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Long2FloatHashMap.Entry.toString|toString(){}[0]
-    }
-
-    final value class EntryIterator : io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableLong2FloatMap.MutableEntry> { // io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator|null[0]
-        constructor <init>(io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableLong2IntMap.MutableEntry>) // io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator.<init>|<init>(io.github.sooniln.fastcollect.MutableFastIterator<io.github.sooniln.fastcollect.MutableLong2IntMap.MutableEntry>){}[0]
-
-        final val it // io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator.it|{}it[0]
-            final fun <get-it>(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableLong2IntMap.MutableEntry> // io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator.it.<get-it>|<get-it>(){}[0]
-
-        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator.equals|equals(kotlin.Any?){}[0]
-        final fun hasNext(): kotlin/Boolean // io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator.hasNext|hasNext(){}[0]
-        final fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator.hashCode|hashCode(){}[0]
-        final fun next(): io.github.sooniln.fastcollect/Long2FloatHashMap.Entry // io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator.next|next(){}[0]
-        final fun remove() // io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator.remove|remove(){}[0]
-        final fun toString(): kotlin/String // io.github.sooniln.fastcollect/Long2FloatHashMap.EntryIterator.toString|toString(){}[0]
-    }
 }
 
 final class io.github.sooniln.fastcollect/Long2IntHashMap : io.github.sooniln.fastcollect/AbstractMutableLong2IntMap { // io.github.sooniln.fastcollect/Long2IntHashMap|null[0]

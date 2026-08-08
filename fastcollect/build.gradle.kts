@@ -1,5 +1,6 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
+import org.gradle.kotlin.dsl.kotlin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.abi.BinariesSource
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
@@ -134,7 +135,7 @@ private fun Sync.generate(sourceSet: String, templates: List<TemplateInstantiati
     }
 }
 
-tasks.register<Sync>("GenerateCommonCollections") {
+tasks.register<Sync>("GenerateCommonMain") {
     description = "Generates source code for primitively typed collection classes from templates."
     group = "build"
     into("src/commonMainGenerated/kotlin")
@@ -255,7 +256,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
         ))
 }
 
-tasks.register<Sync>("GenerateJvmCollections") {
+tasks.register<Sync>("GenerateJvmMain") {
     description = "Generates source code for primitively typed collection classes from templates."
     group = "build"
     into("src/jvmMainGenerated/kotlin")
@@ -305,11 +306,11 @@ kotlin {
     applyDefaultHierarchyTemplate()
     sourceSets {
         commonMain {
-            kotlin.srcDir(tasks.named<Sync>("GenerateCommonCollections"))
+            kotlin.srcDir(tasks.named<Sync>("GenerateCommonMain"))
         }
 
         jvmMain {
-            kotlin.srcDir(tasks.named<Sync>("GenerateJvmCollections"))
+            kotlin.srcDir(tasks.named<Sync>("GenerateJvmMain"))
         }
 
         commonTest.dependencies {
@@ -318,8 +319,14 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(libs.guava.testlib)
+            implementation(kotlin("reflect"))
         }
     }
+}
+
+tasks.named("jvmTest") {
+    // some tests read the abi file for verifications
+    dependsOn("updateKotlinAbi")
 }
 
 dokka {

@@ -1,7 +1,6 @@
 package io.github.sooniln.fastcollect
 
-import kotlin.jvm.JvmExposeBoxed
-import kotlin.jvm.JvmInline
+import kotlin.jvm.JvmName
 import kotlin.math.max
 
 @Suppress("OVERRIDE_BY_INLINE")
@@ -50,9 +49,9 @@ public class Int2FloatHashMap private constructor(@PublishedApi internal val map
     override val keys: MutableIntSet
         inline get() = map.keys
     override val values: InlineFloatCollection
-        inline get() = InlineFloatCollection(map.values)
+        @JvmName("getValues") inline get() = InlineFloatCollection(map.values)
 
-    override fun iterator(): EntryIterator = EntryIterator(map.iterator())
+    override fun iterator(): MutableFastIterator<MutableInt2FloatMap.MutableEntry> = EntryIterator(map.iterator())
 
     override fun foreach(action: IntFloatConsumer) {
         map.foreach { key, value -> action.accept(key, Float.fromBits(value)) }
@@ -64,21 +63,24 @@ public class Int2FloatHashMap private constructor(@PublishedApi internal val map
 
     override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
-    @OptIn(ExperimentalStdlibApi::class)
-    @JvmExposeBoxed
-    @JvmInline
-    public value class EntryIterator(@PublishedApi internal val it: MutableFastIterator<MutableInt2IntMap.MutableEntry>) : MutableFastIterator<MutableInt2FloatMap.MutableEntry> {
-        override fun hasNext(): Boolean = it.hasNext()
-        override fun next(): Entry = Entry(it.next())
-        override fun remove() { it.remove() }
-    }
+    private class EntryIterator(
+        private val it: MutableFastIterator<MutableInt2IntMap.MutableEntry>
+    ) : MutableFastIterator<MutableInt2FloatMap.MutableEntry>, MutableInt2FloatMap.MutableEntry {
 
-    public class Entry(@PublishedApi internal val entry: MutableInt2IntMap.MutableEntry) : MutableInt2FloatMap.MutableEntry {
+        private var entry: MutableInt2IntMap.MutableEntry? = null
+
+        override fun hasNext(): Boolean = it.hasNext()
+        override fun next(): MutableInt2FloatMap.MutableEntry {
+            entry = it.next()
+            return this
+        }
+        override fun remove() { it.remove() }
+
         override val key: Int
-            inline get() = entry.key
+            inline get() = entry!!.key
         override var value: Float
-            inline get() = Float.fromBits(entry.value)
-            inline set(value) { entry.value = value.toBits() }
+            inline get() = Float.fromBits(entry!!.value)
+            inline set(value) { entry!!.value = value.toBits() }
 
         override fun equals(other: Any?): Boolean = other is Int2FloatMap.Entry && other.key equalsBoxed key && other.value equalsBoxed value
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()

@@ -1,7 +1,6 @@
 package io.github.sooniln.fastcollect
 
-import kotlin.jvm.JvmExposeBoxed
-import kotlin.jvm.JvmInline
+import kotlin.jvm.JvmName
 import kotlin.math.max
 
 @Suppress("OVERRIDE_BY_INLINE")
@@ -50,9 +49,9 @@ public class ${Name}HashMap private constructor(@PublishedApi internal val map: 
     override val keys: Mutable${KeyType}Set
         inline get() = map.keys
     override val values: Inline${ValueType}Collection
-        inline get() = Inline${ValueType}Collection(map.values)
+        @JvmName("getValues") inline get() = Inline${ValueType}Collection(map.values)
 
-    override fun iterator(): EntryIterator = EntryIterator(map.iterator())
+    override fun iterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry> = EntryIterator(map.iterator())
 
     override fun foreach(action: ${KeyType}${ValueType}Consumer) {
         map.foreach { key, value -> action.accept(key, ${ValueType}.fromBits(value)) }
@@ -64,23 +63,26 @@ public class ${Name}HashMap private constructor(@PublishedApi internal val map: 
 
     override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
-    @OptIn(ExperimentalStdlibApi::class)
-    @JvmExposeBoxed
-    @JvmInline
-    public value class EntryIterator(@PublishedApi internal val it: MutableFastIterator<Mutable${NonFPName}Map.MutableEntry>) : MutableFastIterator<Mutable${Name}Map.MutableEntry> {
+    private class EntryIterator(
+        private val it: MutableFastIterator<Mutable${NonFPName}Map.MutableEntry>
+    ) : MutableFastIterator<Mutable${Name}Map.MutableEntry>, Mutable${Name}Map.MutableEntry {
+
+        private var entry: Mutable${NonFPName}Map.MutableEntry? = null
+
         override fun hasNext(): Boolean = it.hasNext()
-        override fun next(): Entry = Entry(it.next())
+        override fun next(): Mutable${Name}Map.MutableEntry {
+            entry = it.next()
+            return this
+        }
         override fun remove() { it.remove() }
-    }
 
-    public class Entry(@PublishedApi internal val entry: Mutable${NonFPName}Map.MutableEntry) : Mutable${Name}Map.MutableEntry {
         override val key: ${KeyType}
-            inline get() = entry.key
+            inline get() = entry!!.key
         override var value: ${ValueType}
-            inline get() = ${ValueType}.fromBits(entry.value)
-            inline set(value) { entry.value = value.toBits() }
+            inline get() = ${ValueType}.fromBits(entry!!.value)
+            inline set(value) { entry!!.value = value.toBits() }
 
-        override fun equals(other: Any?): Boolean = other is ${Name}Map.Entry${StarGenerics} && other.key equalsBoxed key && other.value equalsBoxed value
+        override fun equals(other: Any?): Boolean = other is ${Name}Map.Entry && other.key equalsBoxed key && other.value equalsBoxed value
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         override fun toString(): String = "\$key=\$value"
     }

@@ -1876,11 +1876,10 @@ public final class io/github/sooniln/fastcollect/Int2DoubleHashMap : io/github/s
 	public fun getValue (I)D
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/DoubleCollection;
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/MutableDoubleCollection;
-	public fun getValues-M8NZje4 ()Lio/github/sooniln/fastcollect/MutableLongCollection;
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableLongCollection;
 	public fun isDefaultValue (D)Z
 	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
-	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
-	public fun iterator-hjgQj7g ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
 	public fun put (ID)D
 	public fun putAll (Lio/github/sooniln/fastcollect/Int2DoubleMap;)V
 	public fun putAll (Ljava/util/Map;)V
@@ -1889,39 +1888,6 @@ public final class io/github/sooniln/fastcollect/Int2DoubleHashMap : io/github/s
 	public fun set (ID)V
 	public fun toString ()Ljava/lang/String;
 	public final fun trimToSize ()V
-}
-
-public final class io/github/sooniln/fastcollect/Int2DoubleHashMap$Entry : io/github/sooniln/fastcollect/MutableInt2DoubleMap$MutableEntry {
-	public fun <init> (Lio/github/sooniln/fastcollect/MutableInt2LongMap$MutableEntry;)V
-	public fun component1 ()I
-	public fun component2 ()D
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEntry ()Lio/github/sooniln/fastcollect/MutableInt2LongMap$MutableEntry;
-	public fun getKey ()I
-	public fun getValue ()D
-	public fun hashCode ()I
-	public fun setValue (D)V
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/github/sooniln/fastcollect/Int2DoubleHashMap$EntryIterator : io/github/sooniln/fastcollect/MutableFastIterator {
-	public fun <init> (Lio/github/sooniln/fastcollect/MutableFastIterator;)V
-	public static final synthetic fun box-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/Int2DoubleHashMap$EntryIterator;
-	public static fun constructor-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/MutableFastIterator;
-	public fun equals (Ljava/lang/Object;)Z
-	public static fun equals-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;Ljava/lang/Object;)Z
-	public static final fun equals-impl0 (Lio/github/sooniln/fastcollect/MutableFastIterator;Lio/github/sooniln/fastcollect/MutableFastIterator;)Z
-	public fun hasNext ()Z
-	public static fun hasNext-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Z
-	public fun hashCode ()I
-	public static fun hashCode-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)I
-	public fun next ()Lio/github/sooniln/fastcollect/Int2DoubleHashMap$Entry;
-	public static fun next-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/Int2DoubleHashMap$Entry;
-	public fun remove ()V
-	public static fun remove-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)V
-	public fun toString ()Ljava/lang/String;
-	public static fun toString-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Ljava/lang/String;
-	public final synthetic fun unbox-impl ()Lio/github/sooniln/fastcollect/MutableFastIterator;
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Int2DoubleMap {
@@ -2007,11 +1973,10 @@ public final class io/github/sooniln/fastcollect/Int2FloatHashMap : io/github/so
 	public fun getValue (I)F
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/FloatCollection;
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/MutableFloatCollection;
-	public fun getValues-vFU3vko ()Lio/github/sooniln/fastcollect/MutableIntCollection;
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableIntCollection;
 	public fun isDefaultValue (F)Z
 	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
-	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
-	public fun iterator-GzzDFuk ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
 	public fun put (IF)F
 	public fun putAll (Lio/github/sooniln/fastcollect/Int2FloatMap;)V
 	public fun putAll (Ljava/util/Map;)V
@@ -2020,39 +1985,6 @@ public final class io/github/sooniln/fastcollect/Int2FloatHashMap : io/github/so
 	public fun set (IF)V
 	public fun toString ()Ljava/lang/String;
 	public final fun trimToSize ()V
-}
-
-public final class io/github/sooniln/fastcollect/Int2FloatHashMap$Entry : io/github/sooniln/fastcollect/MutableInt2FloatMap$MutableEntry {
-	public fun <init> (Lio/github/sooniln/fastcollect/MutableInt2IntMap$MutableEntry;)V
-	public fun component1 ()I
-	public fun component2 ()F
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEntry ()Lio/github/sooniln/fastcollect/MutableInt2IntMap$MutableEntry;
-	public fun getKey ()I
-	public fun getValue ()F
-	public fun hashCode ()I
-	public fun setValue (F)V
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/github/sooniln/fastcollect/Int2FloatHashMap$EntryIterator : io/github/sooniln/fastcollect/MutableFastIterator {
-	public fun <init> (Lio/github/sooniln/fastcollect/MutableFastIterator;)V
-	public static final synthetic fun box-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/Int2FloatHashMap$EntryIterator;
-	public static fun constructor-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/MutableFastIterator;
-	public fun equals (Ljava/lang/Object;)Z
-	public static fun equals-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;Ljava/lang/Object;)Z
-	public static final fun equals-impl0 (Lio/github/sooniln/fastcollect/MutableFastIterator;Lio/github/sooniln/fastcollect/MutableFastIterator;)Z
-	public fun hasNext ()Z
-	public static fun hasNext-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Z
-	public fun hashCode ()I
-	public static fun hashCode-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)I
-	public fun next ()Lio/github/sooniln/fastcollect/Int2FloatHashMap$Entry;
-	public static fun next-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/Int2FloatHashMap$Entry;
-	public fun remove ()V
-	public static fun remove-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)V
-	public fun toString ()Ljava/lang/String;
-	public static fun toString-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Ljava/lang/String;
-	public final synthetic fun unbox-impl ()Lio/github/sooniln/fastcollect/MutableFastIterator;
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Int2FloatMap {
@@ -2786,11 +2718,10 @@ public final class io/github/sooniln/fastcollect/Long2DoubleHashMap : io/github/
 	public fun getValue (J)D
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/DoubleCollection;
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/MutableDoubleCollection;
-	public fun getValues-M8NZje4 ()Lio/github/sooniln/fastcollect/MutableLongCollection;
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableLongCollection;
 	public fun isDefaultValue (D)Z
 	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
-	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
-	public fun iterator-hR61hMc ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
 	public fun put (JD)D
 	public fun putAll (Lio/github/sooniln/fastcollect/Long2DoubleMap;)V
 	public fun putAll (Ljava/util/Map;)V
@@ -2799,39 +2730,6 @@ public final class io/github/sooniln/fastcollect/Long2DoubleHashMap : io/github/
 	public fun set (JD)V
 	public fun toString ()Ljava/lang/String;
 	public final fun trimToSize ()V
-}
-
-public final class io/github/sooniln/fastcollect/Long2DoubleHashMap$Entry : io/github/sooniln/fastcollect/MutableLong2DoubleMap$MutableEntry {
-	public fun <init> (Lio/github/sooniln/fastcollect/MutableLong2LongMap$MutableEntry;)V
-	public fun component1 ()J
-	public fun component2 ()D
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEntry ()Lio/github/sooniln/fastcollect/MutableLong2LongMap$MutableEntry;
-	public fun getKey ()J
-	public fun getValue ()D
-	public fun hashCode ()I
-	public fun setValue (D)V
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/github/sooniln/fastcollect/Long2DoubleHashMap$EntryIterator : io/github/sooniln/fastcollect/MutableFastIterator {
-	public fun <init> (Lio/github/sooniln/fastcollect/MutableFastIterator;)V
-	public static final synthetic fun box-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/Long2DoubleHashMap$EntryIterator;
-	public static fun constructor-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/MutableFastIterator;
-	public fun equals (Ljava/lang/Object;)Z
-	public static fun equals-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;Ljava/lang/Object;)Z
-	public static final fun equals-impl0 (Lio/github/sooniln/fastcollect/MutableFastIterator;Lio/github/sooniln/fastcollect/MutableFastIterator;)Z
-	public fun hasNext ()Z
-	public static fun hasNext-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Z
-	public fun hashCode ()I
-	public static fun hashCode-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)I
-	public fun next ()Lio/github/sooniln/fastcollect/Long2DoubleHashMap$Entry;
-	public static fun next-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/Long2DoubleHashMap$Entry;
-	public fun remove ()V
-	public static fun remove-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)V
-	public fun toString ()Ljava/lang/String;
-	public static fun toString-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Ljava/lang/String;
-	public final synthetic fun unbox-impl ()Lio/github/sooniln/fastcollect/MutableFastIterator;
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Long2DoubleMap {
@@ -2917,11 +2815,10 @@ public final class io/github/sooniln/fastcollect/Long2FloatHashMap : io/github/s
 	public fun getValue (J)F
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/FloatCollection;
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/MutableFloatCollection;
-	public fun getValues-vFU3vko ()Lio/github/sooniln/fastcollect/MutableIntCollection;
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableIntCollection;
 	public fun isDefaultValue (F)Z
 	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
-	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
-	public fun iterator-eb9yUsM ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
 	public fun put (JF)F
 	public fun putAll (Lio/github/sooniln/fastcollect/Long2FloatMap;)V
 	public fun putAll (Ljava/util/Map;)V
@@ -2930,39 +2827,6 @@ public final class io/github/sooniln/fastcollect/Long2FloatHashMap : io/github/s
 	public fun set (JF)V
 	public fun toString ()Ljava/lang/String;
 	public final fun trimToSize ()V
-}
-
-public final class io/github/sooniln/fastcollect/Long2FloatHashMap$Entry : io/github/sooniln/fastcollect/MutableLong2FloatMap$MutableEntry {
-	public fun <init> (Lio/github/sooniln/fastcollect/MutableLong2IntMap$MutableEntry;)V
-	public fun component1 ()J
-	public fun component2 ()F
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getEntry ()Lio/github/sooniln/fastcollect/MutableLong2IntMap$MutableEntry;
-	public fun getKey ()J
-	public fun getValue ()F
-	public fun hashCode ()I
-	public fun setValue (F)V
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/github/sooniln/fastcollect/Long2FloatHashMap$EntryIterator : io/github/sooniln/fastcollect/MutableFastIterator {
-	public fun <init> (Lio/github/sooniln/fastcollect/MutableFastIterator;)V
-	public static final synthetic fun box-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/Long2FloatHashMap$EntryIterator;
-	public static fun constructor-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/MutableFastIterator;
-	public fun equals (Ljava/lang/Object;)Z
-	public static fun equals-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;Ljava/lang/Object;)Z
-	public static final fun equals-impl0 (Lio/github/sooniln/fastcollect/MutableFastIterator;Lio/github/sooniln/fastcollect/MutableFastIterator;)Z
-	public fun hasNext ()Z
-	public static fun hasNext-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Z
-	public fun hashCode ()I
-	public static fun hashCode-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)I
-	public fun next ()Lio/github/sooniln/fastcollect/Long2FloatHashMap$Entry;
-	public static fun next-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Lio/github/sooniln/fastcollect/Long2FloatHashMap$Entry;
-	public fun remove ()V
-	public static fun remove-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)V
-	public fun toString ()Ljava/lang/String;
-	public static fun toString-impl (Lio/github/sooniln/fastcollect/MutableFastIterator;)Ljava/lang/String;
-	public final synthetic fun unbox-impl ()Lio/github/sooniln/fastcollect/MutableFastIterator;
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Long2FloatMap {
