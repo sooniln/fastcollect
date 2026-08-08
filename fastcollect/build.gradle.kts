@@ -19,7 +19,7 @@ repositories {
 }
 
 group = "io.github.sooniln"
-version = "3.0.0"
+version = "3.0.1"
 
 private data class TemplateInstantiation(
     val inputFile: String,
