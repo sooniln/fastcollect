@@ -9,13 +9,6 @@ import com.google.common.collect.testing.features.CollectionSize
 import com.google.common.collect.testing.features.Feature
 import com.google.common.collect.testing.features.MapFeature
 import com.google.common.collect.testing.testers.MapGetOrDefaultTester
-import io.github.sooniln.fastcollect.ints.*
-import io.github.sooniln.fastcollect.longs.asMutableMap
-import io.github.sooniln.fastcollect.longs.mutableLong2AnyMapOf
-import io.github.sooniln.fastcollect.longs.mutableLong2DoubleMapOf
-import io.github.sooniln.fastcollect.longs.mutableLong2FloatMapOf
-import io.github.sooniln.fastcollect.longs.mutableLong2IntMapOf
-import io.github.sooniln.fastcollect.longs.mutableLong2LongMapOf
 import junit.framework.TestSuite
 import org.junit.runner.RunWith
 import org.junit.runners.AllTests

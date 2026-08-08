@@ -1,17 +1,5 @@
-@file:Suppress("UnusedImport")
+package io.github.sooniln.fastcollect
 
-package io.github.sooniln.fastcollect.${keySubpackage}
-
-import io.github.sooniln.fastcollect.equalsBoxed
-import io.github.sooniln.fastcollect.ArrayUtils
-import io.github.sooniln.fastcollect.FastIterator
-import io.github.sooniln.fastcollect.Hash
-import io.github.sooniln.fastcollect.MutableFastIterator
-<% if (!isReferenceValue) { %>
-import io.github.sooniln.fastcollect.${valueSubpackage}.Mutable${ValueType}Collection
-import io.github.sooniln.fastcollect.${valueSubpackage}.Mutable${ValueType}Iterator
-import io.github.sooniln.fastcollect.${valueSubpackage}.${ValueType}Consumer
-<% } %>
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min

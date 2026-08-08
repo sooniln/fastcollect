@@ -1,8 +1,5 @@
-package io.github.sooniln.fastcollect.${subpackage}
+package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.equalsBoxed
-import io.github.sooniln.fastcollect.ArrayUtils
-import io.github.sooniln.fastcollect.Hash
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min

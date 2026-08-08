@@ -6,8 +6,6 @@ import com.google.common.collect.testing.TestSetGenerator
 import com.google.common.collect.testing.features.CollectionFeature
 import com.google.common.collect.testing.features.CollectionSize
 import com.google.common.collect.testing.features.Feature
-import io.github.sooniln.fastcollect.ints.*
-import io.github.sooniln.fastcollect.longs.*
 import junit.framework.TestSuite
 import org.junit.runner.RunWith
 import org.junit.runners.AllTests

@@ -1,16 +1,24 @@
-package io.github.sooniln.fastcollect.${subpackage}
+/**
+ * Methods for dealing with primitive PriorityQueues.
+ */
+@file:JvmName("PriorityQueues")
+@file:JvmMultifileClass
 
-import io.github.sooniln.fastcollect.ArrayUtils
-import io.github.sooniln.fastcollect.equalsBoxed
+package io.github.sooniln.fastcollect
+
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
 
 public fun ${lowerType}PriorityQueueOf(vararg elements: ${Type}, descending: Boolean = false): ${Type}PriorityQueue {
     return ${Type}PriorityQueue(elements, descending = descending)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun build${Type}PriorityQueue(
     expectedSize: Int = 0,

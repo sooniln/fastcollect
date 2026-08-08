@@ -1,18 +1,5 @@
-@file:Suppress("UnusedImport")
+package io.github.sooniln.fastcollect
 
-package io.github.sooniln.fastcollect.${subpackage}
-
-import io.github.sooniln.fastcollect.ArrayUtils
-import io.github.sooniln.fastcollect.FastIterator
-import io.github.sooniln.fastcollect.Hash
-import io.github.sooniln.fastcollect.MutableFastIterator
-import io.github.sooniln.fastcollect.equalsBoxed
-import io.github.sooniln.fastcollect.${subpackage}.Mutable${KVType}Collection
-import io.github.sooniln.fastcollect.${subpackage}.Mutable${KVType}Iterator
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min

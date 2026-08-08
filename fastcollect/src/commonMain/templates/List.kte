@@ -1,10 +1,18 @@
-package io.github.sooniln.fastcollect.${subpackage}
+/**
+ * Methods for dealing with primitive Lists.
+ */
+@file:JvmName("Lists")
+@file:JvmMultifileClass
 
-import io.github.sooniln.fastcollect.equalsBoxed
+package io.github.sooniln.fastcollect
+
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.jvm.JvmMultifileClass
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 import kotlin.random.Random
 
 public fun empty${Type}List(): ${Type}List = Empty${Type}List
@@ -19,6 +27,7 @@ public fun mutable${Type}ListOf(vararg elements: ${Type}): Mutable${Type}List = 
 
 public fun ${Type}Array.as${Type}List(): ${Type}List = ${Type}ArrayListWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun build${Type}List(expectedSize: Int = 0, builderAction: Mutable${Type}List.() -> Unit): ${Type}List {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
@@ -28,12 +37,14 @@ public inline fun build${Type}List(expectedSize: Int = 0, builderAction: Mutable
     return list
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun ${Type}List(size: Int, init: (index: Int) -> ${Type}): ${Type}List {
     contract { callsInPlace(init, InvocationKind.UNKNOWN) }
     return Mutable${Type}List(size, init)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun Mutable${Type}List(size: Int, init: (index: Int) -> ${Type}): Mutable${Type}List {
     contract { callsInPlace(init, InvocationKind.UNKNOWN) }
@@ -81,10 +92,13 @@ public interface ${Type}List : ${Type}Collection {
     public fun subList(fromIndex: Int, toIndex: Int): ${Type}List
 }
 
-public val ${Type}List.lastIndex: Int inline get() = size - 1
 
+public val ${Type}List.lastIndex: Int @JvmSynthetic inline get() = size - 1
+
+@JvmSynthetic
 public fun ${Type}List.first(): ${Type} = if (isEmpty()) throw NoSuchElementException() else this[0]
 
+@JvmSynthetic
 public fun ${Type}List.last(): ${Type} = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
 public fun ${Type}List.rangeCheck(index: Int, size: Int = this.size): Int {
@@ -103,6 +117,7 @@ public fun ${Type}List.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this
     if (toIndex > size) throw IndexOutOfBoundsException("toIndex=\$toIndex, size=\$size")
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun <R> ${Type}List.foldRight(initial: R, operation: (${Type}, accumulated: R) -> R): R {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -115,6 +130,7 @@ public inline fun <R> ${Type}List.foldRight(initial: R, operation: (${Type}, acc
     return accumulated
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 public inline fun ${Type}List.reduceRight(operation: (${Type}, accumulated: ${Type}) -> ${Type}) : ${Type} {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }

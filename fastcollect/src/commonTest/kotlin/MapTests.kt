@@ -1,7 +1,5 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.ints.*
-import io.github.sooniln.fastcollect.longs.*
 import kotlin.test.*
 
 // ============================= Int2Int =============================

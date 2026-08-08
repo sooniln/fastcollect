@@ -1,8 +1,6 @@
-package io.github.sooniln.fastcollect.${keySubpackage}
+package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.MutableFastIterator
-import io.github.sooniln.fastcollect.equalsBoxed
-import io.github.sooniln.fastcollect.${valueSubpackage}.Inline${ValueType}Collection
+import kotlin.jvm.JvmExposeBoxed
 import kotlin.jvm.JvmInline
 import kotlin.math.max
 
@@ -66,6 +64,8 @@ public class ${Name}HashMap private constructor(@PublishedApi internal val map: 
 
     override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
+    @OptIn(ExperimentalStdlibApi::class)
+    @JvmExposeBoxed
     @JvmInline
     public value class EntryIterator(@PublishedApi internal val it: MutableFastIterator<Mutable${NonFPName}Map.MutableEntry>) : MutableFastIterator<Mutable${Name}Map.MutableEntry> {
         override fun hasNext(): Boolean = it.hasNext()

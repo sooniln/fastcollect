@@ -1,10 +1,15 @@
-package io.github.sooniln.fastcollect.${subpackage}
+/**
+ * Methods for dealing with ${Type}Sets.
+ */
+@file:JvmName("${Type}Sets")
 
-import io.github.sooniln.fastcollect.equalsBoxed
+package io.github.sooniln.fastcollect
+
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.jvm.JvmName
 
 public fun empty${Type}Set(): ${Type}Set = Empty${Type}Set
 

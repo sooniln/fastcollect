@@ -1,6 +1,8 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.abi.BinariesSource
+import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 import kotlin.text.lowercase
 import java.nio.file.Path as NioPath
 
@@ -32,7 +34,6 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
         val type = map["Type"] as String?
         if (type != null) {
             putIfAbsent("lowerType", type.lowercase())
-            putIfAbsent("subpackage", type.lowercase() + "s")
 
             val isFPType = type == "Float" || type == "Double"
             putIfAbsent("isFPType", isFPType)
@@ -46,7 +47,6 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
         val kvType = map["KVType"] as String?
         if (kvType != null) {
             putIfAbsent("lowerKVType", kvType.lowercase())
-            putIfAbsent("subpackage", kvType.lowercase() + "s")
             putIfAbsent("Name", "${kvType}2${kvType}")
             putIfAbsent("lowerName", "${get("lowerKVType")}2${kvType}")
 
@@ -59,7 +59,6 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
         val keyType = map["KeyType"] as String?
         if (keyType != null) {
             putIfAbsent("lowerKeyType", keyType.lowercase())
-            putIfAbsent("keySubpackage", keyType.lowercase() + "s")
 
             val isFPKey = keyType == "Float" || keyType == "Double"
             putIfAbsent("isFPKey", isFPKey)
@@ -73,7 +72,6 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
         val valueType = map["ValueType"] as String?
         if (valueType != null) {
             putIfAbsent("lowerValueType", valueType.lowercase())
-            putIfAbsent("valueSubpackage", valueType.lowercase() + "s")
 
             val isFPValue = valueType == "Float" || valueType == "Double"
             putIfAbsent("isFPValue", isFPValue)
@@ -85,8 +83,6 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
         }
 
         if (keyType != null && valueType != null) {
-            putIfAbsent("subpackage", getValue("keySubpackage"))
-
             val isReferenceValue = map["isReferenceValue"] as Boolean? ?: false
             putIfAbsent("isReferenceValue", isReferenceValue)
 
@@ -140,7 +136,7 @@ private fun Sync.generate(sourceSet: String, templates: List<TemplateInstantiati
 
 tasks.register<Sync>("GenerateCommonCollections") {
     description = "Generates source code for primitively typed collection classes from templates."
-    group = "generate"
+    group = "build"
     into("src/commonMainGenerated/kotlin")
 
     generate("commonMain",
@@ -154,7 +150,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Predicate.kt" },
+                )) { expansion -> "${expansion["Type"]}Predicate.kt" },
             TemplateInstantiation(
                 "Iterator.kte",
                 listOf(
@@ -164,7 +160,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Iterator.kt" },
+                )) { expansion -> "${expansion["Type"]}Iterator.kt" },
             TemplateInstantiation(
                 "Collection.kte",
                 listOf(
@@ -174,7 +170,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Collection.kt" },
+                )) { expansion -> "${expansion["Type"]}Collection.kt" },
             TemplateInstantiation(
                 "List.kte",
                 listOf(
@@ -184,7 +180,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}List.kt" },
+                )) { expansion -> "${expansion["Type"]}List.kt" },
             TemplateInstantiation(
                 "ArrayDeque.kte",
                 listOf(
@@ -195,7 +191,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
                 )
-            ) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}ArrayDeque.kt" },
+            ) { expansion -> "${expansion["Type"]}ArrayDeque.kt" },
             TemplateInstantiation(
                 "Set.kte",
                 listOf(
@@ -203,7 +199,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}Set.kt" },
+                )) { expansion -> "${expansion["Type"]}Set.kt" },
             TemplateInstantiation(
                 "HashSet.kte",
                 listOf(
@@ -211,7 +207,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}HashSet.kt" },
+                )) { expansion -> "${expansion["Type"]}HashSet.kt" },
             TemplateInstantiation(
                 "Map.kte",
                 listOf(
@@ -225,7 +221,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
                     mapOf("KeyType" to "Long", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
                     mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}Map.kt" },
+                )) { expansion -> "${expansion["Name"]}Map.kt" },
             TemplateInstantiation(
                 "HashMap.kte",
                 listOf(
@@ -234,12 +230,12 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}HashMap.kt" },
+                )) { expansion -> "${expansion["Name"]}HashMap.kt" },
             TemplateInstantiation(
                 "InterleavedHashMap.kte",
                 listOf(
                     mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}HashMap.kt" },
+                )) { expansion -> "${expansion["Name"]}HashMap.kt" },
             TemplateInstantiation(
                 "FPHashMap.kte",
                 listOf(
@@ -247,7 +243,7 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("KeyType" to "Int", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
                     mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
                     mapOf("KeyType" to "Long", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Name"]}HashMap.kt" },
+                )) { expansion -> "${expansion["Name"]}HashMap.kt" },
             TemplateInstantiation(
                 "PriorityQueue.kte",
                 listOf(
@@ -255,13 +251,13 @@ tasks.register<Sync>("GenerateCommonCollections") {
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["subpackage"]}/${expansion["Type"]}PriorityQueue.kt" },
+                )) { expansion -> "${expansion["Type"]}PriorityQueue.kt" },
         ))
 }
 
 tasks.register<Sync>("GenerateJvmCollections") {
     description = "Generates source code for primitively typed collection classes from templates."
-    group = "generate"
+    group = "build"
     into("src/jvmMainGenerated/kotlin")
 
     generate("jvmMain",
@@ -274,7 +270,7 @@ tasks.register<Sync>("GenerateJvmCollections") {
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
                 )
-            ) { expansion -> "${expansion["subpackage"]}/Jvm${expansion["Type"]}PriorityQueue.kt" },
+            ) { expansion -> "Jvm${expansion["Type"]}PriorityQueue.kt" },
         ))
 }
 
@@ -292,29 +288,19 @@ kotlin {
     // According to https://kotlinlang.org/docs/native-target-support.html
     // Tier 1
     macosArm64()
-    iosSimulatorArm64()
     // Tier 2
     linuxX64()
     linuxArm64()
-    watchosSimulatorArm64()
-    watchosArm32()
-    watchosArm64()
-    tvosSimulatorArm64()
-    tvosArm64()
     iosArm64()
     // Tier 3
     mingwX64()
     iosX64()
-    watchosDeviceArm64()
-    js {
-        nodejs()
-    }
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs {
-        nodejs()
-    }
 
     explicitApi()
+    @OptIn(ExperimentalAbiValidation::class)
+    abiValidation {
+        binariesSource.set(BinariesSource.MAVEN_PUBLICATIONS)
+    }
 
     applyDefaultHierarchyTemplate()
     sourceSets {

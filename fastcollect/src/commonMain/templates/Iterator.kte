@@ -1,4 +1,13 @@
-package io.github.sooniln.fastcollect.${subpackage}
+/**
+ * Methods for dealing with primitive Iterators.
+ */
+@file:JvmName("Iterators")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
+
+import kotlin.jvm.JvmMultifileClass
+import kotlin.jvm.JvmName
 
 public fun empty${Type}Iterator(): ${Type}ListIterator = Empty${Type}Iterator
 public fun emptyMutable${Type}Iterator(): Mutable${Type}Iterator = EmptyMutable${Type}Iterator

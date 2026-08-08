@@ -1,4 +1,10 @@
-package io.github.sooniln.fastcollect.${subpackage}
+/**
+ * Methods for dealing with primitive PriorityQueues.
+ */
+@file:JvmName("PriorityQueues")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
 
 import java.util.AbstractQueue
 import java.util.Queue

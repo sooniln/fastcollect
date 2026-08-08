@@ -1,11 +1,5 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.bytes.*
-import io.github.sooniln.fastcollect.doubles.*
-import io.github.sooniln.fastcollect.floats.*
-import io.github.sooniln.fastcollect.ints.*
-import io.github.sooniln.fastcollect.longs.*
-import io.github.sooniln.fastcollect.shorts.*
 import kotlin.test.*
 
 // Per-type helpers for element-wise comparison without relying on primitive list equals.

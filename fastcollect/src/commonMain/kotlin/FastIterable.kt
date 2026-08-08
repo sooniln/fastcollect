@@ -1,4 +1,11 @@
+/**
+ * Methods for dealing with FastIterables.
+ */
+@file:JvmName("FastIterables")
+
 package io.github.sooniln.fastcollect
+
+import kotlin.jvm.JvmName
 
 /**
  * An [Iterable] which can be iterated normally, but also supports fast iteration. Fast iteration implies that the

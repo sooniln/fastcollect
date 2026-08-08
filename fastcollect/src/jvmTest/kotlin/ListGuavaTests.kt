@@ -7,12 +7,6 @@ import com.google.common.collect.testing.features.CollectionFeature
 import com.google.common.collect.testing.features.CollectionSize
 import com.google.common.collect.testing.features.Feature
 import com.google.common.collect.testing.features.ListFeature
-import io.github.sooniln.fastcollect.bytes.*
-import io.github.sooniln.fastcollect.doubles.*
-import io.github.sooniln.fastcollect.floats.*
-import io.github.sooniln.fastcollect.ints.*
-import io.github.sooniln.fastcollect.longs.*
-import io.github.sooniln.fastcollect.shorts.*
 import junit.framework.TestSuite
 import org.junit.runner.RunWith
 import org.junit.runners.AllTests

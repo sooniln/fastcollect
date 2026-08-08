@@ -1,4 +1,11 @@
+/**
+ * Methods for dealing with comparisons.
+ */
+@file:JvmName("ComparisonUtils")
+
 package io.github.sooniln.fastcollect
+
+import kotlin.jvm.JvmName
 
 // equalsBoxed implements comparisons that matches the semantics of boxed values on the JVM (notably NaN == NaN)
 

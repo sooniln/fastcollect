@@ -1,16 +1,21 @@
-@file:Suppress("UnusedImport")
+/**
+ * Methods for dealing with primitive Collections.
+ */
+@file:JvmName("Collections")
+@file:JvmMultifileClass
 
-package io.github.sooniln.fastcollect.${subpackage}
+package io.github.sooniln.fastcollect
 
-<% if (isFPType) { %>
-import io.github.sooniln.fastcollect.${lowerNonFPType}s.Mutable${NonFPType}Collection
-import io.github.sooniln.fastcollect.${lowerNonFPType}s.Mutable${NonFPType}Iterator
-<% } %>
-import io.github.sooniln.fastcollect.equalsBoxed
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+<% if (isFPType) { %>
+import kotlin.jvm.JvmExposeBoxed
 import kotlin.jvm.JvmInline
+<% } %>
+import kotlin.jvm.JvmMultifileClass
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 /**
  * A collection of ${Type}s which inherits from [Collection].
@@ -71,6 +76,7 @@ public interface ${Type}Collection : Collection<${Type}> {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}Collection.any(predicate: (${Type}) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
@@ -81,18 +87,21 @@ public inline fun ${Type}Collection.any(predicate: (${Type}) -> Boolean): Boolea
     return false
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}Collection.all(predicate: (${Type}) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any { !predicate(it) }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}Collection.none(predicate: (${Type}) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any(predicate)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun <R> ${Type}Collection.fold(initial: R, operation: (accumulated: R, ${Type}) -> R): R {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -104,6 +113,7 @@ public inline fun <R> ${Type}Collection.fold(initial: R, operation: (accumulated
     return accumulated
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}Collection.reduce(operation: (accumulated: ${Type}, ${Type}) -> ${Type}): ${Type} {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -116,6 +126,7 @@ public inline fun ${Type}Collection.reduce(operation: (accumulated: ${Type}, ${T
     return accumulated
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}Collection.sumOf(selector: (${Type}) -> Int): Int {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
@@ -128,6 +139,7 @@ public inline fun ${Type}Collection.sumOf(selector: (${Type}) -> Int): Int {
     return sum
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}Collection.sumOf(selector: (${Type}) -> Long): Long {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
@@ -140,6 +152,7 @@ public inline fun ${Type}Collection.sumOf(selector: (${Type}) -> Long): Long {
     return sum
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}Collection.sumOf(selector: (${Type}) -> Double): Double {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
@@ -264,11 +277,11 @@ public abstract class Abstract${Type}Collection : ${Type}Collection {
 
 <% if (isFPType) { %>
 
-@Suppress("OVERRIDE_BY_INLINE")
+@OptIn(ExperimentalStdlibApi::class)
+@JvmExposeBoxed
 @JvmInline
 public value class Inline${Type}Collection public constructor(@PublishedApi internal val collection: Mutable${NonFPType}Collection) : Mutable${Type}Collection {
-    override val size: Int
-        inline get() = collection.size
+    override val size: Int get() = collection.size
     override fun contains(element: ${Type}): Boolean = collection.contains(element.toBits())
     override fun add(element: ${Type}): Boolean = collection.add(element.toBits())
     override fun remove(element: ${Type}): Boolean = collection.remove(element.toBits())

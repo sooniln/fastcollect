@@ -1,0 +1,429 @@
+/**
+ * Methods for dealing with Int2IntMaps.
+ */
+@file:JvmName("Int2IntMaps")
+
+package io.github.sooniln.fastcollect
+
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+import kotlin.jvm.JvmName
+
+@Suppress("UNCHECKED_CAST")
+public fun  emptyInt2IntMap(): Int2IntMap = EmptyInt2IntMap as Int2IntMap
+
+@Suppress("UNCHECKED_CAST")
+public fun  int2IntMapOf(): Int2IntMap = EmptyInt2IntMap as Int2IntMap
+public fun  int2IntMapOf(entry: Pair<Int, Int>): Int2IntMap = SingletonInt2IntMap(entry.first, entry.second)
+public fun  int2IntMapOf(vararg entries: Pair<Int, Int>): Int2IntMap = Int2IntHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+public fun  mutableInt2IntMapOf(): MutableInt2IntMap = Int2IntHashMap()
+public fun  mutableInt2IntMapOf(entry: Pair<Int, Int>): MutableInt2IntMap = Int2IntHashMap(1).apply { set(entry.first, entry.second) }
+public fun  mutableInt2IntMapOf(vararg entries: Pair<Int, Int>): MutableInt2IntMap = Int2IntHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+public inline fun  buildInt2IntMap(expectedSize: Int = 0, builderAction: MutableInt2IntMap.() -> Unit): Int2IntMap {
+    contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
+
+    val map = Int2IntHashMap(expectedSize)
+    map.builderAction()
+    return map
+}
+
+/**
+ * A map of Ints to Ints.
+ *
+ * A Int2IntMap returns some default value (how this default value is chosen is implementation dependent) to indicate
+ * that a key is not present in the map. Returned values from APIs may be checked with [isDefaultValue] and if this
+ * returns true it indicates that the key was not present (or it was present but associated with that value - it may be
+ * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
+ * cases more easily.
+ */
+
+public interface Int2IntMap {
+
+
+    public val size: Int
+
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun size(): Int = size
+
+    public fun isEmpty(): Boolean {
+        return size == 0
+    }
+
+    /**
+     * Returns true if the given value is current the default value of the map (i.e., the value returned from retrieval
+     * operations when a key is not present). Note that maps are not required to have an unchanging default value
+     * (though this is the most common implementation). A map may change its default value during the invocation of any
+     * mutable public API method. A map may not change its default value outside of the invocation of any mutable public
+     * API method. For this reason clients should not store or make other assumptions about the default value.
+     */
+    public fun isDefaultValue(value: @UnsafeVariance Int): Boolean
+
+    public operator fun get(key: Int): Int
+
+    /** Returns the value for the given key or throws [NoSuchElementException] if the key is not present. */
+    public fun getValue(key: Int): Int = getOrElse(key) { throw NoSuchElementException() }
+
+    public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance Int): Int = getOrElse(key) { defaultValue }
+
+    public fun containsKey(key: Int): Boolean {
+        for (k in keys) {
+            if (k equalsBoxed key) return true
+        }
+        return false
+    }
+
+    public fun containsValue(value: @UnsafeVariance Int): Boolean {
+        for (v in values) {
+            if (v equalsBoxed value) return true
+        }
+        return false
+    }
+
+    public val keys: IntSet
+    public val values: IntCollection
+
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun keys(): IntSet = keys
+    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
+    public fun values(): IntCollection = values
+
+
+    public interface Entry {
+
+        public val key: Int
+        public val value: Int
+
+        public operator fun component1(): Int = key
+        public operator fun component2(): Int = value
+    }
+
+    /** Returns a [FastIterator] over the map entries. */
+    public operator fun iterator(): FastIterator<Entry>
+
+    /**
+     * A method for iteration guaranteed to be as fast or faster than [iterator].
+     */
+ 
+    public fun foreach(action: IntIntConsumer) {
+ 
+        val it = iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            action.accept(entry.key, entry.value)
+        }
+    }
+
+    /**
+     * A method for iteration over keys guaranteed to be as fast or faster than [iterator].
+     */
+    public fun foreachKey(action: IntConsumer) {
+        val it = iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            action.accept(entry.key)
+        }
+    }
+}
+
+public fun  Int2IntMap.asMap(): Map<Int, Int> = Int2IntMapWrapper(this)
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  Int2IntMap.getOrElse(key: Int, defaultValue: () -> Int): Int {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    val value = get(key)
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as Int
+}
+
+/**
+ * A mutable map of Ints to Ints.
+ */
+public interface MutableInt2IntMap : Int2IntMap {
+
+    public fun put(key: Int, value: Int): Int
+
+    public operator fun set(key: Int, value: Int) {
+        put(key, value)
+    }
+
+    /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
+    public fun replace(key: Int, value: Int): Int = replaceOrSet(key, value) { throw NoSuchElementException() }
+
+    /** Removes the given key and returns it's value, or the default value if the key is not present. */
+    public fun remove(key: Int): Int
+
+    /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
+    public fun removeKey(key: Int): Int = removeOrElse(key) { throw NoSuchElementException() }
+
+    public fun clear()
+
+    override val keys: MutableIntSet
+    override val values: MutableIntCollection
+
+    public fun putAll(from: Int2IntMap) {
+        for (entry in from) {
+            set(entry.key, entry.value)
+        }
+    }
+
+    public fun putAll(from: Map<out Int, Int>) {
+        for (entry in from) {
+            set(entry.key, entry.value)
+        }
+    }
+
+    public interface MutableEntry : Int2IntMap.Entry {
+        override var value: Int
+    }
+
+    override fun iterator(): MutableFastIterator<MutableEntry>
+}
+
+public fun  MutableInt2IntMap.asMutableMap(): MutableMap<Int, Int> = MutableInt2IntMapWrapper(this)
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableInt2IntMap.merge(key: Int, value: Int, merge: (oldValue: Int, value: Int) -> Int): Int {
+    contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
+
+    val oldValue = get(key)
+    val absent = isDefaultValue(oldValue) && !containsKey(key)
+    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    val newValue = if (absent) value else merge(oldValue as Int, value)
+    if (absent || !(newValue equalsBoxed oldValue)) {
+        set(key, newValue)
+    }
+    return newValue
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableInt2IntMap.getOrPut(key: Int, defaultValue: () -> Int): Int {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    var value = get(key)
+    if (isDefaultValue(value) && !containsKey(key)) {
+        value = defaultValue()
+        set(key, value)
+        return value
+    } else {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return value as Int
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableInt2IntMap.replaceOrSet(key: Int, value: Int, oldValue: () -> Int): Int {
+    contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
+
+    if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        return put(key, value) as Int
+    } else {
+        val returnValue = oldValue()
+        set(key, value)
+        return returnValue
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  MutableInt2IntMap.removeOrElse(key: Int, defaultValue: () -> Int): Int {
+    contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
+
+    return if (containsKey(key)) {
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        remove(key) as Int
+    } else {
+        defaultValue()
+    }
+}
+
+public abstract class AbstractInt2IntMap : Int2IntMap {
+
+    override fun equals(other: Any?): Boolean {
+        if (other === this) return true
+        if (other is Int2IntMap) {
+            if (other.size != size) return false
+
+            for (entry in this) {
+                if (!(other[entry.key] equalsBoxed entry.value)) return false
+            }
+
+            return true
+        }
+
+        return false
+    }
+
+    override fun hashCode(): Int {
+        var result = 0
+        for (entry in this) {
+            result += entry.key.hashCode() xor entry.value.hashCode()
+        }
+        return result
+    }
+
+    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
+
+    public class SimpleEntry(override val key: Int, override val value: Int) : Int2IntMap.Entry
+}
+
+public abstract class AbstractMutableInt2IntMap : AbstractInt2IntMap(), MutableInt2IntMap
+
+
+private object EmptyInt2IntMap : Int2IntMap {
+
+
+    override fun isDefaultValue(value: Int): Boolean = true
+
+
+    override val size: Int get() = 0
+    override fun isEmpty(): Boolean = true
+
+    override fun containsKey(key: Int): Boolean = false
+
+    override fun containsValue(value: Int): Boolean = false
+    override fun get(key: Int): Int = Int.MIN_VALUE
+
+
+    override val keys: IntSet get() = emptyIntSet()
+
+    override val values: IntCollection get() = emptyIntList()
+    override fun iterator() = emptyFastIterator<Int2IntMap.Entry>()
+
+}
+
+private class SingletonInt2IntMap(private val key: Int, private val value: Int) : Int2IntMap {
+    override fun isDefaultValue(value: Int): Boolean = value equalsBoxed Int.MIN_VALUE
+
+    override val size: Int get() = 1
+    override fun isEmpty(): Boolean = false
+
+    override fun containsKey(key: Int): Boolean = key equalsBoxed this.key
+    override fun containsValue(value: Int): Boolean = value equalsBoxed this.value
+    override fun get(key: Int): Int = if (key equalsBoxed this.key) value else Int.MIN_VALUE
+
+    override val keys: IntSet by lazy { intSetOf(key) }
+
+    override val values: IntCollection by lazy { intListOf(value) }
+
+    override fun iterator() = object : FastIterator<Int2IntMap.Entry> {
+        private var complete: Boolean = false
+
+        override fun hasNext() = !complete
+        override fun next(): Int2IntMap.Entry {
+            if (complete) throw NoSuchElementException()
+            complete = true
+            return AbstractInt2IntMap.SimpleEntry(key, value)
+        }
+    }
+}
+
+private class Int2IntMapWrapper(private val map: Int2IntMap) : AbstractMap<Int, Int>() {
+    override val size: Int get() = map.size
+
+    override fun get(key: Int): Int? {
+        val value = map.get(key)
+        return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
+    }
+
+    override fun containsKey(key: Int): Boolean = map.containsKey(key)
+
+    override fun containsValue(value: Int): Boolean = map.containsValue(value)
+
+    override val entries: Set<Map.Entry<Int, Int>> = object : AbstractSet<Map.Entry<Int, Int>>() {
+        override val size: Int get() = map.size
+
+        override fun contains(element: Map.Entry<Int, Int>): Boolean {
+            val value = map[element.key]
+            if (map.isDefaultValue(value) && !containsKey(element.key)) return false
+            return value equalsBoxed element.value
+        }
+
+        override fun iterator(): Iterator<Map.Entry<Int, Int>> = object : Iterator<Map.Entry<Int, Int>> {
+            private val it = map.iterator()
+
+            override fun hasNext(): Boolean = it.hasNext()
+            override fun next(): Map.Entry<Int, Int> {
+                val entry = it.next()
+                return object : Map.Entry<Int, Int> {
+                    override val key = entry.key
+                    override val value = entry.value
+                }
+            }
+        }
+    }
+}
+
+private class MutableInt2IntMapWrapper(private val map: MutableInt2IntMap) : AbstractMutableMap<Int, Int>() {
+    override val size: Int get() = map.size
+
+    override fun get(key: Int): Int? {
+        val value = map.get(key)
+        return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
+    }
+
+    override fun containsKey(key: Int): Boolean = map.containsKey(key)
+
+    override fun containsValue(value: Int): Boolean = map.containsValue(value)
+
+    override fun remove(key: Int): Int? {
+        return if (map.containsKey(key)) map.remove(key) else null
+    }
+
+    override fun put(key: Int, value: Int): Int? {
+        val containsKey = map.containsKey(key)
+        val oldValue = map.put(key, value)
+        return if (containsKey) oldValue else null
+    }
+
+    override fun clear(): Unit = map.clear()
+
+    override val entries: MutableSet<MutableMap.MutableEntry<Int, Int>> = object : AbstractMutableSet<MutableMap.MutableEntry<Int, Int>>() {
+        override val size: Int get() = map.size
+
+        override fun contains(element: MutableMap.MutableEntry<Int, Int>): Boolean {
+            val value = map[element.key]
+            if (map.isDefaultValue(value) && !containsKey(element.key)) return false
+            return value equalsBoxed element.value
+        }
+
+        override fun add(element: MutableMap.MutableEntry<Int, Int>): Boolean = throw UnsupportedOperationException()
+
+        override fun iterator(): MutableIterator<MutableMap.MutableEntry<Int, Int>> = object : MutableIterator<MutableMap.MutableEntry<Int, Int>> {
+            private val it = map.iterator()
+
+            override fun hasNext(): Boolean = it.hasNext()
+            override fun next(): MutableMap.MutableEntry<Int, Int> = it.next().let { e -> Entry(e.key, e.value) }
+            override fun remove() = it.remove()
+        }
+
+        private inner class Entry(override val key: Int, value: Int) : MutableMap.MutableEntry<Int, Int> {
+            override var value = value
+                private set
+
+            override fun setValue(newValue: Int): Int {
+                val oldValue = value
+                if (!(map.put(key, newValue) equalsBoxed oldValue)) throw ConcurrentModificationException()
+                value = newValue
+                return oldValue
+            }
+
+            override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+            override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+            override fun toString(): String = "$key=$value"
+        }
+    }
+
+    override fun putAll(from: Map<out Int, Int>): Unit = map.putAll(from)
+}
+
+
+public fun interface IntIntConsumer {
+
+    public fun accept(key: Int, value: Int)
+}

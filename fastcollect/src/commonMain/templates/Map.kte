@@ -1,21 +1,15 @@
-@file:Suppress("UnusedImport")
+/**
+ * Methods for dealing with ${Name}Maps.
+ */
+@file:JvmName("${Name}Maps")
 
-package io.github.sooniln.fastcollect.${keySubpackage}
+package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.FastIterator
-import io.github.sooniln.fastcollect.MutableFastIterator
-import io.github.sooniln.fastcollect.emptyFastIterator
-import io.github.sooniln.fastcollect.equalsBoxed
-<% if (!isReferenceValue) { %>
-import io.github.sooniln.fastcollect.${valueSubpackage}.${lowerValueType}ListOf
-import io.github.sooniln.fastcollect.${valueSubpackage}.${ValueType}Collection
-import io.github.sooniln.fastcollect.${valueSubpackage}.Mutable${ValueType}Collection
-import io.github.sooniln.fastcollect.${valueSubpackage}.empty${ValueType}List
-<% } %>
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.jvm.JvmName
 
 @Suppress("UNCHECKED_CAST")
 public fun ${Generics} empty${Name}Map(): ${Name}Map${Generics} = Empty${Name}Map as ${Name}Map${Generics}

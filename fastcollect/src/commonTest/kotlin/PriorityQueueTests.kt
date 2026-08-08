@@ -1,9 +1,5 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.doubles.*
-import io.github.sooniln.fastcollect.floats.*
-import io.github.sooniln.fastcollect.ints.*
-import io.github.sooniln.fastcollect.longs.*
 import kotlin.test.*
 
 // ============================= Int =============================
