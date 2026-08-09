@@ -601,7 +601,7 @@ public class Long2LongHashMap @JvmOverloads constructor(
             check(capacity >= 0)
             // array must always maintain the invariant of at least one slot remaining open
             val requiredArraySize = max((capacity / loadFactor).toInt(), capacity + 1)
-            val actualArraySize = ArrayUtils.minPowerOfTwo(requiredArraySize)
+            val actualArraySize = minPowerOfTwo(requiredArraySize)
             if (actualArraySize < requiredArraySize) throw Error("Required array length $requiredArraySize is too large")
             return actualArraySize
         }

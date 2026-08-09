@@ -3,6 +3,12 @@ package io.github.sooniln.fastcollect
 import kotlin.test.*
 
 // Per-type helpers for element-wise comparison without relying on primitive list equals.
+
+private fun BooleanList.assertContents(vararg expected: Boolean) {
+    assertEquals(expected.size, size, "size")
+    expected.forEachIndexed { i, v -> assertEquals(v, get(i), "element[$i]") }
+}
+
 private fun ByteList.assertContents(vararg expected: Int) {
     assertEquals(expected.size, size, "size")
     expected.forEachIndexed { i, v -> assertEquals(v.toByte(), get(i), "element[$i]") }
@@ -31,6 +37,228 @@ private fun FloatList.assertContents(vararg expected: Float) {
 private fun DoubleList.assertContents(vararg expected: Double) {
     assertEquals(expected.size, size, "size")
     expected.forEachIndexed { i, v -> assertEquals(v, get(i), "element[$i]") }
+}
+
+// ============================= Boolean =============================
+
+class BooleanListTest {
+    @Test
+    fun listOf_vararg() {
+        booleanListOf(true, true, false).assertContents(true, true, false)
+    }
+
+    @Test
+    fun mutableListOf_vararg() {
+        mutableBooleanListOf(true, true, false).assertContents(true, true, false)
+    }
+
+    @Test
+    fun buildList_dsl() {
+        buildBooleanList { add(true); add(false) }.assertContents(true, false)
+    }
+
+    @Test
+    fun listConstructor_initFn() {
+        BooleanList(4) { (it % 2) == 0 }.assertContents(true, false, true, false)
+    }
+
+    @Test
+    fun mutableListConstructor_initFn() {
+        MutableBooleanList(3) { (it % 2) == 0 }.assertContents(true, false, true)
+    }
+
+    @Test
+    fun asXxxList_fromArray() {
+        booleanArrayOf(true, true, false).asBooleanList().assertContents(true, true, false)
+    }
+
+    @Test
+    fun addFirst_prependsElement() {
+        val list = mutableBooleanListOf(true, false)
+        list.addFirst(true)
+        list.assertContents(true, true, false)
+    }
+
+    @Test
+    fun addLast_appendsElement() {
+        val list = mutableBooleanListOf(true, true)
+        list.addLast(false)
+        list.assertContents(true, true, false)
+    }
+
+    @Test
+    fun removeFirst_returnsAndRemoves() {
+        val list = mutableBooleanListOf(true, false)
+        assertEquals(true, list.removeFirst())
+        list.assertContents(false)
+    }
+
+    @Test
+    fun removeLast_returnsAndRemoves() {
+        val list = mutableBooleanListOf(true, false)
+        assertEquals(false, list.removeLast())
+        list.assertContents(true)
+    }
+
+    @Test
+    fun removeFirst_emptyThrows() {
+        assertFailsWith<NoSuchElementException> { mutableBooleanListOf().removeFirst() }
+    }
+
+    @Test
+    fun removeLast_emptyThrows() {
+        assertFailsWith<NoSuchElementException> { mutableBooleanListOf().removeLast() }
+    }
+
+    @Test
+    fun replace_returnsOldValue() {
+        val list = mutableBooleanListOf(true, false)
+        assertEquals(false, list.replace(1, true))
+        list.assertContents(true, true)
+    }
+
+    @Test
+    fun removeRange_removesSlice() {
+        val list = mutableBooleanListOf(true, false, true, false, true)
+        list.removeRange(1, 4)
+        list.assertContents(true, true)
+    }
+
+    @Test
+    fun subList_removeRange_updatesSubList() {
+        val list = mutableBooleanListOf(true, false, true, false, true)
+        val sub = list.subList(1, 4)
+        sub.removeRange(0, 2)
+        sub.assertContents(false)
+        list.assertContents(true, false, true)
+    }
+
+    @Test
+    fun removeAll_atExactCapacity_removesMatching() {
+        // a deque built from vararg elements exactly fills its backing ring buffer
+        val list = mutableBooleanListOf(true, false, true, false)
+        assertTrue(list.removeAll(listOf(true)))
+        list.assertContents(false, false)
+    }
+
+    @Test
+    fun addAll_atIndex_withPrimitiveCollection() {
+        val list = mutableBooleanListOf(true, false)
+        list.addAll(1, booleanListOf(true, false))
+        list.assertContents(true, true, false, false)
+    }
+
+    @Test
+    fun addAll_atIndex_withStandardCollection() {
+        val list = mutableBooleanListOf(true, false)
+        list.addAll(1, listOf(false, true))
+        list.assertContents(true, false, true, false)
+    }
+
+    @Test
+    fun sort_ascendingOrder() {
+        val list = mutableBooleanListOf(true, false, true, false, true)
+        list.sort()
+        list.assertContents(false, false, true, true, true)
+    }
+
+    @Test
+    fun sortDescending_descendingOrder() {
+        val list = mutableBooleanListOf(true, false, true, false, true)
+        list.sortDescending()
+        list.assertContents(true, true, true, false, false)
+    }
+
+    @Test
+    fun sort_emptyList() {
+        val list = mutableBooleanListOf()
+        list.sort()
+        assertTrue(list.isEmpty())
+    }
+
+    @Test
+    fun sort_singleElement() {
+        val list = mutableBooleanListOf(true)
+        list.sort()
+        list.assertContents(true)
+    }
+
+    @Test
+    fun fill_setsAllElements() {
+        val list = mutableBooleanListOf(true, false, true, false)
+        list.fill(true)
+        list.assertContents(true, true, true, true)
+    }
+
+    @Test
+    fun reverse_reversesOrder() {
+        val list = mutableBooleanListOf(true, true, false, false)
+        list.reverse()
+        list.assertContents(false, false, true, true)
+    }
+
+    @Test
+    fun reverse_emptyList() {
+        val list = mutableBooleanListOf()
+        list.reverse()
+        assertTrue(list.isEmpty())
+    }
+
+    @Test
+    fun shuffle_preservesElementsAndSize() {
+        val list = mutableBooleanListOf(true, false, true, false, true)
+        val before = list.toList().sorted()
+        list.shuffle()
+        assertEquals(5, list.size)
+        assertEquals(before, list.toList().sorted())
+    }
+
+    @Test
+    fun foldRight_correctResult() {
+        val result = booleanListOf(true, false, true).foldRight("") { element, acc -> "$element$acc" }
+        assertEquals("truefalsetrue", result)
+    }
+
+    @Test
+    fun reduceRight_correctResult() {
+        // accumulated starts at true (last element), false && true = false, true && false = false
+        val result = booleanListOf(true, false, true).reduceRight { element, acc -> element && acc }
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun lastIndex_nonEmpty() {
+        assertEquals(2, booleanListOf(true, false, true).lastIndex)
+    }
+
+    @Test
+    fun lastIndex_empty_isMinusOne() {
+        assertEquals(-1, booleanListOf().lastIndex)
+    }
+
+    @Test
+    fun foreach_matchesIteratorInOrder() {
+        val list = mutableBooleanListOf()
+        for (i in 1..50) list.add(i % 2 == 0)
+
+        val fromIterator = mutableListOf<Boolean>()
+        val it = list.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextBoolean())
+
+        val fromForeach = mutableListOf<Boolean>()
+        list.foreach { v -> fromForeach.add(v) }
+
+        assertEquals(fromIterator, fromForeach)
+    }
+
+    @Test
+    fun equals_matchesAnyBooleanListImplementation() {
+        // BooleanList contract (Abstract*List.equals()) requires equality against ANY BooleanList
+        // implementation, not just the same concrete class.
+        val deque: Any = mutableBooleanListOf(true, false, true)
+        val arrayBacked = booleanArrayOf(true, false, true).asBooleanList()
+        assertEquals(arrayBacked, deque)
+    }
 }
 
 // ============================= Byte =============================

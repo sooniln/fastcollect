@@ -67,7 +67,7 @@ public abstract class AbstractIntPriorityQueue(initialCapacity: Int = 0) {
     private fun grow(capacity: Int) {
         val oldCapacity = heap.size
         val newCapacity = if (oldCapacity > 0 || heap !== EMPTY_ARRAY) {
-            ArrayUtils.growArraySize(oldCapacity, capacity - oldCapacity)
+            growArraySize(oldCapacity, capacity - oldCapacity)
         } else {
             max(DEFAULT_CAPACITY, capacity)
         }

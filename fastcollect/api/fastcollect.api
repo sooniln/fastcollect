@@ -1,3 +1,43 @@
+public abstract class io/github/sooniln/fastcollect/AbstractBooleanCollection : io/github/sooniln/fastcollect/BooleanCollection {
+	public fun <init> ()V
+	public synthetic fun add (Ljava/lang/Object;)Z
+	public fun add (Z)Z
+	public fun addAll (Ljava/util/Collection;)Z
+	public fun clear ()V
+	public final fun contains (Ljava/lang/Object;)Z
+	public fun contains (Z)Z
+	public fun containsAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public fun containsAll (Ljava/util/Collection;)Z
+	public fun foreach (Lio/github/sooniln/fastcollect/BooleanConsumer;)V
+	public abstract fun getSize ()I
+	public fun isEmpty ()Z
+	public fun iterator ()Ljava/util/Iterator;
+	public fun remove (Ljava/lang/Object;)Z
+	public fun removeAll (Ljava/util/Collection;)Z
+	public fun removeIf (Ljava/util/function/Predicate;)Z
+	public fun retainAll (Ljava/util/Collection;)Z
+	public final fun size ()I
+	public fun toArray ()[Ljava/lang/Object;
+	public fun toArray ([Ljava/lang/Object;)[Ljava/lang/Object;
+	public fun toBooleanArray ()[Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class io/github/sooniln/fastcollect/AbstractBooleanList : io/github/sooniln/fastcollect/AbstractBooleanCollection, io/github/sooniln/fastcollect/BooleanList {
+	public fun <init> ()V
+	public fun contains (Z)Z
+	public fun containsAll (Ljava/util/Collection;)Z
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun indexOf (Z)I
+	public synthetic fun iterator ()Ljava/util/Iterator;
+	public fun iterator ()Lkotlin/collections/BooleanIterator;
+	public fun lastIndexOf (Z)I
+	public fun listIterator ()Lio/github/sooniln/fastcollect/BooleanListIterator;
+	public fun listIterator (I)Lio/github/sooniln/fastcollect/BooleanListIterator;
+	public fun subList (II)Lio/github/sooniln/fastcollect/BooleanList;
+}
+
 public abstract class io/github/sooniln/fastcollect/AbstractByteCollection : io/github/sooniln/fastcollect/ByteCollection {
 	public fun <init> ()V
 	public fun add (B)Z
@@ -608,6 +648,49 @@ public abstract class io/github/sooniln/fastcollect/AbstractLongSet : io/github/
 	public fun hashCode ()I
 }
 
+public abstract class io/github/sooniln/fastcollect/AbstractMutableBooleanList : io/github/sooniln/fastcollect/AbstractBooleanList, io/github/sooniln/fastcollect/MutableBooleanList {
+	public fun <init> ()V
+	public synthetic fun add (Ljava/lang/Object;)Z
+	public fun add (Z)Z
+	public fun addAll (ILio/github/sooniln/fastcollect/BooleanCollection;)V
+	public fun addAll (ILjava/util/Collection;)V
+	public fun addAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public fun addAll (Ljava/util/Collection;)Z
+	public fun addFirst (Z)V
+	public fun addLast (Z)V
+	public fun clear ()V
+	public fun fill (Z)V
+	public fun iterator ()Lio/github/sooniln/fastcollect/MutableBooleanIterator;
+	public synthetic fun iterator ()Ljava/util/Iterator;
+	public synthetic fun iterator ()Lkotlin/collections/BooleanIterator;
+	public synthetic fun listIterator ()Lio/github/sooniln/fastcollect/BooleanListIterator;
+	public fun listIterator ()Lio/github/sooniln/fastcollect/MutableBooleanListIterator;
+	public synthetic fun listIterator (I)Lio/github/sooniln/fastcollect/BooleanListIterator;
+	public fun listIterator (I)Lio/github/sooniln/fastcollect/MutableBooleanListIterator;
+	public fun minusAssign (Lio/github/sooniln/fastcollect/BooleanCollection;)V
+	public fun minusAssign (Ljava/util/Collection;)V
+	public fun minusAssign (Z)V
+	public fun plusAssign (Lio/github/sooniln/fastcollect/BooleanCollection;)V
+	public fun plusAssign (Ljava/util/Collection;)V
+	public fun plusAssign (Z)V
+	public final fun remove (Ljava/lang/Object;)Z
+	public fun remove (Z)Z
+	public fun removeAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public fun removeAll (Ljava/util/Collection;)Z
+	public fun removeFirst ()Z
+	public fun removeLast ()Z
+	public fun removeRange (II)V
+	public fun replace (IZ)Z
+	public fun retainAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public fun retainAll (Ljava/util/Collection;)Z
+	public fun reverse ()V
+	public fun shuffle ()V
+	public fun sort ()V
+	public fun sortDescending ()V
+	public synthetic fun subList (II)Lio/github/sooniln/fastcollect/BooleanList;
+	public fun subList (II)Lio/github/sooniln/fastcollect/MutableBooleanList;
+}
+
 public abstract class io/github/sooniln/fastcollect/AbstractMutableByteList : io/github/sooniln/fastcollect/AbstractByteList, io/github/sooniln/fastcollect/MutableByteList {
 	public fun <init> ()V
 	public fun add (B)Z
@@ -1087,6 +1170,117 @@ public final class io/github/sooniln/fastcollect/ArrayDeques {
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/ShortArrayDeque;Lio/github/sooniln/fastcollect/ShortPredicate;)Z
 }
 
+public final class io/github/sooniln/fastcollect/ArrayUtils {
+	public static final fun sort ([Z)V
+	public static final fun sort ([ZI)V
+	public static final fun sort ([ZII)V
+	public static synthetic fun sort$default ([ZIIILjava/lang/Object;)V
+	public static final fun sortDescending ([Z)V
+	public static final fun sortDescending ([ZI)V
+	public static final fun sortDescending ([ZII)V
+	public static synthetic fun sortDescending$default ([ZIIILjava/lang/Object;)V
+}
+
+public final class io/github/sooniln/fastcollect/BooleanArrayDeque : io/github/sooniln/fastcollect/AbstractMutableBooleanList, java/util/RandomAccess {
+	public fun <init> (I)V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/BooleanCollection;)V
+	public fun <init> (Ljava/util/Collection;)V
+	public fun <init> ([ZII)V
+	public synthetic fun <init> ([ZIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun add (IZ)V
+	public final fun addAll (Lio/github/sooniln/fastcollect/BooleanArrayDeque;)Z
+	public fun addAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public fun addAll (Ljava/util/Collection;)Z
+	public fun addFirst (Z)V
+	public fun addLast (Z)V
+	public fun clear ()V
+	public final fun ensureCapacity (I)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun fill (Z)V
+	public fun foreach (Lio/github/sooniln/fastcollect/BooleanConsumer;)V
+	public fun get (I)Z
+	public fun getSize ()I
+	public fun hashCode ()I
+	public fun indexOf (Z)I
+	public fun iterator ()Lio/github/sooniln/fastcollect/MutableBooleanIterator;
+	public synthetic fun iterator ()Ljava/util/Iterator;
+	public synthetic fun iterator ()Lkotlin/collections/BooleanIterator;
+	public fun lastIndexOf (Z)I
+	public fun removeAll (Ljava/util/Collection;)Z
+	public fun removeAt (I)Z
+	public fun removeFirst ()Z
+	public fun removeLast ()Z
+	public fun removeRange (II)V
+	public fun retainAll (Ljava/util/Collection;)Z
+	public fun reverse ()V
+	public fun set (IZ)V
+	public fun sort ()V
+	public fun sortDescending ()V
+	public fun toBooleanArray ()[Z
+	public final fun trimToSize ()V
+}
+
+public abstract interface class io/github/sooniln/fastcollect/BooleanCollection : java/util/Collection, kotlin/jvm/internal/markers/KMappedMarker {
+	public fun contains (Ljava/lang/Object;)Z
+	public fun contains (Z)Z
+	public fun containsAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public fun containsAll (Ljava/util/Collection;)Z
+	public fun foreach (Lio/github/sooniln/fastcollect/BooleanConsumer;)V
+	public fun isEmpty ()Z
+	public synthetic fun iterator ()Ljava/util/Iterator;
+	public abstract fun iterator ()Lkotlin/collections/BooleanIterator;
+	public fun toBooleanArray ()[Z
+}
+
+public final class io/github/sooniln/fastcollect/BooleanCollection$DefaultImpls {
+	public static fun contains (Lio/github/sooniln/fastcollect/BooleanCollection;Z)Z
+	public static fun containsAll (Lio/github/sooniln/fastcollect/BooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun containsAll (Lio/github/sooniln/fastcollect/BooleanCollection;Ljava/util/Collection;)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/BooleanCollection;Lio/github/sooniln/fastcollect/BooleanConsumer;)V
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun toBooleanArray (Lio/github/sooniln/fastcollect/BooleanCollection;)[Z
+}
+
+public abstract interface class io/github/sooniln/fastcollect/BooleanConsumer {
+	public abstract fun accept (Z)V
+}
+
+public abstract interface class io/github/sooniln/fastcollect/BooleanList : io/github/sooniln/fastcollect/BooleanCollection {
+	public fun contains (Ljava/lang/Object;)Z
+	public fun contains (Z)Z
+	public fun containsAll (Ljava/util/Collection;)Z
+	public abstract fun get (I)Z
+	public fun indexOf (Z)I
+	public fun lastIndexOf (Z)I
+	public abstract fun listIterator ()Lio/github/sooniln/fastcollect/BooleanListIterator;
+	public abstract fun listIterator (I)Lio/github/sooniln/fastcollect/BooleanListIterator;
+	public abstract fun subList (II)Lio/github/sooniln/fastcollect/BooleanList;
+}
+
+public final class io/github/sooniln/fastcollect/BooleanList$DefaultImpls {
+	public static fun contains (Lio/github/sooniln/fastcollect/BooleanList;Z)Z
+	public static fun containsAll (Lio/github/sooniln/fastcollect/BooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun containsAll (Lio/github/sooniln/fastcollect/BooleanList;Ljava/util/Collection;)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/BooleanList;Lio/github/sooniln/fastcollect/BooleanConsumer;)V
+	public static fun indexOf (Lio/github/sooniln/fastcollect/BooleanList;Z)I
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/BooleanList;)Z
+	public static fun lastIndexOf (Lio/github/sooniln/fastcollect/BooleanList;Z)I
+	public static fun toBooleanArray (Lio/github/sooniln/fastcollect/BooleanList;)[Z
+}
+
+public abstract class io/github/sooniln/fastcollect/BooleanListIterator : kotlin/collections/BooleanIterator, java/util/ListIterator, kotlin/jvm/internal/markers/KMappedMarker {
+	public fun <init> ()V
+	public synthetic fun add (Ljava/lang/Object;)V
+	public fun add (Z)V
+	public fun hasNext ()Z
+	public final fun previous ()Ljava/lang/Boolean;
+	public synthetic fun previous ()Ljava/lang/Object;
+	public abstract fun previousBoolean ()Z
+	public synthetic fun set (Ljava/lang/Object;)V
+	public fun set (Z)V
+}
+
 public final class io/github/sooniln/fastcollect/ByteArrayDeque : io/github/sooniln/fastcollect/AbstractMutableByteList, java/util/RandomAccess {
 	public fun <init> (I)V
 	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -1192,48 +1386,58 @@ public abstract interface class io/github/sooniln/fastcollect/BytePredicate {
 }
 
 public final class io/github/sooniln/fastcollect/Collections {
+	public static final synthetic fun all (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/DoubleCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/FloatCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/IntCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/LongCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/ShortCollection;Lkotlin/jvm/functions/Function1;)Z
+	public static final synthetic fun any (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/DoubleCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/FloatCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/IntCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/LongCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/ShortCollection;Lkotlin/jvm/functions/Function1;)Z
+	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/BooleanCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/ByteCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/DoubleCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/FloatCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/IntCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/LongCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/ShortCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
+	public static final synthetic fun none (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/DoubleCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/FloatCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/IntCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/LongCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/ShortCollection;Lkotlin/jvm/functions/Function1;)Z
+	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function2;)Z
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function2;)B
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/DoubleCollection;Lkotlin/jvm/functions/Function2;)D
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/FloatCollection;Lkotlin/jvm/functions/Function2;)F
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/IntCollection;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/LongCollection;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/ShortCollection;Lkotlin/jvm/functions/Function2;)S
+	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableByteCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableDoubleCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableFloatCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableIntCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableLongCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableShortCollection;Lkotlin/jvm/functions/Function1;)Z
+	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableByteCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableDoubleCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableFloatCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableIntCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableLongCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableShortCollection;Lkotlin/jvm/functions/Function1;)Z
+	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)D
+	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)I
+	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)J
 	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)D
 	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)I
 	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)J
@@ -2435,13 +2639,16 @@ public final class io/github/sooniln/fastcollect/IntSets {
 }
 
 public final class io/github/sooniln/fastcollect/Iterators {
+	public static final fun booleanIteratorOf (Z)Lio/github/sooniln/fastcollect/BooleanListIterator;
 	public static final fun byteIteratorOf (B)Lio/github/sooniln/fastcollect/ByteListIterator;
 	public static final fun doubleIteratorOf (D)Lio/github/sooniln/fastcollect/DoubleListIterator;
+	public static final fun emptyBooleanIterator ()Lio/github/sooniln/fastcollect/BooleanListIterator;
 	public static final fun emptyByteIterator ()Lio/github/sooniln/fastcollect/ByteListIterator;
 	public static final fun emptyDoubleIterator ()Lio/github/sooniln/fastcollect/DoubleListIterator;
 	public static final fun emptyFloatIterator ()Lio/github/sooniln/fastcollect/FloatListIterator;
 	public static final fun emptyIntIterator ()Lio/github/sooniln/fastcollect/IntListIterator;
 	public static final fun emptyLongIterator ()Lio/github/sooniln/fastcollect/LongListIterator;
+	public static final fun emptyMutableBooleanIterator ()Lio/github/sooniln/fastcollect/MutableBooleanIterator;
 	public static final fun emptyMutableByteIterator ()Lio/github/sooniln/fastcollect/MutableByteIterator;
 	public static final fun emptyMutableDoubleIterator ()Lio/github/sooniln/fastcollect/MutableDoubleIterator;
 	public static final fun emptyMutableFloatIterator ()Lio/github/sooniln/fastcollect/MutableFloatIterator;
@@ -2456,11 +2663,13 @@ public final class io/github/sooniln/fastcollect/Iterators {
 }
 
 public final class io/github/sooniln/fastcollect/Lists {
+	public static final synthetic fun BooleanList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/BooleanList;
 	public static final synthetic fun ByteList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/ByteList;
 	public static final synthetic fun DoubleList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/DoubleList;
 	public static final synthetic fun FloatList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/FloatList;
 	public static final synthetic fun IntList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/IntList;
 	public static final synthetic fun LongList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/LongList;
+	public static final synthetic fun MutableBooleanList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableBooleanList;
 	public static final synthetic fun MutableByteList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableByteList;
 	public static final synthetic fun MutableDoubleList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableDoubleList;
 	public static final synthetic fun MutableFloatList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableFloatList;
@@ -2468,10 +2677,12 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final synthetic fun MutableLongList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableLongList;
 	public static final synthetic fun MutableShortList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableShortList;
 	public static final synthetic fun ShortList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/ShortList;
+	public static final fun asBooleanList ([Z)Lio/github/sooniln/fastcollect/BooleanList;
 	public static final fun asByteList ([B)Lio/github/sooniln/fastcollect/ByteList;
 	public static final fun asDoubleList ([D)Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun asFloatList ([F)Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun asIntList ([I)Lio/github/sooniln/fastcollect/IntList;
+	public static final fun asList (Lio/github/sooniln/fastcollect/BooleanList;)Ljava/util/List;
 	public static final fun asList (Lio/github/sooniln/fastcollect/ByteList;)Ljava/util/List;
 	public static final fun asList (Lio/github/sooniln/fastcollect/DoubleList;)Ljava/util/List;
 	public static final fun asList (Lio/github/sooniln/fastcollect/FloatList;)Ljava/util/List;
@@ -2479,6 +2690,7 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun asList (Lio/github/sooniln/fastcollect/LongList;)Ljava/util/List;
 	public static final fun asList (Lio/github/sooniln/fastcollect/ShortList;)Ljava/util/List;
 	public static final fun asLongList ([J)Lio/github/sooniln/fastcollect/LongList;
+	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableBooleanList;)Ljava/util/List;
 	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableByteList;)Ljava/util/List;
 	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableDoubleList;)Ljava/util/List;
 	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableFloatList;)Ljava/util/List;
@@ -2486,6 +2698,11 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableLongList;)Ljava/util/List;
 	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableShortList;)Ljava/util/List;
 	public static final fun asShortList ([S)Lio/github/sooniln/fastcollect/ShortList;
+	public static final fun booleanListOf ()Lio/github/sooniln/fastcollect/BooleanList;
+	public static final fun booleanListOf (Z)Lio/github/sooniln/fastcollect/BooleanList;
+	public static final fun booleanListOf ([Z)Lio/github/sooniln/fastcollect/BooleanList;
+	public static final synthetic fun buildBooleanList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/BooleanList;
+	public static synthetic fun buildBooleanList$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/BooleanList;
 	public static final synthetic fun buildByteList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/ByteList;
 	public static synthetic fun buildByteList$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/ByteList;
 	public static final synthetic fun buildDoubleList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/DoubleList;
@@ -2504,12 +2721,14 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun doubleListOf ()Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun doubleListOf (D)Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun doubleListOf ([D)Lio/github/sooniln/fastcollect/DoubleList;
+	public static final fun emptyBooleanList ()Lio/github/sooniln/fastcollect/BooleanList;
 	public static final fun emptyByteList ()Lio/github/sooniln/fastcollect/ByteList;
 	public static final fun emptyDoubleList ()Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun emptyFloatList ()Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun emptyIntList ()Lio/github/sooniln/fastcollect/IntList;
 	public static final fun emptyLongList ()Lio/github/sooniln/fastcollect/LongList;
 	public static final fun emptyShortList ()Lio/github/sooniln/fastcollect/ShortList;
+	public static final synthetic fun first (Lio/github/sooniln/fastcollect/BooleanList;)Z
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/ByteList;)B
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/DoubleList;)D
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/FloatList;)F
@@ -2519,12 +2738,14 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun floatListOf ()Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun floatListOf (F)Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun floatListOf ([F)Lio/github/sooniln/fastcollect/FloatList;
+	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/BooleanList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/ByteList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/DoubleList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/FloatList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/IntList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/LongList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/ShortList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
+	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/BooleanList;)I
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/ByteList;)I
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/DoubleList;)I
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/FloatList;)I
@@ -2534,6 +2755,7 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun intListOf ()Lio/github/sooniln/fastcollect/IntList;
 	public static final fun intListOf (I)Lio/github/sooniln/fastcollect/IntList;
 	public static final fun intListOf ([I)Lio/github/sooniln/fastcollect/IntList;
+	public static final synthetic fun last (Lio/github/sooniln/fastcollect/BooleanList;)Z
 	public static final synthetic fun last (Lio/github/sooniln/fastcollect/ByteList;)B
 	public static final synthetic fun last (Lio/github/sooniln/fastcollect/DoubleList;)D
 	public static final synthetic fun last (Lio/github/sooniln/fastcollect/FloatList;)F
@@ -2543,6 +2765,9 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun longListOf ()Lio/github/sooniln/fastcollect/LongList;
 	public static final fun longListOf (J)Lio/github/sooniln/fastcollect/LongList;
 	public static final fun longListOf ([J)Lio/github/sooniln/fastcollect/LongList;
+	public static final fun mutableBooleanListOf ()Lio/github/sooniln/fastcollect/MutableBooleanList;
+	public static final fun mutableBooleanListOf (Z)Lio/github/sooniln/fastcollect/MutableBooleanList;
+	public static final fun mutableBooleanListOf ([Z)Lio/github/sooniln/fastcollect/MutableBooleanList;
 	public static final fun mutableByteListOf ()Lio/github/sooniln/fastcollect/MutableByteList;
 	public static final fun mutableByteListOf (B)Lio/github/sooniln/fastcollect/MutableByteList;
 	public static final fun mutableByteListOf ([B)Lio/github/sooniln/fastcollect/MutableByteList;
@@ -2561,6 +2786,8 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun mutableShortListOf ()Lio/github/sooniln/fastcollect/MutableShortList;
 	public static final fun mutableShortListOf (S)Lio/github/sooniln/fastcollect/MutableShortList;
 	public static final fun mutableShortListOf ([S)Lio/github/sooniln/fastcollect/MutableShortList;
+	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/BooleanList;II)I
+	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/BooleanList;III)V
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ByteList;II)I
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ByteList;III)V
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/DoubleList;II)I
@@ -2573,6 +2800,8 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/LongList;III)V
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ShortList;II)I
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ShortList;III)V
+	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/BooleanList;IIIILjava/lang/Object;)V
+	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/BooleanList;IIILjava/lang/Object;)I
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/ByteList;IIIILjava/lang/Object;)V
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/ByteList;IIILjava/lang/Object;)I
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/DoubleList;IIIILjava/lang/Object;)V
@@ -2585,12 +2814,14 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/LongList;IIILjava/lang/Object;)I
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/ShortList;IIIILjava/lang/Object;)V
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/ShortList;IIILjava/lang/Object;)I
+	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/BooleanList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/ByteList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/DoubleList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/FloatList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/IntList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/LongList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/ShortList;I)I
+	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/BooleanList;Lkotlin/jvm/functions/Function2;)Z
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function2;)B
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function2;)D
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function2;)F
@@ -3274,6 +3505,131 @@ public final class io/github/sooniln/fastcollect/LongSets {
 	public static final fun mutableLongSetOf ([J)Lio/github/sooniln/fastcollect/MutableLongSet;
 	public static final fun subtract (Lio/github/sooniln/fastcollect/LongSet;Lio/github/sooniln/fastcollect/LongSet;)Lio/github/sooniln/fastcollect/LongSet;
 	public static final fun union (Lio/github/sooniln/fastcollect/LongSet;Lio/github/sooniln/fastcollect/LongSet;)Lio/github/sooniln/fastcollect/LongSet;
+}
+
+public abstract interface class io/github/sooniln/fastcollect/MutableBooleanCollection : io/github/sooniln/fastcollect/BooleanCollection, java/util/Collection, kotlin/jvm/internal/markers/KMutableCollection {
+	public synthetic fun add (Ljava/lang/Object;)Z
+	public abstract fun add (Z)Z
+	public fun addAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public fun addAll (Ljava/util/Collection;)Z
+	public fun clear ()V
+	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableBooleanIterator;
+	public synthetic fun iterator ()Ljava/util/Iterator;
+	public synthetic fun iterator ()Lkotlin/collections/BooleanIterator;
+	public fun minusAssign (Lio/github/sooniln/fastcollect/BooleanCollection;)V
+	public fun minusAssign (Ljava/util/Collection;)V
+	public fun minusAssign (Z)V
+	public fun plusAssign (Lio/github/sooniln/fastcollect/BooleanCollection;)V
+	public fun plusAssign (Ljava/util/Collection;)V
+	public fun plusAssign (Z)V
+	public fun remove (Ljava/lang/Object;)Z
+	public abstract fun remove (Z)Z
+	public fun removeAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public fun removeAll (Ljava/util/Collection;)Z
+	public fun retainAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public fun retainAll (Ljava/util/Collection;)Z
+}
+
+public final class io/github/sooniln/fastcollect/MutableBooleanCollection$DefaultImpls {
+	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)Z
+	public static fun clear (Lio/github/sooniln/fastcollect/MutableBooleanCollection;)V
+	public static fun contains (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Z)Z
+	public static fun containsAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun containsAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanConsumer;)V
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/MutableBooleanCollection;)Z
+	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)V
+	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)V
+	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Z)V
+	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)V
+	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)V
+	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Z)V
+	public static fun removeAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun removeAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)Z
+	public static fun retainAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun retainAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)Z
+	public static fun toBooleanArray (Lio/github/sooniln/fastcollect/MutableBooleanCollection;)[Z
+}
+
+public abstract class io/github/sooniln/fastcollect/MutableBooleanIterator : kotlin/collections/BooleanIterator, java/util/Iterator, kotlin/jvm/internal/markers/KMutableIterator {
+	public fun <init> ()V
+}
+
+public abstract interface class io/github/sooniln/fastcollect/MutableBooleanList : io/github/sooniln/fastcollect/BooleanList, io/github/sooniln/fastcollect/MutableBooleanCollection {
+	public abstract fun add (IZ)V
+	public synthetic fun add (Ljava/lang/Object;)Z
+	public fun add (Z)Z
+	public fun addAll (ILio/github/sooniln/fastcollect/BooleanCollection;)V
+	public fun addAll (ILjava/util/Collection;)V
+	public fun addAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public fun addAll (Ljava/util/Collection;)Z
+	public fun addFirst (Z)V
+	public fun addLast (Z)V
+	public fun clear ()V
+	public fun fill (Z)V
+	public synthetic fun listIterator ()Lio/github/sooniln/fastcollect/BooleanListIterator;
+	public abstract fun listIterator ()Lio/github/sooniln/fastcollect/MutableBooleanListIterator;
+	public synthetic fun listIterator (I)Lio/github/sooniln/fastcollect/BooleanListIterator;
+	public abstract fun listIterator (I)Lio/github/sooniln/fastcollect/MutableBooleanListIterator;
+	public fun remove (Ljava/lang/Object;)Z
+	public fun remove (Z)Z
+	public fun removeAll (Ljava/util/Collection;)Z
+	public abstract fun removeAt (I)Z
+	public fun removeFirst ()Z
+	public fun removeLast ()Z
+	public abstract fun removeRange (II)V
+	public fun replace (IZ)Z
+	public fun retainAll (Ljava/util/Collection;)Z
+	public fun reverse ()V
+	public abstract fun set (IZ)V
+	public fun shuffle ()V
+	public fun sort ()V
+	public fun sortDescending ()V
+	public synthetic fun subList (II)Lio/github/sooniln/fastcollect/BooleanList;
+	public abstract fun subList (II)Lio/github/sooniln/fastcollect/MutableBooleanList;
+}
+
+public final class io/github/sooniln/fastcollect/MutableBooleanList$DefaultImpls {
+	public static fun add (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)Z
+	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanList;ILio/github/sooniln/fastcollect/BooleanCollection;)V
+	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanList;ILjava/util/Collection;)V
+	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)Z
+	public static fun addFirst (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)V
+	public static fun addLast (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)V
+	public static fun clear (Lio/github/sooniln/fastcollect/MutableBooleanList;)V
+	public static fun contains (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)Z
+	public static fun containsAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun containsAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)Z
+	public static fun fill (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)V
+	public static fun foreach (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanConsumer;)V
+	public static fun indexOf (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)I
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/MutableBooleanList;)Z
+	public static fun lastIndexOf (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)I
+	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)V
+	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)V
+	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)V
+	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)V
+	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)V
+	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)V
+	public static fun remove (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)Z
+	public static fun removeAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun removeAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)Z
+	public static fun removeFirst (Lio/github/sooniln/fastcollect/MutableBooleanList;)Z
+	public static fun removeLast (Lio/github/sooniln/fastcollect/MutableBooleanList;)Z
+	public static fun replace (Lio/github/sooniln/fastcollect/MutableBooleanList;IZ)Z
+	public static fun retainAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
+	public static fun retainAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)Z
+	public static fun reverse (Lio/github/sooniln/fastcollect/MutableBooleanList;)V
+	public static fun shuffle (Lio/github/sooniln/fastcollect/MutableBooleanList;)V
+	public static fun sort (Lio/github/sooniln/fastcollect/MutableBooleanList;)V
+	public static fun sortDescending (Lio/github/sooniln/fastcollect/MutableBooleanList;)V
+	public static fun toBooleanArray (Lio/github/sooniln/fastcollect/MutableBooleanList;)[Z
+}
+
+public abstract class io/github/sooniln/fastcollect/MutableBooleanListIterator : io/github/sooniln/fastcollect/BooleanListIterator, java/util/ListIterator, kotlin/jvm/internal/markers/KMutableListIterator {
+	public fun <init> ()V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableByteCollection : io/github/sooniln/fastcollect/ByteCollection, java/util/Collection, kotlin/jvm/internal/markers/KMutableCollection {

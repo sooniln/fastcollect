@@ -46,7 +46,7 @@ public class ${Type}ArrayDeque private constructor(array: ${Type}Array, size: In
     private fun grow(capacity: Int) {
         val oldCapacity = ring.size
         val newCapacity = if (oldCapacity > 0 || ring !== EMPTY_ARRAY) {
-            ArrayUtils.growArraySize(oldCapacity, capacity - oldCapacity)
+            growArraySize(oldCapacity, capacity - oldCapacity)
         } else {
             max(DEFAULT_CAPACITY, capacity)
         }
@@ -406,7 +406,7 @@ public class ${Type}ArrayDeque private constructor(array: ${Type}Array, size: In
         if (tail > ring.size) {
             val end = tail - ring.size
             if (ring.size - head > end) {
-                head = head - end
+                head -= end
                 ring.copyInto(ring, head, 0, end)
             } else {
                 ring.copyInto(ring, end, head, ring.size)
@@ -532,7 +532,7 @@ public class ${Type}ArrayDeque private constructor(array: ${Type}Array, size: In
             check(previousPosition != -1)
 
             val d = removeAtInternal(previousPosition)
-            tail = tail + d
+            tail += d
             position = ring.negativeMod(position + d)
             previousPosition = -1
         }
@@ -589,5 +589,7 @@ public class ${Type}ArrayDeque private constructor(array: ${Type}Array, size: In
     }
 }
 
+<% if(Type != "Boolean") { %>
 public fun ${Type}ArrayDeque.removeAll(predicate: ${Type}Predicate): Boolean = filterInPlace { predicate.test(it) }
 public fun ${Type}ArrayDeque.retainAll(predicate: ${Type}Predicate): Boolean = filterInPlace { !predicate.test(it) }
+<% } %>

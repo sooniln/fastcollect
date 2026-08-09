@@ -155,6 +155,7 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "Iterator.kte",
                 listOf(
+                    mapOf("Type" to "Boolean"),
                     mapOf("Type" to "Byte"),
                     mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
@@ -165,6 +166,7 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "Collection.kte",
                 listOf(
+                    mapOf("Type" to "Boolean"),
                     mapOf("Type" to "Byte"),
                     mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
@@ -175,6 +177,7 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "List.kte",
                 listOf(
+                    mapOf("Type" to "Boolean"),
                     mapOf("Type" to "Byte"),
                     mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
@@ -185,6 +188,7 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "ArrayDeque.kte",
                 listOf(
+                    mapOf("Type" to "Boolean"),
                     mapOf("Type" to "Byte"),
                     mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
