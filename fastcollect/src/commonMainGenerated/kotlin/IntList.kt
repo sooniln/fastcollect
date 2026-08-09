@@ -371,6 +371,13 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
 
 public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList {
 
+    override fun add(element: Int): Boolean = super<MutableIntList>.add(element)
+    override fun remove(element: Int): Boolean = super<MutableIntList>.remove(element)
+    override fun clear(): Unit = super<MutableIntList>.clear()
+    override fun addAll(elements: Collection<Int>): Boolean = super<MutableIntList>.addAll(elements)
+    override fun removeAll(elements: Collection<Int>): Boolean = super<MutableIntList>.removeAll(elements)
+    override fun retainAll(elements: Collection<Int>): Boolean = super<MutableIntList>.retainAll(elements)
+
     override fun removeRange(fromIndex: Int, toIndex: Int) {
         if (fromIndex == 0 && toIndex == 0) return
 

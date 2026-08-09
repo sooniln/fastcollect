@@ -88,7 +88,10 @@ public abstract class AbstractDoubleSet : AbstractDoubleCollection(), DoubleSet 
     }
 }
 
-public abstract class AbstractMutableDoubleSet : AbstractDoubleSet(), MutableDoubleSet
+public abstract class AbstractMutableDoubleSet : AbstractDoubleSet(), MutableDoubleSet {
+    override fun removeAll(elements: Collection<Double>): Boolean = super<MutableDoubleSet>.removeAll(elements)
+    override fun retainAll(elements: Collection<Double>): Boolean = super<MutableDoubleSet>.retainAll(elements)
+}
 
 public fun MutableDoubleSet.asMutableSet(): MutableSet<Double> = MutableDoubleSetWrapper(this)
 

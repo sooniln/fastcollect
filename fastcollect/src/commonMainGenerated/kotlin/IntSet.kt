@@ -88,7 +88,10 @@ public abstract class AbstractIntSet : AbstractIntCollection(), IntSet {
     }
 }
 
-public abstract class AbstractMutableIntSet : AbstractIntSet(), MutableIntSet
+public abstract class AbstractMutableIntSet : AbstractIntSet(), MutableIntSet {
+    override fun removeAll(elements: Collection<Int>): Boolean = super<MutableIntSet>.removeAll(elements)
+    override fun retainAll(elements: Collection<Int>): Boolean = super<MutableIntSet>.retainAll(elements)
+}
 
 public fun MutableIntSet.asMutableSet(): MutableSet<Int> = MutableIntSetWrapper(this)
 

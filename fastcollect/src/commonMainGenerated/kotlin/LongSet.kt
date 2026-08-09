@@ -88,7 +88,10 @@ public abstract class AbstractLongSet : AbstractLongCollection(), LongSet {
     }
 }
 
-public abstract class AbstractMutableLongSet : AbstractLongSet(), MutableLongSet
+public abstract class AbstractMutableLongSet : AbstractLongSet(), MutableLongSet {
+    override fun removeAll(elements: Collection<Long>): Boolean = super<MutableLongSet>.removeAll(elements)
+    override fun retainAll(elements: Collection<Long>): Boolean = super<MutableLongSet>.retainAll(elements)
+}
 
 public fun MutableLongSet.asMutableSet(): MutableSet<Long> = MutableLongSetWrapper(this)
 

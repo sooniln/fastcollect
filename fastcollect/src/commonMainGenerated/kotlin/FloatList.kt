@@ -371,6 +371,13 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
 
 public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFloatList {
 
+    override fun add(element: Float): Boolean = super<MutableFloatList>.add(element)
+    override fun remove(element: Float): Boolean = super<MutableFloatList>.remove(element)
+    override fun clear(): Unit = super<MutableFloatList>.clear()
+    override fun addAll(elements: Collection<Float>): Boolean = super<MutableFloatList>.addAll(elements)
+    override fun removeAll(elements: Collection<Float>): Boolean = super<MutableFloatList>.removeAll(elements)
+    override fun retainAll(elements: Collection<Float>): Boolean = super<MutableFloatList>.retainAll(elements)
+
     override fun removeRange(fromIndex: Int, toIndex: Int) {
         if (fromIndex == 0 && toIndex == 0) return
 

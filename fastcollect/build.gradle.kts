@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import org.gradle.kotlin.dsl.kotlin
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.abi.BinariesSource
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
@@ -19,7 +20,7 @@ repositories {
 }
 
 group = "io.github.sooniln"
-version = "3.0.1"
+version = "4.0.0"
 
 private data class TemplateInstantiation(
     val inputFile: String,
@@ -146,7 +147,6 @@ tasks.register<Sync>("GenerateCommonMain") {
                 "Predicate.kte",
                 listOf(
                     mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
@@ -156,7 +156,6 @@ tasks.register<Sync>("GenerateCommonMain") {
                 "Iterator.kte",
                 listOf(
                     mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
@@ -166,7 +165,6 @@ tasks.register<Sync>("GenerateCommonMain") {
                 "Collection.kte",
                 listOf(
                     mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
@@ -176,7 +174,6 @@ tasks.register<Sync>("GenerateCommonMain") {
                 "List.kte",
                 listOf(
                     mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
@@ -186,7 +183,6 @@ tasks.register<Sync>("GenerateCommonMain") {
                 "ArrayDeque.kte",
                 listOf(
                     mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
@@ -213,14 +209,12 @@ tasks.register<Sync>("GenerateCommonMain") {
                 "Map.kte",
                 listOf(
                     mapOf("KeyType" to "Int", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Short", "DefaultValue" to "Short.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
                     mapOf("KeyType" to "Int", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
                     mapOf("KeyType" to "Int", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
                     mapOf("KeyType" to "Long", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Short", "DefaultValue" to "Short.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
@@ -231,11 +225,9 @@ tasks.register<Sync>("GenerateCommonMain") {
                 "HashMap.kte",
                 listOf(
                     mapOf("KeyType" to "Int", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Short", "DefaultValue" to "Short.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
                     mapOf("KeyType" to "Long", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Short", "DefaultValue" to "Short.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
@@ -257,7 +249,6 @@ tasks.register<Sync>("GenerateCommonMain") {
                 "PriorityQueue.kte",
                 listOf(
                     mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
@@ -277,7 +268,6 @@ tasks.register<Sync>("GenerateJvmMain") {
                 "JvmPriorityQueue.kte",
                 listOf(
                     mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
@@ -292,6 +282,7 @@ kotlin {
     jvm {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
+            jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
         }
         testRuns["test"].executionTask.configure {
             useJUnit()

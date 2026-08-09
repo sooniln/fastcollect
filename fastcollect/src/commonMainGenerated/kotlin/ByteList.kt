@@ -371,6 +371,13 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
 
 public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteList {
 
+    override fun add(element: Byte): Boolean = super<MutableByteList>.add(element)
+    override fun remove(element: Byte): Boolean = super<MutableByteList>.remove(element)
+    override fun clear(): Unit = super<MutableByteList>.clear()
+    override fun addAll(elements: Collection<Byte>): Boolean = super<MutableByteList>.addAll(elements)
+    override fun removeAll(elements: Collection<Byte>): Boolean = super<MutableByteList>.removeAll(elements)
+    override fun retainAll(elements: Collection<Byte>): Boolean = super<MutableByteList>.retainAll(elements)
+
     override fun removeRange(fromIndex: Int, toIndex: Int) {
         if (fromIndex == 0 && toIndex == 0) return
 

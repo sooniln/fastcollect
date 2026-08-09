@@ -88,7 +88,10 @@ public abstract class AbstractFloatSet : AbstractFloatCollection(), FloatSet {
     }
 }
 
-public abstract class AbstractMutableFloatSet : AbstractFloatSet(), MutableFloatSet
+public abstract class AbstractMutableFloatSet : AbstractFloatSet(), MutableFloatSet {
+    override fun removeAll(elements: Collection<Float>): Boolean = super<MutableFloatSet>.removeAll(elements)
+    override fun retainAll(elements: Collection<Float>): Boolean = super<MutableFloatSet>.retainAll(elements)
+}
 
 public fun MutableFloatSet.asMutableSet(): MutableSet<Float> = MutableFloatSetWrapper(this)
 

@@ -88,7 +88,10 @@ public abstract class Abstract${Type}Set : Abstract${Type}Collection(), ${Type}S
     }
 }
 
-public abstract class AbstractMutable${Type}Set : Abstract${Type}Set(), Mutable${Type}Set
+public abstract class AbstractMutable${Type}Set : Abstract${Type}Set(), Mutable${Type}Set {
+    override fun removeAll(elements: Collection<${Type}>): Boolean = super<Mutable${Type}Set>.removeAll(elements)
+    override fun retainAll(elements: Collection<${Type}>): Boolean = super<Mutable${Type}Set>.retainAll(elements)
+}
 
 public fun Mutable${Type}Set.asMutableSet(): MutableSet<$Type> = Mutable${Type}SetWrapper(this)
 

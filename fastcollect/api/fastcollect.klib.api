@@ -1871,39 +1871,63 @@ abstract class io.github.sooniln.fastcollect/AbstractLongSet : io.github.sooniln
 abstract class io.github.sooniln.fastcollect/AbstractMutableByteList : io.github.sooniln.fastcollect/AbstractByteList, io.github.sooniln.fastcollect/MutableByteList { // io.github.sooniln.fastcollect/AbstractMutableByteList|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableByteList.<init>|<init>(){}[0]
 
+    open fun add(kotlin/Byte): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableByteList.add|add(kotlin.Byte){}[0]
+    open fun addAll(kotlin.collections/Collection<kotlin/Byte>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableByteList.addAll|addAll(kotlin.collections.Collection<kotlin.Byte>){}[0]
+    open fun clear() // io.github.sooniln.fastcollect/AbstractMutableByteList.clear|clear(){}[0]
     open fun iterator(): io.github.sooniln.fastcollect/MutableByteIterator // io.github.sooniln.fastcollect/AbstractMutableByteList.iterator|iterator(){}[0]
     open fun listIterator(): io.github.sooniln.fastcollect/MutableByteListIterator // io.github.sooniln.fastcollect/AbstractMutableByteList.listIterator|listIterator(){}[0]
     open fun listIterator(kotlin/Int): io.github.sooniln.fastcollect/MutableByteListIterator // io.github.sooniln.fastcollect/AbstractMutableByteList.listIterator|listIterator(kotlin.Int){}[0]
+    open fun remove(kotlin/Byte): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableByteList.remove|remove(kotlin.Byte){}[0]
+    open fun removeAll(kotlin.collections/Collection<kotlin/Byte>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableByteList.removeAll|removeAll(kotlin.collections.Collection<kotlin.Byte>){}[0]
     open fun removeRange(kotlin/Int, kotlin/Int) // io.github.sooniln.fastcollect/AbstractMutableByteList.removeRange|removeRange(kotlin.Int;kotlin.Int){}[0]
+    open fun retainAll(kotlin.collections/Collection<kotlin/Byte>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableByteList.retainAll|retainAll(kotlin.collections.Collection<kotlin.Byte>){}[0]
     open fun subList(kotlin/Int, kotlin/Int): io.github.sooniln.fastcollect/MutableByteList // io.github.sooniln.fastcollect/AbstractMutableByteList.subList|subList(kotlin.Int;kotlin.Int){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableDoubleList : io.github.sooniln.fastcollect/AbstractDoubleList, io.github.sooniln.fastcollect/MutableDoubleList { // io.github.sooniln.fastcollect/AbstractMutableDoubleList|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableDoubleList.<init>|<init>(){}[0]
 
+    open fun add(kotlin/Double): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableDoubleList.add|add(kotlin.Double){}[0]
+    open fun addAll(kotlin.collections/Collection<kotlin/Double>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableDoubleList.addAll|addAll(kotlin.collections.Collection<kotlin.Double>){}[0]
+    open fun clear() // io.github.sooniln.fastcollect/AbstractMutableDoubleList.clear|clear(){}[0]
     open fun iterator(): io.github.sooniln.fastcollect/MutableDoubleIterator // io.github.sooniln.fastcollect/AbstractMutableDoubleList.iterator|iterator(){}[0]
     open fun listIterator(): io.github.sooniln.fastcollect/MutableDoubleListIterator // io.github.sooniln.fastcollect/AbstractMutableDoubleList.listIterator|listIterator(){}[0]
     open fun listIterator(kotlin/Int): io.github.sooniln.fastcollect/MutableDoubleListIterator // io.github.sooniln.fastcollect/AbstractMutableDoubleList.listIterator|listIterator(kotlin.Int){}[0]
+    open fun remove(kotlin/Double): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableDoubleList.remove|remove(kotlin.Double){}[0]
+    open fun removeAll(kotlin.collections/Collection<kotlin/Double>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableDoubleList.removeAll|removeAll(kotlin.collections.Collection<kotlin.Double>){}[0]
     open fun removeRange(kotlin/Int, kotlin/Int) // io.github.sooniln.fastcollect/AbstractMutableDoubleList.removeRange|removeRange(kotlin.Int;kotlin.Int){}[0]
+    open fun retainAll(kotlin.collections/Collection<kotlin/Double>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableDoubleList.retainAll|retainAll(kotlin.collections.Collection<kotlin.Double>){}[0]
     open fun subList(kotlin/Int, kotlin/Int): io.github.sooniln.fastcollect/MutableDoubleList // io.github.sooniln.fastcollect/AbstractMutableDoubleList.subList|subList(kotlin.Int;kotlin.Int){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableDoubleSet : io.github.sooniln.fastcollect/AbstractDoubleSet, io.github.sooniln.fastcollect/MutableDoubleSet { // io.github.sooniln.fastcollect/AbstractMutableDoubleSet|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableDoubleSet.<init>|<init>(){}[0]
+
+    open fun removeAll(kotlin.collections/Collection<kotlin/Double>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableDoubleSet.removeAll|removeAll(kotlin.collections.Collection<kotlin.Double>){}[0]
+    open fun retainAll(kotlin.collections/Collection<kotlin/Double>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableDoubleSet.retainAll|retainAll(kotlin.collections.Collection<kotlin.Double>){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableFloatList : io.github.sooniln.fastcollect/AbstractFloatList, io.github.sooniln.fastcollect/MutableFloatList { // io.github.sooniln.fastcollect/AbstractMutableFloatList|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableFloatList.<init>|<init>(){}[0]
 
+    open fun add(kotlin/Float): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableFloatList.add|add(kotlin.Float){}[0]
+    open fun addAll(kotlin.collections/Collection<kotlin/Float>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableFloatList.addAll|addAll(kotlin.collections.Collection<kotlin.Float>){}[0]
+    open fun clear() // io.github.sooniln.fastcollect/AbstractMutableFloatList.clear|clear(){}[0]
     open fun iterator(): io.github.sooniln.fastcollect/MutableFloatIterator // io.github.sooniln.fastcollect/AbstractMutableFloatList.iterator|iterator(){}[0]
     open fun listIterator(): io.github.sooniln.fastcollect/MutableFloatListIterator // io.github.sooniln.fastcollect/AbstractMutableFloatList.listIterator|listIterator(){}[0]
     open fun listIterator(kotlin/Int): io.github.sooniln.fastcollect/MutableFloatListIterator // io.github.sooniln.fastcollect/AbstractMutableFloatList.listIterator|listIterator(kotlin.Int){}[0]
+    open fun remove(kotlin/Float): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableFloatList.remove|remove(kotlin.Float){}[0]
+    open fun removeAll(kotlin.collections/Collection<kotlin/Float>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableFloatList.removeAll|removeAll(kotlin.collections.Collection<kotlin.Float>){}[0]
     open fun removeRange(kotlin/Int, kotlin/Int) // io.github.sooniln.fastcollect/AbstractMutableFloatList.removeRange|removeRange(kotlin.Int;kotlin.Int){}[0]
+    open fun retainAll(kotlin.collections/Collection<kotlin/Float>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableFloatList.retainAll|retainAll(kotlin.collections.Collection<kotlin.Float>){}[0]
     open fun subList(kotlin/Int, kotlin/Int): io.github.sooniln.fastcollect/MutableFloatList // io.github.sooniln.fastcollect/AbstractMutableFloatList.subList|subList(kotlin.Int;kotlin.Int){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableFloatSet : io.github.sooniln.fastcollect/AbstractFloatSet, io.github.sooniln.fastcollect/MutableFloatSet { // io.github.sooniln.fastcollect/AbstractMutableFloatSet|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableFloatSet.<init>|<init>(){}[0]
+
+    open fun removeAll(kotlin.collections/Collection<kotlin/Float>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableFloatSet.removeAll|removeAll(kotlin.collections.Collection<kotlin.Float>){}[0]
+    open fun retainAll(kotlin.collections/Collection<kotlin/Float>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableFloatSet.retainAll|retainAll(kotlin.collections.Collection<kotlin.Float>){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableInt2ByteMap : io.github.sooniln.fastcollect/AbstractInt2ByteMap, io.github.sooniln.fastcollect/MutableInt2ByteMap { // io.github.sooniln.fastcollect/AbstractMutableInt2ByteMap|null[0]
@@ -1933,15 +1957,24 @@ abstract class io.github.sooniln.fastcollect/AbstractMutableInt2ShortMap : io.gi
 abstract class io.github.sooniln.fastcollect/AbstractMutableIntList : io.github.sooniln.fastcollect/AbstractIntList, io.github.sooniln.fastcollect/MutableIntList { // io.github.sooniln.fastcollect/AbstractMutableIntList|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableIntList.<init>|<init>(){}[0]
 
+    open fun add(kotlin/Int): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableIntList.add|add(kotlin.Int){}[0]
+    open fun addAll(kotlin.collections/Collection<kotlin/Int>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableIntList.addAll|addAll(kotlin.collections.Collection<kotlin.Int>){}[0]
+    open fun clear() // io.github.sooniln.fastcollect/AbstractMutableIntList.clear|clear(){}[0]
     open fun iterator(): io.github.sooniln.fastcollect/MutableIntIterator // io.github.sooniln.fastcollect/AbstractMutableIntList.iterator|iterator(){}[0]
     open fun listIterator(): io.github.sooniln.fastcollect/MutableIntListIterator // io.github.sooniln.fastcollect/AbstractMutableIntList.listIterator|listIterator(){}[0]
     open fun listIterator(kotlin/Int): io.github.sooniln.fastcollect/MutableIntListIterator // io.github.sooniln.fastcollect/AbstractMutableIntList.listIterator|listIterator(kotlin.Int){}[0]
+    open fun remove(kotlin/Int): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableIntList.remove|remove(kotlin.Int){}[0]
+    open fun removeAll(kotlin.collections/Collection<kotlin/Int>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableIntList.removeAll|removeAll(kotlin.collections.Collection<kotlin.Int>){}[0]
     open fun removeRange(kotlin/Int, kotlin/Int) // io.github.sooniln.fastcollect/AbstractMutableIntList.removeRange|removeRange(kotlin.Int;kotlin.Int){}[0]
+    open fun retainAll(kotlin.collections/Collection<kotlin/Int>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableIntList.retainAll|retainAll(kotlin.collections.Collection<kotlin.Int>){}[0]
     open fun subList(kotlin/Int, kotlin/Int): io.github.sooniln.fastcollect/MutableIntList // io.github.sooniln.fastcollect/AbstractMutableIntList.subList|subList(kotlin.Int;kotlin.Int){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableIntSet : io.github.sooniln.fastcollect/AbstractIntSet, io.github.sooniln.fastcollect/MutableIntSet { // io.github.sooniln.fastcollect/AbstractMutableIntSet|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableIntSet.<init>|<init>(){}[0]
+
+    open fun removeAll(kotlin.collections/Collection<kotlin/Int>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableIntSet.removeAll|removeAll(kotlin.collections.Collection<kotlin.Int>){}[0]
+    open fun retainAll(kotlin.collections/Collection<kotlin/Int>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableIntSet.retainAll|retainAll(kotlin.collections.Collection<kotlin.Int>){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableLong2ByteMap : io.github.sooniln.fastcollect/AbstractLong2ByteMap, io.github.sooniln.fastcollect/MutableLong2ByteMap { // io.github.sooniln.fastcollect/AbstractMutableLong2ByteMap|null[0]
@@ -1971,24 +2004,39 @@ abstract class io.github.sooniln.fastcollect/AbstractMutableLong2ShortMap : io.g
 abstract class io.github.sooniln.fastcollect/AbstractMutableLongList : io.github.sooniln.fastcollect/AbstractLongList, io.github.sooniln.fastcollect/MutableLongList { // io.github.sooniln.fastcollect/AbstractMutableLongList|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableLongList.<init>|<init>(){}[0]
 
+    open fun add(kotlin/Long): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongList.add|add(kotlin.Long){}[0]
+    open fun addAll(kotlin.collections/Collection<kotlin/Long>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongList.addAll|addAll(kotlin.collections.Collection<kotlin.Long>){}[0]
+    open fun clear() // io.github.sooniln.fastcollect/AbstractMutableLongList.clear|clear(){}[0]
     open fun iterator(): io.github.sooniln.fastcollect/MutableLongIterator // io.github.sooniln.fastcollect/AbstractMutableLongList.iterator|iterator(){}[0]
     open fun listIterator(): io.github.sooniln.fastcollect/MutableLongListIterator // io.github.sooniln.fastcollect/AbstractMutableLongList.listIterator|listIterator(){}[0]
     open fun listIterator(kotlin/Int): io.github.sooniln.fastcollect/MutableLongListIterator // io.github.sooniln.fastcollect/AbstractMutableLongList.listIterator|listIterator(kotlin.Int){}[0]
+    open fun remove(kotlin/Long): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongList.remove|remove(kotlin.Long){}[0]
+    open fun removeAll(kotlin.collections/Collection<kotlin/Long>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongList.removeAll|removeAll(kotlin.collections.Collection<kotlin.Long>){}[0]
     open fun removeRange(kotlin/Int, kotlin/Int) // io.github.sooniln.fastcollect/AbstractMutableLongList.removeRange|removeRange(kotlin.Int;kotlin.Int){}[0]
+    open fun retainAll(kotlin.collections/Collection<kotlin/Long>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongList.retainAll|retainAll(kotlin.collections.Collection<kotlin.Long>){}[0]
     open fun subList(kotlin/Int, kotlin/Int): io.github.sooniln.fastcollect/MutableLongList // io.github.sooniln.fastcollect/AbstractMutableLongList.subList|subList(kotlin.Int;kotlin.Int){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableLongSet : io.github.sooniln.fastcollect/AbstractLongSet, io.github.sooniln.fastcollect/MutableLongSet { // io.github.sooniln.fastcollect/AbstractMutableLongSet|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableLongSet.<init>|<init>(){}[0]
+
+    open fun removeAll(kotlin.collections/Collection<kotlin/Long>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongSet.removeAll|removeAll(kotlin.collections.Collection<kotlin.Long>){}[0]
+    open fun retainAll(kotlin.collections/Collection<kotlin/Long>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongSet.retainAll|retainAll(kotlin.collections.Collection<kotlin.Long>){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableShortList : io.github.sooniln.fastcollect/AbstractShortList, io.github.sooniln.fastcollect/MutableShortList { // io.github.sooniln.fastcollect/AbstractMutableShortList|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableShortList.<init>|<init>(){}[0]
 
+    open fun add(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableShortList.add|add(kotlin.Short){}[0]
+    open fun addAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableShortList.addAll|addAll(kotlin.collections.Collection<kotlin.Short>){}[0]
+    open fun clear() // io.github.sooniln.fastcollect/AbstractMutableShortList.clear|clear(){}[0]
     open fun iterator(): io.github.sooniln.fastcollect/MutableShortIterator // io.github.sooniln.fastcollect/AbstractMutableShortList.iterator|iterator(){}[0]
     open fun listIterator(): io.github.sooniln.fastcollect/MutableShortListIterator // io.github.sooniln.fastcollect/AbstractMutableShortList.listIterator|listIterator(){}[0]
     open fun listIterator(kotlin/Int): io.github.sooniln.fastcollect/MutableShortListIterator // io.github.sooniln.fastcollect/AbstractMutableShortList.listIterator|listIterator(kotlin.Int){}[0]
+    open fun remove(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableShortList.remove|remove(kotlin.Short){}[0]
+    open fun removeAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableShortList.removeAll|removeAll(kotlin.collections.Collection<kotlin.Short>){}[0]
     open fun removeRange(kotlin/Int, kotlin/Int) // io.github.sooniln.fastcollect/AbstractMutableShortList.removeRange|removeRange(kotlin.Int;kotlin.Int){}[0]
+    open fun retainAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableShortList.retainAll|retainAll(kotlin.collections.Collection<kotlin.Short>){}[0]
     open fun subList(kotlin/Int, kotlin/Int): io.github.sooniln.fastcollect/MutableShortList // io.github.sooniln.fastcollect/AbstractMutableShortList.subList|subList(kotlin.Int;kotlin.Int){}[0]
 }
 

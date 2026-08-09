@@ -371,6 +371,13 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
 
 public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongList {
 
+    override fun add(element: Long): Boolean = super<MutableLongList>.add(element)
+    override fun remove(element: Long): Boolean = super<MutableLongList>.remove(element)
+    override fun clear(): Unit = super<MutableLongList>.clear()
+    override fun addAll(elements: Collection<Long>): Boolean = super<MutableLongList>.addAll(elements)
+    override fun removeAll(elements: Collection<Long>): Boolean = super<MutableLongList>.removeAll(elements)
+    override fun retainAll(elements: Collection<Long>): Boolean = super<MutableLongList>.retainAll(elements)
+
     override fun removeRange(fromIndex: Int, toIndex: Int) {
         if (fromIndex == 0 && toIndex == 0) return
 

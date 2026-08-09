@@ -371,6 +371,13 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
 
 public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableDoubleList {
 
+    override fun add(element: Double): Boolean = super<MutableDoubleList>.add(element)
+    override fun remove(element: Double): Boolean = super<MutableDoubleList>.remove(element)
+    override fun clear(): Unit = super<MutableDoubleList>.clear()
+    override fun addAll(elements: Collection<Double>): Boolean = super<MutableDoubleList>.addAll(elements)
+    override fun removeAll(elements: Collection<Double>): Boolean = super<MutableDoubleList>.removeAll(elements)
+    override fun retainAll(elements: Collection<Double>): Boolean = super<MutableDoubleList>.retainAll(elements)
+
     override fun removeRange(fromIndex: Int, toIndex: Int) {
         if (fromIndex == 0 && toIndex == 0) return
 
