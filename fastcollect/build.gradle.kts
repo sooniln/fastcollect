@@ -155,7 +155,6 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "Iterator.kte",
                 listOf(
-                    mapOf("Type" to "Boolean"),
                     mapOf("Type" to "Byte"),
                     mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
@@ -166,7 +165,6 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "Collection.kte",
                 listOf(
-                    mapOf("Type" to "Boolean"),
                     mapOf("Type" to "Byte"),
                     mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
@@ -177,7 +175,6 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "List.kte",
                 listOf(
-                    mapOf("Type" to "Boolean"),
                     mapOf("Type" to "Byte"),
                     mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
@@ -188,7 +185,6 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "ArrayDeque.kte",
                 listOf(
-                    mapOf("Type" to "Boolean"),
                     mapOf("Type" to "Byte"),
                     mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
@@ -216,11 +212,15 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "Map.kte",
                 listOf(
+                    mapOf("KeyType" to "Int", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
+                    mapOf("KeyType" to "Int", "ValueType" to "Short", "DefaultValue" to "Short.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
                     mapOf("KeyType" to "Int", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
                     mapOf("KeyType" to "Int", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
+                    mapOf("KeyType" to "Long", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
+                    mapOf("KeyType" to "Long", "ValueType" to "Short", "DefaultValue" to "Short.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
@@ -230,8 +230,12 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "HashMap.kte",
                 listOf(
+                    mapOf("KeyType" to "Int", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
+                    mapOf("KeyType" to "Int", "ValueType" to "Short", "DefaultValue" to "Short.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
+                    mapOf("KeyType" to "Long", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
+                    mapOf("KeyType" to "Long", "ValueType" to "Short", "DefaultValue" to "Short.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
@@ -252,6 +256,8 @@ tasks.register<Sync>("GenerateCommonMain") {
             TemplateInstantiation(
                 "PriorityQueue.kte",
                 listOf(
+                    mapOf("Type" to "Byte"),
+                    mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),
@@ -270,6 +276,8 @@ tasks.register<Sync>("GenerateJvmMain") {
             TemplateInstantiation(
                 "JvmPriorityQueue.kte",
                 listOf(
+                    mapOf("Type" to "Byte"),
+                    mapOf("Type" to "Short"),
                     mapOf("Type" to "Int"),
                     mapOf("Type" to "Long"),
                     mapOf("Type" to "Float"),

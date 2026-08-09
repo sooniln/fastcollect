@@ -1,43 +1,3 @@
-public abstract class io/github/sooniln/fastcollect/AbstractBooleanCollection : io/github/sooniln/fastcollect/BooleanCollection {
-	public fun <init> ()V
-	public synthetic fun add (Ljava/lang/Object;)Z
-	public fun add (Z)Z
-	public fun addAll (Ljava/util/Collection;)Z
-	public fun clear ()V
-	public final fun contains (Ljava/lang/Object;)Z
-	public fun contains (Z)Z
-	public fun containsAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public fun containsAll (Ljava/util/Collection;)Z
-	public fun foreach (Lio/github/sooniln/fastcollect/BooleanConsumer;)V
-	public abstract fun getSize ()I
-	public fun isEmpty ()Z
-	public fun iterator ()Ljava/util/Iterator;
-	public fun remove (Ljava/lang/Object;)Z
-	public fun removeAll (Ljava/util/Collection;)Z
-	public fun removeIf (Ljava/util/function/Predicate;)Z
-	public fun retainAll (Ljava/util/Collection;)Z
-	public final fun size ()I
-	public fun toArray ()[Ljava/lang/Object;
-	public fun toArray ([Ljava/lang/Object;)[Ljava/lang/Object;
-	public fun toBooleanArray ()[Z
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract class io/github/sooniln/fastcollect/AbstractBooleanList : io/github/sooniln/fastcollect/AbstractBooleanCollection, io/github/sooniln/fastcollect/BooleanList {
-	public fun <init> ()V
-	public fun contains (Z)Z
-	public fun containsAll (Ljava/util/Collection;)Z
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun indexOf (Z)I
-	public synthetic fun iterator ()Ljava/util/Iterator;
-	public fun iterator ()Lkotlin/collections/BooleanIterator;
-	public fun lastIndexOf (Z)I
-	public fun listIterator ()Lio/github/sooniln/fastcollect/BooleanListIterator;
-	public fun listIterator (I)Lio/github/sooniln/fastcollect/BooleanListIterator;
-	public fun subList (II)Lio/github/sooniln/fastcollect/BooleanList;
-}
-
 public abstract class io/github/sooniln/fastcollect/AbstractByteCollection : io/github/sooniln/fastcollect/ByteCollection {
 	public fun <init> ()V
 	public fun add (B)Z
@@ -76,6 +36,39 @@ public abstract class io/github/sooniln/fastcollect/AbstractByteList : io/github
 	public fun listIterator ()Lio/github/sooniln/fastcollect/ByteListIterator;
 	public fun listIterator (I)Lio/github/sooniln/fastcollect/ByteListIterator;
 	public fun subList (II)Lio/github/sooniln/fastcollect/ByteList;
+}
+
+public abstract class io/github/sooniln/fastcollect/AbstractBytePriorityQueue {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/ByteCollection;)V
+	public fun <init> (Ljava/util/Collection;)V
+	public fun <init> ([BII)V
+	public synthetic fun <init> ([BIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun add (B)V
+	public final fun addAll (Lio/github/sooniln/fastcollect/ByteCollection;)V
+	public final fun addAll (Ljava/util/Collection;)V
+	public final fun clear ()V
+	public final fun contains (B)Z
+	public final fun ensureCapacity (I)V
+	public final fun first ()B
+	public final fun getSize ()I
+	protected final fun heapify ()V
+	public final fun isEmpty ()Z
+	protected abstract fun isHigherPriority (BB)Z
+	public final fun iterator ()Lkotlin/collections/ByteIterator;
+	protected fun onIndexChanged (BI)V
+	public final fun remove (B)Z
+	public final fun removeAll (Lio/github/sooniln/fastcollect/ByteCollection;)Z
+	public final fun removeAll (Ljava/util/Collection;)Z
+	protected final fun removeAt (I)V
+	public final fun removeFirst ()B
+	public final fun retainAll (Lio/github/sooniln/fastcollect/ByteCollection;)Z
+	public final fun retainAll (Ljava/util/Collection;)Z
+	public fun toString ()Ljava/lang/String;
+	public final fun trimToSize ()V
+	protected final fun updatePriority (I)V
 }
 
 public abstract class io/github/sooniln/fastcollect/AbstractDoubleCollection : io/github/sooniln/fastcollect/DoubleCollection {
@@ -263,6 +256,31 @@ public final class io/github/sooniln/fastcollect/AbstractInt2AnyMap$SimpleEntry 
 	public fun getValue ()Ljava/lang/Object;
 }
 
+public abstract class io/github/sooniln/fastcollect/AbstractInt2ByteMap : io/github/sooniln/fastcollect/Int2ByteMap {
+	public fun <init> ()V
+	public fun containsKey (I)Z
+	public fun containsValue (B)Z
+	public fun equals (Ljava/lang/Object;)Z
+	public fun foreach (Lio/github/sooniln/fastcollect/IntByteConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/IntConsumer;)V
+	public fun getOrDefault (IB)B
+	public fun getValue (I)B
+	public fun hashCode ()I
+	public fun isEmpty ()Z
+	public synthetic fun keys ()Lio/github/sooniln/fastcollect/IntSet;
+	public synthetic fun size ()I
+	public fun toString ()Ljava/lang/String;
+	public synthetic fun values ()Lio/github/sooniln/fastcollect/ByteCollection;
+}
+
+public final class io/github/sooniln/fastcollect/AbstractInt2ByteMap$SimpleEntry : io/github/sooniln/fastcollect/Int2ByteMap$Entry {
+	public fun <init> (IB)V
+	public fun component1 ()I
+	public fun component2 ()B
+	public fun getKey ()I
+	public fun getValue ()B
+}
+
 public abstract class io/github/sooniln/fastcollect/AbstractInt2DoubleMap : io/github/sooniln/fastcollect/Int2DoubleMap {
 	public fun <init> ()V
 	public fun containsKey (I)Z
@@ -361,6 +379,31 @@ public final class io/github/sooniln/fastcollect/AbstractInt2LongMap$SimpleEntry
 	public fun component2 ()J
 	public fun getKey ()I
 	public fun getValue ()J
+}
+
+public abstract class io/github/sooniln/fastcollect/AbstractInt2ShortMap : io/github/sooniln/fastcollect/Int2ShortMap {
+	public fun <init> ()V
+	public fun containsKey (I)Z
+	public fun containsValue (S)Z
+	public fun equals (Ljava/lang/Object;)Z
+	public fun foreach (Lio/github/sooniln/fastcollect/IntShortConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/IntConsumer;)V
+	public fun getOrDefault (IS)S
+	public fun getValue (I)S
+	public fun hashCode ()I
+	public fun isEmpty ()Z
+	public synthetic fun keys ()Lio/github/sooniln/fastcollect/IntSet;
+	public synthetic fun size ()I
+	public fun toString ()Ljava/lang/String;
+	public synthetic fun values ()Lio/github/sooniln/fastcollect/ShortCollection;
+}
+
+public final class io/github/sooniln/fastcollect/AbstractInt2ShortMap$SimpleEntry : io/github/sooniln/fastcollect/Int2ShortMap$Entry {
+	public fun <init> (IS)V
+	public fun component1 ()I
+	public fun component2 ()S
+	public fun getKey ()I
+	public fun getValue ()S
 }
 
 public abstract class io/github/sooniln/fastcollect/AbstractIntCollection : io/github/sooniln/fastcollect/IntCollection {
@@ -468,6 +511,31 @@ public final class io/github/sooniln/fastcollect/AbstractLong2AnyMap$SimpleEntry
 	public fun getValue ()Ljava/lang/Object;
 }
 
+public abstract class io/github/sooniln/fastcollect/AbstractLong2ByteMap : io/github/sooniln/fastcollect/Long2ByteMap {
+	public fun <init> ()V
+	public fun containsKey (J)Z
+	public fun containsValue (B)Z
+	public fun equals (Ljava/lang/Object;)Z
+	public fun foreach (Lio/github/sooniln/fastcollect/LongByteConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/LongConsumer;)V
+	public fun getOrDefault (JB)B
+	public fun getValue (J)B
+	public fun hashCode ()I
+	public fun isEmpty ()Z
+	public synthetic fun keys ()Lio/github/sooniln/fastcollect/LongSet;
+	public synthetic fun size ()I
+	public fun toString ()Ljava/lang/String;
+	public synthetic fun values ()Lio/github/sooniln/fastcollect/ByteCollection;
+}
+
+public final class io/github/sooniln/fastcollect/AbstractLong2ByteMap$SimpleEntry : io/github/sooniln/fastcollect/Long2ByteMap$Entry {
+	public fun <init> (JB)V
+	public fun component1 ()J
+	public fun component2 ()B
+	public fun getKey ()J
+	public fun getValue ()B
+}
+
 public abstract class io/github/sooniln/fastcollect/AbstractLong2DoubleMap : io/github/sooniln/fastcollect/Long2DoubleMap {
 	public fun <init> ()V
 	public fun containsKey (J)Z
@@ -568,6 +636,31 @@ public final class io/github/sooniln/fastcollect/AbstractLong2LongMap$SimpleEntr
 	public fun getValue ()J
 }
 
+public abstract class io/github/sooniln/fastcollect/AbstractLong2ShortMap : io/github/sooniln/fastcollect/Long2ShortMap {
+	public fun <init> ()V
+	public fun containsKey (J)Z
+	public fun containsValue (S)Z
+	public fun equals (Ljava/lang/Object;)Z
+	public fun foreach (Lio/github/sooniln/fastcollect/LongShortConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/LongConsumer;)V
+	public fun getOrDefault (JS)S
+	public fun getValue (J)S
+	public fun hashCode ()I
+	public fun isEmpty ()Z
+	public synthetic fun keys ()Lio/github/sooniln/fastcollect/LongSet;
+	public synthetic fun size ()I
+	public fun toString ()Ljava/lang/String;
+	public synthetic fun values ()Lio/github/sooniln/fastcollect/ShortCollection;
+}
+
+public final class io/github/sooniln/fastcollect/AbstractLong2ShortMap$SimpleEntry : io/github/sooniln/fastcollect/Long2ShortMap$Entry {
+	public fun <init> (JS)V
+	public fun component1 ()J
+	public fun component2 ()S
+	public fun getKey ()J
+	public fun getValue ()S
+}
+
 public abstract class io/github/sooniln/fastcollect/AbstractLongCollection : io/github/sooniln/fastcollect/LongCollection {
 	public fun <init> ()V
 	public fun add (J)Z
@@ -646,49 +739,6 @@ public abstract class io/github/sooniln/fastcollect/AbstractLongSet : io/github/
 	public fun contains (J)Z
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
-}
-
-public abstract class io/github/sooniln/fastcollect/AbstractMutableBooleanList : io/github/sooniln/fastcollect/AbstractBooleanList, io/github/sooniln/fastcollect/MutableBooleanList {
-	public fun <init> ()V
-	public synthetic fun add (Ljava/lang/Object;)Z
-	public fun add (Z)Z
-	public fun addAll (ILio/github/sooniln/fastcollect/BooleanCollection;)V
-	public fun addAll (ILjava/util/Collection;)V
-	public fun addAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public fun addAll (Ljava/util/Collection;)Z
-	public fun addFirst (Z)V
-	public fun addLast (Z)V
-	public fun clear ()V
-	public fun fill (Z)V
-	public fun iterator ()Lio/github/sooniln/fastcollect/MutableBooleanIterator;
-	public synthetic fun iterator ()Ljava/util/Iterator;
-	public synthetic fun iterator ()Lkotlin/collections/BooleanIterator;
-	public synthetic fun listIterator ()Lio/github/sooniln/fastcollect/BooleanListIterator;
-	public fun listIterator ()Lio/github/sooniln/fastcollect/MutableBooleanListIterator;
-	public synthetic fun listIterator (I)Lio/github/sooniln/fastcollect/BooleanListIterator;
-	public fun listIterator (I)Lio/github/sooniln/fastcollect/MutableBooleanListIterator;
-	public fun minusAssign (Lio/github/sooniln/fastcollect/BooleanCollection;)V
-	public fun minusAssign (Ljava/util/Collection;)V
-	public fun minusAssign (Z)V
-	public fun plusAssign (Lio/github/sooniln/fastcollect/BooleanCollection;)V
-	public fun plusAssign (Ljava/util/Collection;)V
-	public fun plusAssign (Z)V
-	public final fun remove (Ljava/lang/Object;)Z
-	public fun remove (Z)Z
-	public fun removeAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public fun removeAll (Ljava/util/Collection;)Z
-	public fun removeFirst ()Z
-	public fun removeLast ()Z
-	public fun removeRange (II)V
-	public fun replace (IZ)Z
-	public fun retainAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public fun retainAll (Ljava/util/Collection;)Z
-	public fun reverse ()V
-	public fun shuffle ()V
-	public fun sort ()V
-	public fun sortDescending ()V
-	public synthetic fun subList (II)Lio/github/sooniln/fastcollect/BooleanList;
-	public fun subList (II)Lio/github/sooniln/fastcollect/MutableBooleanList;
 }
 
 public abstract class io/github/sooniln/fastcollect/AbstractMutableByteList : io/github/sooniln/fastcollect/AbstractByteList, io/github/sooniln/fastcollect/MutableByteList {
@@ -867,6 +917,15 @@ public abstract class io/github/sooniln/fastcollect/AbstractMutableInt2AnyMap : 
 	public fun set (ILjava/lang/Object;)V
 }
 
+public abstract class io/github/sooniln/fastcollect/AbstractMutableInt2ByteMap : io/github/sooniln/fastcollect/AbstractInt2ByteMap, io/github/sooniln/fastcollect/MutableInt2ByteMap {
+	public fun <init> ()V
+	public fun putAll (Lio/github/sooniln/fastcollect/Int2ByteMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public fun removeKey (I)B
+	public fun replace (IB)B
+	public fun set (IB)V
+}
+
 public abstract class io/github/sooniln/fastcollect/AbstractMutableInt2DoubleMap : io/github/sooniln/fastcollect/AbstractInt2DoubleMap, io/github/sooniln/fastcollect/MutableInt2DoubleMap {
 	public fun <init> ()V
 	public fun putAll (Lio/github/sooniln/fastcollect/Int2DoubleMap;)V
@@ -901,6 +960,15 @@ public abstract class io/github/sooniln/fastcollect/AbstractMutableInt2LongMap :
 	public fun removeKey (I)J
 	public fun replace (IJ)J
 	public fun set (IJ)V
+}
+
+public abstract class io/github/sooniln/fastcollect/AbstractMutableInt2ShortMap : io/github/sooniln/fastcollect/AbstractInt2ShortMap, io/github/sooniln/fastcollect/MutableInt2ShortMap {
+	public fun <init> ()V
+	public fun putAll (Lio/github/sooniln/fastcollect/Int2ShortMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public fun removeKey (I)S
+	public fun replace (IS)S
+	public fun set (IS)V
 }
 
 public abstract class io/github/sooniln/fastcollect/AbstractMutableIntList : io/github/sooniln/fastcollect/AbstractIntList, io/github/sooniln/fastcollect/MutableIntList {
@@ -974,6 +1042,15 @@ public abstract class io/github/sooniln/fastcollect/AbstractMutableLong2AnyMap :
 	public fun set (JLjava/lang/Object;)V
 }
 
+public abstract class io/github/sooniln/fastcollect/AbstractMutableLong2ByteMap : io/github/sooniln/fastcollect/AbstractLong2ByteMap, io/github/sooniln/fastcollect/MutableLong2ByteMap {
+	public fun <init> ()V
+	public fun putAll (Lio/github/sooniln/fastcollect/Long2ByteMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public fun removeKey (J)B
+	public fun replace (JB)B
+	public fun set (JB)V
+}
+
 public abstract class io/github/sooniln/fastcollect/AbstractMutableLong2DoubleMap : io/github/sooniln/fastcollect/AbstractLong2DoubleMap, io/github/sooniln/fastcollect/MutableLong2DoubleMap {
 	public fun <init> ()V
 	public fun putAll (Lio/github/sooniln/fastcollect/Long2DoubleMap;)V
@@ -1008,6 +1085,15 @@ public abstract class io/github/sooniln/fastcollect/AbstractMutableLong2LongMap 
 	public fun removeKey (J)J
 	public fun replace (JJ)J
 	public fun set (JJ)V
+}
+
+public abstract class io/github/sooniln/fastcollect/AbstractMutableLong2ShortMap : io/github/sooniln/fastcollect/AbstractLong2ShortMap, io/github/sooniln/fastcollect/MutableLong2ShortMap {
+	public fun <init> ()V
+	public fun putAll (Lio/github/sooniln/fastcollect/Long2ShortMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public fun removeKey (J)S
+	public fun replace (JS)S
+	public fun set (JS)V
 }
 
 public abstract class io/github/sooniln/fastcollect/AbstractMutableLongList : io/github/sooniln/fastcollect/AbstractLongList, io/github/sooniln/fastcollect/MutableLongList {
@@ -1155,6 +1241,39 @@ public abstract class io/github/sooniln/fastcollect/AbstractShortList : io/githu
 	public fun subList (II)Lio/github/sooniln/fastcollect/ShortList;
 }
 
+public abstract class io/github/sooniln/fastcollect/AbstractShortPriorityQueue {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/ShortCollection;)V
+	public fun <init> (Ljava/util/Collection;)V
+	public fun <init> ([SII)V
+	public synthetic fun <init> ([SIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun add (S)V
+	public final fun addAll (Lio/github/sooniln/fastcollect/ShortCollection;)V
+	public final fun addAll (Ljava/util/Collection;)V
+	public final fun clear ()V
+	public final fun contains (S)Z
+	public final fun ensureCapacity (I)V
+	public final fun first ()S
+	public final fun getSize ()I
+	protected final fun heapify ()V
+	public final fun isEmpty ()Z
+	protected abstract fun isHigherPriority (SS)Z
+	public final fun iterator ()Lkotlin/collections/ShortIterator;
+	protected fun onIndexChanged (SI)V
+	public final fun remove (S)Z
+	public final fun removeAll (Lio/github/sooniln/fastcollect/ShortCollection;)Z
+	public final fun removeAll (Ljava/util/Collection;)Z
+	protected final fun removeAt (I)V
+	public final fun removeFirst ()S
+	public final fun retainAll (Lio/github/sooniln/fastcollect/ShortCollection;)Z
+	public final fun retainAll (Ljava/util/Collection;)Z
+	public fun toString ()Ljava/lang/String;
+	public final fun trimToSize ()V
+	protected final fun updatePriority (I)V
+}
+
 public final class io/github/sooniln/fastcollect/ArrayDeques {
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/ByteArrayDeque;Lio/github/sooniln/fastcollect/BytePredicate;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/DoubleArrayDeque;Lio/github/sooniln/fastcollect/DoublePredicate;)Z
@@ -1179,106 +1298,6 @@ public final class io/github/sooniln/fastcollect/ArrayUtils {
 	public static final fun sortDescending ([ZI)V
 	public static final fun sortDescending ([ZII)V
 	public static synthetic fun sortDescending$default ([ZIIILjava/lang/Object;)V
-}
-
-public final class io/github/sooniln/fastcollect/BooleanArrayDeque : io/github/sooniln/fastcollect/AbstractMutableBooleanList, java/util/RandomAccess {
-	public fun <init> (I)V
-	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Lio/github/sooniln/fastcollect/BooleanCollection;)V
-	public fun <init> (Ljava/util/Collection;)V
-	public fun <init> ([ZII)V
-	public synthetic fun <init> ([ZIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun add (IZ)V
-	public final fun addAll (Lio/github/sooniln/fastcollect/BooleanArrayDeque;)Z
-	public fun addAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public fun addAll (Ljava/util/Collection;)Z
-	public fun addFirst (Z)V
-	public fun addLast (Z)V
-	public fun clear ()V
-	public final fun ensureCapacity (I)V
-	public fun equals (Ljava/lang/Object;)Z
-	public fun fill (Z)V
-	public fun foreach (Lio/github/sooniln/fastcollect/BooleanConsumer;)V
-	public fun get (I)Z
-	public fun getSize ()I
-	public fun hashCode ()I
-	public fun indexOf (Z)I
-	public fun iterator ()Lio/github/sooniln/fastcollect/MutableBooleanIterator;
-	public synthetic fun iterator ()Ljava/util/Iterator;
-	public synthetic fun iterator ()Lkotlin/collections/BooleanIterator;
-	public fun lastIndexOf (Z)I
-	public fun removeAll (Ljava/util/Collection;)Z
-	public fun removeAt (I)Z
-	public fun removeFirst ()Z
-	public fun removeLast ()Z
-	public fun removeRange (II)V
-	public fun retainAll (Ljava/util/Collection;)Z
-	public fun reverse ()V
-	public fun set (IZ)V
-	public fun sort ()V
-	public fun sortDescending ()V
-	public fun toBooleanArray ()[Z
-	public final fun trimToSize ()V
-}
-
-public abstract interface class io/github/sooniln/fastcollect/BooleanCollection : java/util/Collection, kotlin/jvm/internal/markers/KMappedMarker {
-	public fun contains (Ljava/lang/Object;)Z
-	public fun contains (Z)Z
-	public fun containsAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public fun containsAll (Ljava/util/Collection;)Z
-	public fun foreach (Lio/github/sooniln/fastcollect/BooleanConsumer;)V
-	public fun isEmpty ()Z
-	public synthetic fun iterator ()Ljava/util/Iterator;
-	public abstract fun iterator ()Lkotlin/collections/BooleanIterator;
-	public fun toBooleanArray ()[Z
-}
-
-public final class io/github/sooniln/fastcollect/BooleanCollection$DefaultImpls {
-	public static fun contains (Lio/github/sooniln/fastcollect/BooleanCollection;Z)Z
-	public static fun containsAll (Lio/github/sooniln/fastcollect/BooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun containsAll (Lio/github/sooniln/fastcollect/BooleanCollection;Ljava/util/Collection;)Z
-	public static fun foreach (Lio/github/sooniln/fastcollect/BooleanCollection;Lio/github/sooniln/fastcollect/BooleanConsumer;)V
-	public static fun isEmpty (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun toBooleanArray (Lio/github/sooniln/fastcollect/BooleanCollection;)[Z
-}
-
-public abstract interface class io/github/sooniln/fastcollect/BooleanConsumer {
-	public abstract fun accept (Z)V
-}
-
-public abstract interface class io/github/sooniln/fastcollect/BooleanList : io/github/sooniln/fastcollect/BooleanCollection {
-	public fun contains (Ljava/lang/Object;)Z
-	public fun contains (Z)Z
-	public fun containsAll (Ljava/util/Collection;)Z
-	public abstract fun get (I)Z
-	public fun indexOf (Z)I
-	public fun lastIndexOf (Z)I
-	public abstract fun listIterator ()Lio/github/sooniln/fastcollect/BooleanListIterator;
-	public abstract fun listIterator (I)Lio/github/sooniln/fastcollect/BooleanListIterator;
-	public abstract fun subList (II)Lio/github/sooniln/fastcollect/BooleanList;
-}
-
-public final class io/github/sooniln/fastcollect/BooleanList$DefaultImpls {
-	public static fun contains (Lio/github/sooniln/fastcollect/BooleanList;Z)Z
-	public static fun containsAll (Lio/github/sooniln/fastcollect/BooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun containsAll (Lio/github/sooniln/fastcollect/BooleanList;Ljava/util/Collection;)Z
-	public static fun foreach (Lio/github/sooniln/fastcollect/BooleanList;Lio/github/sooniln/fastcollect/BooleanConsumer;)V
-	public static fun indexOf (Lio/github/sooniln/fastcollect/BooleanList;Z)I
-	public static fun isEmpty (Lio/github/sooniln/fastcollect/BooleanList;)Z
-	public static fun lastIndexOf (Lio/github/sooniln/fastcollect/BooleanList;Z)I
-	public static fun toBooleanArray (Lio/github/sooniln/fastcollect/BooleanList;)[Z
-}
-
-public abstract class io/github/sooniln/fastcollect/BooleanListIterator : kotlin/collections/BooleanIterator, java/util/ListIterator, kotlin/jvm/internal/markers/KMappedMarker {
-	public fun <init> ()V
-	public synthetic fun add (Ljava/lang/Object;)V
-	public fun add (Z)V
-	public fun hasNext ()Z
-	public final fun previous ()Ljava/lang/Boolean;
-	public synthetic fun previous ()Ljava/lang/Object;
-	public abstract fun previousBoolean ()Z
-	public synthetic fun set (Ljava/lang/Object;)V
-	public fun set (Z)V
 }
 
 public final class io/github/sooniln/fastcollect/ByteArrayDeque : io/github/sooniln/fastcollect/AbstractMutableByteList, java/util/RandomAccess {
@@ -1385,59 +1404,60 @@ public abstract interface class io/github/sooniln/fastcollect/BytePredicate {
 	public abstract fun test (B)Z
 }
 
+public final class io/github/sooniln/fastcollect/BytePriorityQueue : io/github/sooniln/fastcollect/AbstractBytePriorityQueue {
+	public fun <init> (IZ)V
+	public synthetic fun <init> (IZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/ByteCollection;Z)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/ByteCollection;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/Collection;Z)V
+	public synthetic fun <init> (Ljava/util/Collection;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> ([BIIZ)V
+	public synthetic fun <init> ([BIIZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
 public final class io/github/sooniln/fastcollect/Collections {
-	public static final synthetic fun all (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/DoubleCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/FloatCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/IntCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/LongCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun all (Lio/github/sooniln/fastcollect/ShortCollection;Lkotlin/jvm/functions/Function1;)Z
-	public static final synthetic fun any (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/DoubleCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/FloatCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/IntCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/LongCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun any (Lio/github/sooniln/fastcollect/ShortCollection;Lkotlin/jvm/functions/Function1;)Z
-	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/BooleanCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/ByteCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/DoubleCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/FloatCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/IntCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/LongCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/ShortCollection;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final synthetic fun none (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/DoubleCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/FloatCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/IntCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/LongCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/ShortCollection;Lkotlin/jvm/functions/Function1;)Z
-	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function2;)Z
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function2;)B
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/DoubleCollection;Lkotlin/jvm/functions/Function2;)D
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/FloatCollection;Lkotlin/jvm/functions/Function2;)F
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/IntCollection;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/LongCollection;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/ShortCollection;Lkotlin/jvm/functions/Function2;)S
-	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableByteCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableDoubleCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableFloatCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableIntCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableLongCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/MutableShortCollection;Lkotlin/jvm/functions/Function1;)Z
-	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableByteCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableDoubleCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableFloatCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableIntCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableLongCollection;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/MutableShortCollection;Lkotlin/jvm/functions/Function1;)Z
-	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)D
-	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)I
-	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/BooleanCollection;Lkotlin/jvm/functions/Function1;)J
 	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)D
 	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)I
 	public static final synthetic fun sumOf (Lio/github/sooniln/fastcollect/ByteCollection;Lkotlin/jvm/functions/Function1;)J
@@ -2060,6 +2080,104 @@ public final class io/github/sooniln/fastcollect/Int2AnyMaps {
 	public static final fun replaceOrSet (Lio/github/sooniln/fastcollect/MutableInt2AnyMap;ILjava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 }
 
+public final class io/github/sooniln/fastcollect/Int2ByteHashMap : io/github/sooniln/fastcollect/AbstractMutableInt2ByteMap {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public fun <init> (IB)V
+	public synthetic fun <init> (IBILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Int2ByteMap;)V
+	public fun <init> (Ljava/util/Map;)V
+	public fun clear ()V
+	public fun containsKey (I)Z
+	public fun containsValue (B)Z
+	public final fun ensureCapacity (I)V
+	public fun foreach (Lio/github/sooniln/fastcollect/IntByteConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/IntConsumer;)V
+	public fun get (I)B
+	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/IntSet;
+	public fun getKeys ()Lio/github/sooniln/fastcollect/MutableIntSet;
+	public fun getOrDefault (IB)B
+	public fun getSize ()I
+	public fun getValue (I)B
+	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/ByteCollection;
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableByteCollection;
+	public fun isDefaultValue (B)Z
+	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public fun put (IB)B
+	public fun putAll (Lio/github/sooniln/fastcollect/Int2ByteMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public final fun putIfAbsent (IB)B
+	public fun remove (I)B
+	public fun removeKey (I)B
+	public fun replace (IB)B
+	public fun set (IB)V
+	public final fun trimToSize ()V
+}
+
+public abstract interface class io/github/sooniln/fastcollect/Int2ByteMap {
+	public fun containsKey (I)Z
+	public fun containsValue (B)Z
+	public fun foreach (Lio/github/sooniln/fastcollect/IntByteConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/IntConsumer;)V
+	public abstract fun get (I)B
+	public abstract fun getKeys ()Lio/github/sooniln/fastcollect/IntSet;
+	public fun getOrDefault (IB)B
+	public abstract fun getSize ()I
+	public fun getValue (I)B
+	public abstract fun getValues ()Lio/github/sooniln/fastcollect/ByteCollection;
+	public abstract fun isDefaultValue (B)Z
+	public fun isEmpty ()Z
+	public abstract fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public synthetic fun keys ()Lio/github/sooniln/fastcollect/IntSet;
+	public synthetic fun size ()I
+	public synthetic fun values ()Lio/github/sooniln/fastcollect/ByteCollection;
+}
+
+public final class io/github/sooniln/fastcollect/Int2ByteMap$DefaultImpls {
+	public static fun containsKey (Lio/github/sooniln/fastcollect/Int2ByteMap;I)Z
+	public static fun containsValue (Lio/github/sooniln/fastcollect/Int2ByteMap;B)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/Int2ByteMap;Lio/github/sooniln/fastcollect/IntByteConsumer;)V
+	public static fun foreachKey (Lio/github/sooniln/fastcollect/Int2ByteMap;Lio/github/sooniln/fastcollect/IntConsumer;)V
+	public static fun getOrDefault (Lio/github/sooniln/fastcollect/Int2ByteMap;IB)B
+	public static fun getValue (Lio/github/sooniln/fastcollect/Int2ByteMap;I)B
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/Int2ByteMap;)Z
+	public static synthetic fun keys (Lio/github/sooniln/fastcollect/Int2ByteMap;)Lio/github/sooniln/fastcollect/IntSet;
+	public static synthetic fun size (Lio/github/sooniln/fastcollect/Int2ByteMap;)I
+	public static synthetic fun values (Lio/github/sooniln/fastcollect/Int2ByteMap;)Lio/github/sooniln/fastcollect/ByteCollection;
+}
+
+public abstract interface class io/github/sooniln/fastcollect/Int2ByteMap$Entry {
+	public fun component1 ()I
+	public fun component2 ()B
+	public abstract fun getKey ()I
+	public abstract fun getValue ()B
+}
+
+public final class io/github/sooniln/fastcollect/Int2ByteMap$Entry$DefaultImpls {
+	public static fun component1 (Lio/github/sooniln/fastcollect/Int2ByteMap$Entry;)I
+	public static fun component2 (Lio/github/sooniln/fastcollect/Int2ByteMap$Entry;)B
+}
+
+public final class io/github/sooniln/fastcollect/Int2ByteMaps {
+	public static final fun asMap (Lio/github/sooniln/fastcollect/Int2ByteMap;)Ljava/util/Map;
+	public static final fun asMutableMap (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;)Ljava/util/Map;
+	public static final fun buildInt2ByteMap (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/Int2ByteMap;
+	public static synthetic fun buildInt2ByteMap$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/Int2ByteMap;
+	public static final fun emptyInt2ByteMap ()Lio/github/sooniln/fastcollect/Int2ByteMap;
+	public static final fun getOrElse (Lio/github/sooniln/fastcollect/Int2ByteMap;ILkotlin/jvm/functions/Function0;)B
+	public static final fun getOrPut (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;ILkotlin/jvm/functions/Function0;)B
+	public static final fun int2ByteMapOf ()Lio/github/sooniln/fastcollect/Int2ByteMap;
+	public static final fun int2ByteMapOf (Lkotlin/Pair;)Lio/github/sooniln/fastcollect/Int2ByteMap;
+	public static final fun int2ByteMapOf ([Lkotlin/Pair;)Lio/github/sooniln/fastcollect/Int2ByteMap;
+	public static final fun merge (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;IBLkotlin/jvm/functions/Function2;)B
+	public static final fun mutableInt2ByteMapOf ()Lio/github/sooniln/fastcollect/MutableInt2ByteMap;
+	public static final fun mutableInt2ByteMapOf (Lkotlin/Pair;)Lio/github/sooniln/fastcollect/MutableInt2ByteMap;
+	public static final fun mutableInt2ByteMapOf ([Lkotlin/Pair;)Lio/github/sooniln/fastcollect/MutableInt2ByteMap;
+	public static final fun removeOrElse (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;ILkotlin/jvm/functions/Function0;)B
+	public static final fun replaceOrSet (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;IBLkotlin/jvm/functions/Function0;)B
+}
+
 public final class io/github/sooniln/fastcollect/Int2DoubleHashMap : io/github/sooniln/fastcollect/AbstractMutableInt2DoubleMap {
 	public fun <init> (ID)V
 	public synthetic fun <init> (IDILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -2450,6 +2568,104 @@ public final class io/github/sooniln/fastcollect/Int2LongMaps {
 	public static final fun replaceOrSet (Lio/github/sooniln/fastcollect/MutableInt2LongMap;IJLkotlin/jvm/functions/Function0;)J
 }
 
+public final class io/github/sooniln/fastcollect/Int2ShortHashMap : io/github/sooniln/fastcollect/AbstractMutableInt2ShortMap {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public fun <init> (IS)V
+	public synthetic fun <init> (ISILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Int2ShortMap;)V
+	public fun <init> (Ljava/util/Map;)V
+	public fun clear ()V
+	public fun containsKey (I)Z
+	public fun containsValue (S)Z
+	public final fun ensureCapacity (I)V
+	public fun foreach (Lio/github/sooniln/fastcollect/IntShortConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/IntConsumer;)V
+	public fun get (I)S
+	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/IntSet;
+	public fun getKeys ()Lio/github/sooniln/fastcollect/MutableIntSet;
+	public fun getOrDefault (IS)S
+	public fun getSize ()I
+	public fun getValue (I)S
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableShortCollection;
+	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/ShortCollection;
+	public fun isDefaultValue (S)Z
+	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public fun put (IS)S
+	public fun putAll (Lio/github/sooniln/fastcollect/Int2ShortMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public final fun putIfAbsent (IS)S
+	public fun remove (I)S
+	public fun removeKey (I)S
+	public fun replace (IS)S
+	public fun set (IS)V
+	public final fun trimToSize ()V
+}
+
+public abstract interface class io/github/sooniln/fastcollect/Int2ShortMap {
+	public fun containsKey (I)Z
+	public fun containsValue (S)Z
+	public fun foreach (Lio/github/sooniln/fastcollect/IntShortConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/IntConsumer;)V
+	public abstract fun get (I)S
+	public abstract fun getKeys ()Lio/github/sooniln/fastcollect/IntSet;
+	public fun getOrDefault (IS)S
+	public abstract fun getSize ()I
+	public fun getValue (I)S
+	public abstract fun getValues ()Lio/github/sooniln/fastcollect/ShortCollection;
+	public abstract fun isDefaultValue (S)Z
+	public fun isEmpty ()Z
+	public abstract fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public synthetic fun keys ()Lio/github/sooniln/fastcollect/IntSet;
+	public synthetic fun size ()I
+	public synthetic fun values ()Lio/github/sooniln/fastcollect/ShortCollection;
+}
+
+public final class io/github/sooniln/fastcollect/Int2ShortMap$DefaultImpls {
+	public static fun containsKey (Lio/github/sooniln/fastcollect/Int2ShortMap;I)Z
+	public static fun containsValue (Lio/github/sooniln/fastcollect/Int2ShortMap;S)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/Int2ShortMap;Lio/github/sooniln/fastcollect/IntShortConsumer;)V
+	public static fun foreachKey (Lio/github/sooniln/fastcollect/Int2ShortMap;Lio/github/sooniln/fastcollect/IntConsumer;)V
+	public static fun getOrDefault (Lio/github/sooniln/fastcollect/Int2ShortMap;IS)S
+	public static fun getValue (Lio/github/sooniln/fastcollect/Int2ShortMap;I)S
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/Int2ShortMap;)Z
+	public static synthetic fun keys (Lio/github/sooniln/fastcollect/Int2ShortMap;)Lio/github/sooniln/fastcollect/IntSet;
+	public static synthetic fun size (Lio/github/sooniln/fastcollect/Int2ShortMap;)I
+	public static synthetic fun values (Lio/github/sooniln/fastcollect/Int2ShortMap;)Lio/github/sooniln/fastcollect/ShortCollection;
+}
+
+public abstract interface class io/github/sooniln/fastcollect/Int2ShortMap$Entry {
+	public fun component1 ()I
+	public fun component2 ()S
+	public abstract fun getKey ()I
+	public abstract fun getValue ()S
+}
+
+public final class io/github/sooniln/fastcollect/Int2ShortMap$Entry$DefaultImpls {
+	public static fun component1 (Lio/github/sooniln/fastcollect/Int2ShortMap$Entry;)I
+	public static fun component2 (Lio/github/sooniln/fastcollect/Int2ShortMap$Entry;)S
+}
+
+public final class io/github/sooniln/fastcollect/Int2ShortMaps {
+	public static final fun asMap (Lio/github/sooniln/fastcollect/Int2ShortMap;)Ljava/util/Map;
+	public static final fun asMutableMap (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;)Ljava/util/Map;
+	public static final fun buildInt2ShortMap (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/Int2ShortMap;
+	public static synthetic fun buildInt2ShortMap$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/Int2ShortMap;
+	public static final fun emptyInt2ShortMap ()Lio/github/sooniln/fastcollect/Int2ShortMap;
+	public static final fun getOrElse (Lio/github/sooniln/fastcollect/Int2ShortMap;ILkotlin/jvm/functions/Function0;)S
+	public static final fun getOrPut (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;ILkotlin/jvm/functions/Function0;)S
+	public static final fun int2ShortMapOf ()Lio/github/sooniln/fastcollect/Int2ShortMap;
+	public static final fun int2ShortMapOf (Lkotlin/Pair;)Lio/github/sooniln/fastcollect/Int2ShortMap;
+	public static final fun int2ShortMapOf ([Lkotlin/Pair;)Lio/github/sooniln/fastcollect/Int2ShortMap;
+	public static final fun merge (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;ISLkotlin/jvm/functions/Function2;)S
+	public static final fun mutableInt2ShortMapOf ()Lio/github/sooniln/fastcollect/MutableInt2ShortMap;
+	public static final fun mutableInt2ShortMapOf (Lkotlin/Pair;)Lio/github/sooniln/fastcollect/MutableInt2ShortMap;
+	public static final fun mutableInt2ShortMapOf ([Lkotlin/Pair;)Lio/github/sooniln/fastcollect/MutableInt2ShortMap;
+	public static final fun removeOrElse (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;ILkotlin/jvm/functions/Function0;)S
+	public static final fun replaceOrSet (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;ISLkotlin/jvm/functions/Function0;)S
+}
+
 public abstract interface class io/github/sooniln/fastcollect/IntAnyConsumer {
 	public abstract fun accept (ILjava/lang/Object;)V
 }
@@ -2492,6 +2708,10 @@ public final class io/github/sooniln/fastcollect/IntArrayDeque : io/github/sooni
 	public fun sortDescending ()V
 	public fun toIntArray ()[I
 	public final fun trimToSize ()V
+}
+
+public abstract interface class io/github/sooniln/fastcollect/IntByteConsumer {
+	public abstract fun accept (IB)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/IntCollection : java/util/Collection, kotlin/jvm/internal/markers/KMappedMarker {
@@ -2638,17 +2858,18 @@ public final class io/github/sooniln/fastcollect/IntSets {
 	public static final fun union (Lio/github/sooniln/fastcollect/IntSet;Lio/github/sooniln/fastcollect/IntSet;)Lio/github/sooniln/fastcollect/IntSet;
 }
 
+public abstract interface class io/github/sooniln/fastcollect/IntShortConsumer {
+	public abstract fun accept (IS)V
+}
+
 public final class io/github/sooniln/fastcollect/Iterators {
-	public static final fun booleanIteratorOf (Z)Lio/github/sooniln/fastcollect/BooleanListIterator;
 	public static final fun byteIteratorOf (B)Lio/github/sooniln/fastcollect/ByteListIterator;
 	public static final fun doubleIteratorOf (D)Lio/github/sooniln/fastcollect/DoubleListIterator;
-	public static final fun emptyBooleanIterator ()Lio/github/sooniln/fastcollect/BooleanListIterator;
 	public static final fun emptyByteIterator ()Lio/github/sooniln/fastcollect/ByteListIterator;
 	public static final fun emptyDoubleIterator ()Lio/github/sooniln/fastcollect/DoubleListIterator;
 	public static final fun emptyFloatIterator ()Lio/github/sooniln/fastcollect/FloatListIterator;
 	public static final fun emptyIntIterator ()Lio/github/sooniln/fastcollect/IntListIterator;
 	public static final fun emptyLongIterator ()Lio/github/sooniln/fastcollect/LongListIterator;
-	public static final fun emptyMutableBooleanIterator ()Lio/github/sooniln/fastcollect/MutableBooleanIterator;
 	public static final fun emptyMutableByteIterator ()Lio/github/sooniln/fastcollect/MutableByteIterator;
 	public static final fun emptyMutableDoubleIterator ()Lio/github/sooniln/fastcollect/MutableDoubleIterator;
 	public static final fun emptyMutableFloatIterator ()Lio/github/sooniln/fastcollect/MutableFloatIterator;
@@ -2663,13 +2884,11 @@ public final class io/github/sooniln/fastcollect/Iterators {
 }
 
 public final class io/github/sooniln/fastcollect/Lists {
-	public static final synthetic fun BooleanList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/BooleanList;
 	public static final synthetic fun ByteList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/ByteList;
 	public static final synthetic fun DoubleList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/DoubleList;
 	public static final synthetic fun FloatList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/FloatList;
 	public static final synthetic fun IntList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/IntList;
 	public static final synthetic fun LongList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/LongList;
-	public static final synthetic fun MutableBooleanList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableBooleanList;
 	public static final synthetic fun MutableByteList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableByteList;
 	public static final synthetic fun MutableDoubleList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableDoubleList;
 	public static final synthetic fun MutableFloatList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableFloatList;
@@ -2677,12 +2896,10 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final synthetic fun MutableLongList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableLongList;
 	public static final synthetic fun MutableShortList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/MutableShortList;
 	public static final synthetic fun ShortList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/ShortList;
-	public static final fun asBooleanList ([Z)Lio/github/sooniln/fastcollect/BooleanList;
 	public static final fun asByteList ([B)Lio/github/sooniln/fastcollect/ByteList;
 	public static final fun asDoubleList ([D)Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun asFloatList ([F)Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun asIntList ([I)Lio/github/sooniln/fastcollect/IntList;
-	public static final fun asList (Lio/github/sooniln/fastcollect/BooleanList;)Ljava/util/List;
 	public static final fun asList (Lio/github/sooniln/fastcollect/ByteList;)Ljava/util/List;
 	public static final fun asList (Lio/github/sooniln/fastcollect/DoubleList;)Ljava/util/List;
 	public static final fun asList (Lio/github/sooniln/fastcollect/FloatList;)Ljava/util/List;
@@ -2690,7 +2907,6 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun asList (Lio/github/sooniln/fastcollect/LongList;)Ljava/util/List;
 	public static final fun asList (Lio/github/sooniln/fastcollect/ShortList;)Ljava/util/List;
 	public static final fun asLongList ([J)Lio/github/sooniln/fastcollect/LongList;
-	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableBooleanList;)Ljava/util/List;
 	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableByteList;)Ljava/util/List;
 	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableDoubleList;)Ljava/util/List;
 	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableFloatList;)Ljava/util/List;
@@ -2698,11 +2914,6 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableLongList;)Ljava/util/List;
 	public static final fun asMutableList (Lio/github/sooniln/fastcollect/MutableShortList;)Ljava/util/List;
 	public static final fun asShortList ([S)Lio/github/sooniln/fastcollect/ShortList;
-	public static final fun booleanListOf ()Lio/github/sooniln/fastcollect/BooleanList;
-	public static final fun booleanListOf (Z)Lio/github/sooniln/fastcollect/BooleanList;
-	public static final fun booleanListOf ([Z)Lio/github/sooniln/fastcollect/BooleanList;
-	public static final synthetic fun buildBooleanList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/BooleanList;
-	public static synthetic fun buildBooleanList$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/BooleanList;
 	public static final synthetic fun buildByteList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/ByteList;
 	public static synthetic fun buildByteList$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/ByteList;
 	public static final synthetic fun buildDoubleList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/DoubleList;
@@ -2721,14 +2932,12 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun doubleListOf ()Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun doubleListOf (D)Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun doubleListOf ([D)Lio/github/sooniln/fastcollect/DoubleList;
-	public static final fun emptyBooleanList ()Lio/github/sooniln/fastcollect/BooleanList;
 	public static final fun emptyByteList ()Lio/github/sooniln/fastcollect/ByteList;
 	public static final fun emptyDoubleList ()Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun emptyFloatList ()Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun emptyIntList ()Lio/github/sooniln/fastcollect/IntList;
 	public static final fun emptyLongList ()Lio/github/sooniln/fastcollect/LongList;
 	public static final fun emptyShortList ()Lio/github/sooniln/fastcollect/ShortList;
-	public static final synthetic fun first (Lio/github/sooniln/fastcollect/BooleanList;)Z
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/ByteList;)B
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/DoubleList;)D
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/FloatList;)F
@@ -2738,14 +2947,12 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun floatListOf ()Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun floatListOf (F)Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun floatListOf ([F)Lio/github/sooniln/fastcollect/FloatList;
-	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/BooleanList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/ByteList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/DoubleList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/FloatList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/IntList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/LongList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/ShortList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/BooleanList;)I
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/ByteList;)I
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/DoubleList;)I
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/FloatList;)I
@@ -2755,7 +2962,6 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun intListOf ()Lio/github/sooniln/fastcollect/IntList;
 	public static final fun intListOf (I)Lio/github/sooniln/fastcollect/IntList;
 	public static final fun intListOf ([I)Lio/github/sooniln/fastcollect/IntList;
-	public static final synthetic fun last (Lio/github/sooniln/fastcollect/BooleanList;)Z
 	public static final synthetic fun last (Lio/github/sooniln/fastcollect/ByteList;)B
 	public static final synthetic fun last (Lio/github/sooniln/fastcollect/DoubleList;)D
 	public static final synthetic fun last (Lio/github/sooniln/fastcollect/FloatList;)F
@@ -2765,9 +2971,6 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun longListOf ()Lio/github/sooniln/fastcollect/LongList;
 	public static final fun longListOf (J)Lio/github/sooniln/fastcollect/LongList;
 	public static final fun longListOf ([J)Lio/github/sooniln/fastcollect/LongList;
-	public static final fun mutableBooleanListOf ()Lio/github/sooniln/fastcollect/MutableBooleanList;
-	public static final fun mutableBooleanListOf (Z)Lio/github/sooniln/fastcollect/MutableBooleanList;
-	public static final fun mutableBooleanListOf ([Z)Lio/github/sooniln/fastcollect/MutableBooleanList;
 	public static final fun mutableByteListOf ()Lio/github/sooniln/fastcollect/MutableByteList;
 	public static final fun mutableByteListOf (B)Lio/github/sooniln/fastcollect/MutableByteList;
 	public static final fun mutableByteListOf ([B)Lio/github/sooniln/fastcollect/MutableByteList;
@@ -2786,8 +2989,6 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun mutableShortListOf ()Lio/github/sooniln/fastcollect/MutableShortList;
 	public static final fun mutableShortListOf (S)Lio/github/sooniln/fastcollect/MutableShortList;
 	public static final fun mutableShortListOf ([S)Lio/github/sooniln/fastcollect/MutableShortList;
-	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/BooleanList;II)I
-	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/BooleanList;III)V
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ByteList;II)I
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ByteList;III)V
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/DoubleList;II)I
@@ -2800,8 +3001,6 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/LongList;III)V
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ShortList;II)I
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ShortList;III)V
-	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/BooleanList;IIIILjava/lang/Object;)V
-	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/BooleanList;IIILjava/lang/Object;)I
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/ByteList;IIIILjava/lang/Object;)V
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/ByteList;IIILjava/lang/Object;)I
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/DoubleList;IIIILjava/lang/Object;)V
@@ -2814,14 +3013,12 @@ public final class io/github/sooniln/fastcollect/Lists {
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/LongList;IIILjava/lang/Object;)I
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/ShortList;IIIILjava/lang/Object;)V
 	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/ShortList;IIILjava/lang/Object;)I
-	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/BooleanList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/ByteList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/DoubleList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/FloatList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/IntList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/LongList;I)I
 	public static final fun rangeCheckInclusive (Lio/github/sooniln/fastcollect/ShortList;I)I
-	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/BooleanList;Lkotlin/jvm/functions/Function2;)Z
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function2;)B
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function2;)D
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function2;)F
@@ -2927,6 +3124,104 @@ public final class io/github/sooniln/fastcollect/Long2AnyMaps {
 	public static final fun mutableLong2AnyMapOf ([Lkotlin/Pair;)Lio/github/sooniln/fastcollect/MutableLong2AnyMap;
 	public static final fun removeOrElse (Lio/github/sooniln/fastcollect/MutableLong2AnyMap;JLkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public static final fun replaceOrSet (Lio/github/sooniln/fastcollect/MutableLong2AnyMap;JLjava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+}
+
+public final class io/github/sooniln/fastcollect/Long2ByteHashMap : io/github/sooniln/fastcollect/AbstractMutableLong2ByteMap {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public fun <init> (IB)V
+	public synthetic fun <init> (IBILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Long2ByteMap;)V
+	public fun <init> (Ljava/util/Map;)V
+	public fun clear ()V
+	public fun containsKey (J)Z
+	public fun containsValue (B)Z
+	public final fun ensureCapacity (I)V
+	public fun foreach (Lio/github/sooniln/fastcollect/LongByteConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/LongConsumer;)V
+	public fun get (J)B
+	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/LongSet;
+	public fun getKeys ()Lio/github/sooniln/fastcollect/MutableLongSet;
+	public fun getOrDefault (JB)B
+	public fun getSize ()I
+	public fun getValue (J)B
+	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/ByteCollection;
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableByteCollection;
+	public fun isDefaultValue (B)Z
+	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public fun put (JB)B
+	public fun putAll (Lio/github/sooniln/fastcollect/Long2ByteMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public final fun putIfAbsent (JB)B
+	public fun remove (J)B
+	public fun removeKey (J)B
+	public fun replace (JB)B
+	public fun set (JB)V
+	public final fun trimToSize ()V
+}
+
+public abstract interface class io/github/sooniln/fastcollect/Long2ByteMap {
+	public fun containsKey (J)Z
+	public fun containsValue (B)Z
+	public fun foreach (Lio/github/sooniln/fastcollect/LongByteConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/LongConsumer;)V
+	public abstract fun get (J)B
+	public abstract fun getKeys ()Lio/github/sooniln/fastcollect/LongSet;
+	public fun getOrDefault (JB)B
+	public abstract fun getSize ()I
+	public fun getValue (J)B
+	public abstract fun getValues ()Lio/github/sooniln/fastcollect/ByteCollection;
+	public abstract fun isDefaultValue (B)Z
+	public fun isEmpty ()Z
+	public abstract fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public synthetic fun keys ()Lio/github/sooniln/fastcollect/LongSet;
+	public synthetic fun size ()I
+	public synthetic fun values ()Lio/github/sooniln/fastcollect/ByteCollection;
+}
+
+public final class io/github/sooniln/fastcollect/Long2ByteMap$DefaultImpls {
+	public static fun containsKey (Lio/github/sooniln/fastcollect/Long2ByteMap;J)Z
+	public static fun containsValue (Lio/github/sooniln/fastcollect/Long2ByteMap;B)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/Long2ByteMap;Lio/github/sooniln/fastcollect/LongByteConsumer;)V
+	public static fun foreachKey (Lio/github/sooniln/fastcollect/Long2ByteMap;Lio/github/sooniln/fastcollect/LongConsumer;)V
+	public static fun getOrDefault (Lio/github/sooniln/fastcollect/Long2ByteMap;JB)B
+	public static fun getValue (Lio/github/sooniln/fastcollect/Long2ByteMap;J)B
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/Long2ByteMap;)Z
+	public static synthetic fun keys (Lio/github/sooniln/fastcollect/Long2ByteMap;)Lio/github/sooniln/fastcollect/LongSet;
+	public static synthetic fun size (Lio/github/sooniln/fastcollect/Long2ByteMap;)I
+	public static synthetic fun values (Lio/github/sooniln/fastcollect/Long2ByteMap;)Lio/github/sooniln/fastcollect/ByteCollection;
+}
+
+public abstract interface class io/github/sooniln/fastcollect/Long2ByteMap$Entry {
+	public fun component1 ()J
+	public fun component2 ()B
+	public abstract fun getKey ()J
+	public abstract fun getValue ()B
+}
+
+public final class io/github/sooniln/fastcollect/Long2ByteMap$Entry$DefaultImpls {
+	public static fun component1 (Lio/github/sooniln/fastcollect/Long2ByteMap$Entry;)J
+	public static fun component2 (Lio/github/sooniln/fastcollect/Long2ByteMap$Entry;)B
+}
+
+public final class io/github/sooniln/fastcollect/Long2ByteMaps {
+	public static final fun asMap (Lio/github/sooniln/fastcollect/Long2ByteMap;)Ljava/util/Map;
+	public static final fun asMutableMap (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;)Ljava/util/Map;
+	public static final fun buildLong2ByteMap (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/Long2ByteMap;
+	public static synthetic fun buildLong2ByteMap$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/Long2ByteMap;
+	public static final fun emptyLong2ByteMap ()Lio/github/sooniln/fastcollect/Long2ByteMap;
+	public static final fun getOrElse (Lio/github/sooniln/fastcollect/Long2ByteMap;JLkotlin/jvm/functions/Function0;)B
+	public static final fun getOrPut (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;JLkotlin/jvm/functions/Function0;)B
+	public static final fun long2ByteMapOf ()Lio/github/sooniln/fastcollect/Long2ByteMap;
+	public static final fun long2ByteMapOf (Lkotlin/Pair;)Lio/github/sooniln/fastcollect/Long2ByteMap;
+	public static final fun long2ByteMapOf ([Lkotlin/Pair;)Lio/github/sooniln/fastcollect/Long2ByteMap;
+	public static final fun merge (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;JBLkotlin/jvm/functions/Function2;)B
+	public static final fun mutableLong2ByteMapOf ()Lio/github/sooniln/fastcollect/MutableLong2ByteMap;
+	public static final fun mutableLong2ByteMapOf (Lkotlin/Pair;)Lio/github/sooniln/fastcollect/MutableLong2ByteMap;
+	public static final fun mutableLong2ByteMapOf ([Lkotlin/Pair;)Lio/github/sooniln/fastcollect/MutableLong2ByteMap;
+	public static final fun removeOrElse (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;JLkotlin/jvm/functions/Function0;)B
+	public static final fun replaceOrSet (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;JBLkotlin/jvm/functions/Function0;)B
 }
 
 public final class io/github/sooniln/fastcollect/Long2DoubleHashMap : io/github/sooniln/fastcollect/AbstractMutableLong2DoubleMap {
@@ -3319,6 +3614,104 @@ public final class io/github/sooniln/fastcollect/Long2LongMaps {
 	public static final fun replaceOrSet (Lio/github/sooniln/fastcollect/MutableLong2LongMap;JJLkotlin/jvm/functions/Function0;)J
 }
 
+public final class io/github/sooniln/fastcollect/Long2ShortHashMap : io/github/sooniln/fastcollect/AbstractMutableLong2ShortMap {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public fun <init> (IS)V
+	public synthetic fun <init> (ISILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Long2ShortMap;)V
+	public fun <init> (Ljava/util/Map;)V
+	public fun clear ()V
+	public fun containsKey (J)Z
+	public fun containsValue (S)Z
+	public final fun ensureCapacity (I)V
+	public fun foreach (Lio/github/sooniln/fastcollect/LongShortConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/LongConsumer;)V
+	public fun get (J)S
+	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/LongSet;
+	public fun getKeys ()Lio/github/sooniln/fastcollect/MutableLongSet;
+	public fun getOrDefault (JS)S
+	public fun getSize ()I
+	public fun getValue (J)S
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableShortCollection;
+	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/ShortCollection;
+	public fun isDefaultValue (S)Z
+	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public fun put (JS)S
+	public fun putAll (Lio/github/sooniln/fastcollect/Long2ShortMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public final fun putIfAbsent (JS)S
+	public fun remove (J)S
+	public fun removeKey (J)S
+	public fun replace (JS)S
+	public fun set (JS)V
+	public final fun trimToSize ()V
+}
+
+public abstract interface class io/github/sooniln/fastcollect/Long2ShortMap {
+	public fun containsKey (J)Z
+	public fun containsValue (S)Z
+	public fun foreach (Lio/github/sooniln/fastcollect/LongShortConsumer;)V
+	public fun foreachKey (Lio/github/sooniln/fastcollect/LongConsumer;)V
+	public abstract fun get (J)S
+	public abstract fun getKeys ()Lio/github/sooniln/fastcollect/LongSet;
+	public fun getOrDefault (JS)S
+	public abstract fun getSize ()I
+	public fun getValue (J)S
+	public abstract fun getValues ()Lio/github/sooniln/fastcollect/ShortCollection;
+	public abstract fun isDefaultValue (S)Z
+	public fun isEmpty ()Z
+	public abstract fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public synthetic fun keys ()Lio/github/sooniln/fastcollect/LongSet;
+	public synthetic fun size ()I
+	public synthetic fun values ()Lio/github/sooniln/fastcollect/ShortCollection;
+}
+
+public final class io/github/sooniln/fastcollect/Long2ShortMap$DefaultImpls {
+	public static fun containsKey (Lio/github/sooniln/fastcollect/Long2ShortMap;J)Z
+	public static fun containsValue (Lio/github/sooniln/fastcollect/Long2ShortMap;S)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/Long2ShortMap;Lio/github/sooniln/fastcollect/LongShortConsumer;)V
+	public static fun foreachKey (Lio/github/sooniln/fastcollect/Long2ShortMap;Lio/github/sooniln/fastcollect/LongConsumer;)V
+	public static fun getOrDefault (Lio/github/sooniln/fastcollect/Long2ShortMap;JS)S
+	public static fun getValue (Lio/github/sooniln/fastcollect/Long2ShortMap;J)S
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/Long2ShortMap;)Z
+	public static synthetic fun keys (Lio/github/sooniln/fastcollect/Long2ShortMap;)Lio/github/sooniln/fastcollect/LongSet;
+	public static synthetic fun size (Lio/github/sooniln/fastcollect/Long2ShortMap;)I
+	public static synthetic fun values (Lio/github/sooniln/fastcollect/Long2ShortMap;)Lio/github/sooniln/fastcollect/ShortCollection;
+}
+
+public abstract interface class io/github/sooniln/fastcollect/Long2ShortMap$Entry {
+	public fun component1 ()J
+	public fun component2 ()S
+	public abstract fun getKey ()J
+	public abstract fun getValue ()S
+}
+
+public final class io/github/sooniln/fastcollect/Long2ShortMap$Entry$DefaultImpls {
+	public static fun component1 (Lio/github/sooniln/fastcollect/Long2ShortMap$Entry;)J
+	public static fun component2 (Lio/github/sooniln/fastcollect/Long2ShortMap$Entry;)S
+}
+
+public final class io/github/sooniln/fastcollect/Long2ShortMaps {
+	public static final fun asMap (Lio/github/sooniln/fastcollect/Long2ShortMap;)Ljava/util/Map;
+	public static final fun asMutableMap (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;)Ljava/util/Map;
+	public static final fun buildLong2ShortMap (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/Long2ShortMap;
+	public static synthetic fun buildLong2ShortMap$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/Long2ShortMap;
+	public static final fun emptyLong2ShortMap ()Lio/github/sooniln/fastcollect/Long2ShortMap;
+	public static final fun getOrElse (Lio/github/sooniln/fastcollect/Long2ShortMap;JLkotlin/jvm/functions/Function0;)S
+	public static final fun getOrPut (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;JLkotlin/jvm/functions/Function0;)S
+	public static final fun long2ShortMapOf ()Lio/github/sooniln/fastcollect/Long2ShortMap;
+	public static final fun long2ShortMapOf (Lkotlin/Pair;)Lio/github/sooniln/fastcollect/Long2ShortMap;
+	public static final fun long2ShortMapOf ([Lkotlin/Pair;)Lio/github/sooniln/fastcollect/Long2ShortMap;
+	public static final fun merge (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;JSLkotlin/jvm/functions/Function2;)S
+	public static final fun mutableLong2ShortMapOf ()Lio/github/sooniln/fastcollect/MutableLong2ShortMap;
+	public static final fun mutableLong2ShortMapOf (Lkotlin/Pair;)Lio/github/sooniln/fastcollect/MutableLong2ShortMap;
+	public static final fun mutableLong2ShortMapOf ([Lkotlin/Pair;)Lio/github/sooniln/fastcollect/MutableLong2ShortMap;
+	public static final fun removeOrElse (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;JLkotlin/jvm/functions/Function0;)S
+	public static final fun replaceOrSet (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;JSLkotlin/jvm/functions/Function0;)S
+}
+
 public abstract interface class io/github/sooniln/fastcollect/LongAnyConsumer {
 	public abstract fun accept (JLjava/lang/Object;)V
 }
@@ -3361,6 +3754,10 @@ public final class io/github/sooniln/fastcollect/LongArrayDeque : io/github/soon
 	public fun sortDescending ()V
 	public fun toLongArray ()[J
 	public final fun trimToSize ()V
+}
+
+public abstract interface class io/github/sooniln/fastcollect/LongByteConsumer {
+	public abstract fun accept (JB)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/LongCollection : java/util/Collection, kotlin/jvm/internal/markers/KMappedMarker {
@@ -3507,129 +3904,8 @@ public final class io/github/sooniln/fastcollect/LongSets {
 	public static final fun union (Lio/github/sooniln/fastcollect/LongSet;Lio/github/sooniln/fastcollect/LongSet;)Lio/github/sooniln/fastcollect/LongSet;
 }
 
-public abstract interface class io/github/sooniln/fastcollect/MutableBooleanCollection : io/github/sooniln/fastcollect/BooleanCollection, java/util/Collection, kotlin/jvm/internal/markers/KMutableCollection {
-	public synthetic fun add (Ljava/lang/Object;)Z
-	public abstract fun add (Z)Z
-	public fun addAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public fun addAll (Ljava/util/Collection;)Z
-	public fun clear ()V
-	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableBooleanIterator;
-	public synthetic fun iterator ()Ljava/util/Iterator;
-	public synthetic fun iterator ()Lkotlin/collections/BooleanIterator;
-	public fun minusAssign (Lio/github/sooniln/fastcollect/BooleanCollection;)V
-	public fun minusAssign (Ljava/util/Collection;)V
-	public fun minusAssign (Z)V
-	public fun plusAssign (Lio/github/sooniln/fastcollect/BooleanCollection;)V
-	public fun plusAssign (Ljava/util/Collection;)V
-	public fun plusAssign (Z)V
-	public fun remove (Ljava/lang/Object;)Z
-	public abstract fun remove (Z)Z
-	public fun removeAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public fun removeAll (Ljava/util/Collection;)Z
-	public fun retainAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public fun retainAll (Ljava/util/Collection;)Z
-}
-
-public final class io/github/sooniln/fastcollect/MutableBooleanCollection$DefaultImpls {
-	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)Z
-	public static fun clear (Lio/github/sooniln/fastcollect/MutableBooleanCollection;)V
-	public static fun contains (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Z)Z
-	public static fun containsAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun containsAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)Z
-	public static fun foreach (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanConsumer;)V
-	public static fun isEmpty (Lio/github/sooniln/fastcollect/MutableBooleanCollection;)Z
-	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)V
-	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)V
-	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Z)V
-	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)V
-	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)V
-	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Z)V
-	public static fun removeAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun removeAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)Z
-	public static fun retainAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun retainAll (Lio/github/sooniln/fastcollect/MutableBooleanCollection;Ljava/util/Collection;)Z
-	public static fun toBooleanArray (Lio/github/sooniln/fastcollect/MutableBooleanCollection;)[Z
-}
-
-public abstract class io/github/sooniln/fastcollect/MutableBooleanIterator : kotlin/collections/BooleanIterator, java/util/Iterator, kotlin/jvm/internal/markers/KMutableIterator {
-	public fun <init> ()V
-}
-
-public abstract interface class io/github/sooniln/fastcollect/MutableBooleanList : io/github/sooniln/fastcollect/BooleanList, io/github/sooniln/fastcollect/MutableBooleanCollection {
-	public abstract fun add (IZ)V
-	public synthetic fun add (Ljava/lang/Object;)Z
-	public fun add (Z)Z
-	public fun addAll (ILio/github/sooniln/fastcollect/BooleanCollection;)V
-	public fun addAll (ILjava/util/Collection;)V
-	public fun addAll (Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public fun addAll (Ljava/util/Collection;)Z
-	public fun addFirst (Z)V
-	public fun addLast (Z)V
-	public fun clear ()V
-	public fun fill (Z)V
-	public synthetic fun listIterator ()Lio/github/sooniln/fastcollect/BooleanListIterator;
-	public abstract fun listIterator ()Lio/github/sooniln/fastcollect/MutableBooleanListIterator;
-	public synthetic fun listIterator (I)Lio/github/sooniln/fastcollect/BooleanListIterator;
-	public abstract fun listIterator (I)Lio/github/sooniln/fastcollect/MutableBooleanListIterator;
-	public fun remove (Ljava/lang/Object;)Z
-	public fun remove (Z)Z
-	public fun removeAll (Ljava/util/Collection;)Z
-	public abstract fun removeAt (I)Z
-	public fun removeFirst ()Z
-	public fun removeLast ()Z
-	public abstract fun removeRange (II)V
-	public fun replace (IZ)Z
-	public fun retainAll (Ljava/util/Collection;)Z
-	public fun reverse ()V
-	public abstract fun set (IZ)V
-	public fun shuffle ()V
-	public fun sort ()V
-	public fun sortDescending ()V
-	public synthetic fun subList (II)Lio/github/sooniln/fastcollect/BooleanList;
-	public abstract fun subList (II)Lio/github/sooniln/fastcollect/MutableBooleanList;
-}
-
-public final class io/github/sooniln/fastcollect/MutableBooleanList$DefaultImpls {
-	public static fun add (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)Z
-	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanList;ILio/github/sooniln/fastcollect/BooleanCollection;)V
-	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanList;ILjava/util/Collection;)V
-	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun addAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)Z
-	public static fun addFirst (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)V
-	public static fun addLast (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)V
-	public static fun clear (Lio/github/sooniln/fastcollect/MutableBooleanList;)V
-	public static fun contains (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)Z
-	public static fun containsAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun containsAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)Z
-	public static fun fill (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)V
-	public static fun foreach (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanConsumer;)V
-	public static fun indexOf (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)I
-	public static fun isEmpty (Lio/github/sooniln/fastcollect/MutableBooleanList;)Z
-	public static fun lastIndexOf (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)I
-	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)V
-	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)V
-	public static fun minusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)V
-	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)V
-	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)V
-	public static fun plusAssign (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)V
-	public static fun remove (Lio/github/sooniln/fastcollect/MutableBooleanList;Z)Z
-	public static fun removeAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun removeAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)Z
-	public static fun removeFirst (Lio/github/sooniln/fastcollect/MutableBooleanList;)Z
-	public static fun removeLast (Lio/github/sooniln/fastcollect/MutableBooleanList;)Z
-	public static fun replace (Lio/github/sooniln/fastcollect/MutableBooleanList;IZ)Z
-	public static fun retainAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Lio/github/sooniln/fastcollect/BooleanCollection;)Z
-	public static fun retainAll (Lio/github/sooniln/fastcollect/MutableBooleanList;Ljava/util/Collection;)Z
-	public static fun reverse (Lio/github/sooniln/fastcollect/MutableBooleanList;)V
-	public static fun shuffle (Lio/github/sooniln/fastcollect/MutableBooleanList;)V
-	public static fun sort (Lio/github/sooniln/fastcollect/MutableBooleanList;)V
-	public static fun sortDescending (Lio/github/sooniln/fastcollect/MutableBooleanList;)V
-	public static fun toBooleanArray (Lio/github/sooniln/fastcollect/MutableBooleanList;)[Z
-}
-
-public abstract class io/github/sooniln/fastcollect/MutableBooleanListIterator : io/github/sooniln/fastcollect/BooleanListIterator, java/util/ListIterator, kotlin/jvm/internal/markers/KMutableListIterator {
-	public fun <init> ()V
+public abstract interface class io/github/sooniln/fastcollect/LongShortConsumer {
+	public abstract fun accept (JS)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableByteCollection : io/github/sooniln/fastcollect/ByteCollection, java/util/Collection, kotlin/jvm/internal/markers/KMutableCollection {
@@ -4109,6 +4385,51 @@ public final class io/github/sooniln/fastcollect/MutableInt2AnyMap$MutableEntry$
 	public static fun component2 (Lio/github/sooniln/fastcollect/MutableInt2AnyMap$MutableEntry;)Ljava/lang/Object;
 }
 
+public abstract interface class io/github/sooniln/fastcollect/MutableInt2ByteMap : io/github/sooniln/fastcollect/Int2ByteMap {
+	public abstract fun clear ()V
+	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/IntSet;
+	public abstract fun getKeys ()Lio/github/sooniln/fastcollect/MutableIntSet;
+	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/ByteCollection;
+	public abstract fun getValues ()Lio/github/sooniln/fastcollect/MutableByteCollection;
+	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public abstract fun put (IB)B
+	public fun putAll (Lio/github/sooniln/fastcollect/Int2ByteMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public abstract fun remove (I)B
+	public fun removeKey (I)B
+	public fun replace (IB)B
+	public fun set (IB)V
+}
+
+public final class io/github/sooniln/fastcollect/MutableInt2ByteMap$DefaultImpls {
+	public static fun containsKey (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;I)Z
+	public static fun containsValue (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;B)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;Lio/github/sooniln/fastcollect/IntByteConsumer;)V
+	public static fun foreachKey (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;Lio/github/sooniln/fastcollect/IntConsumer;)V
+	public static fun getOrDefault (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;IB)B
+	public static fun getValue (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;I)B
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;)Z
+	public static synthetic fun keys (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;)Lio/github/sooniln/fastcollect/IntSet;
+	public static fun putAll (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;Lio/github/sooniln/fastcollect/Int2ByteMap;)V
+	public static fun putAll (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;Ljava/util/Map;)V
+	public static fun removeKey (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;I)B
+	public static fun replace (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;IB)B
+	public static fun set (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;IB)V
+	public static synthetic fun size (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;)I
+	public static synthetic fun values (Lio/github/sooniln/fastcollect/MutableInt2ByteMap;)Lio/github/sooniln/fastcollect/ByteCollection;
+}
+
+public abstract interface class io/github/sooniln/fastcollect/MutableInt2ByteMap$MutableEntry : io/github/sooniln/fastcollect/Int2ByteMap$Entry {
+	public abstract fun getValue ()B
+	public abstract fun setValue (B)V
+}
+
+public final class io/github/sooniln/fastcollect/MutableInt2ByteMap$MutableEntry$DefaultImpls {
+	public static fun component1 (Lio/github/sooniln/fastcollect/MutableInt2ByteMap$MutableEntry;)I
+	public static fun component2 (Lio/github/sooniln/fastcollect/MutableInt2ByteMap$MutableEntry;)B
+}
+
 public abstract interface class io/github/sooniln/fastcollect/MutableInt2DoubleMap : io/github/sooniln/fastcollect/Int2DoubleMap {
 	public abstract fun clear ()V
 	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/IntSet;
@@ -4287,6 +4608,51 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2LongMap
 public final class io/github/sooniln/fastcollect/MutableInt2LongMap$MutableEntry$DefaultImpls {
 	public static fun component1 (Lio/github/sooniln/fastcollect/MutableInt2LongMap$MutableEntry;)I
 	public static fun component2 (Lio/github/sooniln/fastcollect/MutableInt2LongMap$MutableEntry;)J
+}
+
+public abstract interface class io/github/sooniln/fastcollect/MutableInt2ShortMap : io/github/sooniln/fastcollect/Int2ShortMap {
+	public abstract fun clear ()V
+	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/IntSet;
+	public abstract fun getKeys ()Lio/github/sooniln/fastcollect/MutableIntSet;
+	public abstract fun getValues ()Lio/github/sooniln/fastcollect/MutableShortCollection;
+	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/ShortCollection;
+	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public abstract fun put (IS)S
+	public fun putAll (Lio/github/sooniln/fastcollect/Int2ShortMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public abstract fun remove (I)S
+	public fun removeKey (I)S
+	public fun replace (IS)S
+	public fun set (IS)V
+}
+
+public final class io/github/sooniln/fastcollect/MutableInt2ShortMap$DefaultImpls {
+	public static fun containsKey (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;I)Z
+	public static fun containsValue (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;S)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;Lio/github/sooniln/fastcollect/IntShortConsumer;)V
+	public static fun foreachKey (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;Lio/github/sooniln/fastcollect/IntConsumer;)V
+	public static fun getOrDefault (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;IS)S
+	public static fun getValue (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;I)S
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;)Z
+	public static synthetic fun keys (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;)Lio/github/sooniln/fastcollect/IntSet;
+	public static fun putAll (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;Lio/github/sooniln/fastcollect/Int2ShortMap;)V
+	public static fun putAll (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;Ljava/util/Map;)V
+	public static fun removeKey (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;I)S
+	public static fun replace (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;IS)S
+	public static fun set (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;IS)V
+	public static synthetic fun size (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;)I
+	public static synthetic fun values (Lio/github/sooniln/fastcollect/MutableInt2ShortMap;)Lio/github/sooniln/fastcollect/ShortCollection;
+}
+
+public abstract interface class io/github/sooniln/fastcollect/MutableInt2ShortMap$MutableEntry : io/github/sooniln/fastcollect/Int2ShortMap$Entry {
+	public abstract fun getValue ()S
+	public abstract fun setValue (S)V
+}
+
+public final class io/github/sooniln/fastcollect/MutableInt2ShortMap$MutableEntry$DefaultImpls {
+	public static fun component1 (Lio/github/sooniln/fastcollect/MutableInt2ShortMap$MutableEntry;)I
+	public static fun component2 (Lio/github/sooniln/fastcollect/MutableInt2ShortMap$MutableEntry;)S
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableIntCollection : io/github/sooniln/fastcollect/IntCollection, java/util/Collection, kotlin/jvm/internal/markers/KMutableCollection {
@@ -4483,6 +4849,51 @@ public final class io/github/sooniln/fastcollect/MutableLong2AnyMap$MutableEntry
 	public static fun component2 (Lio/github/sooniln/fastcollect/MutableLong2AnyMap$MutableEntry;)Ljava/lang/Object;
 }
 
+public abstract interface class io/github/sooniln/fastcollect/MutableLong2ByteMap : io/github/sooniln/fastcollect/Long2ByteMap {
+	public abstract fun clear ()V
+	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/LongSet;
+	public abstract fun getKeys ()Lio/github/sooniln/fastcollect/MutableLongSet;
+	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/ByteCollection;
+	public abstract fun getValues ()Lio/github/sooniln/fastcollect/MutableByteCollection;
+	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public abstract fun put (JB)B
+	public fun putAll (Lio/github/sooniln/fastcollect/Long2ByteMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public abstract fun remove (J)B
+	public fun removeKey (J)B
+	public fun replace (JB)B
+	public fun set (JB)V
+}
+
+public final class io/github/sooniln/fastcollect/MutableLong2ByteMap$DefaultImpls {
+	public static fun containsKey (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;J)Z
+	public static fun containsValue (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;B)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;Lio/github/sooniln/fastcollect/LongByteConsumer;)V
+	public static fun foreachKey (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;Lio/github/sooniln/fastcollect/LongConsumer;)V
+	public static fun getOrDefault (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;JB)B
+	public static fun getValue (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;J)B
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;)Z
+	public static synthetic fun keys (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;)Lio/github/sooniln/fastcollect/LongSet;
+	public static fun putAll (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;Lio/github/sooniln/fastcollect/Long2ByteMap;)V
+	public static fun putAll (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;Ljava/util/Map;)V
+	public static fun removeKey (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;J)B
+	public static fun replace (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;JB)B
+	public static fun set (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;JB)V
+	public static synthetic fun size (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;)I
+	public static synthetic fun values (Lio/github/sooniln/fastcollect/MutableLong2ByteMap;)Lio/github/sooniln/fastcollect/ByteCollection;
+}
+
+public abstract interface class io/github/sooniln/fastcollect/MutableLong2ByteMap$MutableEntry : io/github/sooniln/fastcollect/Long2ByteMap$Entry {
+	public abstract fun getValue ()B
+	public abstract fun setValue (B)V
+}
+
+public final class io/github/sooniln/fastcollect/MutableLong2ByteMap$MutableEntry$DefaultImpls {
+	public static fun component1 (Lio/github/sooniln/fastcollect/MutableLong2ByteMap$MutableEntry;)J
+	public static fun component2 (Lio/github/sooniln/fastcollect/MutableLong2ByteMap$MutableEntry;)B
+}
+
 public abstract interface class io/github/sooniln/fastcollect/MutableLong2DoubleMap : io/github/sooniln/fastcollect/Long2DoubleMap {
 	public abstract fun clear ()V
 	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/LongSet;
@@ -4661,6 +5072,51 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2LongMa
 public final class io/github/sooniln/fastcollect/MutableLong2LongMap$MutableEntry$DefaultImpls {
 	public static fun component1 (Lio/github/sooniln/fastcollect/MutableLong2LongMap$MutableEntry;)J
 	public static fun component2 (Lio/github/sooniln/fastcollect/MutableLong2LongMap$MutableEntry;)J
+}
+
+public abstract interface class io/github/sooniln/fastcollect/MutableLong2ShortMap : io/github/sooniln/fastcollect/Long2ShortMap {
+	public abstract fun clear ()V
+	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/LongSet;
+	public abstract fun getKeys ()Lio/github/sooniln/fastcollect/MutableLongSet;
+	public abstract fun getValues ()Lio/github/sooniln/fastcollect/MutableShortCollection;
+	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/ShortCollection;
+	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
+	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
+	public abstract fun put (JS)S
+	public fun putAll (Lio/github/sooniln/fastcollect/Long2ShortMap;)V
+	public fun putAll (Ljava/util/Map;)V
+	public abstract fun remove (J)S
+	public fun removeKey (J)S
+	public fun replace (JS)S
+	public fun set (JS)V
+}
+
+public final class io/github/sooniln/fastcollect/MutableLong2ShortMap$DefaultImpls {
+	public static fun containsKey (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;J)Z
+	public static fun containsValue (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;S)Z
+	public static fun foreach (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;Lio/github/sooniln/fastcollect/LongShortConsumer;)V
+	public static fun foreachKey (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;Lio/github/sooniln/fastcollect/LongConsumer;)V
+	public static fun getOrDefault (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;JS)S
+	public static fun getValue (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;J)S
+	public static fun isEmpty (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;)Z
+	public static synthetic fun keys (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;)Lio/github/sooniln/fastcollect/LongSet;
+	public static fun putAll (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;Lio/github/sooniln/fastcollect/Long2ShortMap;)V
+	public static fun putAll (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;Ljava/util/Map;)V
+	public static fun removeKey (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;J)S
+	public static fun replace (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;JS)S
+	public static fun set (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;JS)V
+	public static synthetic fun size (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;)I
+	public static synthetic fun values (Lio/github/sooniln/fastcollect/MutableLong2ShortMap;)Lio/github/sooniln/fastcollect/ShortCollection;
+}
+
+public abstract interface class io/github/sooniln/fastcollect/MutableLong2ShortMap$MutableEntry : io/github/sooniln/fastcollect/Long2ShortMap$Entry {
+	public abstract fun getValue ()S
+	public abstract fun setValue (S)V
+}
+
+public final class io/github/sooniln/fastcollect/MutableLong2ShortMap$MutableEntry$DefaultImpls {
+	public static fun component1 (Lio/github/sooniln/fastcollect/MutableLong2ShortMap$MutableEntry;)J
+	public static fun component2 (Lio/github/sooniln/fastcollect/MutableLong2ShortMap$MutableEntry;)S
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableLongCollection : io/github/sooniln/fastcollect/LongCollection, java/util/Collection, kotlin/jvm/internal/markers/KMutableCollection {
@@ -4939,10 +5395,14 @@ public abstract class io/github/sooniln/fastcollect/MutableShortListIterator : i
 }
 
 public final class io/github/sooniln/fastcollect/PriorityQueues {
+	public static final fun asQueue (Lio/github/sooniln/fastcollect/BytePriorityQueue;)Ljava/util/Queue;
 	public static final fun asQueue (Lio/github/sooniln/fastcollect/DoublePriorityQueue;)Ljava/util/Queue;
 	public static final fun asQueue (Lio/github/sooniln/fastcollect/FloatPriorityQueue;)Ljava/util/Queue;
 	public static final fun asQueue (Lio/github/sooniln/fastcollect/IntPriorityQueue;)Ljava/util/Queue;
 	public static final fun asQueue (Lio/github/sooniln/fastcollect/LongPriorityQueue;)Ljava/util/Queue;
+	public static final fun asQueue (Lio/github/sooniln/fastcollect/ShortPriorityQueue;)Ljava/util/Queue;
+	public static final synthetic fun buildBytePriorityQueue (IZLkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/BytePriorityQueue;
+	public static synthetic fun buildBytePriorityQueue$default (IZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/BytePriorityQueue;
 	public static final synthetic fun buildDoublePriorityQueue (IZLkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/DoublePriorityQueue;
 	public static synthetic fun buildDoublePriorityQueue$default (IZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/DoublePriorityQueue;
 	public static final synthetic fun buildFloatPriorityQueue (IZLkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/FloatPriorityQueue;
@@ -4951,6 +5411,10 @@ public final class io/github/sooniln/fastcollect/PriorityQueues {
 	public static synthetic fun buildIntPriorityQueue$default (IZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/IntPriorityQueue;
 	public static final synthetic fun buildLongPriorityQueue (IZLkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/LongPriorityQueue;
 	public static synthetic fun buildLongPriorityQueue$default (IZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/LongPriorityQueue;
+	public static final synthetic fun buildShortPriorityQueue (IZLkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/ShortPriorityQueue;
+	public static synthetic fun buildShortPriorityQueue$default (IZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/ShortPriorityQueue;
+	public static final fun bytePriorityQueueOf ([BZ)Lio/github/sooniln/fastcollect/BytePriorityQueue;
+	public static synthetic fun bytePriorityQueueOf$default ([BZILjava/lang/Object;)Lio/github/sooniln/fastcollect/BytePriorityQueue;
 	public static final fun doublePriorityQueueOf ([DZ)Lio/github/sooniln/fastcollect/DoublePriorityQueue;
 	public static synthetic fun doublePriorityQueueOf$default ([DZILjava/lang/Object;)Lio/github/sooniln/fastcollect/DoublePriorityQueue;
 	public static final fun floatPriorityQueueOf ([FZ)Lio/github/sooniln/fastcollect/FloatPriorityQueue;
@@ -4959,14 +5423,20 @@ public final class io/github/sooniln/fastcollect/PriorityQueues {
 	public static synthetic fun intPriorityQueueOf$default ([IZILjava/lang/Object;)Lio/github/sooniln/fastcollect/IntPriorityQueue;
 	public static final fun longPriorityQueueOf ([JZ)Lio/github/sooniln/fastcollect/LongPriorityQueue;
 	public static synthetic fun longPriorityQueueOf$default ([JZILjava/lang/Object;)Lio/github/sooniln/fastcollect/LongPriorityQueue;
+	public static final fun removeAll (Lio/github/sooniln/fastcollect/AbstractBytePriorityQueue;Lio/github/sooniln/fastcollect/BytePredicate;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/AbstractDoublePriorityQueue;Lio/github/sooniln/fastcollect/DoublePredicate;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/AbstractFloatPriorityQueue;Lio/github/sooniln/fastcollect/FloatPredicate;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/AbstractIntPriorityQueue;Lio/github/sooniln/fastcollect/IntPredicate;)Z
 	public static final fun removeAll (Lio/github/sooniln/fastcollect/AbstractLongPriorityQueue;Lio/github/sooniln/fastcollect/LongPredicate;)Z
+	public static final fun removeAll (Lio/github/sooniln/fastcollect/AbstractShortPriorityQueue;Lio/github/sooniln/fastcollect/ShortPredicate;)Z
+	public static final fun retainAll (Lio/github/sooniln/fastcollect/AbstractBytePriorityQueue;Lio/github/sooniln/fastcollect/BytePredicate;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/AbstractDoublePriorityQueue;Lio/github/sooniln/fastcollect/DoublePredicate;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/AbstractFloatPriorityQueue;Lio/github/sooniln/fastcollect/FloatPredicate;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/AbstractIntPriorityQueue;Lio/github/sooniln/fastcollect/IntPredicate;)Z
 	public static final fun retainAll (Lio/github/sooniln/fastcollect/AbstractLongPriorityQueue;Lio/github/sooniln/fastcollect/LongPredicate;)Z
+	public static final fun retainAll (Lio/github/sooniln/fastcollect/AbstractShortPriorityQueue;Lio/github/sooniln/fastcollect/ShortPredicate;)Z
+	public static final fun shortPriorityQueueOf ([SZ)Lio/github/sooniln/fastcollect/ShortPriorityQueue;
+	public static synthetic fun shortPriorityQueueOf$default ([SZILjava/lang/Object;)Lio/github/sooniln/fastcollect/ShortPriorityQueue;
 }
 
 public final class io/github/sooniln/fastcollect/ShortArrayDeque : io/github/sooniln/fastcollect/AbstractMutableShortList, java/util/RandomAccess {
@@ -5071,5 +5541,16 @@ public abstract class io/github/sooniln/fastcollect/ShortListIterator : kotlin/c
 
 public abstract interface class io/github/sooniln/fastcollect/ShortPredicate {
 	public abstract fun test (S)Z
+}
+
+public final class io/github/sooniln/fastcollect/ShortPriorityQueue : io/github/sooniln/fastcollect/AbstractShortPriorityQueue {
+	public fun <init> (IZ)V
+	public synthetic fun <init> (IZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/ShortCollection;Z)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/ShortCollection;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/Collection;Z)V
+	public synthetic fun <init> (Ljava/util/Collection;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> ([SIIZ)V
+	public synthetic fun <init> ([SIIZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 

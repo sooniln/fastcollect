@@ -17,6 +17,67 @@ private val QUEUE_FEATURES = arrayOf<Feature<*>>(
     CollectionFeature.SUPPORTS_REMOVE,
 )
 
+// ============================= Byte =============================
+
+private abstract class TestByteQueueGenerator : TestQueueGenerator<Byte> {
+    override fun samples(): SampleElements<Byte> = SampleElements(1.toByte(), 2.toByte(), 3.toByte(), 4.toByte(), 5.toByte())
+
+    override fun create(vararg elements: Any): Queue<Byte> =
+        createQueue(elements.map { it as Byte }.toByteArray())
+
+    protected abstract fun createQueue(elements: ByteArray): Queue<Byte>
+
+    @Suppress("UNCHECKED_CAST")
+    override fun createArray(length: Int): Array<Byte> = arrayOfNulls<Byte>(length) as Array<Byte>
+
+    override fun order(insertionOrder: MutableList<Byte>): Iterable<Byte> = insertionOrder
+}
+
+@RunWith(AllTests::class)
+class ByteQueueGuavaTest {
+    companion object {
+        @JvmStatic
+        fun suite(): TestSuite = QueueTestSuiteBuilder
+            .using(object : TestByteQueueGenerator() {
+                override fun createQueue(elements: ByteArray): Queue<Byte> = BytePriorityQueue(elements).asQueue()
+            })
+            .named("BytePriorityQueue")
+            .withFeatures(*QUEUE_FEATURES)
+            .createTestSuite()
+    }
+}
+
+// ============================= Short =============================
+
+private abstract class TestShortQueueGenerator : TestQueueGenerator<Short> {
+    override fun samples(): SampleElements<Short> =
+        SampleElements(1.toShort(), 2.toShort(), 3.toShort(), 4.toShort(), 5.toShort())
+
+    override fun create(vararg elements: Any): Queue<Short> =
+        createQueue(elements.map { it as Short }.toShortArray())
+
+    protected abstract fun createQueue(elements: ShortArray): Queue<Short>
+
+    @Suppress("UNCHECKED_CAST")
+    override fun createArray(length: Int): Array<Short> = arrayOfNulls<Short>(length) as Array<Short>
+
+    override fun order(insertionOrder: MutableList<Short>): Iterable<Short> = insertionOrder
+}
+
+@RunWith(AllTests::class)
+class ShortQueueGuavaTest {
+    companion object {
+        @JvmStatic
+        fun suite(): TestSuite = QueueTestSuiteBuilder
+            .using(object : TestShortQueueGenerator() {
+                override fun createQueue(elements: ShortArray): Queue<Short> = ShortPriorityQueue(elements).asQueue()
+            })
+            .named("ShortPriorityQueue")
+            .withFeatures(*QUEUE_FEATURES)
+            .createTestSuite()
+    }
+}
+
 // ============================= Int =============================
 
 private abstract class TestIntQueueGenerator : TestQueueGenerator<Int> {

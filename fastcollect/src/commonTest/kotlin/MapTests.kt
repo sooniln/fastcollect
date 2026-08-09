@@ -2,6 +2,632 @@ package io.github.sooniln.fastcollect
 
 import kotlin.test.*
 
+// ============================= Int2Byte =============================
+
+class Int2ByteMapTest {
+    @Test
+    fun mapOf_vararg() {
+        val map = int2ByteMapOf(1 to 10.toByte(), 2 to 20.toByte(), 3 to 30.toByte())
+        assertEquals(3, map.size)
+        assertEquals(10.toByte(), map[1])
+        assertEquals(20.toByte(), map[2])
+        assertEquals(30.toByte(), map[3])
+    }
+
+    @Test
+    fun mutableMapOf_vararg() {
+        val map = mutableInt2ByteMapOf(1 to 10.toByte(), 2 to 20.toByte())
+        assertEquals(2, map.size)
+        assertEquals(10.toByte(), map[1])
+    }
+
+    @Test
+    fun buildMap_dsl() {
+        val map = buildInt2ByteMap {
+            set(1, 100.toByte())
+            set(2, 110.toByte())
+        }
+        assertEquals(2, map.size)
+        assertEquals(100.toByte(), map[1])
+        assertEquals(110.toByte(), map[2])
+    }
+
+    @Test
+    fun get_absentKey_returnsDefaultValue() {
+        assertEquals(Byte.MIN_VALUE, int2ByteMapOf(1 to 10.toByte())[99])
+        assertEquals(Byte.MIN_VALUE, mutableInt2ByteMapOf(1 to 10.toByte())[99])
+    }
+
+    @Test
+    fun containsValue_presentAndAbsent() {
+        assertTrue(int2ByteMapOf(1 to 10.toByte()).containsValue(10.toByte()))
+        assertFalse(int2ByteMapOf(1 to 10.toByte()).containsValue(99.toByte()))
+        assertTrue(mutableInt2ByteMapOf(1 to 10.toByte()).containsValue(10.toByte()))
+        assertFalse(mutableInt2ByteMapOf(1 to 10.toByte()).containsValue(99.toByte()))
+    }
+
+    @Test
+    fun absentZeroKey_behavesLikeAnyAbsentKey() {
+        // 0 is the hash map's initial empty-slot marker, but must still behave as an ordinary key
+        assertFalse(mutableInt2ByteMapOf().containsKey(0))
+
+        val map = mutableInt2ByteMapOf(1 to 10.toByte())
+        assertEquals(Byte.MIN_VALUE, map[0])
+        assertFalse(map.containsKey(0))
+        assertEquals(Byte.MIN_VALUE, map.remove(0))
+        assertEquals(1, map.size)
+
+        map[0] = 5.toByte()
+        assertTrue(map.containsKey(0))
+        assertEquals(5.toByte(), map[0])
+        assertEquals(2, map.size)
+    }
+
+    @Test
+    fun isDefaultValue_true_forDefaultValue() {
+        assertTrue(mutableInt2ByteMapOf().isDefaultValue(Byte.MIN_VALUE))
+    }
+
+    @Test
+    fun isDefaultValue_false_forNonDefaultValues() {
+        val map = mutableInt2ByteMapOf(1 to 42.toByte())
+        assertFalse(map.isDefaultValue(42.toByte()))
+        assertFalse(map.isDefaultValue(0.toByte()))
+    }
+
+    @Test
+    fun storedDefaultValue_keyStillReportedPresent() {
+        val map = mutableInt2ByteMapOf(1 to Byte.MIN_VALUE)
+        assertTrue(map.containsKey(1), "key must still be present even when stored value is the default value")
+        assertEquals(Byte.MIN_VALUE, map[1])
+    }
+
+    @Test
+    fun getValue_presentKey_returnsValue() {
+        assertEquals(10.toByte(), int2ByteMapOf(1 to 10.toByte()).getValue(1))
+    }
+
+    @Test
+    fun getValue_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { int2ByteMapOf(1 to 10.toByte()).getValue(99) }
+    }
+
+    @Test
+    fun getOrElse_absentKey_invokesLambda() {
+        var invoked = false
+        val result = int2ByteMapOf(1 to 10.toByte()).getOrElse(99) { invoked = true; (-1).toByte() }
+        assertTrue(invoked)
+        assertEquals((-1).toByte(), result)
+    }
+
+    @Test
+    fun getOrElse_presentKey_doesNotInvokeLambda() {
+        var invoked = false
+        val result = int2ByteMapOf(1 to 10.toByte()).getOrElse(1) { invoked = true; (-1).toByte() }
+        assertFalse(invoked)
+        assertEquals(10.toByte(), result)
+    }
+
+    @Test
+    fun getOrElse_storedDefaultValue_doesNotInvokeLambda() {
+        val map = mutableInt2ByteMapOf(1 to Byte.MIN_VALUE)
+        var invoked = false
+        val result = map.getOrElse(1) { invoked = true; (-1).toByte() }
+        assertFalse(invoked, "lambda must not be invoked when the default value is stored under the key")
+        assertEquals(Byte.MIN_VALUE, result)
+    }
+
+    @Test
+    fun getOrDefault_absentKey_returnsDefault() {
+        assertEquals((-99).toByte(), int2ByteMapOf(1 to 10.toByte()).getOrDefault(99, (-99).toByte()))
+    }
+
+    @Test
+    fun getOrDefault_presentKey_returnsStoredValue() {
+        assertEquals(10.toByte(), int2ByteMapOf(1 to 10.toByte()).getOrDefault(1, (-99).toByte()))
+    }
+
+    @Test
+    fun merge_absentKey_insertsValue() {
+        val map = mutableInt2ByteMapOf(1 to 10.toByte())
+        assertEquals(42.toByte(), map.merge(99, 42.toByte()) { old, new -> (old + new).toByte() })
+        assertEquals(42.toByte(), map[99])
+    }
+
+    @Test
+    fun merge_presentKey_appliesMergeFunction() {
+        val map = mutableInt2ByteMapOf(1 to 10.toByte())
+        assertEquals(15.toByte(), map.merge(1, 5.toByte()) { old, new -> (old + new).toByte() })
+        assertEquals(15.toByte(), map[1])
+    }
+
+    @Test
+    fun getOrPut_absentKey_insertsAndReturns() {
+        val map = mutableInt2ByteMapOf(1 to 10.toByte())
+        assertEquals(42.toByte(), map.getOrPut(99) { 42.toByte() })
+        assertEquals(42.toByte(), map[99])
+    }
+
+    @Test
+    fun getOrPut_presentKey_returnsExisting_doesNotCallLambda() {
+        var invoked = false
+        val map = mutableInt2ByteMapOf(1 to 10.toByte())
+        val result = map.getOrPut(1) { invoked = true; 99.toByte() }
+        assertFalse(invoked)
+        assertEquals(10.toByte(), result)
+    }
+
+    @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableInt2ByteMapOf(1 to 10.toByte())
+        assertEquals(10.toByte(), map.replace(1, 20.toByte()))
+        assertEquals(20.toByte(), map[1])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2ByteMapOf(1 to 10.toByte()).replace(99, 20.toByte()) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableInt2ByteMapOf(1 to 10.toByte(), 2 to 20.toByte())
+        assertEquals(10.toByte(), map.removeKey(1))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2ByteMapOf(1 to 10.toByte()).removeKey(99) }
+    }
+
+    @Test
+    fun putAll_fromPrimitiveMap_copiesAllEntries() {
+        val source = int2ByteMapOf(1 to 10.toByte(), 2 to 20.toByte())
+        val dest = mutableInt2ByteMapOf(3 to 30.toByte())
+        dest.putAll(source)
+        assertEquals(3, dest.size)
+        assertEquals(10.toByte(), dest[1])
+        assertEquals(20.toByte(), dest[2])
+        assertEquals(30.toByte(), dest[3])
+    }
+
+    @Test
+    fun putAll_fromLargerOverlappingMap_prefersFromValues() {
+        // when `from` is more than double this map's size, putAll takes a "reset to from" fast path;
+        // for keys present in both maps, from's value must win, while keys unique to this map are preserved.
+        val dest = mutableInt2ByteMapOf(1 to 100.toByte(), 6 to 60.toByte())
+        val source = int2ByteMapOf(
+            1 to 99.toByte(), 2 to 2.toByte(), 3 to 3.toByte(), 4 to 4.toByte(), 5 to 5.toByte(), 7 to 7.toByte(),
+        )
+        dest.putAll(source)
+        assertEquals(7, dest.size)
+        assertEquals(99.toByte(), dest[1])
+        assertEquals(2.toByte(), dest[2])
+        assertEquals(3.toByte(), dest[3])
+        assertEquals(4.toByte(), dest[4])
+        assertEquals(5.toByte(), dest[5])
+        assertEquals(60.toByte(), dest[6])
+        assertEquals(7.toByte(), dest[7])
+    }
+
+    @Test
+    fun putAll_fromStandardMap_copiesAllEntries() {
+        val dest = mutableInt2ByteMapOf(3 to 30.toByte())
+        dest.putAll(mapOf(1 to 10.toByte(), 2 to 20.toByte()))
+        assertEquals(3, dest.size)
+        assertEquals(10.toByte(), dest[1])
+        assertEquals(20.toByte(), dest[2])
+    }
+
+    @Test
+    fun ensureCapacity_doesNotLoseEntries() {
+        val map = Int2ByteHashMap().apply { set(1, 10.toByte()); set(2, 20.toByte()) }
+        map.ensureCapacity(100)
+        assertEquals(2, map.size)
+        assertEquals(10.toByte(), map[1])
+        assertEquals(20.toByte(), map[2])
+    }
+
+    @Test
+    fun trimToSize_doesNotLoseEntries() {
+        val map = Int2ByteHashMap(100).apply { set(1, 10.toByte()); set(2, 20.toByte()) }
+        map.trimToSize()
+        assertEquals(2, map.size)
+        assertEquals(10.toByte(), map[1])
+        assertEquals(20.toByte(), map[2])
+    }
+
+    @Test
+    fun manyEntries_survivePutRemoveAndRehash() {
+        // enough entries to force several rehashes and dense collision clusters; values are truncated to Byte
+        // range via toByte(), consistently on both the write and the read-back assertion.
+        val map = Int2ByteHashMap()
+        for (i in 1..500) map[i] = (i + 1000).toByte()
+        assertEquals(500, map.size)
+        for (i in 1..500) assertEquals((i + 1000).toByte(), map[i])
+
+        // removing entries exercises the backward-shift chains through collision clusters
+        for (i in 1..500 step 2) assertEquals((i + 1000).toByte(), map.remove(i))
+        assertEquals(250, map.size)
+        for (i in 1..500) {
+            if (i % 2 == 0) assertEquals((i + 1000).toByte(), map[i]) else assertFalse(map.containsKey(i))
+        }
+
+        map.trimToSize()
+        for (i in 2..500 step 2) assertEquals((i + 1000).toByte(), map[i])
+    }
+
+    @Test
+    fun iteratorRemove_removesAllEntries() {
+        // a trimmed, densely loaded table makes the iterator's removal adjustment paths likely
+        val map = Int2ByteHashMap()
+        for (i in 1..200) map[i] = (i + 1000).toByte()
+        map.trimToSize()
+
+        val visited = mutableListOf<Int>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            assertEquals((entry.key + 1000).toByte(), entry.value)
+            visited.add(entry.key)
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals((1..200).toList(), visited.sorted())
+    }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Int2ByteHashMap()
+        for (i in 1..50) map[i] = (i + 1000).toByte()
+        map[0] = 99.toByte()
+
+        val fromIterator = mutableListOf<Pair<Int, Byte>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value)
+        }
+
+        val fromForeach = mutableListOf<Pair<Int, Byte>>()
+        map.foreach { k, v -> fromForeach.add(k to v) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Int2ByteMap implementation,
+        // not just the same concrete class.
+        val map: Any = mutableInt2ByteMapOf(1 to 1.toByte(), 2 to 2.toByte())
+        assertEquals(int2ByteMapOf(1 to 1.toByte(), 2 to 2.toByte()), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Int2ByteMap.Entry implementation, not just the same concrete class.
+        val entry: Any = mutableInt2ByteMapOf(1 to 1.toByte()).iterator().next()
+        assertEquals(mutableInt2ByteMapOf(1 to 1.toByte()).iterator().next(), entry)
+    }
+}
+
+// ============================= Int2Short =============================
+
+class Int2ShortMapTest {
+    @Test
+    fun mapOf_vararg() {
+        val map = int2ShortMapOf(1 to 10.toShort(), 2 to 20.toShort(), 3 to 30.toShort())
+        assertEquals(3, map.size)
+        assertEquals(10.toShort(), map[1])
+        assertEquals(20.toShort(), map[2])
+        assertEquals(30.toShort(), map[3])
+    }
+
+    @Test
+    fun mutableMapOf_vararg() {
+        val map = mutableInt2ShortMapOf(1 to 10.toShort(), 2 to 20.toShort())
+        assertEquals(2, map.size)
+        assertEquals(10.toShort(), map[1])
+    }
+
+    @Test
+    fun buildMap_dsl() {
+        val map = buildInt2ShortMap {
+            set(1, 100.toShort())
+            set(2, 200.toShort())
+        }
+        assertEquals(2, map.size)
+        assertEquals(100.toShort(), map[1])
+        assertEquals(200.toShort(), map[2])
+    }
+
+    @Test
+    fun get_absentKey_returnsDefaultValue() {
+        assertEquals(Short.MIN_VALUE, int2ShortMapOf(1 to 10.toShort())[99])
+        assertEquals(Short.MIN_VALUE, mutableInt2ShortMapOf(1 to 10.toShort())[99])
+    }
+
+    @Test
+    fun containsValue_presentAndAbsent() {
+        assertTrue(int2ShortMapOf(1 to 10.toShort()).containsValue(10.toShort()))
+        assertFalse(int2ShortMapOf(1 to 10.toShort()).containsValue(99.toShort()))
+        assertTrue(mutableInt2ShortMapOf(1 to 10.toShort()).containsValue(10.toShort()))
+        assertFalse(mutableInt2ShortMapOf(1 to 10.toShort()).containsValue(99.toShort()))
+    }
+
+    @Test
+    fun absentZeroKey_behavesLikeAnyAbsentKey() {
+        // 0 is the hash map's initial empty-slot marker, but must still behave as an ordinary key
+        assertFalse(mutableInt2ShortMapOf().containsKey(0))
+
+        val map = mutableInt2ShortMapOf(1 to 10.toShort())
+        assertEquals(Short.MIN_VALUE, map[0])
+        assertFalse(map.containsKey(0))
+        assertEquals(Short.MIN_VALUE, map.remove(0))
+        assertEquals(1, map.size)
+
+        map[0] = 5.toShort()
+        assertTrue(map.containsKey(0))
+        assertEquals(5.toShort(), map[0])
+        assertEquals(2, map.size)
+    }
+
+    @Test
+    fun isDefaultValue_true_forDefaultValue() {
+        assertTrue(mutableInt2ShortMapOf().isDefaultValue(Short.MIN_VALUE))
+    }
+
+    @Test
+    fun isDefaultValue_false_forNonDefaultValues() {
+        val map = mutableInt2ShortMapOf(1 to 42.toShort())
+        assertFalse(map.isDefaultValue(42.toShort()))
+        assertFalse(map.isDefaultValue(0.toShort()))
+    }
+
+    @Test
+    fun storedDefaultValue_keyStillReportedPresent() {
+        val map = mutableInt2ShortMapOf(1 to Short.MIN_VALUE)
+        assertTrue(map.containsKey(1), "key must still be present even when stored value is the default value")
+        assertEquals(Short.MIN_VALUE, map[1])
+    }
+
+    @Test
+    fun getValue_presentKey_returnsValue() {
+        assertEquals(10.toShort(), int2ShortMapOf(1 to 10.toShort()).getValue(1))
+    }
+
+    @Test
+    fun getValue_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { int2ShortMapOf(1 to 10.toShort()).getValue(99) }
+    }
+
+    @Test
+    fun getOrElse_absentKey_invokesLambda() {
+        var invoked = false
+        val result = int2ShortMapOf(1 to 10.toShort()).getOrElse(99) { invoked = true; (-1).toShort() }
+        assertTrue(invoked)
+        assertEquals((-1).toShort(), result)
+    }
+
+    @Test
+    fun getOrElse_presentKey_doesNotInvokeLambda() {
+        var invoked = false
+        val result = int2ShortMapOf(1 to 10.toShort()).getOrElse(1) { invoked = true; (-1).toShort() }
+        assertFalse(invoked)
+        assertEquals(10.toShort(), result)
+    }
+
+    @Test
+    fun getOrElse_storedDefaultValue_doesNotInvokeLambda() {
+        val map = mutableInt2ShortMapOf(1 to Short.MIN_VALUE)
+        var invoked = false
+        val result = map.getOrElse(1) { invoked = true; (-1).toShort() }
+        assertFalse(invoked, "lambda must not be invoked when the default value is stored under the key")
+        assertEquals(Short.MIN_VALUE, result)
+    }
+
+    @Test
+    fun getOrDefault_absentKey_returnsDefault() {
+        assertEquals((-99).toShort(), int2ShortMapOf(1 to 10.toShort()).getOrDefault(99, (-99).toShort()))
+    }
+
+    @Test
+    fun getOrDefault_presentKey_returnsStoredValue() {
+        assertEquals(10.toShort(), int2ShortMapOf(1 to 10.toShort()).getOrDefault(1, (-99).toShort()))
+    }
+
+    @Test
+    fun merge_absentKey_insertsValue() {
+        val map = mutableInt2ShortMapOf(1 to 10.toShort())
+        assertEquals(42.toShort(), map.merge(99, 42.toShort()) { old, new -> (old + new).toShort() })
+        assertEquals(42.toShort(), map[99])
+    }
+
+    @Test
+    fun merge_presentKey_appliesMergeFunction() {
+        val map = mutableInt2ShortMapOf(1 to 10.toShort())
+        assertEquals(15.toShort(), map.merge(1, 5.toShort()) { old, new -> (old + new).toShort() })
+        assertEquals(15.toShort(), map[1])
+    }
+
+    @Test
+    fun getOrPut_absentKey_insertsAndReturns() {
+        val map = mutableInt2ShortMapOf(1 to 10.toShort())
+        assertEquals(42.toShort(), map.getOrPut(99) { 42.toShort() })
+        assertEquals(42.toShort(), map[99])
+    }
+
+    @Test
+    fun getOrPut_presentKey_returnsExisting_doesNotCallLambda() {
+        var invoked = false
+        val map = mutableInt2ShortMapOf(1 to 10.toShort())
+        val result = map.getOrPut(1) { invoked = true; 99.toShort() }
+        assertFalse(invoked)
+        assertEquals(10.toShort(), result)
+    }
+
+    @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableInt2ShortMapOf(1 to 10.toShort())
+        assertEquals(10.toShort(), map.replace(1, 20.toShort()))
+        assertEquals(20.toShort(), map[1])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2ShortMapOf(1 to 10.toShort()).replace(99, 20.toShort()) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableInt2ShortMapOf(1 to 10.toShort(), 2 to 20.toShort())
+        assertEquals(10.toShort(), map.removeKey(1))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableInt2ShortMapOf(1 to 10.toShort()).removeKey(99) }
+    }
+
+    @Test
+    fun putAll_fromPrimitiveMap_copiesAllEntries() {
+        val source = int2ShortMapOf(1 to 10.toShort(), 2 to 20.toShort())
+        val dest = mutableInt2ShortMapOf(3 to 30.toShort())
+        dest.putAll(source)
+        assertEquals(3, dest.size)
+        assertEquals(10.toShort(), dest[1])
+        assertEquals(20.toShort(), dest[2])
+        assertEquals(30.toShort(), dest[3])
+    }
+
+    @Test
+    fun putAll_fromLargerOverlappingMap_prefersFromValues() {
+        // when `from` is more than double this map's size, putAll takes a "reset to from" fast path;
+        // for keys present in both maps, from's value must win, while keys unique to this map are preserved.
+        val dest = mutableInt2ShortMapOf(1 to 100.toShort(), 6 to 600.toShort())
+        val source = int2ShortMapOf(
+            1 to 999.toShort(), 2 to 2.toShort(), 3 to 3.toShort(), 4 to 4.toShort(), 5 to 5.toShort(),
+            7 to 7.toShort(),
+        )
+        dest.putAll(source)
+        assertEquals(7, dest.size)
+        assertEquals(999.toShort(), dest[1])
+        assertEquals(2.toShort(), dest[2])
+        assertEquals(3.toShort(), dest[3])
+        assertEquals(4.toShort(), dest[4])
+        assertEquals(5.toShort(), dest[5])
+        assertEquals(600.toShort(), dest[6])
+        assertEquals(7.toShort(), dest[7])
+    }
+
+    @Test
+    fun putAll_fromStandardMap_copiesAllEntries() {
+        val dest = mutableInt2ShortMapOf(3 to 30.toShort())
+        dest.putAll(mapOf(1 to 10.toShort(), 2 to 20.toShort()))
+        assertEquals(3, dest.size)
+        assertEquals(10.toShort(), dest[1])
+        assertEquals(20.toShort(), dest[2])
+    }
+
+    @Test
+    fun ensureCapacity_doesNotLoseEntries() {
+        val map = Int2ShortHashMap().apply { set(1, 10.toShort()); set(2, 20.toShort()) }
+        map.ensureCapacity(100)
+        assertEquals(2, map.size)
+        assertEquals(10.toShort(), map[1])
+        assertEquals(20.toShort(), map[2])
+    }
+
+    @Test
+    fun trimToSize_doesNotLoseEntries() {
+        val map = Int2ShortHashMap(100).apply { set(1, 10.toShort()); set(2, 20.toShort()) }
+        map.trimToSize()
+        assertEquals(2, map.size)
+        assertEquals(10.toShort(), map[1])
+        assertEquals(20.toShort(), map[2])
+    }
+
+    @Test
+    fun manyEntries_survivePutRemoveAndRehash() {
+        // enough entries to force several rehashes and dense collision clusters
+        val map = Int2ShortHashMap()
+        for (i in 1..500) map[i] = (i + 1000).toShort()
+        assertEquals(500, map.size)
+        for (i in 1..500) assertEquals((i + 1000).toShort(), map[i])
+
+        // removing entries exercises the backward-shift chains through collision clusters
+        for (i in 1..500 step 2) assertEquals((i + 1000).toShort(), map.remove(i))
+        assertEquals(250, map.size)
+        for (i in 1..500) {
+            if (i % 2 == 0) assertEquals((i + 1000).toShort(), map[i]) else assertFalse(map.containsKey(i))
+        }
+
+        map.trimToSize()
+        for (i in 2..500 step 2) assertEquals((i + 1000).toShort(), map[i])
+    }
+
+    @Test
+    fun iteratorRemove_removesAllEntries() {
+        // a trimmed, densely loaded table makes the iterator's removal adjustment paths likely
+        val map = Int2ShortHashMap()
+        for (i in 1..200) map[i] = (i + 1000).toShort()
+        map.trimToSize()
+
+        val visited = mutableListOf<Int>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            assertEquals((entry.key + 1000).toShort(), entry.value)
+            visited.add(entry.key)
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals((1..200).toList(), visited.sorted())
+    }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Int2ShortHashMap()
+        for (i in 1..50) map[i] = (i + 1000).toShort()
+        map[0] = 9999.toShort()
+
+        val fromIterator = mutableListOf<Pair<Int, Short>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value)
+        }
+
+        val fromForeach = mutableListOf<Pair<Int, Short>>()
+        map.foreach { k, v -> fromForeach.add(k to v) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Int2ShortMap implementation,
+        // not just the same concrete class.
+        val map: Any = mutableInt2ShortMapOf(1 to 1.toShort(), 2 to 2.toShort())
+        assertEquals(int2ShortMapOf(1 to 1.toShort(), 2 to 2.toShort()), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Int2ShortMap.Entry implementation, not just the same concrete class.
+        val entry: Any = mutableInt2ShortMapOf(1 to 1.toShort()).iterator().next()
+        assertEquals(mutableInt2ShortMapOf(1 to 1.toShort()).iterator().next(), entry)
+    }
+}
+
 // ============================= Int2Int =============================
 
 class Int2IntMapTest {
@@ -1618,6 +2244,635 @@ class Int2AnyMapTest {
         // ANY Int2AnyMap.Entry implementation, not just the same concrete class.
         val entry: Any = mutableInt2AnyMapOf(1 to "a").iterator().next()
         assertEquals(mutableInt2AnyMapOf(1 to "a").iterator().next(), entry)
+    }
+}
+
+// ============================= Long2Byte =============================
+
+class Long2ByteMapTest {
+    @Test
+    fun mapOf_vararg() {
+        val map = long2ByteMapOf(1L to 10.toByte(), 2L to 20.toByte(), 3L to 30.toByte())
+        assertEquals(3, map.size)
+        assertEquals(10.toByte(), map[1L])
+        assertEquals(20.toByte(), map[2L])
+        assertEquals(30.toByte(), map[3L])
+    }
+
+    @Test
+    fun mutableMapOf_vararg() {
+        val map = mutableLong2ByteMapOf(1L to 10.toByte(), 2L to 20.toByte())
+        assertEquals(2, map.size)
+        assertEquals(10.toByte(), map[1L])
+    }
+
+    @Test
+    fun buildMap_dsl() {
+        val map = buildLong2ByteMap {
+            set(1L, 100.toByte())
+            set(2L, 110.toByte())
+        }
+        assertEquals(2, map.size)
+        assertEquals(100.toByte(), map[1L])
+        assertEquals(110.toByte(), map[2L])
+    }
+
+    @Test
+    fun get_absentKey_returnsDefaultValue() {
+        assertEquals(Byte.MIN_VALUE, long2ByteMapOf(1L to 10.toByte())[99L])
+        assertEquals(Byte.MIN_VALUE, mutableLong2ByteMapOf(1L to 10.toByte())[99L])
+    }
+
+    @Test
+    fun containsValue_presentAndAbsent() {
+        assertTrue(long2ByteMapOf(1L to 10.toByte()).containsValue(10.toByte()))
+        assertFalse(long2ByteMapOf(1L to 10.toByte()).containsValue(99.toByte()))
+        assertTrue(mutableLong2ByteMapOf(1L to 10.toByte()).containsValue(10.toByte()))
+        assertFalse(mutableLong2ByteMapOf(1L to 10.toByte()).containsValue(99.toByte()))
+    }
+
+    @Test
+    fun absentZeroKey_behavesLikeAnyAbsentKey() {
+        // 0 is the hash map's initial empty-slot marker, but must still behave as an ordinary key
+        assertFalse(mutableLong2ByteMapOf().containsKey(0L))
+
+        val map = mutableLong2ByteMapOf(1L to 10.toByte())
+        assertEquals(Byte.MIN_VALUE, map[0L])
+        assertFalse(map.containsKey(0L))
+        assertEquals(Byte.MIN_VALUE, map.remove(0L))
+        assertEquals(1, map.size)
+
+        map[0L] = 5.toByte()
+        assertTrue(map.containsKey(0L))
+        assertEquals(5.toByte(), map[0L])
+        assertEquals(2, map.size)
+    }
+
+    @Test
+    fun isDefaultValue_true_forDefaultValue() {
+        assertTrue(mutableLong2ByteMapOf().isDefaultValue(Byte.MIN_VALUE))
+    }
+
+    @Test
+    fun isDefaultValue_false_forNonDefaultValues() {
+        val map = mutableLong2ByteMapOf(1L to 42.toByte())
+        assertFalse(map.isDefaultValue(42.toByte()))
+        assertFalse(map.isDefaultValue(0.toByte()))
+    }
+
+    @Test
+    fun storedDefaultValue_keyStillReportedPresent() {
+        val map = mutableLong2ByteMapOf(1L to Byte.MIN_VALUE)
+        assertTrue(map.containsKey(1L), "key must still be present even when stored value is the default value")
+        assertEquals(Byte.MIN_VALUE, map[1L])
+    }
+
+    @Test
+    fun getValue_presentKey_returnsValue() {
+        assertEquals(10.toByte(), long2ByteMapOf(1L to 10.toByte()).getValue(1L))
+    }
+
+    @Test
+    fun getValue_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { long2ByteMapOf(1L to 10.toByte()).getValue(99L) }
+    }
+
+    @Test
+    fun getOrElse_absentKey_invokesLambda() {
+        var invoked = false
+        val result = long2ByteMapOf(1L to 10.toByte()).getOrElse(99L) { invoked = true; (-1).toByte() }
+        assertTrue(invoked)
+        assertEquals((-1).toByte(), result)
+    }
+
+    @Test
+    fun getOrElse_presentKey_doesNotInvokeLambda() {
+        var invoked = false
+        val result = long2ByteMapOf(1L to 10.toByte()).getOrElse(1L) { invoked = true; (-1).toByte() }
+        assertFalse(invoked)
+        assertEquals(10.toByte(), result)
+    }
+
+    @Test
+    fun getOrElse_storedDefaultValue_doesNotInvokeLambda() {
+        val map = mutableLong2ByteMapOf(1L to Byte.MIN_VALUE)
+        var invoked = false
+        val result = map.getOrElse(1L) { invoked = true; (-1).toByte() }
+        assertFalse(invoked, "lambda must not be invoked when the default value is stored under the key")
+        assertEquals(Byte.MIN_VALUE, result)
+    }
+
+    @Test
+    fun getOrDefault_absentKey_returnsDefault() {
+        assertEquals((-99).toByte(), long2ByteMapOf(1L to 10.toByte()).getOrDefault(99L, (-99).toByte()))
+    }
+
+    @Test
+    fun getOrDefault_presentKey_returnsStoredValue() {
+        assertEquals(10.toByte(), long2ByteMapOf(1L to 10.toByte()).getOrDefault(1L, (-99).toByte()))
+    }
+
+    @Test
+    fun merge_absentKey_insertsValue() {
+        val map = mutableLong2ByteMapOf(1L to 10.toByte())
+        assertEquals(42.toByte(), map.merge(99L, 42.toByte()) { old, new -> (old + new).toByte() })
+        assertEquals(42.toByte(), map[99L])
+    }
+
+    @Test
+    fun merge_presentKey_appliesMergeFunction() {
+        val map = mutableLong2ByteMapOf(1L to 10.toByte())
+        assertEquals(15.toByte(), map.merge(1L, 5.toByte()) { old, new -> (old + new).toByte() })
+        assertEquals(15.toByte(), map[1L])
+    }
+
+    @Test
+    fun getOrPut_absentKey_insertsAndReturns() {
+        val map = mutableLong2ByteMapOf(1L to 10.toByte())
+        assertEquals(42.toByte(), map.getOrPut(99L) { 42.toByte() })
+        assertEquals(42.toByte(), map[99L])
+    }
+
+    @Test
+    fun getOrPut_presentKey_returnsExisting_doesNotCallLambda() {
+        var invoked = false
+        val map = mutableLong2ByteMapOf(1L to 10.toByte())
+        val result = map.getOrPut(1L) { invoked = true; 99.toByte() }
+        assertFalse(invoked)
+        assertEquals(10.toByte(), result)
+    }
+
+    @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableLong2ByteMapOf(1L to 10.toByte())
+        assertEquals(10.toByte(), map.replace(1L, 20.toByte()))
+        assertEquals(20.toByte(), map[1L])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2ByteMapOf(1L to 10.toByte()).replace(99L, 20.toByte()) }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableLong2ByteMapOf(1L to 10.toByte(), 2L to 20.toByte())
+        assertEquals(10.toByte(), map.removeKey(1L))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2ByteMapOf(1L to 10.toByte()).removeKey(99L) }
+    }
+
+    @Test
+    fun putAll_fromPrimitiveMap_copiesAllEntries() {
+        val source = long2ByteMapOf(1L to 10.toByte(), 2L to 20.toByte())
+        val dest = mutableLong2ByteMapOf(3L to 30.toByte())
+        dest.putAll(source)
+        assertEquals(3, dest.size)
+        assertEquals(10.toByte(), dest[1L])
+        assertEquals(20.toByte(), dest[2L])
+        assertEquals(30.toByte(), dest[3L])
+    }
+
+    @Test
+    fun putAll_fromLargerOverlappingMap_prefersFromValues() {
+        // when `from` is more than double this map's size, putAll takes a "reset to from" fast path;
+        // for keys present in both maps, from's value must win, while keys unique to this map are preserved.
+        val dest = mutableLong2ByteMapOf(1L to 100.toByte(), 6L to 60.toByte())
+        val source = long2ByteMapOf(
+            1L to 99.toByte(), 2L to 2.toByte(), 3L to 3.toByte(), 4L to 4.toByte(), 5L to 5.toByte(),
+            7L to 7.toByte(),
+        )
+        dest.putAll(source)
+        assertEquals(7, dest.size)
+        assertEquals(99.toByte(), dest[1L])
+        assertEquals(2.toByte(), dest[2L])
+        assertEquals(3.toByte(), dest[3L])
+        assertEquals(4.toByte(), dest[4L])
+        assertEquals(5.toByte(), dest[5L])
+        assertEquals(60.toByte(), dest[6L])
+        assertEquals(7.toByte(), dest[7L])
+    }
+
+    @Test
+    fun putAll_fromStandardMap_copiesAllEntries() {
+        val dest = mutableLong2ByteMapOf(3L to 30.toByte())
+        dest.putAll(mapOf(1L to 10.toByte(), 2L to 20.toByte()))
+        assertEquals(3, dest.size)
+        assertEquals(10.toByte(), dest[1L])
+        assertEquals(20.toByte(), dest[2L])
+    }
+
+    @Test
+    fun ensureCapacity_doesNotLoseEntries() {
+        val map = Long2ByteHashMap().apply { set(1L, 10.toByte()); set(2L, 20.toByte()) }
+        map.ensureCapacity(100)
+        assertEquals(2, map.size)
+        assertEquals(10.toByte(), map[1L])
+        assertEquals(20.toByte(), map[2L])
+    }
+
+    @Test
+    fun trimToSize_doesNotLoseEntries() {
+        val map = Long2ByteHashMap(100).apply { set(1L, 10.toByte()); set(2L, 20.toByte()) }
+        map.trimToSize()
+        assertEquals(2, map.size)
+        assertEquals(10.toByte(), map[1L])
+        assertEquals(20.toByte(), map[2L])
+    }
+
+    @Test
+    fun manyEntries_survivePutRemoveAndRehash() {
+        // enough entries to force several rehashes and dense collision clusters; values are truncated to Byte
+        // range via toByte(), consistently on both the write and the read-back assertion.
+        val map = Long2ByteHashMap()
+        for (i in 1L..500L) map[i] = (i + 1000).toByte()
+        assertEquals(500, map.size)
+        for (i in 1L..500L) assertEquals((i + 1000).toByte(), map[i])
+
+        // removing entries exercises the backward-shift chains through collision clusters
+        for (i in 1L..500L step 2) assertEquals((i + 1000).toByte(), map.remove(i))
+        assertEquals(250, map.size)
+        for (i in 1L..500L) {
+            if (i % 2 == 0L) assertEquals((i + 1000).toByte(), map[i]) else assertFalse(map.containsKey(i))
+        }
+
+        map.trimToSize()
+        for (i in 2L..500L step 2) assertEquals((i + 1000).toByte(), map[i])
+    }
+
+    @Test
+    fun iteratorRemove_removesAllEntries() {
+        // a trimmed, densely loaded table makes the iterator's removal adjustment paths likely
+        val map = Long2ByteHashMap()
+        for (i in 1L..200L) map[i] = (i + 1000).toByte()
+        map.trimToSize()
+
+        val visited = mutableListOf<Long>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            assertEquals((entry.key + 1000).toByte(), entry.value)
+            visited.add(entry.key)
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals((1L..200L).toList(), visited.sorted())
+    }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Long2ByteHashMap()
+        for (i in 1L..50L) map[i] = (i + 1000).toByte()
+        map[0L] = 99.toByte()
+
+        val fromIterator = mutableListOf<Pair<Long, Byte>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value)
+        }
+
+        val fromForeach = mutableListOf<Pair<Long, Byte>>()
+        map.foreach { k, v -> fromForeach.add(k to v) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Long2ByteMap implementation,
+        // not just the same concrete class.
+        val map: Any = mutableLong2ByteMapOf(1L to 1.toByte(), 2L to 2.toByte())
+        assertEquals(long2ByteMapOf(1L to 1.toByte(), 2L to 2.toByte()), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Long2ByteMap.Entry implementation, not just the same concrete class.
+        val entry: Any = mutableLong2ByteMapOf(1L to 1.toByte()).iterator().next()
+        assertEquals(mutableLong2ByteMapOf(1L to 1.toByte()).iterator().next(), entry)
+    }
+}
+
+// ============================= Long2Short =============================
+
+class Long2ShortMapTest {
+    @Test
+    fun mapOf_vararg() {
+        val map = long2ShortMapOf(1L to 10.toShort(), 2L to 20.toShort(), 3L to 30.toShort())
+        assertEquals(3, map.size)
+        assertEquals(10.toShort(), map[1L])
+        assertEquals(20.toShort(), map[2L])
+        assertEquals(30.toShort(), map[3L])
+    }
+
+    @Test
+    fun mutableMapOf_vararg() {
+        val map = mutableLong2ShortMapOf(1L to 10.toShort(), 2L to 20.toShort())
+        assertEquals(2, map.size)
+        assertEquals(10.toShort(), map[1L])
+    }
+
+    @Test
+    fun buildMap_dsl() {
+        val map = buildLong2ShortMap {
+            set(1L, 100.toShort())
+            set(2L, 200.toShort())
+        }
+        assertEquals(2, map.size)
+        assertEquals(100.toShort(), map[1L])
+        assertEquals(200.toShort(), map[2L])
+    }
+
+    @Test
+    fun get_absentKey_returnsDefaultValue() {
+        assertEquals(Short.MIN_VALUE, long2ShortMapOf(1L to 10.toShort())[99L])
+        assertEquals(Short.MIN_VALUE, mutableLong2ShortMapOf(1L to 10.toShort())[99L])
+    }
+
+    @Test
+    fun containsValue_presentAndAbsent() {
+        assertTrue(long2ShortMapOf(1L to 10.toShort()).containsValue(10.toShort()))
+        assertFalse(long2ShortMapOf(1L to 10.toShort()).containsValue(99.toShort()))
+        assertTrue(mutableLong2ShortMapOf(1L to 10.toShort()).containsValue(10.toShort()))
+        assertFalse(mutableLong2ShortMapOf(1L to 10.toShort()).containsValue(99.toShort()))
+    }
+
+    @Test
+    fun absentZeroKey_behavesLikeAnyAbsentKey() {
+        // 0 is the hash map's initial empty-slot marker, but must still behave as an ordinary key
+        assertFalse(mutableLong2ShortMapOf().containsKey(0L))
+
+        val map = mutableLong2ShortMapOf(1L to 10.toShort())
+        assertEquals(Short.MIN_VALUE, map[0L])
+        assertFalse(map.containsKey(0L))
+        assertEquals(Short.MIN_VALUE, map.remove(0L))
+        assertEquals(1, map.size)
+
+        map[0L] = 5.toShort()
+        assertTrue(map.containsKey(0L))
+        assertEquals(5.toShort(), map[0L])
+        assertEquals(2, map.size)
+    }
+
+    @Test
+    fun isDefaultValue_true_forDefaultValue() {
+        assertTrue(mutableLong2ShortMapOf().isDefaultValue(Short.MIN_VALUE))
+    }
+
+    @Test
+    fun isDefaultValue_false_forNonDefaultValues() {
+        val map = mutableLong2ShortMapOf(1L to 42.toShort())
+        assertFalse(map.isDefaultValue(42.toShort()))
+        assertFalse(map.isDefaultValue(0.toShort()))
+    }
+
+    @Test
+    fun storedDefaultValue_keyStillReportedPresent() {
+        val map = mutableLong2ShortMapOf(1L to Short.MIN_VALUE)
+        assertTrue(map.containsKey(1L), "key must still be present even when stored value is the default value")
+        assertEquals(Short.MIN_VALUE, map[1L])
+    }
+
+    @Test
+    fun getValue_presentKey_returnsValue() {
+        assertEquals(10.toShort(), long2ShortMapOf(1L to 10.toShort()).getValue(1L))
+    }
+
+    @Test
+    fun getValue_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { long2ShortMapOf(1L to 10.toShort()).getValue(99L) }
+    }
+
+    @Test
+    fun getOrElse_absentKey_invokesLambda() {
+        var invoked = false
+        val result = long2ShortMapOf(1L to 10.toShort()).getOrElse(99L) { invoked = true; (-1).toShort() }
+        assertTrue(invoked)
+        assertEquals((-1).toShort(), result)
+    }
+
+    @Test
+    fun getOrElse_presentKey_doesNotInvokeLambda() {
+        var invoked = false
+        val result = long2ShortMapOf(1L to 10.toShort()).getOrElse(1L) { invoked = true; (-1).toShort() }
+        assertFalse(invoked)
+        assertEquals(10.toShort(), result)
+    }
+
+    @Test
+    fun getOrElse_storedDefaultValue_doesNotInvokeLambda() {
+        val map = mutableLong2ShortMapOf(1L to Short.MIN_VALUE)
+        var invoked = false
+        val result = map.getOrElse(1L) { invoked = true; (-1).toShort() }
+        assertFalse(invoked, "lambda must not be invoked when the default value is stored under the key")
+        assertEquals(Short.MIN_VALUE, result)
+    }
+
+    @Test
+    fun getOrDefault_absentKey_returnsDefault() {
+        assertEquals((-99).toShort(), long2ShortMapOf(1L to 10.toShort()).getOrDefault(99L, (-99).toShort()))
+    }
+
+    @Test
+    fun getOrDefault_presentKey_returnsStoredValue() {
+        assertEquals(10.toShort(), long2ShortMapOf(1L to 10.toShort()).getOrDefault(1L, (-99).toShort()))
+    }
+
+    @Test
+    fun merge_absentKey_insertsValue() {
+        val map = mutableLong2ShortMapOf(1L to 10.toShort())
+        assertEquals(42.toShort(), map.merge(99L, 42.toShort()) { old, new -> (old + new).toShort() })
+        assertEquals(42.toShort(), map[99L])
+    }
+
+    @Test
+    fun merge_presentKey_appliesMergeFunction() {
+        val map = mutableLong2ShortMapOf(1L to 10.toShort())
+        assertEquals(15.toShort(), map.merge(1L, 5.toShort()) { old, new -> (old + new).toShort() })
+        assertEquals(15.toShort(), map[1L])
+    }
+
+    @Test
+    fun getOrPut_absentKey_insertsAndReturns() {
+        val map = mutableLong2ShortMapOf(1L to 10.toShort())
+        assertEquals(42.toShort(), map.getOrPut(99L) { 42.toShort() })
+        assertEquals(42.toShort(), map[99L])
+    }
+
+    @Test
+    fun getOrPut_presentKey_returnsExisting_doesNotCallLambda() {
+        var invoked = false
+        val map = mutableLong2ShortMapOf(1L to 10.toShort())
+        val result = map.getOrPut(1L) { invoked = true; 99.toShort() }
+        assertFalse(invoked)
+        assertEquals(10.toShort(), result)
+    }
+
+    @Test
+    fun replace_presentKey_updatesAndReturnsOldValue() {
+        val map = mutableLong2ShortMapOf(1L to 10.toShort())
+        assertEquals(10.toShort(), map.replace(1L, 20.toShort()))
+        assertEquals(20.toShort(), map[1L])
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun replace_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> {
+            mutableLong2ShortMapOf(1L to 10.toShort()).replace(99L, 20.toShort())
+        }
+    }
+
+    @Test
+    fun removeKey_presentKey_removesAndReturnsValue() {
+        val map = mutableLong2ShortMapOf(1L to 10.toShort(), 2L to 20.toShort())
+        assertEquals(10.toShort(), map.removeKey(1L))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun removeKey_absentKey_throws() {
+        assertFailsWith<NoSuchElementException> { mutableLong2ShortMapOf(1L to 10.toShort()).removeKey(99L) }
+    }
+
+    @Test
+    fun putAll_fromPrimitiveMap_copiesAllEntries() {
+        val source = long2ShortMapOf(1L to 10.toShort(), 2L to 20.toShort())
+        val dest = mutableLong2ShortMapOf(3L to 30.toShort())
+        dest.putAll(source)
+        assertEquals(3, dest.size)
+        assertEquals(10.toShort(), dest[1L])
+        assertEquals(20.toShort(), dest[2L])
+        assertEquals(30.toShort(), dest[3L])
+    }
+
+    @Test
+    fun putAll_fromLargerOverlappingMap_prefersFromValues() {
+        // when `from` is more than double this map's size, putAll takes a "reset to from" fast path;
+        // for keys present in both maps, from's value must win, while keys unique to this map are preserved.
+        val dest = mutableLong2ShortMapOf(1L to 100.toShort(), 6L to 600.toShort())
+        val source = long2ShortMapOf(
+            1L to 999.toShort(), 2L to 2.toShort(), 3L to 3.toShort(), 4L to 4.toShort(), 5L to 5.toShort(),
+            7L to 7.toShort(),
+        )
+        dest.putAll(source)
+        assertEquals(7, dest.size)
+        assertEquals(999.toShort(), dest[1L])
+        assertEquals(2.toShort(), dest[2L])
+        assertEquals(3.toShort(), dest[3L])
+        assertEquals(4.toShort(), dest[4L])
+        assertEquals(5.toShort(), dest[5L])
+        assertEquals(600.toShort(), dest[6L])
+        assertEquals(7.toShort(), dest[7L])
+    }
+
+    @Test
+    fun putAll_fromStandardMap_copiesAllEntries() {
+        val dest = mutableLong2ShortMapOf(3L to 30.toShort())
+        dest.putAll(mapOf(1L to 10.toShort(), 2L to 20.toShort()))
+        assertEquals(3, dest.size)
+        assertEquals(10.toShort(), dest[1L])
+        assertEquals(20.toShort(), dest[2L])
+    }
+
+    @Test
+    fun ensureCapacity_doesNotLoseEntries() {
+        val map = Long2ShortHashMap().apply { set(1L, 10.toShort()); set(2L, 20.toShort()) }
+        map.ensureCapacity(100)
+        assertEquals(2, map.size)
+        assertEquals(10.toShort(), map[1L])
+        assertEquals(20.toShort(), map[2L])
+    }
+
+    @Test
+    fun trimToSize_doesNotLoseEntries() {
+        val map = Long2ShortHashMap(100).apply { set(1L, 10.toShort()); set(2L, 20.toShort()) }
+        map.trimToSize()
+        assertEquals(2, map.size)
+        assertEquals(10.toShort(), map[1L])
+        assertEquals(20.toShort(), map[2L])
+    }
+
+    @Test
+    fun manyEntries_survivePutRemoveAndRehash() {
+        // enough entries to force several rehashes and dense collision clusters
+        val map = Long2ShortHashMap()
+        for (i in 1L..500L) map[i] = (i + 1000).toShort()
+        assertEquals(500, map.size)
+        for (i in 1L..500L) assertEquals((i + 1000).toShort(), map[i])
+
+        // removing entries exercises the backward-shift chains through collision clusters
+        for (i in 1L..500L step 2) assertEquals((i + 1000).toShort(), map.remove(i))
+        assertEquals(250, map.size)
+        for (i in 1L..500L) {
+            if (i % 2 == 0L) assertEquals((i + 1000).toShort(), map[i]) else assertFalse(map.containsKey(i))
+        }
+
+        map.trimToSize()
+        for (i in 2L..500L step 2) assertEquals((i + 1000).toShort(), map[i])
+    }
+
+    @Test
+    fun iteratorRemove_removesAllEntries() {
+        // a trimmed, densely loaded table makes the iterator's removal adjustment paths likely
+        val map = Long2ShortHashMap()
+        for (i in 1L..200L) map[i] = (i + 1000).toShort()
+        map.trimToSize()
+
+        val visited = mutableListOf<Long>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            assertEquals((entry.key + 1000).toShort(), entry.value)
+            visited.add(entry.key)
+            it.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals((1L..200L).toList(), visited.sorted())
+    }
+
+    @Test
+    fun foreach_matchesIterator() {
+        val map = Long2ShortHashMap()
+        for (i in 1L..50L) map[i] = (i + 1000).toShort()
+        map[0L] = 9999.toShort()
+
+        val fromIterator = mutableListOf<Pair<Long, Short>>()
+        val it = map.iterator()
+        while (it.hasNext()) {
+            val entry = it.next()
+            fromIterator.add(entry.key to entry.value)
+        }
+
+        val fromForeach = mutableListOf<Pair<Long, Short>>()
+        map.foreach { k, v -> fromForeach.add(k to v) }
+
+        assertEquals(fromIterator.toMap(), fromForeach.toMap())
+    }
+
+    @Test
+    fun equals_matchesAnyMapImplementation() {
+        // Map contract (Abstract*Map.equals()) requires equality against ANY Long2ShortMap implementation,
+        // not just the same concrete class.
+        val map: Any = mutableLong2ShortMapOf(1L to 1.toShort(), 2L to 2.toShort())
+        assertEquals(long2ShortMapOf(1L to 1.toShort(), 2L to 2.toShort()), map)
+    }
+
+    @Test
+    fun entryEquals_matchesAnyMapEntryImplementation() {
+        // Map.Entry contract (see HashMap.kte's FastEntryIterator.equals()) requires equality against
+        // ANY Long2ShortMap.Entry implementation, not just the same concrete class.
+        val entry: Any = mutableLong2ShortMapOf(1L to 1.toShort()).iterator().next()
+        assertEquals(mutableLong2ShortMapOf(1L to 1.toShort()).iterator().next(), entry)
     }
 }
 
