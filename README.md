@@ -42,10 +42,14 @@ implementation 'io.github.sooniln:fastcollect-kotlin:3.0.0'
 </dependency>
 ```
 
-FastCollect can be used as a (mostly) drop-in replacement for Kotlin standard library collections and should provide
-immediate memory and CPU improvements without any further changes. You may need to explicitly import FastCollect
-extension functions where standard library extension functions were imported silently, and note that FastCollect
-currently does not provide extension methods that create new collections (i.e. filter(), etc...).
+FastCollect can be used as a replacement for Kotlin standard library collections and should provide immediate memory and
+CPU improvements without any further changes. You may need to explicitly import FastCollect extension functions where
+standard library extension functions were imported silently, and note that FastCollect currently does not provide
+extension methods that create new collections (i.e. filter(), etc...).
+
+FastCollect can interact with normal Kotlin collections through the use of extension methods like [asList], [asSet],
+[asMap], and [asQueue], which produce a thin wrapper around the FastCollect collection which allows it to be used as a
+Kotlin collection. Beware that using these wrappers may incur boxing penalties.
 
 Using FastCollect types should be quite straightforward for anyone familiar with standard Kotlin/Java collections.
 FastCollect provides ArrayList/ArrayDeque, HashSet, and HashMap analogues that can store primitives (and in the case of
@@ -150,6 +154,9 @@ list.clear()
 list.sort()
 list.shuffle()
 list.fill(0)
+
+// use the list somewhere a Kotlin list is required
+legacyApi(list.asList())
 ```
 
 ```kotlin
@@ -167,6 +174,9 @@ for (i in set) { ... }
 set.add(5)
 set.remove(5)
 set.clear()
+
+// use the set somewhere a Kotlin set is required
+legacyApi(set.asSet())
 ```
 
 ```kotlin
@@ -193,6 +203,9 @@ map.clear()
 
 // other operations
 map.getOrElse(1) { -1 }
+
+// use the map somewhere a Kotlin map is required
+legacyApi(map.asMap())
 ```
 
 ```kotlin
@@ -210,6 +223,9 @@ priorityQueue.clear()
 
 // iterate over priority queue
 for (e in priorityQueue) { ... }
+
+// use the priority queue somewhere a Kotlin queue is required
+legacyApi(priorityQueue.asQueue())
 ```
 
 ## Performance and Memory Usage ##

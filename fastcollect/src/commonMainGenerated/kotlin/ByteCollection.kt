@@ -15,14 +15,17 @@ import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
 /**
- * A collection of Bytes which inherits from [Collection].
+ * A collection of Bytes.
  */
-public interface ByteCollection : Collection<Byte> {
-    override fun isEmpty(): Boolean {
+public interface ByteCollection {
+
+    public val size: Int
+
+    public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    override fun iterator(): ByteIterator
+    public operator fun iterator(): ByteIterator
 
     /**
      * A method for iteration guaranteed to be as fast or faster than [iterator].
@@ -34,7 +37,7 @@ public interface ByteCollection : Collection<Byte> {
         }
     }
 
-    override fun contains(element: Byte): Boolean {
+    public fun contains(element: Byte): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true
         }
@@ -50,11 +53,7 @@ public interface ByteCollection : Collection<Byte> {
         return true
     }
 
-    override fun containsAll(elements: Collection<Byte>): Boolean {
-        if (elements is ByteCollection) {
-            return containsAll(elements)
-        }
-
+    public fun containsAll(elements: Collection<Byte>): Boolean {
         for (e in elements) {
             if (!contains(e)) {
                 return false
@@ -163,15 +162,15 @@ public inline fun ByteCollection.sumOf(selector: (Byte) -> Double): Double {
 }
 
 /**
- * A mutable collection of Bytes which inherits from [MutableCollection].
+ * A mutable collection of Bytes.
  */
-public interface MutableByteCollection : ByteCollection, MutableCollection<Byte> {
+public interface MutableByteCollection : ByteCollection {
     override fun iterator(): MutableByteIterator
 
-    override fun add(element: Byte): Boolean
-    override fun remove(element: Byte): Boolean
+    public fun add(element: Byte): Boolean
+    public fun remove(element: Byte): Boolean
 
-    override fun clear() {
+    public fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.nextByte()
@@ -187,11 +186,7 @@ public interface MutableByteCollection : ByteCollection, MutableCollection<Byte>
         return modified
     }
 
-    override fun addAll(elements: Collection<Byte>): Boolean {
-        if (elements is ByteCollection) {
-            return addAll(elements)
-        }
-
+    public fun addAll(elements: Collection<Byte>): Boolean {
         var modified = false
         for (e in elements) {
             modified = add(e) or modified
@@ -200,14 +195,10 @@ public interface MutableByteCollection : ByteCollection, MutableCollection<Byte>
     }
 
     public fun removeAll(elements: ByteCollection): Boolean = filterInPlace { elements.contains(it) }
-    override fun removeAll(elements: Collection<Byte>): Boolean {
-        return if (elements is ByteCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
-    }
+    public fun removeAll(elements: Collection<Byte>): Boolean = filterInPlace { elements.contains(it) }
 
     public fun retainAll(elements: ByteCollection): Boolean = filterInPlace { !elements.contains(it) }
-    override fun retainAll(elements: Collection<Byte>): Boolean {
-        return if (elements is ByteCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
-    }
+    public fun retainAll(elements: Collection<Byte>): Boolean = filterInPlace { !elements.contains(it) }
 
     public operator fun plusAssign(element: Byte) {
         add(element)
@@ -268,7 +259,7 @@ internal inline fun MutableByteCollection.filterInPlace(removePredicate: (Byte) 
 
 public abstract class AbstractByteCollection : ByteCollection {
     override fun toString(): String {
-        return joinToString(", ", "[", "]")
+        return Iterable { iterator() }.joinToString(", ", "[", "]")
     }
 }
 

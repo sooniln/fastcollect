@@ -13,10 +13,17 @@ import kotlin.random.Random
  * attempt to mutate the collection, EXCEPT that [MutableIterator.remove] will work as expected. Other mutation
  * operations should be made directly on the map rather than on the sub-collections.
  *
- * The entry [iterator] exposed by this class is a [FastIterator] - clients may not allow the returned entry to escape. See
- * the [FastIterator] documentation for more information.
+ * The entry [iterator] exposed by this class is a [FastIterator] - clients may not allow the returned entry to escape.
+ * See the [FastIterator] documentation for more information.
  *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
+ *
+ * Note that a load factor of 1.0 is accepted - this is interpreted to mean that only 1 slot need ever remain free (i.e.
+ * the actual load factor is (capacity - 1)/capacity). For small capacities, this HashMap automatically forces a load
+ * factor of 1.0.
+ *
+ * The extension method [asMap] produces a thin wrapper around this class which exposes it as Kotlin map which can be
+ * used anywhere a Kotlin map is expected. Using this wrapper may incur boxing penalties.
  */
 public class Long2ByteHashMap @JvmOverloads constructor(
     capacity: Int = 0,

@@ -18,14 +18,17 @@ import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
 /**
- * A collection of ${Type}s which inherits from [Collection].
+ * A collection of ${Type}s.
  */
-public interface ${Type}Collection : Collection<${Type}> {
-    override fun isEmpty(): Boolean {
+public interface ${Type}Collection {
+
+    public val size: Int
+
+    public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    override fun iterator(): ${Type}Iterator
+    public operator fun iterator(): ${Type}Iterator
 
     /**
      * A method for iteration guaranteed to be as fast or faster than [iterator].
@@ -37,7 +40,7 @@ public interface ${Type}Collection : Collection<${Type}> {
         }
     }
 
-    override fun contains(element: ${Type}): Boolean {
+    public fun contains(element: ${Type}): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true
         }
@@ -53,11 +56,7 @@ public interface ${Type}Collection : Collection<${Type}> {
         return true
     }
 
-    override fun containsAll(elements: Collection<${Type}>): Boolean {
-        if (elements is ${Type}Collection) {
-            return containsAll(elements)
-        }
-
+    public fun containsAll(elements: Collection<${Type}>): Boolean {
         for (e in elements) {
             if (!contains(e)) {
                 return false
@@ -166,15 +165,15 @@ public inline fun ${Type}Collection.sumOf(selector: (${Type}) -> Double): Double
 }
 
 /**
- * A mutable collection of ${Type}s which inherits from [MutableCollection].
+ * A mutable collection of ${Type}s.
  */
-public interface Mutable${Type}Collection : ${Type}Collection, MutableCollection<${Type}> {
+public interface Mutable${Type}Collection : ${Type}Collection {
     override fun iterator(): Mutable${Type}Iterator
 
-    override fun add(element: ${Type}): Boolean
-    override fun remove(element: ${Type}): Boolean
+    public fun add(element: ${Type}): Boolean
+    public fun remove(element: ${Type}): Boolean
 
-    override fun clear() {
+    public fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.next${Type}()
@@ -190,11 +189,7 @@ public interface Mutable${Type}Collection : ${Type}Collection, MutableCollection
         return modified
     }
 
-    override fun addAll(elements: Collection<${Type}>): Boolean {
-        if (elements is ${Type}Collection) {
-            return addAll(elements)
-        }
-
+    public fun addAll(elements: Collection<${Type}>): Boolean {
         var modified = false
         for (e in elements) {
             modified = add(e) or modified
@@ -203,14 +198,10 @@ public interface Mutable${Type}Collection : ${Type}Collection, MutableCollection
     }
 
     public fun removeAll(elements: ${Type}Collection): Boolean = filterInPlace { elements.contains(it) }
-    override fun removeAll(elements: Collection<${Type}>): Boolean {
-        return if (elements is ${Type}Collection) removeAll(elements) else filterInPlace { elements.contains(it) }
-    }
+    public fun removeAll(elements: Collection<${Type}>): Boolean = filterInPlace { elements.contains(it) }
 
     public fun retainAll(elements: ${Type}Collection): Boolean = filterInPlace { !elements.contains(it) }
-    override fun retainAll(elements: Collection<${Type}>): Boolean {
-        return if (elements is ${Type}Collection) retainAll(elements) else filterInPlace { !elements.contains(it) }
-    }
+    public fun retainAll(elements: Collection<${Type}>): Boolean = filterInPlace { !elements.contains(it) }
 
     public operator fun plusAssign(element: ${Type}) {
         add(element)
@@ -271,7 +262,7 @@ internal inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${T
 
 public abstract class Abstract${Type}Collection : ${Type}Collection {
     override fun toString(): String {
-        return joinToString(", ", "[", "]")
+        return Iterable { iterator() }.joinToString(", ", "[", "]")
     }
 }
 

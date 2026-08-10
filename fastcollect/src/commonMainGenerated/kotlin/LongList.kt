@@ -92,6 +92,7 @@ public interface LongList : LongCollection {
     public fun subList(fromIndex: Int, toIndex: Int): LongList
 }
 
+public val LongList.indices: IntRange @JvmSynthetic inline get() = 0..<size
 
 public val LongList.lastIndex: Int @JvmSynthetic inline get() = size - 1
 
@@ -193,7 +194,6 @@ public interface MutableLongList : LongList, MutableLongCollection {
         return !elements.isEmpty()
     }
     override fun addAll(elements: Collection<Long>): Boolean {
-        if (elements is LongCollection) return addAll(elements)
         for (element in elements) addLast(element)
         return !elements.isEmpty()
     }
@@ -202,10 +202,6 @@ public interface MutableLongList : LongList, MutableLongCollection {
         for (element in elements) add(i++, element)
     }
     public fun addAll(index: Int, elements: Collection<Long>) {
-        if (elements is LongCollection) {
-            addAll(index, elements)
-            return
-        }
         var i = rangeCheckInclusive(index)
         for (element in elements) add(i++, element)
     }
@@ -520,10 +516,6 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
         }
 
         override fun addAll(index: Int, elements: Collection<Long>) {
-            if (elements is LongCollection) {
-                addAll(index, elements)
-                return
-            }
             list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
         }

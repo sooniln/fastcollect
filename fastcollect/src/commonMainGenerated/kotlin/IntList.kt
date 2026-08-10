@@ -92,6 +92,7 @@ public interface IntList : IntCollection {
     public fun subList(fromIndex: Int, toIndex: Int): IntList
 }
 
+public val IntList.indices: IntRange @JvmSynthetic inline get() = 0..<size
 
 public val IntList.lastIndex: Int @JvmSynthetic inline get() = size - 1
 
@@ -193,7 +194,6 @@ public interface MutableIntList : IntList, MutableIntCollection {
         return !elements.isEmpty()
     }
     override fun addAll(elements: Collection<Int>): Boolean {
-        if (elements is IntCollection) return addAll(elements)
         for (element in elements) addLast(element)
         return !elements.isEmpty()
     }
@@ -202,10 +202,6 @@ public interface MutableIntList : IntList, MutableIntCollection {
         for (element in elements) add(i++, element)
     }
     public fun addAll(index: Int, elements: Collection<Int>) {
-        if (elements is IntCollection) {
-            addAll(index, elements)
-            return
-        }
         var i = rangeCheckInclusive(index)
         for (element in elements) add(i++, element)
     }
@@ -520,10 +516,6 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
         }
 
         override fun addAll(index: Int, elements: Collection<Int>) {
-            if (elements is IntCollection) {
-                addAll(index, elements)
-                return
-            }
             list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
         }

@@ -92,6 +92,7 @@ public interface DoubleList : DoubleCollection {
     public fun subList(fromIndex: Int, toIndex: Int): DoubleList
 }
 
+public val DoubleList.indices: IntRange @JvmSynthetic inline get() = 0..<size
 
 public val DoubleList.lastIndex: Int @JvmSynthetic inline get() = size - 1
 
@@ -193,7 +194,6 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection {
         return !elements.isEmpty()
     }
     override fun addAll(elements: Collection<Double>): Boolean {
-        if (elements is DoubleCollection) return addAll(elements)
         for (element in elements) addLast(element)
         return !elements.isEmpty()
     }
@@ -202,10 +202,6 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection {
         for (element in elements) add(i++, element)
     }
     public fun addAll(index: Int, elements: Collection<Double>) {
-        if (elements is DoubleCollection) {
-            addAll(index, elements)
-            return
-        }
         var i = rangeCheckInclusive(index)
         for (element in elements) add(i++, element)
     }
@@ -520,10 +516,6 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
         }
 
         override fun addAll(index: Int, elements: Collection<Double>) {
-            if (elements is DoubleCollection) {
-                addAll(index, elements)
-                return
-            }
             list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
         }

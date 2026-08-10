@@ -17,12 +17,13 @@ import kotlin.math.min
 public typealias DoubleArrayList = DoubleArrayDeque
 
 /**
- * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing Doubles. Can be
- * used in place of the Kotlin standard library [ArrayList] and [ArrayDeque] implementations to improve performance and
- * memory usage. Has the same API contracts as the standard library [ArrayList] and [ArrayDeque] unless noted otherwise.
+ * An array based [Deque](https://en.wikipedia.org/wiki/Double-ended_queue) implementation for storing Doubles.
  *
  * This implementation supports amortized O(1) `addFirst/addLast/removeFirst/removeLast` functionality. The
  * [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
+ *
+ * The extension method [asList] produces a thin wrapper around this class which exposes it as Kotlin list which can be
+ * used anywhere a Kotlin list is expected. Using this wrapper may incur boxing penalties.
  */
 public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int = array.size) : AbstractMutableDoubleList(), RandomAccess {
 
@@ -336,7 +337,6 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
     }
 
     override fun addAll(elements: Collection<Double>): Boolean {
-        if (elements is DoubleCollection) return addAll(elements)
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)

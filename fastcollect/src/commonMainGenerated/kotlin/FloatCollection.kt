@@ -18,14 +18,17 @@ import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
 /**
- * A collection of Floats which inherits from [Collection].
+ * A collection of Floats.
  */
-public interface FloatCollection : Collection<Float> {
-    override fun isEmpty(): Boolean {
+public interface FloatCollection {
+
+    public val size: Int
+
+    public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    override fun iterator(): FloatIterator
+    public operator fun iterator(): FloatIterator
 
     /**
      * A method for iteration guaranteed to be as fast or faster than [iterator].
@@ -37,7 +40,7 @@ public interface FloatCollection : Collection<Float> {
         }
     }
 
-    override fun contains(element: Float): Boolean {
+    public fun contains(element: Float): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true
         }
@@ -53,11 +56,7 @@ public interface FloatCollection : Collection<Float> {
         return true
     }
 
-    override fun containsAll(elements: Collection<Float>): Boolean {
-        if (elements is FloatCollection) {
-            return containsAll(elements)
-        }
-
+    public fun containsAll(elements: Collection<Float>): Boolean {
         for (e in elements) {
             if (!contains(e)) {
                 return false
@@ -166,15 +165,15 @@ public inline fun FloatCollection.sumOf(selector: (Float) -> Double): Double {
 }
 
 /**
- * A mutable collection of Floats which inherits from [MutableCollection].
+ * A mutable collection of Floats.
  */
-public interface MutableFloatCollection : FloatCollection, MutableCollection<Float> {
+public interface MutableFloatCollection : FloatCollection {
     override fun iterator(): MutableFloatIterator
 
-    override fun add(element: Float): Boolean
-    override fun remove(element: Float): Boolean
+    public fun add(element: Float): Boolean
+    public fun remove(element: Float): Boolean
 
-    override fun clear() {
+    public fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.nextFloat()
@@ -190,11 +189,7 @@ public interface MutableFloatCollection : FloatCollection, MutableCollection<Flo
         return modified
     }
 
-    override fun addAll(elements: Collection<Float>): Boolean {
-        if (elements is FloatCollection) {
-            return addAll(elements)
-        }
-
+    public fun addAll(elements: Collection<Float>): Boolean {
         var modified = false
         for (e in elements) {
             modified = add(e) or modified
@@ -203,14 +198,10 @@ public interface MutableFloatCollection : FloatCollection, MutableCollection<Flo
     }
 
     public fun removeAll(elements: FloatCollection): Boolean = filterInPlace { elements.contains(it) }
-    override fun removeAll(elements: Collection<Float>): Boolean {
-        return if (elements is FloatCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
-    }
+    public fun removeAll(elements: Collection<Float>): Boolean = filterInPlace { elements.contains(it) }
 
     public fun retainAll(elements: FloatCollection): Boolean = filterInPlace { !elements.contains(it) }
-    override fun retainAll(elements: Collection<Float>): Boolean {
-        return if (elements is FloatCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
-    }
+    public fun retainAll(elements: Collection<Float>): Boolean = filterInPlace { !elements.contains(it) }
 
     public operator fun plusAssign(element: Float) {
         add(element)
@@ -271,7 +262,7 @@ internal inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float
 
 public abstract class AbstractFloatCollection : FloatCollection {
     override fun toString(): String {
-        return joinToString(", ", "[", "]")
+        return Iterable { iterator() }.joinToString(", ", "[", "]")
     }
 }
 

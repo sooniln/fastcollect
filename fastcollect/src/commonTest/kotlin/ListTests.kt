@@ -197,10 +197,10 @@ class ByteListTest {
     @Test
     fun shuffle_preservesElementsAndSize() {
         val list = mutableByteListOf(1, 2, 3, 4, 5)
-        val before = list.toList().sorted()
+        val before = list.asList().sorted()
         list.shuffle()
         assertEquals(5, list.size)
-        assertEquals(before, list.toList().sorted())
+        assertEquals(before, list.asList().sorted())
     }
 
     @Test
@@ -419,10 +419,10 @@ class IntListTest {
     @Test
     fun shuffle_preservesElementsAndSize() {
         val list = mutableIntListOf(1, 2, 3, 4, 5)
-        val before = list.toList().sorted()
+        val before = list.asList().sorted()
         list.shuffle()
         assertEquals(5, list.size)
-        assertEquals(before, list.toList().sorted())
+        assertEquals(before, list.asList().sorted())
     }
 
     @Test
@@ -641,10 +641,10 @@ class LongListTest {
     @Test
     fun shuffle_preservesElementsAndSize() {
         val list = mutableLongListOf(1L, 2L, 3L, 4L, 5L)
-        val before = list.toList().sorted()
+        val before = list.asList().sorted()
         list.shuffle()
         assertEquals(5, list.size)
-        assertEquals(before, list.toList().sorted())
+        assertEquals(before, list.asList().sorted())
     }
 
     @Test
@@ -865,10 +865,10 @@ class FloatListTest {
     @Test
     fun shuffle_preservesElementsAndSize() {
         val list = mutableFloatListOf(1f, 2f, 3f, 4f, 5f)
-        val before = list.toList().sortedBy { it }
+        val before = list.asList().sortedBy { it }
         list.shuffle()
         assertEquals(5, list.size)
-        assertEquals(before, list.toList().sortedBy { it })
+        assertEquals(before, list.asList().sortedBy { it })
     }
 
     @Test
@@ -1116,10 +1116,10 @@ class DoubleListTest {
     @Test
     fun shuffle_preservesElementsAndSize() {
         val list = mutableDoubleListOf(1.0, 2.0, 3.0, 4.0, 5.0)
-        val before = list.toList().sortedBy { it }
+        val before = list.asList().sortedBy { it }
         list.shuffle()
         assertEquals(5, list.size)
-        assertEquals(before, list.toList().sortedBy { it })
+        assertEquals(before, list.asList().sortedBy { it })
     }
 
     @Test

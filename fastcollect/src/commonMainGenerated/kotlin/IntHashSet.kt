@@ -6,14 +6,16 @@ import kotlin.math.min
 import kotlin.random.Random
 
 /**
- * A [HashSet](https://en.wikipedia.org/wiki/Hash_table) implementation for storing Ints. Can be used in place of
- * the Kotlin standard library [HashSet] implementations to improve performance and memory usage. Has the same API
- * contracts as the standard library [HashSet] unless noted otherwise.
+ * A [HashSet](https://en.wikipedia.org/wiki/Hash_table) implementation for storing Ints.
  *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  *
- * Note that a load factor of 1.0 is accepted, unlike many HashSets - this is interpreted to mean that only 1 slot need
- * ever remain free (i.e. the actual load factor is (capacity - 1)/capacity).
+ * Note that a load factor of 1.0 is accepted - this is interpreted to mean that only 1 slot need ever remain free (i.e.
+ * the actual load factor is (capacity - 1)/capacity). For small capacities, this HashSet automatically forces a load
+ * factor of 1.0.
+ *
+ * The extension method [asSet] produces a thin wrapper around this class which exposes it as Kotlin map which can be
+ * used anywhere a Kotlin set is expected. Using this wrapper may incur boxing penalties.
  */
 public class IntHashSet @JvmOverloads constructor(
     capacity: Int = 0,
@@ -211,16 +213,12 @@ public class IntHashSet @JvmOverloads constructor(
     }
 
     override fun addAll(elements: Collection<Int>): Boolean {
-        if (elements is IntCollection) {
-            return addAll(elements)
-        } else {
-            ensureCapacity(max(size + (elements.size / 2), elements.size))
-            var modified = false
-            for (element in elements) {
-                modified = add(element) or modified
-            }
-            return modified
+        ensureCapacity(max(size + (elements.size / 2), elements.size))
+        var modified = false
+        for (element in elements) {
+            modified = add(element) or modified
         }
+        return modified
     }
 
     private fun resetTo(elements: IntHashSet) {

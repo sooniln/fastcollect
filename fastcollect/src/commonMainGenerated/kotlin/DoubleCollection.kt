@@ -18,14 +18,17 @@ import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
 /**
- * A collection of Doubles which inherits from [Collection].
+ * A collection of Doubles.
  */
-public interface DoubleCollection : Collection<Double> {
-    override fun isEmpty(): Boolean {
+public interface DoubleCollection {
+
+    public val size: Int
+
+    public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    override fun iterator(): DoubleIterator
+    public operator fun iterator(): DoubleIterator
 
     /**
      * A method for iteration guaranteed to be as fast or faster than [iterator].
@@ -37,7 +40,7 @@ public interface DoubleCollection : Collection<Double> {
         }
     }
 
-    override fun contains(element: Double): Boolean {
+    public fun contains(element: Double): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true
         }
@@ -53,11 +56,7 @@ public interface DoubleCollection : Collection<Double> {
         return true
     }
 
-    override fun containsAll(elements: Collection<Double>): Boolean {
-        if (elements is DoubleCollection) {
-            return containsAll(elements)
-        }
-
+    public fun containsAll(elements: Collection<Double>): Boolean {
         for (e in elements) {
             if (!contains(e)) {
                 return false
@@ -166,15 +165,15 @@ public inline fun DoubleCollection.sumOf(selector: (Double) -> Double): Double {
 }
 
 /**
- * A mutable collection of Doubles which inherits from [MutableCollection].
+ * A mutable collection of Doubles.
  */
-public interface MutableDoubleCollection : DoubleCollection, MutableCollection<Double> {
+public interface MutableDoubleCollection : DoubleCollection {
     override fun iterator(): MutableDoubleIterator
 
-    override fun add(element: Double): Boolean
-    override fun remove(element: Double): Boolean
+    public fun add(element: Double): Boolean
+    public fun remove(element: Double): Boolean
 
-    override fun clear() {
+    public fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.nextDouble()
@@ -190,11 +189,7 @@ public interface MutableDoubleCollection : DoubleCollection, MutableCollection<D
         return modified
     }
 
-    override fun addAll(elements: Collection<Double>): Boolean {
-        if (elements is DoubleCollection) {
-            return addAll(elements)
-        }
-
+    public fun addAll(elements: Collection<Double>): Boolean {
         var modified = false
         for (e in elements) {
             modified = add(e) or modified
@@ -203,14 +198,10 @@ public interface MutableDoubleCollection : DoubleCollection, MutableCollection<D
     }
 
     public fun removeAll(elements: DoubleCollection): Boolean = filterInPlace { elements.contains(it) }
-    override fun removeAll(elements: Collection<Double>): Boolean {
-        return if (elements is DoubleCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
-    }
+    public fun removeAll(elements: Collection<Double>): Boolean = filterInPlace { elements.contains(it) }
 
     public fun retainAll(elements: DoubleCollection): Boolean = filterInPlace { !elements.contains(it) }
-    override fun retainAll(elements: Collection<Double>): Boolean {
-        return if (elements is DoubleCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
-    }
+    public fun retainAll(elements: Collection<Double>): Boolean = filterInPlace { !elements.contains(it) }
 
     public operator fun plusAssign(element: Double) {
         add(element)
@@ -271,7 +262,7 @@ internal inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Doub
 
 public abstract class AbstractDoubleCollection : DoubleCollection {
     override fun toString(): String {
-        return joinToString(", ", "[", "]")
+        return Iterable { iterator() }.joinToString(", ", "[", "]")
     }
 }
 

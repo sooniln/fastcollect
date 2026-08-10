@@ -36,6 +36,9 @@ public inline fun buildFloatPriorityQueue(
  * An abstract base class for priority queues of Floats, backed by a binary heap. Subclasses can override
  * [isHigherPriority] to specify the ordering, [onIndexChanged] to optionally maintain an element ⟷ index mapping, and
  * have access to the protected [updatePriority] and [heapify] methods to handle priority changes.
+ *
+ * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
+ * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
 public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0) {
 
@@ -153,11 +156,6 @@ public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0) {
     }
 
     public fun addAll(elements: Collection<Float>) {
-        if (elements is FloatCollection) {
-            addAll(elements)
-            return
-        }
-
         ensureCapacity(size + elements.size)
         for (element in elements) {
             setHeap(size++, element)
@@ -166,14 +164,10 @@ public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0) {
     }
 
     public fun removeAll(elements: FloatCollection): Boolean = filterInPlace { elements.contains(it) }
-    public fun removeAll(elements: Collection<Float>): Boolean {
-        return if (elements is FloatCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
-    }
+    public fun removeAll(elements: Collection<Float>): Boolean = filterInPlace { elements.contains(it) }
 
     public fun retainAll(elements: FloatCollection): Boolean = filterInPlace { !elements.contains(it) }
-    public fun retainAll(elements: Collection<Float>): Boolean {
-        return if (elements is FloatCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
-    }
+    public fun retainAll(elements: Collection<Float>): Boolean = filterInPlace { !elements.contains(it) }
 
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (Float) -> Boolean): Boolean {

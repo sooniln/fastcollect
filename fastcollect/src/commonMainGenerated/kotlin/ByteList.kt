@@ -92,6 +92,7 @@ public interface ByteList : ByteCollection {
     public fun subList(fromIndex: Int, toIndex: Int): ByteList
 }
 
+public val ByteList.indices: IntRange @JvmSynthetic inline get() = 0..<size
 
 public val ByteList.lastIndex: Int @JvmSynthetic inline get() = size - 1
 
@@ -193,7 +194,6 @@ public interface MutableByteList : ByteList, MutableByteCollection {
         return !elements.isEmpty()
     }
     override fun addAll(elements: Collection<Byte>): Boolean {
-        if (elements is ByteCollection) return addAll(elements)
         for (element in elements) addLast(element)
         return !elements.isEmpty()
     }
@@ -202,10 +202,6 @@ public interface MutableByteList : ByteList, MutableByteCollection {
         for (element in elements) add(i++, element)
     }
     public fun addAll(index: Int, elements: Collection<Byte>) {
-        if (elements is ByteCollection) {
-            addAll(index, elements)
-            return
-        }
         var i = rangeCheckInclusive(index)
         for (element in elements) add(i++, element)
     }
@@ -520,10 +516,6 @@ public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteL
         }
 
         override fun addAll(index: Int, elements: Collection<Byte>) {
-            if (elements is ByteCollection) {
-                addAll(index, elements)
-                return
-            }
             list.addAll(offset + rangeCheckInclusive(index), elements)
             size += elements.size
         }

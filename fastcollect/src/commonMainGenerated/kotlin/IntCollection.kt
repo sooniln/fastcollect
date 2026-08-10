@@ -15,14 +15,17 @@ import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
 /**
- * A collection of Ints which inherits from [Collection].
+ * A collection of Ints.
  */
-public interface IntCollection : Collection<Int> {
-    override fun isEmpty(): Boolean {
+public interface IntCollection {
+
+    public val size: Int
+
+    public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    override fun iterator(): IntIterator
+    public operator fun iterator(): IntIterator
 
     /**
      * A method for iteration guaranteed to be as fast or faster than [iterator].
@@ -34,7 +37,7 @@ public interface IntCollection : Collection<Int> {
         }
     }
 
-    override fun contains(element: Int): Boolean {
+    public fun contains(element: Int): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true
         }
@@ -50,11 +53,7 @@ public interface IntCollection : Collection<Int> {
         return true
     }
 
-    override fun containsAll(elements: Collection<Int>): Boolean {
-        if (elements is IntCollection) {
-            return containsAll(elements)
-        }
-
+    public fun containsAll(elements: Collection<Int>): Boolean {
         for (e in elements) {
             if (!contains(e)) {
                 return false
@@ -163,15 +162,15 @@ public inline fun IntCollection.sumOf(selector: (Int) -> Double): Double {
 }
 
 /**
- * A mutable collection of Ints which inherits from [MutableCollection].
+ * A mutable collection of Ints.
  */
-public interface MutableIntCollection : IntCollection, MutableCollection<Int> {
+public interface MutableIntCollection : IntCollection {
     override fun iterator(): MutableIntIterator
 
-    override fun add(element: Int): Boolean
-    override fun remove(element: Int): Boolean
+    public fun add(element: Int): Boolean
+    public fun remove(element: Int): Boolean
 
-    override fun clear() {
+    public fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.nextInt()
@@ -187,11 +186,7 @@ public interface MutableIntCollection : IntCollection, MutableCollection<Int> {
         return modified
     }
 
-    override fun addAll(elements: Collection<Int>): Boolean {
-        if (elements is IntCollection) {
-            return addAll(elements)
-        }
-
+    public fun addAll(elements: Collection<Int>): Boolean {
         var modified = false
         for (e in elements) {
             modified = add(e) or modified
@@ -200,14 +195,10 @@ public interface MutableIntCollection : IntCollection, MutableCollection<Int> {
     }
 
     public fun removeAll(elements: IntCollection): Boolean = filterInPlace { elements.contains(it) }
-    override fun removeAll(elements: Collection<Int>): Boolean {
-        return if (elements is IntCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
-    }
+    public fun removeAll(elements: Collection<Int>): Boolean = filterInPlace { elements.contains(it) }
 
     public fun retainAll(elements: IntCollection): Boolean = filterInPlace { !elements.contains(it) }
-    override fun retainAll(elements: Collection<Int>): Boolean {
-        return if (elements is IntCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
-    }
+    public fun retainAll(elements: Collection<Int>): Boolean = filterInPlace { !elements.contains(it) }
 
     public operator fun plusAssign(element: Int) {
         add(element)
@@ -268,7 +259,7 @@ internal inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) ->
 
 public abstract class AbstractIntCollection : IntCollection {
     override fun toString(): String {
-        return joinToString(", ", "[", "]")
+        return Iterable { iterator() }.joinToString(", ", "[", "]")
     }
 }
 

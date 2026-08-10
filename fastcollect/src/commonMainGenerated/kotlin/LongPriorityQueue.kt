@@ -36,6 +36,9 @@ public inline fun buildLongPriorityQueue(
  * An abstract base class for priority queues of Longs, backed by a binary heap. Subclasses can override
  * [isHigherPriority] to specify the ordering, [onIndexChanged] to optionally maintain an element ⟷ index mapping, and
  * have access to the protected [updatePriority] and [heapify] methods to handle priority changes.
+ *
+ * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
+ * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
 public abstract class AbstractLongPriorityQueue(initialCapacity: Int = 0) {
 
@@ -153,11 +156,6 @@ public abstract class AbstractLongPriorityQueue(initialCapacity: Int = 0) {
     }
 
     public fun addAll(elements: Collection<Long>) {
-        if (elements is LongCollection) {
-            addAll(elements)
-            return
-        }
-
         ensureCapacity(size + elements.size)
         for (element in elements) {
             setHeap(size++, element)
@@ -166,14 +164,10 @@ public abstract class AbstractLongPriorityQueue(initialCapacity: Int = 0) {
     }
 
     public fun removeAll(elements: LongCollection): Boolean = filterInPlace { elements.contains(it) }
-    public fun removeAll(elements: Collection<Long>): Boolean {
-        return if (elements is LongCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
-    }
+    public fun removeAll(elements: Collection<Long>): Boolean = filterInPlace { elements.contains(it) }
 
     public fun retainAll(elements: LongCollection): Boolean = filterInPlace { !elements.contains(it) }
-    public fun retainAll(elements: Collection<Long>): Boolean {
-        return if (elements is LongCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
-    }
+    public fun retainAll(elements: Collection<Long>): Boolean = filterInPlace { !elements.contains(it) }
 
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (Long) -> Boolean): Boolean {

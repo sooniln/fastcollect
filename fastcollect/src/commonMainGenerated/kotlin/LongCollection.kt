@@ -15,14 +15,17 @@ import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
 /**
- * A collection of Longs which inherits from [Collection].
+ * A collection of Longs.
  */
-public interface LongCollection : Collection<Long> {
-    override fun isEmpty(): Boolean {
+public interface LongCollection {
+
+    public val size: Int
+
+    public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    override fun iterator(): LongIterator
+    public operator fun iterator(): LongIterator
 
     /**
      * A method for iteration guaranteed to be as fast or faster than [iterator].
@@ -34,7 +37,7 @@ public interface LongCollection : Collection<Long> {
         }
     }
 
-    override fun contains(element: Long): Boolean {
+    public fun contains(element: Long): Boolean {
         for (e in this) {
             if (e equalsBoxed element) return true
         }
@@ -50,11 +53,7 @@ public interface LongCollection : Collection<Long> {
         return true
     }
 
-    override fun containsAll(elements: Collection<Long>): Boolean {
-        if (elements is LongCollection) {
-            return containsAll(elements)
-        }
-
+    public fun containsAll(elements: Collection<Long>): Boolean {
         for (e in elements) {
             if (!contains(e)) {
                 return false
@@ -163,15 +162,15 @@ public inline fun LongCollection.sumOf(selector: (Long) -> Double): Double {
 }
 
 /**
- * A mutable collection of Longs which inherits from [MutableCollection].
+ * A mutable collection of Longs.
  */
-public interface MutableLongCollection : LongCollection, MutableCollection<Long> {
+public interface MutableLongCollection : LongCollection {
     override fun iterator(): MutableLongIterator
 
-    override fun add(element: Long): Boolean
-    override fun remove(element: Long): Boolean
+    public fun add(element: Long): Boolean
+    public fun remove(element: Long): Boolean
 
-    override fun clear() {
+    public fun clear() {
         val it = iterator()
         while (it.hasNext()) {
             it.nextLong()
@@ -187,11 +186,7 @@ public interface MutableLongCollection : LongCollection, MutableCollection<Long>
         return modified
     }
 
-    override fun addAll(elements: Collection<Long>): Boolean {
-        if (elements is LongCollection) {
-            return addAll(elements)
-        }
-
+    public fun addAll(elements: Collection<Long>): Boolean {
         var modified = false
         for (e in elements) {
             modified = add(e) or modified
@@ -200,14 +195,10 @@ public interface MutableLongCollection : LongCollection, MutableCollection<Long>
     }
 
     public fun removeAll(elements: LongCollection): Boolean = filterInPlace { elements.contains(it) }
-    override fun removeAll(elements: Collection<Long>): Boolean {
-        return if (elements is LongCollection) removeAll(elements) else filterInPlace { elements.contains(it) }
-    }
+    public fun removeAll(elements: Collection<Long>): Boolean = filterInPlace { elements.contains(it) }
 
     public fun retainAll(elements: LongCollection): Boolean = filterInPlace { !elements.contains(it) }
-    override fun retainAll(elements: Collection<Long>): Boolean {
-        return if (elements is LongCollection) retainAll(elements) else filterInPlace { !elements.contains(it) }
-    }
+    public fun retainAll(elements: Collection<Long>): Boolean = filterInPlace { !elements.contains(it) }
 
     public operator fun plusAssign(element: Long) {
         add(element)
@@ -268,7 +259,7 @@ internal inline fun MutableLongCollection.filterInPlace(removePredicate: (Long) 
 
 public abstract class AbstractLongCollection : LongCollection {
     override fun toString(): String {
-        return joinToString(", ", "[", "]")
+        return Iterable { iterator() }.joinToString(", ", "[", "]")
     }
 }
 
