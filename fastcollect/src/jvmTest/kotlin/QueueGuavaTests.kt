@@ -47,37 +47,6 @@ class ByteQueueGuavaTest {
     }
 }
 
-// ============================= Short =============================
-
-private abstract class TestShortQueueGenerator : TestQueueGenerator<Short> {
-    override fun samples(): SampleElements<Short> =
-        SampleElements(1.toShort(), 2.toShort(), 3.toShort(), 4.toShort(), 5.toShort())
-
-    override fun create(vararg elements: Any): Queue<Short> =
-        createQueue(elements.map { it as Short }.toShortArray())
-
-    protected abstract fun createQueue(elements: ShortArray): Queue<Short>
-
-    @Suppress("UNCHECKED_CAST")
-    override fun createArray(length: Int): Array<Short> = arrayOfNulls<Short>(length) as Array<Short>
-
-    override fun order(insertionOrder: MutableList<Short>): Iterable<Short> = insertionOrder
-}
-
-@RunWith(AllTests::class)
-class ShortQueueGuavaTest {
-    companion object {
-        @JvmStatic
-        fun suite(): TestSuite = QueueTestSuiteBuilder
-            .using(object : TestShortQueueGenerator() {
-                override fun createQueue(elements: ShortArray): Queue<Short> = ShortPriorityQueue(elements).asQueue()
-            })
-            .named("ShortPriorityQueue")
-            .withFeatures(*QUEUE_FEATURES)
-            .createTestSuite()
-    }
-}
-
 // ============================= Int =============================
 
 private abstract class TestIntQueueGenerator : TestQueueGenerator<Int> {

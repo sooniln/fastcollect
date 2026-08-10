@@ -74,55 +74,6 @@ class Int2ByteMapGuavaTest {
     }
 }
 
-// ============================= Int2Short =============================
-
-private abstract class AbstractInt2ShortMapGenerator : TestMapGenerator<Int, Short> {
-    override fun samples(): SampleElements<Map.Entry<Int, Short>> = SampleElements(
-        Helpers.mapEntry(1, 10.toShort()),
-        Helpers.mapEntry(2, 20.toShort()),
-        Helpers.mapEntry(3, 30.toShort()),
-        Helpers.mapEntry(4, 40.toShort()),
-        Helpers.mapEntry(5, 50.toShort()),
-    )
-
-    @Suppress("UNCHECKED_CAST")
-    override fun create(vararg elements: Any): Map<Int, Short> =
-        createMap(Array(elements.size) { index -> elements[index] as Map.Entry<Int, Short> })
-
-    protected abstract fun createMap(entries: Array<Map.Entry<Int, Short>>): Map<Int, Short>
-
-    @Suppress("UNCHECKED_CAST")
-    override fun createArray(length: Int): Array<Map.Entry<Int, Short>> =
-        arrayOfNulls<Map.Entry<Int, Short>>(length) as Array<Map.Entry<Int, Short>>
-
-    @Suppress("UNCHECKED_CAST")
-    override fun createKeyArray(length: Int): Array<Int> =
-        arrayOfNulls<Int>(length) as Array<Int>
-
-    @Suppress("UNCHECKED_CAST")
-    override fun createValueArray(length: Int): Array<Short> =
-        arrayOfNulls<Short>(length) as Array<Short>
-
-    override fun order(insertionOrder: MutableList<Map.Entry<Int, Short>>): Iterable<Map.Entry<Int, Short>> =
-        insertionOrder
-}
-
-@RunWith(AllTests::class)
-class Int2ShortMapGuavaTest {
-    companion object {
-        @JvmStatic
-        fun suite(): TestSuite = MapTestSuiteBuilder
-            .using(object : AbstractInt2ShortMapGenerator() {
-                override fun createMap(entries: Array<Map.Entry<Int, Short>>): MutableMap<Int, Short> =
-                    mutableInt2ShortMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
-            })
-            .named("Int2ShortMap")
-            .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
-            .createTestSuite()
-    }
-}
-
 // ============================= Int2Int =============================
 
 private abstract class AbstractInt2IntMapGenerator : TestMapGenerator<Int, Int> {
@@ -408,55 +359,6 @@ class Long2ByteMapGuavaTest {
                     mutableLong2ByteMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
             })
             .named("Long2ByteMap")
-            .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
-            .createTestSuite()
-    }
-}
-
-// ============================= Long2Short =============================
-
-private abstract class AbstractLong2ShortMapGenerator : TestMapGenerator<Long, Short> {
-    override fun samples(): SampleElements<Map.Entry<Long, Short>> = SampleElements(
-        Helpers.mapEntry(1L, 10.toShort()),
-        Helpers.mapEntry(2L, 20.toShort()),
-        Helpers.mapEntry(3L, 30.toShort()),
-        Helpers.mapEntry(4L, 40.toShort()),
-        Helpers.mapEntry(5L, 50.toShort()),
-    )
-
-    @Suppress("UNCHECKED_CAST")
-    override fun create(vararg elements: Any): Map<Long, Short> =
-        createMap(Array(elements.size) { index -> elements[index] as Map.Entry<Long, Short> })
-
-    protected abstract fun createMap(entries: Array<Map.Entry<Long, Short>>): Map<Long, Short>
-
-    @Suppress("UNCHECKED_CAST")
-    override fun createArray(length: Int): Array<Map.Entry<Long, Short>> =
-        arrayOfNulls<Map.Entry<Long, Short>>(length) as Array<Map.Entry<Long, Short>>
-
-    @Suppress("UNCHECKED_CAST")
-    override fun createKeyArray(length: Int): Array<Long> =
-        arrayOfNulls<Long>(length) as Array<Long>
-
-    @Suppress("UNCHECKED_CAST")
-    override fun createValueArray(length: Int): Array<Short> =
-        arrayOfNulls<Short>(length) as Array<Short>
-
-    override fun order(insertionOrder: MutableList<Map.Entry<Long, Short>>): Iterable<Map.Entry<Long, Short>> =
-        insertionOrder
-}
-
-@RunWith(AllTests::class)
-class Long2ShortMapGuavaTest {
-    companion object {
-        @JvmStatic
-        fun suite(): TestSuite = MapTestSuiteBuilder
-            .using(object : AbstractLong2ShortMapGenerator() {
-                override fun createMap(entries: Array<Map.Entry<Long, Short>>): MutableMap<Long, Short> =
-                    mutableLong2ShortMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
-            })
-            .named("Long2ShortMap")
             .withFeatures(*MAP_FEATURES)
             .suppressing(SUPPRESSED_MAP_TESTS)
             .createTestSuite()

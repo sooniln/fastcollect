@@ -66,10 +66,6 @@ abstract fun interface io.github.sooniln.fastcollect/IntPredicate { // io.github
     abstract fun test(kotlin/Int): kotlin/Boolean // io.github.sooniln.fastcollect/IntPredicate.test|test(kotlin.Int){}[0]
 }
 
-abstract fun interface io.github.sooniln.fastcollect/IntShortConsumer { // io.github.sooniln.fastcollect/IntShortConsumer|null[0]
-    abstract fun accept(kotlin/Int, kotlin/Short) // io.github.sooniln.fastcollect/IntShortConsumer.accept|accept(kotlin.Int;kotlin.Short){}[0]
-}
-
 abstract fun interface io.github.sooniln.fastcollect/LongByteConsumer { // io.github.sooniln.fastcollect/LongByteConsumer|null[0]
     abstract fun accept(kotlin/Long, kotlin/Byte) // io.github.sooniln.fastcollect/LongByteConsumer.accept|accept(kotlin.Long;kotlin.Byte){}[0]
 }
@@ -96,18 +92,6 @@ abstract fun interface io.github.sooniln.fastcollect/LongLongConsumer { // io.gi
 
 abstract fun interface io.github.sooniln.fastcollect/LongPredicate { // io.github.sooniln.fastcollect/LongPredicate|null[0]
     abstract fun test(kotlin/Long): kotlin/Boolean // io.github.sooniln.fastcollect/LongPredicate.test|test(kotlin.Long){}[0]
-}
-
-abstract fun interface io.github.sooniln.fastcollect/LongShortConsumer { // io.github.sooniln.fastcollect/LongShortConsumer|null[0]
-    abstract fun accept(kotlin/Long, kotlin/Short) // io.github.sooniln.fastcollect/LongShortConsumer.accept|accept(kotlin.Long;kotlin.Short){}[0]
-}
-
-abstract fun interface io.github.sooniln.fastcollect/ShortConsumer { // io.github.sooniln.fastcollect/ShortConsumer|null[0]
-    abstract fun accept(kotlin/Short) // io.github.sooniln.fastcollect/ShortConsumer.accept|accept(kotlin.Short){}[0]
-}
-
-abstract fun interface io.github.sooniln.fastcollect/ShortPredicate { // io.github.sooniln.fastcollect/ShortPredicate|null[0]
-    abstract fun test(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/ShortPredicate.test|test(kotlin.Short){}[0]
 }
 
 abstract interface <#A: kotlin/Any?> io.github.sooniln.fastcollect/MutableInt2AnyMap : io.github.sooniln.fastcollect/Int2AnyMap<#A> { // io.github.sooniln.fastcollect/MutableInt2AnyMap|null[0]
@@ -470,39 +454,6 @@ abstract interface io.github.sooniln.fastcollect/Int2LongMap { // io.github.soon
     }
 }
 
-abstract interface io.github.sooniln.fastcollect/Int2ShortMap { // io.github.sooniln.fastcollect/Int2ShortMap|null[0]
-    abstract val keys // io.github.sooniln.fastcollect/Int2ShortMap.keys|{}keys[0]
-        abstract fun <get-keys>(): io.github.sooniln.fastcollect/IntSet // io.github.sooniln.fastcollect/Int2ShortMap.keys.<get-keys>|<get-keys>(){}[0]
-    abstract val size // io.github.sooniln.fastcollect/Int2ShortMap.size|{}size[0]
-        abstract fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/Int2ShortMap.size.<get-size>|<get-size>(){}[0]
-    abstract val values // io.github.sooniln.fastcollect/Int2ShortMap.values|{}values[0]
-        abstract fun <get-values>(): io.github.sooniln.fastcollect/ShortCollection // io.github.sooniln.fastcollect/Int2ShortMap.values.<get-values>|<get-values>(){}[0]
-
-    abstract fun get(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortMap.get|get(kotlin.Int){}[0]
-    abstract fun isDefaultValue(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/Int2ShortMap.isDefaultValue|isDefaultValue(kotlin.Short){}[0]
-    abstract fun iterator(): io.github.sooniln.fastcollect/FastIterator<io.github.sooniln.fastcollect/Int2ShortMap.Entry> // io.github.sooniln.fastcollect/Int2ShortMap.iterator|iterator(){}[0]
-    open fun containsKey(kotlin/Int): kotlin/Boolean // io.github.sooniln.fastcollect/Int2ShortMap.containsKey|containsKey(kotlin.Int){}[0]
-    open fun containsValue(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/Int2ShortMap.containsValue|containsValue(kotlin.Short){}[0]
-    open fun foreach(io.github.sooniln.fastcollect/IntShortConsumer) // io.github.sooniln.fastcollect/Int2ShortMap.foreach|foreach(io.github.sooniln.fastcollect.IntShortConsumer){}[0]
-    open fun foreachKey(io.github.sooniln.fastcollect/IntConsumer) // io.github.sooniln.fastcollect/Int2ShortMap.foreachKey|foreachKey(io.github.sooniln.fastcollect.IntConsumer){}[0]
-    open fun getOrDefault(kotlin/Int, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortMap.getOrDefault|getOrDefault(kotlin.Int;kotlin.Short){}[0]
-    open fun getValue(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortMap.getValue|getValue(kotlin.Int){}[0]
-    open fun isEmpty(): kotlin/Boolean // io.github.sooniln.fastcollect/Int2ShortMap.isEmpty|isEmpty(){}[0]
-    open fun keys(): io.github.sooniln.fastcollect/IntSet // io.github.sooniln.fastcollect/Int2ShortMap.keys|keys(){}[0]
-    open fun size(): kotlin/Int // io.github.sooniln.fastcollect/Int2ShortMap.size|size(){}[0]
-    open fun values(): io.github.sooniln.fastcollect/ShortCollection // io.github.sooniln.fastcollect/Int2ShortMap.values|values(){}[0]
-
-    abstract interface Entry { // io.github.sooniln.fastcollect/Int2ShortMap.Entry|null[0]
-        abstract val key // io.github.sooniln.fastcollect/Int2ShortMap.Entry.key|{}key[0]
-            abstract fun <get-key>(): kotlin/Int // io.github.sooniln.fastcollect/Int2ShortMap.Entry.key.<get-key>|<get-key>(){}[0]
-        abstract val value // io.github.sooniln.fastcollect/Int2ShortMap.Entry.value|{}value[0]
-            abstract fun <get-value>(): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortMap.Entry.value.<get-value>|<get-value>(){}[0]
-
-        open fun component1(): kotlin/Int // io.github.sooniln.fastcollect/Int2ShortMap.Entry.component1|component1(){}[0]
-        open fun component2(): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortMap.Entry.component2|component2(){}[0]
-    }
-}
-
 abstract interface io.github.sooniln.fastcollect/IntCollection : kotlin.collections/Collection<kotlin/Int> { // io.github.sooniln.fastcollect/IntCollection|null[0]
     abstract fun iterator(): kotlin.collections/IntIterator // io.github.sooniln.fastcollect/IntCollection.iterator|iterator(){}[0]
     open fun contains(kotlin/Int): kotlin/Boolean // io.github.sooniln.fastcollect/IntCollection.contains|contains(kotlin.Int){}[0]
@@ -690,39 +641,6 @@ abstract interface io.github.sooniln.fastcollect/Long2LongMap { // io.github.soo
 
         open fun component1(): kotlin/Long // io.github.sooniln.fastcollect/Long2LongMap.Entry.component1|component1(){}[0]
         open fun component2(): kotlin/Long // io.github.sooniln.fastcollect/Long2LongMap.Entry.component2|component2(){}[0]
-    }
-}
-
-abstract interface io.github.sooniln.fastcollect/Long2ShortMap { // io.github.sooniln.fastcollect/Long2ShortMap|null[0]
-    abstract val keys // io.github.sooniln.fastcollect/Long2ShortMap.keys|{}keys[0]
-        abstract fun <get-keys>(): io.github.sooniln.fastcollect/LongSet // io.github.sooniln.fastcollect/Long2ShortMap.keys.<get-keys>|<get-keys>(){}[0]
-    abstract val size // io.github.sooniln.fastcollect/Long2ShortMap.size|{}size[0]
-        abstract fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/Long2ShortMap.size.<get-size>|<get-size>(){}[0]
-    abstract val values // io.github.sooniln.fastcollect/Long2ShortMap.values|{}values[0]
-        abstract fun <get-values>(): io.github.sooniln.fastcollect/ShortCollection // io.github.sooniln.fastcollect/Long2ShortMap.values.<get-values>|<get-values>(){}[0]
-
-    abstract fun get(kotlin/Long): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortMap.get|get(kotlin.Long){}[0]
-    abstract fun isDefaultValue(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/Long2ShortMap.isDefaultValue|isDefaultValue(kotlin.Short){}[0]
-    abstract fun iterator(): io.github.sooniln.fastcollect/FastIterator<io.github.sooniln.fastcollect/Long2ShortMap.Entry> // io.github.sooniln.fastcollect/Long2ShortMap.iterator|iterator(){}[0]
-    open fun containsKey(kotlin/Long): kotlin/Boolean // io.github.sooniln.fastcollect/Long2ShortMap.containsKey|containsKey(kotlin.Long){}[0]
-    open fun containsValue(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/Long2ShortMap.containsValue|containsValue(kotlin.Short){}[0]
-    open fun foreach(io.github.sooniln.fastcollect/LongShortConsumer) // io.github.sooniln.fastcollect/Long2ShortMap.foreach|foreach(io.github.sooniln.fastcollect.LongShortConsumer){}[0]
-    open fun foreachKey(io.github.sooniln.fastcollect/LongConsumer) // io.github.sooniln.fastcollect/Long2ShortMap.foreachKey|foreachKey(io.github.sooniln.fastcollect.LongConsumer){}[0]
-    open fun getOrDefault(kotlin/Long, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortMap.getOrDefault|getOrDefault(kotlin.Long;kotlin.Short){}[0]
-    open fun getValue(kotlin/Long): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortMap.getValue|getValue(kotlin.Long){}[0]
-    open fun isEmpty(): kotlin/Boolean // io.github.sooniln.fastcollect/Long2ShortMap.isEmpty|isEmpty(){}[0]
-    open fun keys(): io.github.sooniln.fastcollect/LongSet // io.github.sooniln.fastcollect/Long2ShortMap.keys|keys(){}[0]
-    open fun size(): kotlin/Int // io.github.sooniln.fastcollect/Long2ShortMap.size|size(){}[0]
-    open fun values(): io.github.sooniln.fastcollect/ShortCollection // io.github.sooniln.fastcollect/Long2ShortMap.values|values(){}[0]
-
-    abstract interface Entry { // io.github.sooniln.fastcollect/Long2ShortMap.Entry|null[0]
-        abstract val key // io.github.sooniln.fastcollect/Long2ShortMap.Entry.key|{}key[0]
-            abstract fun <get-key>(): kotlin/Long // io.github.sooniln.fastcollect/Long2ShortMap.Entry.key.<get-key>|<get-key>(){}[0]
-        abstract val value // io.github.sooniln.fastcollect/Long2ShortMap.Entry.value|{}value[0]
-            abstract fun <get-value>(): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortMap.Entry.value.<get-value>|<get-value>(){}[0]
-
-        open fun component1(): kotlin/Long // io.github.sooniln.fastcollect/Long2ShortMap.Entry.component1|component1(){}[0]
-        open fun component2(): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortMap.Entry.component2|component2(){}[0]
     }
 }
 
@@ -1014,29 +932,6 @@ abstract interface io.github.sooniln.fastcollect/MutableInt2LongMap : io.github.
     }
 }
 
-abstract interface io.github.sooniln.fastcollect/MutableInt2ShortMap : io.github.sooniln.fastcollect/Int2ShortMap { // io.github.sooniln.fastcollect/MutableInt2ShortMap|null[0]
-    abstract val keys // io.github.sooniln.fastcollect/MutableInt2ShortMap.keys|{}keys[0]
-        abstract fun <get-keys>(): io.github.sooniln.fastcollect/MutableIntSet // io.github.sooniln.fastcollect/MutableInt2ShortMap.keys.<get-keys>|<get-keys>(){}[0]
-    abstract val values // io.github.sooniln.fastcollect/MutableInt2ShortMap.values|{}values[0]
-        abstract fun <get-values>(): io.github.sooniln.fastcollect/MutableShortCollection // io.github.sooniln.fastcollect/MutableInt2ShortMap.values.<get-values>|<get-values>(){}[0]
-
-    abstract fun clear() // io.github.sooniln.fastcollect/MutableInt2ShortMap.clear|clear(){}[0]
-    abstract fun iterator(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableInt2ShortMap.MutableEntry> // io.github.sooniln.fastcollect/MutableInt2ShortMap.iterator|iterator(){}[0]
-    abstract fun put(kotlin/Int, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/MutableInt2ShortMap.put|put(kotlin.Int;kotlin.Short){}[0]
-    abstract fun remove(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/MutableInt2ShortMap.remove|remove(kotlin.Int){}[0]
-    open fun putAll(io.github.sooniln.fastcollect/Int2ShortMap) // io.github.sooniln.fastcollect/MutableInt2ShortMap.putAll|putAll(io.github.sooniln.fastcollect.Int2ShortMap){}[0]
-    open fun putAll(kotlin.collections/Map<out kotlin/Int, kotlin/Short>) // io.github.sooniln.fastcollect/MutableInt2ShortMap.putAll|putAll(kotlin.collections.Map<out|kotlin.Int,kotlin.Short>){}[0]
-    open fun removeKey(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/MutableInt2ShortMap.removeKey|removeKey(kotlin.Int){}[0]
-    open fun replace(kotlin/Int, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/MutableInt2ShortMap.replace|replace(kotlin.Int;kotlin.Short){}[0]
-    open fun set(kotlin/Int, kotlin/Short) // io.github.sooniln.fastcollect/MutableInt2ShortMap.set|set(kotlin.Int;kotlin.Short){}[0]
-
-    abstract interface MutableEntry : io.github.sooniln.fastcollect/Int2ShortMap.Entry { // io.github.sooniln.fastcollect/MutableInt2ShortMap.MutableEntry|null[0]
-        abstract var value // io.github.sooniln.fastcollect/MutableInt2ShortMap.MutableEntry.value|{}value[0]
-            abstract fun <get-value>(): kotlin/Short // io.github.sooniln.fastcollect/MutableInt2ShortMap.MutableEntry.value.<get-value>|<get-value>(){}[0]
-            abstract fun <set-value>(kotlin/Short) // io.github.sooniln.fastcollect/MutableInt2ShortMap.MutableEntry.value.<set-value>|<set-value>(kotlin.Short){}[0]
-    }
-}
-
 abstract interface io.github.sooniln.fastcollect/MutableIntCollection : io.github.sooniln.fastcollect/IntCollection, kotlin.collections/MutableCollection<kotlin/Int> { // io.github.sooniln.fastcollect/MutableIntCollection|null[0]
     abstract fun add(kotlin/Int): kotlin/Boolean // io.github.sooniln.fastcollect/MutableIntCollection.add|add(kotlin.Int){}[0]
     abstract fun iterator(): io.github.sooniln.fastcollect/MutableIntIterator // io.github.sooniln.fastcollect/MutableIntCollection.iterator|iterator(){}[0]
@@ -1202,29 +1097,6 @@ abstract interface io.github.sooniln.fastcollect/MutableLong2LongMap : io.github
     }
 }
 
-abstract interface io.github.sooniln.fastcollect/MutableLong2ShortMap : io.github.sooniln.fastcollect/Long2ShortMap { // io.github.sooniln.fastcollect/MutableLong2ShortMap|null[0]
-    abstract val keys // io.github.sooniln.fastcollect/MutableLong2ShortMap.keys|{}keys[0]
-        abstract fun <get-keys>(): io.github.sooniln.fastcollect/MutableLongSet // io.github.sooniln.fastcollect/MutableLong2ShortMap.keys.<get-keys>|<get-keys>(){}[0]
-    abstract val values // io.github.sooniln.fastcollect/MutableLong2ShortMap.values|{}values[0]
-        abstract fun <get-values>(): io.github.sooniln.fastcollect/MutableShortCollection // io.github.sooniln.fastcollect/MutableLong2ShortMap.values.<get-values>|<get-values>(){}[0]
-
-    abstract fun clear() // io.github.sooniln.fastcollect/MutableLong2ShortMap.clear|clear(){}[0]
-    abstract fun iterator(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableLong2ShortMap.MutableEntry> // io.github.sooniln.fastcollect/MutableLong2ShortMap.iterator|iterator(){}[0]
-    abstract fun put(kotlin/Long, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/MutableLong2ShortMap.put|put(kotlin.Long;kotlin.Short){}[0]
-    abstract fun remove(kotlin/Long): kotlin/Short // io.github.sooniln.fastcollect/MutableLong2ShortMap.remove|remove(kotlin.Long){}[0]
-    open fun putAll(io.github.sooniln.fastcollect/Long2ShortMap) // io.github.sooniln.fastcollect/MutableLong2ShortMap.putAll|putAll(io.github.sooniln.fastcollect.Long2ShortMap){}[0]
-    open fun putAll(kotlin.collections/Map<out kotlin/Long, kotlin/Short>) // io.github.sooniln.fastcollect/MutableLong2ShortMap.putAll|putAll(kotlin.collections.Map<out|kotlin.Long,kotlin.Short>){}[0]
-    open fun removeKey(kotlin/Long): kotlin/Short // io.github.sooniln.fastcollect/MutableLong2ShortMap.removeKey|removeKey(kotlin.Long){}[0]
-    open fun replace(kotlin/Long, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/MutableLong2ShortMap.replace|replace(kotlin.Long;kotlin.Short){}[0]
-    open fun set(kotlin/Long, kotlin/Short) // io.github.sooniln.fastcollect/MutableLong2ShortMap.set|set(kotlin.Long;kotlin.Short){}[0]
-
-    abstract interface MutableEntry : io.github.sooniln.fastcollect/Long2ShortMap.Entry { // io.github.sooniln.fastcollect/MutableLong2ShortMap.MutableEntry|null[0]
-        abstract var value // io.github.sooniln.fastcollect/MutableLong2ShortMap.MutableEntry.value|{}value[0]
-            abstract fun <get-value>(): kotlin/Short // io.github.sooniln.fastcollect/MutableLong2ShortMap.MutableEntry.value.<get-value>|<get-value>(){}[0]
-            abstract fun <set-value>(kotlin/Short) // io.github.sooniln.fastcollect/MutableLong2ShortMap.MutableEntry.value.<set-value>|<set-value>(kotlin.Short){}[0]
-    }
-}
-
 abstract interface io.github.sooniln.fastcollect/MutableLongCollection : io.github.sooniln.fastcollect/LongCollection, kotlin.collections/MutableCollection<kotlin/Long> { // io.github.sooniln.fastcollect/MutableLongCollection|null[0]
     abstract fun add(kotlin/Long): kotlin/Boolean // io.github.sooniln.fastcollect/MutableLongCollection.add|add(kotlin.Long){}[0]
     abstract fun iterator(): io.github.sooniln.fastcollect/MutableLongIterator // io.github.sooniln.fastcollect/MutableLongCollection.iterator|iterator(){}[0]
@@ -1274,75 +1146,6 @@ abstract interface io.github.sooniln.fastcollect/MutableLongList : io.github.soo
 }
 
 abstract interface io.github.sooniln.fastcollect/MutableLongSet : io.github.sooniln.fastcollect/LongSet, io.github.sooniln.fastcollect/MutableLongCollection // io.github.sooniln.fastcollect/MutableLongSet|null[0]
-
-abstract interface io.github.sooniln.fastcollect/MutableShortCollection : io.github.sooniln.fastcollect/ShortCollection, kotlin.collections/MutableCollection<kotlin/Short> { // io.github.sooniln.fastcollect/MutableShortCollection|null[0]
-    abstract fun add(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortCollection.add|add(kotlin.Short){}[0]
-    abstract fun iterator(): io.github.sooniln.fastcollect/MutableShortIterator // io.github.sooniln.fastcollect/MutableShortCollection.iterator|iterator(){}[0]
-    abstract fun remove(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortCollection.remove|remove(kotlin.Short){}[0]
-    open fun addAll(io.github.sooniln.fastcollect/ShortCollection): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortCollection.addAll|addAll(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    open fun addAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortCollection.addAll|addAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun clear() // io.github.sooniln.fastcollect/MutableShortCollection.clear|clear(){}[0]
-    open fun minusAssign(io.github.sooniln.fastcollect/ShortCollection) // io.github.sooniln.fastcollect/MutableShortCollection.minusAssign|minusAssign(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    open fun minusAssign(kotlin.collections/Collection<kotlin/Short>) // io.github.sooniln.fastcollect/MutableShortCollection.minusAssign|minusAssign(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun minusAssign(kotlin/Short) // io.github.sooniln.fastcollect/MutableShortCollection.minusAssign|minusAssign(kotlin.Short){}[0]
-    open fun plusAssign(io.github.sooniln.fastcollect/ShortCollection) // io.github.sooniln.fastcollect/MutableShortCollection.plusAssign|plusAssign(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    open fun plusAssign(kotlin.collections/Collection<kotlin/Short>) // io.github.sooniln.fastcollect/MutableShortCollection.plusAssign|plusAssign(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun plusAssign(kotlin/Short) // io.github.sooniln.fastcollect/MutableShortCollection.plusAssign|plusAssign(kotlin.Short){}[0]
-    open fun removeAll(io.github.sooniln.fastcollect/ShortCollection): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortCollection.removeAll|removeAll(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    open fun removeAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortCollection.removeAll|removeAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun retainAll(io.github.sooniln.fastcollect/ShortCollection): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortCollection.retainAll|retainAll(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    open fun retainAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortCollection.retainAll|retainAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-}
-
-abstract interface io.github.sooniln.fastcollect/MutableShortList : io.github.sooniln.fastcollect/MutableShortCollection, io.github.sooniln.fastcollect/ShortList { // io.github.sooniln.fastcollect/MutableShortList|null[0]
-    abstract fun add(kotlin/Int, kotlin/Short) // io.github.sooniln.fastcollect/MutableShortList.add|add(kotlin.Int;kotlin.Short){}[0]
-    abstract fun listIterator(): io.github.sooniln.fastcollect/MutableShortListIterator // io.github.sooniln.fastcollect/MutableShortList.listIterator|listIterator(){}[0]
-    abstract fun listIterator(kotlin/Int): io.github.sooniln.fastcollect/MutableShortListIterator // io.github.sooniln.fastcollect/MutableShortList.listIterator|listIterator(kotlin.Int){}[0]
-    abstract fun removeAt(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/MutableShortList.removeAt|removeAt(kotlin.Int){}[0]
-    abstract fun removeRange(kotlin/Int, kotlin/Int) // io.github.sooniln.fastcollect/MutableShortList.removeRange|removeRange(kotlin.Int;kotlin.Int){}[0]
-    abstract fun set(kotlin/Int, kotlin/Short) // io.github.sooniln.fastcollect/MutableShortList.set|set(kotlin.Int;kotlin.Short){}[0]
-    abstract fun subList(kotlin/Int, kotlin/Int): io.github.sooniln.fastcollect/MutableShortList // io.github.sooniln.fastcollect/MutableShortList.subList|subList(kotlin.Int;kotlin.Int){}[0]
-    open fun add(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortList.add|add(kotlin.Short){}[0]
-    open fun addAll(io.github.sooniln.fastcollect/ShortCollection): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortList.addAll|addAll(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    open fun addAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortList.addAll|addAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun addAll(kotlin/Int, io.github.sooniln.fastcollect/ShortCollection) // io.github.sooniln.fastcollect/MutableShortList.addAll|addAll(kotlin.Int;io.github.sooniln.fastcollect.ShortCollection){}[0]
-    open fun addAll(kotlin/Int, kotlin.collections/Collection<kotlin/Short>) // io.github.sooniln.fastcollect/MutableShortList.addAll|addAll(kotlin.Int;kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun addFirst(kotlin/Short) // io.github.sooniln.fastcollect/MutableShortList.addFirst|addFirst(kotlin.Short){}[0]
-    open fun addLast(kotlin/Short) // io.github.sooniln.fastcollect/MutableShortList.addLast|addLast(kotlin.Short){}[0]
-    open fun clear() // io.github.sooniln.fastcollect/MutableShortList.clear|clear(){}[0]
-    open fun fill(kotlin/Short) // io.github.sooniln.fastcollect/MutableShortList.fill|fill(kotlin.Short){}[0]
-    open fun remove(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortList.remove|remove(kotlin.Short){}[0]
-    open fun removeAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortList.removeAll|removeAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun removeFirst(): kotlin/Short // io.github.sooniln.fastcollect/MutableShortList.removeFirst|removeFirst(){}[0]
-    open fun removeLast(): kotlin/Short // io.github.sooniln.fastcollect/MutableShortList.removeLast|removeLast(){}[0]
-    open fun replace(kotlin/Int, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/MutableShortList.replace|replace(kotlin.Int;kotlin.Short){}[0]
-    open fun retainAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/MutableShortList.retainAll|retainAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun reverse() // io.github.sooniln.fastcollect/MutableShortList.reverse|reverse(){}[0]
-    open fun shuffle() // io.github.sooniln.fastcollect/MutableShortList.shuffle|shuffle(){}[0]
-    open fun sort() // io.github.sooniln.fastcollect/MutableShortList.sort|sort(){}[0]
-    open fun sortDescending() // io.github.sooniln.fastcollect/MutableShortList.sortDescending|sortDescending(){}[0]
-}
-
-abstract interface io.github.sooniln.fastcollect/ShortCollection : kotlin.collections/Collection<kotlin/Short> { // io.github.sooniln.fastcollect/ShortCollection|null[0]
-    abstract fun iterator(): kotlin.collections/ShortIterator // io.github.sooniln.fastcollect/ShortCollection.iterator|iterator(){}[0]
-    open fun contains(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/ShortCollection.contains|contains(kotlin.Short){}[0]
-    open fun containsAll(io.github.sooniln.fastcollect/ShortCollection): kotlin/Boolean // io.github.sooniln.fastcollect/ShortCollection.containsAll|containsAll(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    open fun containsAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/ShortCollection.containsAll|containsAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun foreach(io.github.sooniln.fastcollect/ShortConsumer) // io.github.sooniln.fastcollect/ShortCollection.foreach|foreach(io.github.sooniln.fastcollect.ShortConsumer){}[0]
-    open fun isEmpty(): kotlin/Boolean // io.github.sooniln.fastcollect/ShortCollection.isEmpty|isEmpty(){}[0]
-    open fun toShortArray(): kotlin/ShortArray // io.github.sooniln.fastcollect/ShortCollection.toShortArray|toShortArray(){}[0]
-}
-
-abstract interface io.github.sooniln.fastcollect/ShortList : io.github.sooniln.fastcollect/ShortCollection { // io.github.sooniln.fastcollect/ShortList|null[0]
-    abstract fun get(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/ShortList.get|get(kotlin.Int){}[0]
-    abstract fun listIterator(): io.github.sooniln.fastcollect/ShortListIterator // io.github.sooniln.fastcollect/ShortList.listIterator|listIterator(){}[0]
-    abstract fun listIterator(kotlin/Int): io.github.sooniln.fastcollect/ShortListIterator // io.github.sooniln.fastcollect/ShortList.listIterator|listIterator(kotlin.Int){}[0]
-    abstract fun subList(kotlin/Int, kotlin/Int): io.github.sooniln.fastcollect/ShortList // io.github.sooniln.fastcollect/ShortList.subList|subList(kotlin.Int;kotlin.Int){}[0]
-    open fun contains(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/ShortList.contains|contains(kotlin.Short){}[0]
-    open fun containsAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/ShortList.containsAll|containsAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun indexOf(kotlin/Short): kotlin/Int // io.github.sooniln.fastcollect/ShortList.indexOf|indexOf(kotlin.Short){}[0]
-    open fun lastIndexOf(kotlin/Short): kotlin/Int // io.github.sooniln.fastcollect/ShortList.lastIndexOf|lastIndexOf(kotlin.Short){}[0]
-}
 
 abstract class <#A: kotlin/Any?> io.github.sooniln.fastcollect/AbstractInt2AnyMap : io.github.sooniln.fastcollect/Int2AnyMap<#A> { // io.github.sooniln.fastcollect/AbstractInt2AnyMap|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractInt2AnyMap.<init>|<init>(){}[0]
@@ -1635,23 +1438,6 @@ abstract class io.github.sooniln.fastcollect/AbstractInt2LongMap : io.github.soo
     }
 }
 
-abstract class io.github.sooniln.fastcollect/AbstractInt2ShortMap : io.github.sooniln.fastcollect/Int2ShortMap { // io.github.sooniln.fastcollect/AbstractInt2ShortMap|null[0]
-    constructor <init>() // io.github.sooniln.fastcollect/AbstractInt2ShortMap.<init>|<init>(){}[0]
-
-    open fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractInt2ShortMap.equals|equals(kotlin.Any?){}[0]
-    open fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/AbstractInt2ShortMap.hashCode|hashCode(){}[0]
-    open fun toString(): kotlin/String // io.github.sooniln.fastcollect/AbstractInt2ShortMap.toString|toString(){}[0]
-
-    final class SimpleEntry : io.github.sooniln.fastcollect/Int2ShortMap.Entry { // io.github.sooniln.fastcollect/AbstractInt2ShortMap.SimpleEntry|null[0]
-        constructor <init>(kotlin/Int, kotlin/Short) // io.github.sooniln.fastcollect/AbstractInt2ShortMap.SimpleEntry.<init>|<init>(kotlin.Int;kotlin.Short){}[0]
-
-        final val key // io.github.sooniln.fastcollect/AbstractInt2ShortMap.SimpleEntry.key|{}key[0]
-            final fun <get-key>(): kotlin/Int // io.github.sooniln.fastcollect/AbstractInt2ShortMap.SimpleEntry.key.<get-key>|<get-key>(){}[0]
-        final val value // io.github.sooniln.fastcollect/AbstractInt2ShortMap.SimpleEntry.value|{}value[0]
-            final fun <get-value>(): kotlin/Short // io.github.sooniln.fastcollect/AbstractInt2ShortMap.SimpleEntry.value.<get-value>|<get-value>(){}[0]
-    }
-}
-
 abstract class io.github.sooniln.fastcollect/AbstractIntCollection : io.github.sooniln.fastcollect/IntCollection { // io.github.sooniln.fastcollect/AbstractIntCollection|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractIntCollection.<init>|<init>(){}[0]
 
@@ -1794,23 +1580,6 @@ abstract class io.github.sooniln.fastcollect/AbstractLong2LongMap : io.github.so
     }
 }
 
-abstract class io.github.sooniln.fastcollect/AbstractLong2ShortMap : io.github.sooniln.fastcollect/Long2ShortMap { // io.github.sooniln.fastcollect/AbstractLong2ShortMap|null[0]
-    constructor <init>() // io.github.sooniln.fastcollect/AbstractLong2ShortMap.<init>|<init>(){}[0]
-
-    open fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractLong2ShortMap.equals|equals(kotlin.Any?){}[0]
-    open fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/AbstractLong2ShortMap.hashCode|hashCode(){}[0]
-    open fun toString(): kotlin/String // io.github.sooniln.fastcollect/AbstractLong2ShortMap.toString|toString(){}[0]
-
-    final class SimpleEntry : io.github.sooniln.fastcollect/Long2ShortMap.Entry { // io.github.sooniln.fastcollect/AbstractLong2ShortMap.SimpleEntry|null[0]
-        constructor <init>(kotlin/Long, kotlin/Short) // io.github.sooniln.fastcollect/AbstractLong2ShortMap.SimpleEntry.<init>|<init>(kotlin.Long;kotlin.Short){}[0]
-
-        final val key // io.github.sooniln.fastcollect/AbstractLong2ShortMap.SimpleEntry.key|{}key[0]
-            final fun <get-key>(): kotlin/Long // io.github.sooniln.fastcollect/AbstractLong2ShortMap.SimpleEntry.key.<get-key>|<get-key>(){}[0]
-        final val value // io.github.sooniln.fastcollect/AbstractLong2ShortMap.SimpleEntry.value|{}value[0]
-            final fun <get-value>(): kotlin/Short // io.github.sooniln.fastcollect/AbstractLong2ShortMap.SimpleEntry.value.<get-value>|<get-value>(){}[0]
-    }
-}
-
 abstract class io.github.sooniln.fastcollect/AbstractLongCollection : io.github.sooniln.fastcollect/LongCollection { // io.github.sooniln.fastcollect/AbstractLongCollection|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractLongCollection.<init>|<init>(){}[0]
 
@@ -1950,10 +1719,6 @@ abstract class io.github.sooniln.fastcollect/AbstractMutableInt2LongMap : io.git
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableInt2LongMap.<init>|<init>(){}[0]
 }
 
-abstract class io.github.sooniln.fastcollect/AbstractMutableInt2ShortMap : io.github.sooniln.fastcollect/AbstractInt2ShortMap, io.github.sooniln.fastcollect/MutableInt2ShortMap { // io.github.sooniln.fastcollect/AbstractMutableInt2ShortMap|null[0]
-    constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableInt2ShortMap.<init>|<init>(){}[0]
-}
-
 abstract class io.github.sooniln.fastcollect/AbstractMutableIntList : io.github.sooniln.fastcollect/AbstractIntList, io.github.sooniln.fastcollect/MutableIntList { // io.github.sooniln.fastcollect/AbstractMutableIntList|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableIntList.<init>|<init>(){}[0]
 
@@ -1997,10 +1762,6 @@ abstract class io.github.sooniln.fastcollect/AbstractMutableLong2LongMap : io.gi
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableLong2LongMap.<init>|<init>(){}[0]
 }
 
-abstract class io.github.sooniln.fastcollect/AbstractMutableLong2ShortMap : io.github.sooniln.fastcollect/AbstractLong2ShortMap, io.github.sooniln.fastcollect/MutableLong2ShortMap { // io.github.sooniln.fastcollect/AbstractMutableLong2ShortMap|null[0]
-    constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableLong2ShortMap.<init>|<init>(){}[0]
-}
-
 abstract class io.github.sooniln.fastcollect/AbstractMutableLongList : io.github.sooniln.fastcollect/AbstractLongList, io.github.sooniln.fastcollect/MutableLongList { // io.github.sooniln.fastcollect/AbstractMutableLongList|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableLongList.<init>|<init>(){}[0]
 
@@ -2022,72 +1783,6 @@ abstract class io.github.sooniln.fastcollect/AbstractMutableLongSet : io.github.
 
     open fun removeAll(kotlin.collections/Collection<kotlin/Long>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongSet.removeAll|removeAll(kotlin.collections.Collection<kotlin.Long>){}[0]
     open fun retainAll(kotlin.collections/Collection<kotlin/Long>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongSet.retainAll|retainAll(kotlin.collections.Collection<kotlin.Long>){}[0]
-}
-
-abstract class io.github.sooniln.fastcollect/AbstractMutableShortList : io.github.sooniln.fastcollect/AbstractShortList, io.github.sooniln.fastcollect/MutableShortList { // io.github.sooniln.fastcollect/AbstractMutableShortList|null[0]
-    constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableShortList.<init>|<init>(){}[0]
-
-    open fun add(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableShortList.add|add(kotlin.Short){}[0]
-    open fun addAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableShortList.addAll|addAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun clear() // io.github.sooniln.fastcollect/AbstractMutableShortList.clear|clear(){}[0]
-    open fun iterator(): io.github.sooniln.fastcollect/MutableShortIterator // io.github.sooniln.fastcollect/AbstractMutableShortList.iterator|iterator(){}[0]
-    open fun listIterator(): io.github.sooniln.fastcollect/MutableShortListIterator // io.github.sooniln.fastcollect/AbstractMutableShortList.listIterator|listIterator(){}[0]
-    open fun listIterator(kotlin/Int): io.github.sooniln.fastcollect/MutableShortListIterator // io.github.sooniln.fastcollect/AbstractMutableShortList.listIterator|listIterator(kotlin.Int){}[0]
-    open fun remove(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableShortList.remove|remove(kotlin.Short){}[0]
-    open fun removeAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableShortList.removeAll|removeAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun removeRange(kotlin/Int, kotlin/Int) // io.github.sooniln.fastcollect/AbstractMutableShortList.removeRange|removeRange(kotlin.Int;kotlin.Int){}[0]
-    open fun retainAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableShortList.retainAll|retainAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    open fun subList(kotlin/Int, kotlin/Int): io.github.sooniln.fastcollect/MutableShortList // io.github.sooniln.fastcollect/AbstractMutableShortList.subList|subList(kotlin.Int;kotlin.Int){}[0]
-}
-
-abstract class io.github.sooniln.fastcollect/AbstractShortCollection : io.github.sooniln.fastcollect/ShortCollection { // io.github.sooniln.fastcollect/AbstractShortCollection|null[0]
-    constructor <init>() // io.github.sooniln.fastcollect/AbstractShortCollection.<init>|<init>(){}[0]
-
-    open fun toString(): kotlin/String // io.github.sooniln.fastcollect/AbstractShortCollection.toString|toString(){}[0]
-}
-
-abstract class io.github.sooniln.fastcollect/AbstractShortList : io.github.sooniln.fastcollect/AbstractShortCollection, io.github.sooniln.fastcollect/ShortList { // io.github.sooniln.fastcollect/AbstractShortList|null[0]
-    constructor <init>() // io.github.sooniln.fastcollect/AbstractShortList.<init>|<init>(){}[0]
-
-    open fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractShortList.equals|equals(kotlin.Any?){}[0]
-    open fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/AbstractShortList.hashCode|hashCode(){}[0]
-    open fun iterator(): kotlin.collections/ShortIterator // io.github.sooniln.fastcollect/AbstractShortList.iterator|iterator(){}[0]
-    open fun listIterator(): io.github.sooniln.fastcollect/ShortListIterator // io.github.sooniln.fastcollect/AbstractShortList.listIterator|listIterator(){}[0]
-    open fun listIterator(kotlin/Int): io.github.sooniln.fastcollect/ShortListIterator // io.github.sooniln.fastcollect/AbstractShortList.listIterator|listIterator(kotlin.Int){}[0]
-    open fun subList(kotlin/Int, kotlin/Int): io.github.sooniln.fastcollect/ShortList // io.github.sooniln.fastcollect/AbstractShortList.subList|subList(kotlin.Int;kotlin.Int){}[0]
-}
-
-abstract class io.github.sooniln.fastcollect/AbstractShortPriorityQueue { // io.github.sooniln.fastcollect/AbstractShortPriorityQueue|null[0]
-    constructor <init>(io.github.sooniln.fastcollect/ShortCollection) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    constructor <init>(kotlin.collections/Collection<kotlin/Short>) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Short>){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.<init>|<init>(kotlin.Int){}[0]
-    constructor <init>(kotlin/ShortArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.<init>|<init>(kotlin.ShortArray;kotlin.Int;kotlin.Int){}[0]
-
-    final var size // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.size|{}size[0]
-        final fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.size.<get-size>|<get-size>(){}[0]
-
-    abstract fun isHigherPriority(kotlin/Short, kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.isHigherPriority|isHigherPriority(kotlin.Short;kotlin.Short){}[0]
-    final fun add(kotlin/Short) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.add|add(kotlin.Short){}[0]
-    final fun addAll(io.github.sooniln.fastcollect/ShortCollection) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.addAll|addAll(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    final fun addAll(kotlin.collections/Collection<kotlin/Short>) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.addAll|addAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    final fun clear() // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.clear|clear(){}[0]
-    final fun contains(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.contains|contains(kotlin.Short){}[0]
-    final fun ensureCapacity(kotlin/Int) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.ensureCapacity|ensureCapacity(kotlin.Int){}[0]
-    final fun first(): kotlin/Short // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.first|first(){}[0]
-    final fun heapify() // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.heapify|heapify(){}[0]
-    final fun isEmpty(): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.isEmpty|isEmpty(){}[0]
-    final fun iterator(): kotlin.collections/ShortIterator // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.iterator|iterator(){}[0]
-    final fun remove(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.remove|remove(kotlin.Short){}[0]
-    final fun removeAll(io.github.sooniln.fastcollect/ShortCollection): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.removeAll|removeAll(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    final fun removeAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.removeAll|removeAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    final fun removeAt(kotlin/Int) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.removeAt|removeAt(kotlin.Int){}[0]
-    final fun removeFirst(): kotlin/Short // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.removeFirst|removeFirst(){}[0]
-    final fun retainAll(io.github.sooniln.fastcollect/ShortCollection): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.retainAll|retainAll(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    final fun retainAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.retainAll|retainAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    final fun trimToSize() // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.trimToSize|trimToSize(){}[0]
-    final fun updatePriority(kotlin/Int) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.updatePriority|updatePriority(kotlin.Int){}[0]
-    open fun onIndexChanged(kotlin/Short, kotlin/Int) // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.onIndexChanged|onIndexChanged(kotlin.Short;kotlin.Int){}[0]
-    open fun toString(): kotlin/String // io.github.sooniln.fastcollect/AbstractShortPriorityQueue.toString|toString(){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/ByteListIterator : kotlin.collections/ByteIterator, kotlin.collections/ListIterator<kotlin/Byte> { // io.github.sooniln.fastcollect/ByteListIterator|null[0]
@@ -2163,21 +1858,6 @@ abstract class io.github.sooniln.fastcollect/MutableLongIterator : kotlin.collec
 
 abstract class io.github.sooniln.fastcollect/MutableLongListIterator : io.github.sooniln.fastcollect/LongListIterator, kotlin.collections/MutableListIterator<kotlin/Long> { // io.github.sooniln.fastcollect/MutableLongListIterator|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/MutableLongListIterator.<init>|<init>(){}[0]
-}
-
-abstract class io.github.sooniln.fastcollect/MutableShortIterator : kotlin.collections/MutableIterator<kotlin/Short>, kotlin.collections/ShortIterator { // io.github.sooniln.fastcollect/MutableShortIterator|null[0]
-    constructor <init>() // io.github.sooniln.fastcollect/MutableShortIterator.<init>|<init>(){}[0]
-}
-
-abstract class io.github.sooniln.fastcollect/MutableShortListIterator : io.github.sooniln.fastcollect/ShortListIterator, kotlin.collections/MutableListIterator<kotlin/Short> { // io.github.sooniln.fastcollect/MutableShortListIterator|null[0]
-    constructor <init>() // io.github.sooniln.fastcollect/MutableShortListIterator.<init>|<init>(){}[0]
-}
-
-abstract class io.github.sooniln.fastcollect/ShortListIterator : kotlin.collections/ListIterator<kotlin/Short>, kotlin.collections/ShortIterator { // io.github.sooniln.fastcollect/ShortListIterator|null[0]
-    constructor <init>() // io.github.sooniln.fastcollect/ShortListIterator.<init>|<init>(){}[0]
-
-    abstract fun previousShort(): kotlin/Short // io.github.sooniln.fastcollect/ShortListIterator.previousShort|previousShort(){}[0]
-    final fun previous(): kotlin/Short // io.github.sooniln.fastcollect/ShortListIterator.previous|previous(){}[0]
 }
 
 final class <#A: kotlin/Any?> io.github.sooniln.fastcollect/Int2AnyHashMap : io.github.sooniln.fastcollect/AbstractMutableInt2AnyMap<#A> { // io.github.sooniln.fastcollect/Int2AnyHashMap|null[0]
@@ -2625,41 +2305,6 @@ final class io.github.sooniln.fastcollect/Int2LongHashMap : io.github.sooniln.fa
     final fun trimToSize() // io.github.sooniln.fastcollect/Int2LongHashMap.trimToSize|trimToSize(){}[0]
 }
 
-final class io.github.sooniln.fastcollect/Int2ShortHashMap : io.github.sooniln.fastcollect/AbstractMutableInt2ShortMap { // io.github.sooniln.fastcollect/Int2ShortHashMap|null[0]
-    constructor <init>(io.github.sooniln.fastcollect/Int2ShortMap) // io.github.sooniln.fastcollect/Int2ShortHashMap.<init>|<init>(io.github.sooniln.fastcollect.Int2ShortMap){}[0]
-    constructor <init>(kotlin.collections/Map<kotlin/Int, kotlin/Short>) // io.github.sooniln.fastcollect/Int2ShortHashMap.<init>|<init>(kotlin.collections.Map<kotlin.Int,kotlin.Short>){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/Short = ...) // io.github.sooniln.fastcollect/Int2ShortHashMap.<init>|<init>(kotlin.Int;kotlin.Short){}[0]
-
-    final val keys // io.github.sooniln.fastcollect/Int2ShortHashMap.keys|{}keys[0]
-        final fun <get-keys>(): io.github.sooniln.fastcollect/MutableIntSet // io.github.sooniln.fastcollect/Int2ShortHashMap.keys.<get-keys>|<get-keys>(){}[0]
-    final val values // io.github.sooniln.fastcollect/Int2ShortHashMap.values|{}values[0]
-        final fun <get-values>(): io.github.sooniln.fastcollect/MutableShortCollection // io.github.sooniln.fastcollect/Int2ShortHashMap.values.<get-values>|<get-values>(){}[0]
-
-    final var size // io.github.sooniln.fastcollect/Int2ShortHashMap.size|{}size[0]
-        final fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/Int2ShortHashMap.size.<get-size>|<get-size>(){}[0]
-
-    final fun clear() // io.github.sooniln.fastcollect/Int2ShortHashMap.clear|clear(){}[0]
-    final fun containsKey(kotlin/Int): kotlin/Boolean // io.github.sooniln.fastcollect/Int2ShortHashMap.containsKey|containsKey(kotlin.Int){}[0]
-    final fun containsValue(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/Int2ShortHashMap.containsValue|containsValue(kotlin.Short){}[0]
-    final fun ensureCapacity(kotlin/Int) // io.github.sooniln.fastcollect/Int2ShortHashMap.ensureCapacity|ensureCapacity(kotlin.Int){}[0]
-    final fun foreach(io.github.sooniln.fastcollect/IntShortConsumer) // io.github.sooniln.fastcollect/Int2ShortHashMap.foreach|foreach(io.github.sooniln.fastcollect.IntShortConsumer){}[0]
-    final fun foreachKey(io.github.sooniln.fastcollect/IntConsumer) // io.github.sooniln.fastcollect/Int2ShortHashMap.foreachKey|foreachKey(io.github.sooniln.fastcollect.IntConsumer){}[0]
-    final fun get(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortHashMap.get|get(kotlin.Int){}[0]
-    final fun getOrDefault(kotlin/Int, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortHashMap.getOrDefault|getOrDefault(kotlin.Int;kotlin.Short){}[0]
-    final fun getValue(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortHashMap.getValue|getValue(kotlin.Int){}[0]
-    final fun isDefaultValue(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/Int2ShortHashMap.isDefaultValue|isDefaultValue(kotlin.Short){}[0]
-    final fun iterator(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableInt2ShortMap.MutableEntry> // io.github.sooniln.fastcollect/Int2ShortHashMap.iterator|iterator(){}[0]
-    final fun put(kotlin/Int, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortHashMap.put|put(kotlin.Int;kotlin.Short){}[0]
-    final fun putAll(io.github.sooniln.fastcollect/Int2ShortMap) // io.github.sooniln.fastcollect/Int2ShortHashMap.putAll|putAll(io.github.sooniln.fastcollect.Int2ShortMap){}[0]
-    final fun putAll(kotlin.collections/Map<out kotlin/Int, kotlin/Short>) // io.github.sooniln.fastcollect/Int2ShortHashMap.putAll|putAll(kotlin.collections.Map<out|kotlin.Int,kotlin.Short>){}[0]
-    final fun putIfAbsent(kotlin/Int, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortHashMap.putIfAbsent|putIfAbsent(kotlin.Int;kotlin.Short){}[0]
-    final fun remove(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortHashMap.remove|remove(kotlin.Int){}[0]
-    final fun removeKey(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortHashMap.removeKey|removeKey(kotlin.Int){}[0]
-    final fun replace(kotlin/Int, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/Int2ShortHashMap.replace|replace(kotlin.Int;kotlin.Short){}[0]
-    final fun set(kotlin/Int, kotlin/Short) // io.github.sooniln.fastcollect/Int2ShortHashMap.set|set(kotlin.Int;kotlin.Short){}[0]
-    final fun trimToSize() // io.github.sooniln.fastcollect/Int2ShortHashMap.trimToSize|trimToSize(){}[0]
-}
-
 final class io.github.sooniln.fastcollect/IntArrayDeque : io.github.sooniln.fastcollect/AbstractMutableIntList, kotlin.collections/RandomAccess { // io.github.sooniln.fastcollect/IntArrayDeque|null[0]
     constructor <init>(io.github.sooniln.fastcollect/IntCollection) // io.github.sooniln.fastcollect/IntArrayDeque.<init>|<init>(io.github.sooniln.fastcollect.IntCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Int>) // io.github.sooniln.fastcollect/IntArrayDeque.<init>|<init>(kotlin.collections.Collection<kotlin.Int>){}[0]
@@ -2901,41 +2546,6 @@ final class io.github.sooniln.fastcollect/Long2LongHashMap : io.github.sooniln.f
     final fun trimToSize() // io.github.sooniln.fastcollect/Long2LongHashMap.trimToSize|trimToSize(){}[0]
 }
 
-final class io.github.sooniln.fastcollect/Long2ShortHashMap : io.github.sooniln.fastcollect/AbstractMutableLong2ShortMap { // io.github.sooniln.fastcollect/Long2ShortHashMap|null[0]
-    constructor <init>(io.github.sooniln.fastcollect/Long2ShortMap) // io.github.sooniln.fastcollect/Long2ShortHashMap.<init>|<init>(io.github.sooniln.fastcollect.Long2ShortMap){}[0]
-    constructor <init>(kotlin.collections/Map<kotlin/Long, kotlin/Short>) // io.github.sooniln.fastcollect/Long2ShortHashMap.<init>|<init>(kotlin.collections.Map<kotlin.Long,kotlin.Short>){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/Short = ...) // io.github.sooniln.fastcollect/Long2ShortHashMap.<init>|<init>(kotlin.Int;kotlin.Short){}[0]
-
-    final val keys // io.github.sooniln.fastcollect/Long2ShortHashMap.keys|{}keys[0]
-        final fun <get-keys>(): io.github.sooniln.fastcollect/MutableLongSet // io.github.sooniln.fastcollect/Long2ShortHashMap.keys.<get-keys>|<get-keys>(){}[0]
-    final val values // io.github.sooniln.fastcollect/Long2ShortHashMap.values|{}values[0]
-        final fun <get-values>(): io.github.sooniln.fastcollect/MutableShortCollection // io.github.sooniln.fastcollect/Long2ShortHashMap.values.<get-values>|<get-values>(){}[0]
-
-    final var size // io.github.sooniln.fastcollect/Long2ShortHashMap.size|{}size[0]
-        final fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/Long2ShortHashMap.size.<get-size>|<get-size>(){}[0]
-
-    final fun clear() // io.github.sooniln.fastcollect/Long2ShortHashMap.clear|clear(){}[0]
-    final fun containsKey(kotlin/Long): kotlin/Boolean // io.github.sooniln.fastcollect/Long2ShortHashMap.containsKey|containsKey(kotlin.Long){}[0]
-    final fun containsValue(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/Long2ShortHashMap.containsValue|containsValue(kotlin.Short){}[0]
-    final fun ensureCapacity(kotlin/Int) // io.github.sooniln.fastcollect/Long2ShortHashMap.ensureCapacity|ensureCapacity(kotlin.Int){}[0]
-    final fun foreach(io.github.sooniln.fastcollect/LongShortConsumer) // io.github.sooniln.fastcollect/Long2ShortHashMap.foreach|foreach(io.github.sooniln.fastcollect.LongShortConsumer){}[0]
-    final fun foreachKey(io.github.sooniln.fastcollect/LongConsumer) // io.github.sooniln.fastcollect/Long2ShortHashMap.foreachKey|foreachKey(io.github.sooniln.fastcollect.LongConsumer){}[0]
-    final fun get(kotlin/Long): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortHashMap.get|get(kotlin.Long){}[0]
-    final fun getOrDefault(kotlin/Long, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortHashMap.getOrDefault|getOrDefault(kotlin.Long;kotlin.Short){}[0]
-    final fun getValue(kotlin/Long): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortHashMap.getValue|getValue(kotlin.Long){}[0]
-    final fun isDefaultValue(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/Long2ShortHashMap.isDefaultValue|isDefaultValue(kotlin.Short){}[0]
-    final fun iterator(): io.github.sooniln.fastcollect/MutableFastIterator<io.github.sooniln.fastcollect/MutableLong2ShortMap.MutableEntry> // io.github.sooniln.fastcollect/Long2ShortHashMap.iterator|iterator(){}[0]
-    final fun put(kotlin/Long, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortHashMap.put|put(kotlin.Long;kotlin.Short){}[0]
-    final fun putAll(io.github.sooniln.fastcollect/Long2ShortMap) // io.github.sooniln.fastcollect/Long2ShortHashMap.putAll|putAll(io.github.sooniln.fastcollect.Long2ShortMap){}[0]
-    final fun putAll(kotlin.collections/Map<out kotlin/Long, kotlin/Short>) // io.github.sooniln.fastcollect/Long2ShortHashMap.putAll|putAll(kotlin.collections.Map<out|kotlin.Long,kotlin.Short>){}[0]
-    final fun putIfAbsent(kotlin/Long, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortHashMap.putIfAbsent|putIfAbsent(kotlin.Long;kotlin.Short){}[0]
-    final fun remove(kotlin/Long): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortHashMap.remove|remove(kotlin.Long){}[0]
-    final fun removeKey(kotlin/Long): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortHashMap.removeKey|removeKey(kotlin.Long){}[0]
-    final fun replace(kotlin/Long, kotlin/Short): kotlin/Short // io.github.sooniln.fastcollect/Long2ShortHashMap.replace|replace(kotlin.Long;kotlin.Short){}[0]
-    final fun set(kotlin/Long, kotlin/Short) // io.github.sooniln.fastcollect/Long2ShortHashMap.set|set(kotlin.Long;kotlin.Short){}[0]
-    final fun trimToSize() // io.github.sooniln.fastcollect/Long2ShortHashMap.trimToSize|trimToSize(){}[0]
-}
-
 final class io.github.sooniln.fastcollect/LongArrayDeque : io.github.sooniln.fastcollect/AbstractMutableLongList, kotlin.collections/RandomAccess { // io.github.sooniln.fastcollect/LongArrayDeque|null[0]
     constructor <init>(io.github.sooniln.fastcollect/LongCollection) // io.github.sooniln.fastcollect/LongArrayDeque.<init>|<init>(io.github.sooniln.fastcollect.LongCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Long>) // io.github.sooniln.fastcollect/LongArrayDeque.<init>|<init>(kotlin.collections.Collection<kotlin.Long>){}[0]
@@ -3002,52 +2612,6 @@ final class io.github.sooniln.fastcollect/LongPriorityQueue : io.github.sooniln.
     constructor <init>(kotlin/LongArray, kotlin/Int = ..., kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/LongPriorityQueue.<init>|<init>(kotlin.LongArray;kotlin.Int;kotlin.Int;kotlin.Boolean){}[0]
 }
 
-final class io.github.sooniln.fastcollect/ShortArrayDeque : io.github.sooniln.fastcollect/AbstractMutableShortList, kotlin.collections/RandomAccess { // io.github.sooniln.fastcollect/ShortArrayDeque|null[0]
-    constructor <init>(io.github.sooniln.fastcollect/ShortCollection) // io.github.sooniln.fastcollect/ShortArrayDeque.<init>|<init>(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    constructor <init>(kotlin.collections/Collection<kotlin/Short>) // io.github.sooniln.fastcollect/ShortArrayDeque.<init>|<init>(kotlin.collections.Collection<kotlin.Short>){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/ShortArrayDeque.<init>|<init>(kotlin.Int){}[0]
-    constructor <init>(kotlin/ShortArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/ShortArrayDeque.<init>|<init>(kotlin.ShortArray;kotlin.Int;kotlin.Int){}[0]
-
-    final var size // io.github.sooniln.fastcollect/ShortArrayDeque.size|{}size[0]
-        final fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/ShortArrayDeque.size.<get-size>|<get-size>(){}[0]
-
-    final fun add(kotlin/Int, kotlin/Short) // io.github.sooniln.fastcollect/ShortArrayDeque.add|add(kotlin.Int;kotlin.Short){}[0]
-    final fun addAll(io.github.sooniln.fastcollect/ShortArrayDeque): kotlin/Boolean // io.github.sooniln.fastcollect/ShortArrayDeque.addAll|addAll(io.github.sooniln.fastcollect.ShortArrayDeque){}[0]
-    final fun addAll(io.github.sooniln.fastcollect/ShortCollection): kotlin/Boolean // io.github.sooniln.fastcollect/ShortArrayDeque.addAll|addAll(io.github.sooniln.fastcollect.ShortCollection){}[0]
-    final fun addAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/ShortArrayDeque.addAll|addAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    final fun addFirst(kotlin/Short) // io.github.sooniln.fastcollect/ShortArrayDeque.addFirst|addFirst(kotlin.Short){}[0]
-    final fun addLast(kotlin/Short) // io.github.sooniln.fastcollect/ShortArrayDeque.addLast|addLast(kotlin.Short){}[0]
-    final fun clear() // io.github.sooniln.fastcollect/ShortArrayDeque.clear|clear(){}[0]
-    final fun ensureCapacity(kotlin/Int) // io.github.sooniln.fastcollect/ShortArrayDeque.ensureCapacity|ensureCapacity(kotlin.Int){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/ShortArrayDeque.equals|equals(kotlin.Any?){}[0]
-    final fun fill(kotlin/Short) // io.github.sooniln.fastcollect/ShortArrayDeque.fill|fill(kotlin.Short){}[0]
-    final fun foreach(io.github.sooniln.fastcollect/ShortConsumer) // io.github.sooniln.fastcollect/ShortArrayDeque.foreach|foreach(io.github.sooniln.fastcollect.ShortConsumer){}[0]
-    final fun get(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/ShortArrayDeque.get|get(kotlin.Int){}[0]
-    final fun hashCode(): kotlin/Int // io.github.sooniln.fastcollect/ShortArrayDeque.hashCode|hashCode(){}[0]
-    final fun indexOf(kotlin/Short): kotlin/Int // io.github.sooniln.fastcollect/ShortArrayDeque.indexOf|indexOf(kotlin.Short){}[0]
-    final fun iterator(): io.github.sooniln.fastcollect/MutableShortIterator // io.github.sooniln.fastcollect/ShortArrayDeque.iterator|iterator(){}[0]
-    final fun lastIndexOf(kotlin/Short): kotlin/Int // io.github.sooniln.fastcollect/ShortArrayDeque.lastIndexOf|lastIndexOf(kotlin.Short){}[0]
-    final fun removeAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/ShortArrayDeque.removeAll|removeAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    final fun removeAt(kotlin/Int): kotlin/Short // io.github.sooniln.fastcollect/ShortArrayDeque.removeAt|removeAt(kotlin.Int){}[0]
-    final fun removeFirst(): kotlin/Short // io.github.sooniln.fastcollect/ShortArrayDeque.removeFirst|removeFirst(){}[0]
-    final fun removeLast(): kotlin/Short // io.github.sooniln.fastcollect/ShortArrayDeque.removeLast|removeLast(){}[0]
-    final fun removeRange(kotlin/Int, kotlin/Int) // io.github.sooniln.fastcollect/ShortArrayDeque.removeRange|removeRange(kotlin.Int;kotlin.Int){}[0]
-    final fun retainAll(kotlin.collections/Collection<kotlin/Short>): kotlin/Boolean // io.github.sooniln.fastcollect/ShortArrayDeque.retainAll|retainAll(kotlin.collections.Collection<kotlin.Short>){}[0]
-    final fun reverse() // io.github.sooniln.fastcollect/ShortArrayDeque.reverse|reverse(){}[0]
-    final fun set(kotlin/Int, kotlin/Short) // io.github.sooniln.fastcollect/ShortArrayDeque.set|set(kotlin.Int;kotlin.Short){}[0]
-    final fun sort() // io.github.sooniln.fastcollect/ShortArrayDeque.sort|sort(){}[0]
-    final fun sortDescending() // io.github.sooniln.fastcollect/ShortArrayDeque.sortDescending|sortDescending(){}[0]
-    final fun toShortArray(): kotlin/ShortArray // io.github.sooniln.fastcollect/ShortArrayDeque.toShortArray|toShortArray(){}[0]
-    final fun trimToSize() // io.github.sooniln.fastcollect/ShortArrayDeque.trimToSize|trimToSize(){}[0]
-}
-
-final class io.github.sooniln.fastcollect/ShortPriorityQueue : io.github.sooniln.fastcollect/AbstractShortPriorityQueue { // io.github.sooniln.fastcollect/ShortPriorityQueue|null[0]
-    constructor <init>(io.github.sooniln.fastcollect/ShortCollection, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/ShortPriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.ShortCollection;kotlin.Boolean){}[0]
-    constructor <init>(kotlin.collections/Collection<kotlin/Short>, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/ShortPriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Short>;kotlin.Boolean){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/ShortPriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
-    constructor <init>(kotlin/ShortArray, kotlin/Int = ..., kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/ShortPriorityQueue.<init>|<init>(kotlin.ShortArray;kotlin.Int;kotlin.Int;kotlin.Boolean){}[0]
-}
-
 final value class io.github.sooniln.fastcollect/InlineDoubleCollection : io.github.sooniln.fastcollect/MutableDoubleCollection { // io.github.sooniln.fastcollect/InlineDoubleCollection|null[0]
     constructor <init>(io.github.sooniln.fastcollect/MutableLongCollection) // io.github.sooniln.fastcollect/InlineDoubleCollection.<init>|<init>(io.github.sooniln.fastcollect.MutableLongCollection){}[0]
 
@@ -3094,8 +2658,6 @@ final val io.github.sooniln.fastcollect/lastIndex // io.github.sooniln.fastcolle
     final inline fun (io.github.sooniln.fastcollect/IntList).<get-lastIndex>(): kotlin/Int // io.github.sooniln.fastcollect/lastIndex.<get-lastIndex>|<get-lastIndex>@io.github.sooniln.fastcollect.IntList(){}[0]
 final val io.github.sooniln.fastcollect/lastIndex // io.github.sooniln.fastcollect/lastIndex|@io.github.sooniln.fastcollect.LongList{}lastIndex[0]
     final inline fun (io.github.sooniln.fastcollect/LongList).<get-lastIndex>(): kotlin/Int // io.github.sooniln.fastcollect/lastIndex.<get-lastIndex>|<get-lastIndex>@io.github.sooniln.fastcollect.LongList(){}[0]
-final val io.github.sooniln.fastcollect/lastIndex // io.github.sooniln.fastcollect/lastIndex|@io.github.sooniln.fastcollect.ShortList{}lastIndex[0]
-    final inline fun (io.github.sooniln.fastcollect/ShortList).<get-lastIndex>(): kotlin/Int // io.github.sooniln.fastcollect/lastIndex.<get-lastIndex>|<get-lastIndex>@io.github.sooniln.fastcollect.ShortList(){}[0]
 
 final fun (io.github.sooniln.fastcollect/AbstractBytePriorityQueue).io.github.sooniln.fastcollect/removeAll(io.github.sooniln.fastcollect/BytePredicate): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.AbstractBytePriorityQueue(io.github.sooniln.fastcollect.BytePredicate){}[0]
 final fun (io.github.sooniln.fastcollect/AbstractBytePriorityQueue).io.github.sooniln.fastcollect/retainAll(io.github.sooniln.fastcollect/BytePredicate): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.AbstractBytePriorityQueue(io.github.sooniln.fastcollect.BytePredicate){}[0]
@@ -3107,8 +2669,6 @@ final fun (io.github.sooniln.fastcollect/AbstractIntPriorityQueue).io.github.soo
 final fun (io.github.sooniln.fastcollect/AbstractIntPriorityQueue).io.github.sooniln.fastcollect/retainAll(io.github.sooniln.fastcollect/IntPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.AbstractIntPriorityQueue(io.github.sooniln.fastcollect.IntPredicate){}[0]
 final fun (io.github.sooniln.fastcollect/AbstractLongPriorityQueue).io.github.sooniln.fastcollect/removeAll(io.github.sooniln.fastcollect/LongPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.AbstractLongPriorityQueue(io.github.sooniln.fastcollect.LongPredicate){}[0]
 final fun (io.github.sooniln.fastcollect/AbstractLongPriorityQueue).io.github.sooniln.fastcollect/retainAll(io.github.sooniln.fastcollect/LongPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.AbstractLongPriorityQueue(io.github.sooniln.fastcollect.LongPredicate){}[0]
-final fun (io.github.sooniln.fastcollect/AbstractShortPriorityQueue).io.github.sooniln.fastcollect/removeAll(io.github.sooniln.fastcollect/ShortPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.AbstractShortPriorityQueue(io.github.sooniln.fastcollect.ShortPredicate){}[0]
-final fun (io.github.sooniln.fastcollect/AbstractShortPriorityQueue).io.github.sooniln.fastcollect/retainAll(io.github.sooniln.fastcollect/ShortPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.AbstractShortPriorityQueue(io.github.sooniln.fastcollect.ShortPredicate){}[0]
 final fun (io.github.sooniln.fastcollect/ByteArrayDeque).io.github.sooniln.fastcollect/removeAll(io.github.sooniln.fastcollect/BytePredicate): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.ByteArrayDeque(io.github.sooniln.fastcollect.BytePredicate){}[0]
 final fun (io.github.sooniln.fastcollect/ByteArrayDeque).io.github.sooniln.fastcollect/retainAll(io.github.sooniln.fastcollect/BytePredicate): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.ByteArrayDeque(io.github.sooniln.fastcollect.BytePredicate){}[0]
 final fun (io.github.sooniln.fastcollect/ByteList).io.github.sooniln.fastcollect/asList(): kotlin.collections/List<kotlin/Byte> // io.github.sooniln.fastcollect/asList|asList@io.github.sooniln.fastcollect.ByteList(){}[0]
@@ -3146,7 +2706,6 @@ final fun (io.github.sooniln.fastcollect/Int2DoubleMap).io.github.sooniln.fastco
 final fun (io.github.sooniln.fastcollect/Int2FloatMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Int, kotlin/Float> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Int2FloatMap(){}[0]
 final fun (io.github.sooniln.fastcollect/Int2IntMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Int, kotlin/Int> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Int2IntMap(){}[0]
 final fun (io.github.sooniln.fastcollect/Int2LongMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Int, kotlin/Long> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Int2LongMap(){}[0]
-final fun (io.github.sooniln.fastcollect/Int2ShortMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Int, kotlin/Short> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Int2ShortMap(){}[0]
 final fun (io.github.sooniln.fastcollect/IntArrayDeque).io.github.sooniln.fastcollect/removeAll(io.github.sooniln.fastcollect/IntPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.IntArrayDeque(io.github.sooniln.fastcollect.IntPredicate){}[0]
 final fun (io.github.sooniln.fastcollect/IntArrayDeque).io.github.sooniln.fastcollect/retainAll(io.github.sooniln.fastcollect/IntPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.IntArrayDeque(io.github.sooniln.fastcollect.IntPredicate){}[0]
 final fun (io.github.sooniln.fastcollect/IntList).io.github.sooniln.fastcollect/asList(): kotlin.collections/List<kotlin/Int> // io.github.sooniln.fastcollect/asList|asList@io.github.sooniln.fastcollect.IntList(){}[0]
@@ -3164,7 +2723,6 @@ final fun (io.github.sooniln.fastcollect/Long2DoubleMap).io.github.sooniln.fastc
 final fun (io.github.sooniln.fastcollect/Long2FloatMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Long, kotlin/Float> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Long2FloatMap(){}[0]
 final fun (io.github.sooniln.fastcollect/Long2IntMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Long, kotlin/Int> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Long2IntMap(){}[0]
 final fun (io.github.sooniln.fastcollect/Long2LongMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Long, kotlin/Long> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Long2LongMap(){}[0]
-final fun (io.github.sooniln.fastcollect/Long2ShortMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Long, kotlin/Short> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Long2ShortMap(){}[0]
 final fun (io.github.sooniln.fastcollect/LongArrayDeque).io.github.sooniln.fastcollect/removeAll(io.github.sooniln.fastcollect/LongPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.LongArrayDeque(io.github.sooniln.fastcollect.LongPredicate){}[0]
 final fun (io.github.sooniln.fastcollect/LongArrayDeque).io.github.sooniln.fastcollect/retainAll(io.github.sooniln.fastcollect/LongPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.LongArrayDeque(io.github.sooniln.fastcollect.LongPredicate){}[0]
 final fun (io.github.sooniln.fastcollect/LongList).io.github.sooniln.fastcollect/asList(): kotlin.collections/List<kotlin/Long> // io.github.sooniln.fastcollect/asList|asList@io.github.sooniln.fastcollect.LongList(){}[0]
@@ -3187,7 +2745,6 @@ final fun (io.github.sooniln.fastcollect/MutableInt2DoubleMap).io.github.sooniln
 final fun (io.github.sooniln.fastcollect/MutableInt2FloatMap).io.github.sooniln.fastcollect/asMutableMap(): kotlin.collections/MutableMap<kotlin/Int, kotlin/Float> // io.github.sooniln.fastcollect/asMutableMap|asMutableMap@io.github.sooniln.fastcollect.MutableInt2FloatMap(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableInt2IntMap).io.github.sooniln.fastcollect/asMutableMap(): kotlin.collections/MutableMap<kotlin/Int, kotlin/Int> // io.github.sooniln.fastcollect/asMutableMap|asMutableMap@io.github.sooniln.fastcollect.MutableInt2IntMap(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableInt2LongMap).io.github.sooniln.fastcollect/asMutableMap(): kotlin.collections/MutableMap<kotlin/Int, kotlin/Long> // io.github.sooniln.fastcollect/asMutableMap|asMutableMap@io.github.sooniln.fastcollect.MutableInt2LongMap(){}[0]
-final fun (io.github.sooniln.fastcollect/MutableInt2ShortMap).io.github.sooniln.fastcollect/asMutableMap(): kotlin.collections/MutableMap<kotlin/Int, kotlin/Short> // io.github.sooniln.fastcollect/asMutableMap|asMutableMap@io.github.sooniln.fastcollect.MutableInt2ShortMap(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableIntList).io.github.sooniln.fastcollect/asMutableList(): kotlin.collections/MutableList<kotlin/Int> // io.github.sooniln.fastcollect/asMutableList|asMutableList@io.github.sooniln.fastcollect.MutableIntList(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableIntSet).io.github.sooniln.fastcollect/asMutableSet(): kotlin.collections/MutableSet<kotlin/Int> // io.github.sooniln.fastcollect/asMutableSet|asMutableSet@io.github.sooniln.fastcollect.MutableIntSet(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableLong2ByteMap).io.github.sooniln.fastcollect/asMutableMap(): kotlin.collections/MutableMap<kotlin/Long, kotlin/Byte> // io.github.sooniln.fastcollect/asMutableMap|asMutableMap@io.github.sooniln.fastcollect.MutableLong2ByteMap(){}[0]
@@ -3195,18 +2752,8 @@ final fun (io.github.sooniln.fastcollect/MutableLong2DoubleMap).io.github.soonil
 final fun (io.github.sooniln.fastcollect/MutableLong2FloatMap).io.github.sooniln.fastcollect/asMutableMap(): kotlin.collections/MutableMap<kotlin/Long, kotlin/Float> // io.github.sooniln.fastcollect/asMutableMap|asMutableMap@io.github.sooniln.fastcollect.MutableLong2FloatMap(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableLong2IntMap).io.github.sooniln.fastcollect/asMutableMap(): kotlin.collections/MutableMap<kotlin/Long, kotlin/Int> // io.github.sooniln.fastcollect/asMutableMap|asMutableMap@io.github.sooniln.fastcollect.MutableLong2IntMap(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableLong2LongMap).io.github.sooniln.fastcollect/asMutableMap(): kotlin.collections/MutableMap<kotlin/Long, kotlin/Long> // io.github.sooniln.fastcollect/asMutableMap|asMutableMap@io.github.sooniln.fastcollect.MutableLong2LongMap(){}[0]
-final fun (io.github.sooniln.fastcollect/MutableLong2ShortMap).io.github.sooniln.fastcollect/asMutableMap(): kotlin.collections/MutableMap<kotlin/Long, kotlin/Short> // io.github.sooniln.fastcollect/asMutableMap|asMutableMap@io.github.sooniln.fastcollect.MutableLong2ShortMap(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableLongList).io.github.sooniln.fastcollect/asMutableList(): kotlin.collections/MutableList<kotlin/Long> // io.github.sooniln.fastcollect/asMutableList|asMutableList@io.github.sooniln.fastcollect.MutableLongList(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableLongSet).io.github.sooniln.fastcollect/asMutableSet(): kotlin.collections/MutableSet<kotlin/Long> // io.github.sooniln.fastcollect/asMutableSet|asMutableSet@io.github.sooniln.fastcollect.MutableLongSet(){}[0]
-final fun (io.github.sooniln.fastcollect/MutableShortList).io.github.sooniln.fastcollect/asMutableList(): kotlin.collections/MutableList<kotlin/Short> // io.github.sooniln.fastcollect/asMutableList|asMutableList@io.github.sooniln.fastcollect.MutableShortList(){}[0]
-final fun (io.github.sooniln.fastcollect/ShortArrayDeque).io.github.sooniln.fastcollect/removeAll(io.github.sooniln.fastcollect/ShortPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.ShortArrayDeque(io.github.sooniln.fastcollect.ShortPredicate){}[0]
-final fun (io.github.sooniln.fastcollect/ShortArrayDeque).io.github.sooniln.fastcollect/retainAll(io.github.sooniln.fastcollect/ShortPredicate): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.ShortArrayDeque(io.github.sooniln.fastcollect.ShortPredicate){}[0]
-final fun (io.github.sooniln.fastcollect/ShortList).io.github.sooniln.fastcollect/asList(): kotlin.collections/List<kotlin/Short> // io.github.sooniln.fastcollect/asList|asList@io.github.sooniln.fastcollect.ShortList(){}[0]
-final fun (io.github.sooniln.fastcollect/ShortList).io.github.sooniln.fastcollect/first(): kotlin/Short // io.github.sooniln.fastcollect/first|first@io.github.sooniln.fastcollect.ShortList(){}[0]
-final fun (io.github.sooniln.fastcollect/ShortList).io.github.sooniln.fastcollect/last(): kotlin/Short // io.github.sooniln.fastcollect/last|last@io.github.sooniln.fastcollect.ShortList(){}[0]
-final fun (io.github.sooniln.fastcollect/ShortList).io.github.sooniln.fastcollect/rangeCheck(kotlin/Int, kotlin/Int = ...): kotlin/Int // io.github.sooniln.fastcollect/rangeCheck|rangeCheck@io.github.sooniln.fastcollect.ShortList(kotlin.Int;kotlin.Int){}[0]
-final fun (io.github.sooniln.fastcollect/ShortList).io.github.sooniln.fastcollect/rangeCheck(kotlin/Int, kotlin/Int, kotlin/Int = ...) // io.github.sooniln.fastcollect/rangeCheck|rangeCheck@io.github.sooniln.fastcollect.ShortList(kotlin.Int;kotlin.Int;kotlin.Int){}[0]
-final fun (io.github.sooniln.fastcollect/ShortList).io.github.sooniln.fastcollect/rangeCheckInclusive(kotlin/Int): kotlin/Int // io.github.sooniln.fastcollect/rangeCheckInclusive|rangeCheckInclusive@io.github.sooniln.fastcollect.ShortList(kotlin.Int){}[0]
 final fun (kotlin/Any?).io.github.sooniln.fastcollect/equalsBoxed(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/equalsBoxed|equalsBoxed@kotlin.Any?(kotlin.Any?){}[0]
 final fun (kotlin/BooleanArray).io.github.sooniln.fastcollect/sort(kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/sort|sort@kotlin.BooleanArray(kotlin.Int;kotlin.Int){}[0]
 final fun (kotlin/BooleanArray).io.github.sooniln.fastcollect/sortDescending(kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/sortDescending|sortDescending@kotlin.BooleanArray(kotlin.Int;kotlin.Int){}[0]
@@ -3223,7 +2770,6 @@ final fun (kotlin/IntArray).io.github.sooniln.fastcollect/asIntList(): io.github
 final fun (kotlin/Long).io.github.sooniln.fastcollect/equalsBoxed(kotlin/Long): kotlin/Boolean // io.github.sooniln.fastcollect/equalsBoxed|equalsBoxed@kotlin.Long(kotlin.Long){}[0]
 final fun (kotlin/LongArray).io.github.sooniln.fastcollect/asLongList(): io.github.sooniln.fastcollect/LongList // io.github.sooniln.fastcollect/asLongList|asLongList@kotlin.LongArray(){}[0]
 final fun (kotlin/Short).io.github.sooniln.fastcollect/equalsBoxed(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/equalsBoxed|equalsBoxed@kotlin.Short(kotlin.Short){}[0]
-final fun (kotlin/ShortArray).io.github.sooniln.fastcollect/asShortList(): io.github.sooniln.fastcollect/ShortList // io.github.sooniln.fastcollect/asShortList|asShortList@kotlin.ShortArray(){}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Int2AnyMap<#A>).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Int, #A> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Int2AnyMap<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Long2AnyMap<#A>).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Long, #A> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Long2AnyMap<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/MutableInt2AnyMap<#A>).io.github.sooniln.fastcollect/asMutableMap(): kotlin.collections/MutableMap<kotlin/Int, #A> // io.github.sooniln.fastcollect/asMutableMap|asMutableMap@io.github.sooniln.fastcollect.MutableInt2AnyMap<0:0>(){0§<kotlin.Any?>}[0]
@@ -3269,7 +2815,6 @@ final fun io.github.sooniln.fastcollect/emptyInt2DoubleMap(): io.github.sooniln.
 final fun io.github.sooniln.fastcollect/emptyInt2FloatMap(): io.github.sooniln.fastcollect/Int2FloatMap // io.github.sooniln.fastcollect/emptyInt2FloatMap|emptyInt2FloatMap(){}[0]
 final fun io.github.sooniln.fastcollect/emptyInt2IntMap(): io.github.sooniln.fastcollect/Int2IntMap // io.github.sooniln.fastcollect/emptyInt2IntMap|emptyInt2IntMap(){}[0]
 final fun io.github.sooniln.fastcollect/emptyInt2LongMap(): io.github.sooniln.fastcollect/Int2LongMap // io.github.sooniln.fastcollect/emptyInt2LongMap|emptyInt2LongMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyInt2ShortMap(): io.github.sooniln.fastcollect/Int2ShortMap // io.github.sooniln.fastcollect/emptyInt2ShortMap|emptyInt2ShortMap(){}[0]
 final fun io.github.sooniln.fastcollect/emptyIntIterator(): io.github.sooniln.fastcollect/IntListIterator // io.github.sooniln.fastcollect/emptyIntIterator|emptyIntIterator(){}[0]
 final fun io.github.sooniln.fastcollect/emptyIntList(): io.github.sooniln.fastcollect/IntList // io.github.sooniln.fastcollect/emptyIntList|emptyIntList(){}[0]
 final fun io.github.sooniln.fastcollect/emptyIntSet(): io.github.sooniln.fastcollect/IntSet // io.github.sooniln.fastcollect/emptyIntSet|emptyIntSet(){}[0]
@@ -3278,7 +2823,6 @@ final fun io.github.sooniln.fastcollect/emptyLong2DoubleMap(): io.github.sooniln
 final fun io.github.sooniln.fastcollect/emptyLong2FloatMap(): io.github.sooniln.fastcollect/Long2FloatMap // io.github.sooniln.fastcollect/emptyLong2FloatMap|emptyLong2FloatMap(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLong2IntMap(): io.github.sooniln.fastcollect/Long2IntMap // io.github.sooniln.fastcollect/emptyLong2IntMap|emptyLong2IntMap(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLong2LongMap(): io.github.sooniln.fastcollect/Long2LongMap // io.github.sooniln.fastcollect/emptyLong2LongMap|emptyLong2LongMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyLong2ShortMap(): io.github.sooniln.fastcollect/Long2ShortMap // io.github.sooniln.fastcollect/emptyLong2ShortMap|emptyLong2ShortMap(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLongIterator(): io.github.sooniln.fastcollect/LongListIterator // io.github.sooniln.fastcollect/emptyLongIterator|emptyLongIterator(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLongList(): io.github.sooniln.fastcollect/LongList // io.github.sooniln.fastcollect/emptyLongList|emptyLongList(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLongSet(): io.github.sooniln.fastcollect/LongSet // io.github.sooniln.fastcollect/emptyLongSet|emptyLongSet(){}[0]
@@ -3287,9 +2831,6 @@ final fun io.github.sooniln.fastcollect/emptyMutableDoubleIterator(): io.github.
 final fun io.github.sooniln.fastcollect/emptyMutableFloatIterator(): io.github.sooniln.fastcollect/MutableFloatIterator // io.github.sooniln.fastcollect/emptyMutableFloatIterator|emptyMutableFloatIterator(){}[0]
 final fun io.github.sooniln.fastcollect/emptyMutableIntIterator(): io.github.sooniln.fastcollect/MutableIntIterator // io.github.sooniln.fastcollect/emptyMutableIntIterator|emptyMutableIntIterator(){}[0]
 final fun io.github.sooniln.fastcollect/emptyMutableLongIterator(): io.github.sooniln.fastcollect/MutableLongIterator // io.github.sooniln.fastcollect/emptyMutableLongIterator|emptyMutableLongIterator(){}[0]
-final fun io.github.sooniln.fastcollect/emptyMutableShortIterator(): io.github.sooniln.fastcollect/MutableShortIterator // io.github.sooniln.fastcollect/emptyMutableShortIterator|emptyMutableShortIterator(){}[0]
-final fun io.github.sooniln.fastcollect/emptyShortIterator(): io.github.sooniln.fastcollect/ShortListIterator // io.github.sooniln.fastcollect/emptyShortIterator|emptyShortIterator(){}[0]
-final fun io.github.sooniln.fastcollect/emptyShortList(): io.github.sooniln.fastcollect/ShortList // io.github.sooniln.fastcollect/emptyShortList|emptyShortList(){}[0]
 final fun io.github.sooniln.fastcollect/floatIteratorOf(kotlin/Float): io.github.sooniln.fastcollect/FloatListIterator // io.github.sooniln.fastcollect/floatIteratorOf|floatIteratorOf(kotlin.Float){}[0]
 final fun io.github.sooniln.fastcollect/floatListOf(): io.github.sooniln.fastcollect/FloatList // io.github.sooniln.fastcollect/floatListOf|floatListOf(){}[0]
 final fun io.github.sooniln.fastcollect/floatListOf(kotlin/Float): io.github.sooniln.fastcollect/FloatList // io.github.sooniln.fastcollect/floatListOf|floatListOf(kotlin.Float){}[0]
@@ -3313,9 +2854,6 @@ final fun io.github.sooniln.fastcollect/int2IntMapOf(kotlin/Pair<kotlin/Int, kot
 final fun io.github.sooniln.fastcollect/int2LongMapOf(): io.github.sooniln.fastcollect/Int2LongMap // io.github.sooniln.fastcollect/int2LongMapOf|int2LongMapOf(){}[0]
 final fun io.github.sooniln.fastcollect/int2LongMapOf(kotlin/Array<out kotlin/Pair<kotlin/Int, kotlin/Long>>...): io.github.sooniln.fastcollect/Int2LongMap // io.github.sooniln.fastcollect/int2LongMapOf|int2LongMapOf(kotlin.Array<out|kotlin.Pair<kotlin.Int,kotlin.Long>>...){}[0]
 final fun io.github.sooniln.fastcollect/int2LongMapOf(kotlin/Pair<kotlin/Int, kotlin/Long>): io.github.sooniln.fastcollect/Int2LongMap // io.github.sooniln.fastcollect/int2LongMapOf|int2LongMapOf(kotlin.Pair<kotlin.Int,kotlin.Long>){}[0]
-final fun io.github.sooniln.fastcollect/int2ShortMapOf(): io.github.sooniln.fastcollect/Int2ShortMap // io.github.sooniln.fastcollect/int2ShortMapOf|int2ShortMapOf(){}[0]
-final fun io.github.sooniln.fastcollect/int2ShortMapOf(kotlin/Array<out kotlin/Pair<kotlin/Int, kotlin/Short>>...): io.github.sooniln.fastcollect/Int2ShortMap // io.github.sooniln.fastcollect/int2ShortMapOf|int2ShortMapOf(kotlin.Array<out|kotlin.Pair<kotlin.Int,kotlin.Short>>...){}[0]
-final fun io.github.sooniln.fastcollect/int2ShortMapOf(kotlin/Pair<kotlin/Int, kotlin/Short>): io.github.sooniln.fastcollect/Int2ShortMap // io.github.sooniln.fastcollect/int2ShortMapOf|int2ShortMapOf(kotlin.Pair<kotlin.Int,kotlin.Short>){}[0]
 final fun io.github.sooniln.fastcollect/intIteratorOf(kotlin/Int): io.github.sooniln.fastcollect/IntListIterator // io.github.sooniln.fastcollect/intIteratorOf|intIteratorOf(kotlin.Int){}[0]
 final fun io.github.sooniln.fastcollect/intListOf(): io.github.sooniln.fastcollect/IntList // io.github.sooniln.fastcollect/intListOf|intListOf(){}[0]
 final fun io.github.sooniln.fastcollect/intListOf(kotlin/Int): io.github.sooniln.fastcollect/IntList // io.github.sooniln.fastcollect/intListOf|intListOf(kotlin.Int){}[0]
@@ -3339,9 +2877,6 @@ final fun io.github.sooniln.fastcollect/long2IntMapOf(kotlin/Pair<kotlin/Long, k
 final fun io.github.sooniln.fastcollect/long2LongMapOf(): io.github.sooniln.fastcollect/Long2LongMap // io.github.sooniln.fastcollect/long2LongMapOf|long2LongMapOf(){}[0]
 final fun io.github.sooniln.fastcollect/long2LongMapOf(kotlin/Array<out kotlin/Pair<kotlin/Long, kotlin/Long>>...): io.github.sooniln.fastcollect/Long2LongMap // io.github.sooniln.fastcollect/long2LongMapOf|long2LongMapOf(kotlin.Array<out|kotlin.Pair<kotlin.Long,kotlin.Long>>...){}[0]
 final fun io.github.sooniln.fastcollect/long2LongMapOf(kotlin/Pair<kotlin/Long, kotlin/Long>): io.github.sooniln.fastcollect/Long2LongMap // io.github.sooniln.fastcollect/long2LongMapOf|long2LongMapOf(kotlin.Pair<kotlin.Long,kotlin.Long>){}[0]
-final fun io.github.sooniln.fastcollect/long2ShortMapOf(): io.github.sooniln.fastcollect/Long2ShortMap // io.github.sooniln.fastcollect/long2ShortMapOf|long2ShortMapOf(){}[0]
-final fun io.github.sooniln.fastcollect/long2ShortMapOf(kotlin/Array<out kotlin/Pair<kotlin/Long, kotlin/Short>>...): io.github.sooniln.fastcollect/Long2ShortMap // io.github.sooniln.fastcollect/long2ShortMapOf|long2ShortMapOf(kotlin.Array<out|kotlin.Pair<kotlin.Long,kotlin.Short>>...){}[0]
-final fun io.github.sooniln.fastcollect/long2ShortMapOf(kotlin/Pair<kotlin/Long, kotlin/Short>): io.github.sooniln.fastcollect/Long2ShortMap // io.github.sooniln.fastcollect/long2ShortMapOf|long2ShortMapOf(kotlin.Pair<kotlin.Long,kotlin.Short>){}[0]
 final fun io.github.sooniln.fastcollect/longIteratorOf(kotlin/Long): io.github.sooniln.fastcollect/LongListIterator // io.github.sooniln.fastcollect/longIteratorOf|longIteratorOf(kotlin.Long){}[0]
 final fun io.github.sooniln.fastcollect/longListOf(): io.github.sooniln.fastcollect/LongList // io.github.sooniln.fastcollect/longListOf|longListOf(){}[0]
 final fun io.github.sooniln.fastcollect/longListOf(kotlin/Long): io.github.sooniln.fastcollect/LongList // io.github.sooniln.fastcollect/longListOf|longListOf(kotlin.Long){}[0]
@@ -3380,9 +2915,6 @@ final fun io.github.sooniln.fastcollect/mutableInt2IntMapOf(kotlin/Pair<kotlin/I
 final fun io.github.sooniln.fastcollect/mutableInt2LongMapOf(): io.github.sooniln.fastcollect/MutableInt2LongMap // io.github.sooniln.fastcollect/mutableInt2LongMapOf|mutableInt2LongMapOf(){}[0]
 final fun io.github.sooniln.fastcollect/mutableInt2LongMapOf(kotlin/Array<out kotlin/Pair<kotlin/Int, kotlin/Long>>...): io.github.sooniln.fastcollect/MutableInt2LongMap // io.github.sooniln.fastcollect/mutableInt2LongMapOf|mutableInt2LongMapOf(kotlin.Array<out|kotlin.Pair<kotlin.Int,kotlin.Long>>...){}[0]
 final fun io.github.sooniln.fastcollect/mutableInt2LongMapOf(kotlin/Pair<kotlin/Int, kotlin/Long>): io.github.sooniln.fastcollect/MutableInt2LongMap // io.github.sooniln.fastcollect/mutableInt2LongMapOf|mutableInt2LongMapOf(kotlin.Pair<kotlin.Int,kotlin.Long>){}[0]
-final fun io.github.sooniln.fastcollect/mutableInt2ShortMapOf(): io.github.sooniln.fastcollect/MutableInt2ShortMap // io.github.sooniln.fastcollect/mutableInt2ShortMapOf|mutableInt2ShortMapOf(){}[0]
-final fun io.github.sooniln.fastcollect/mutableInt2ShortMapOf(kotlin/Array<out kotlin/Pair<kotlin/Int, kotlin/Short>>...): io.github.sooniln.fastcollect/MutableInt2ShortMap // io.github.sooniln.fastcollect/mutableInt2ShortMapOf|mutableInt2ShortMapOf(kotlin.Array<out|kotlin.Pair<kotlin.Int,kotlin.Short>>...){}[0]
-final fun io.github.sooniln.fastcollect/mutableInt2ShortMapOf(kotlin/Pair<kotlin/Int, kotlin/Short>): io.github.sooniln.fastcollect/MutableInt2ShortMap // io.github.sooniln.fastcollect/mutableInt2ShortMapOf|mutableInt2ShortMapOf(kotlin.Pair<kotlin.Int,kotlin.Short>){}[0]
 final fun io.github.sooniln.fastcollect/mutableIntListOf(): io.github.sooniln.fastcollect/MutableIntList // io.github.sooniln.fastcollect/mutableIntListOf|mutableIntListOf(){}[0]
 final fun io.github.sooniln.fastcollect/mutableIntListOf(kotlin/Int): io.github.sooniln.fastcollect/MutableIntList // io.github.sooniln.fastcollect/mutableIntListOf|mutableIntListOf(kotlin.Int){}[0]
 final fun io.github.sooniln.fastcollect/mutableIntListOf(kotlin/IntArray...): io.github.sooniln.fastcollect/MutableIntList // io.github.sooniln.fastcollect/mutableIntListOf|mutableIntListOf(kotlin.IntArray...){}[0]
@@ -3404,23 +2936,12 @@ final fun io.github.sooniln.fastcollect/mutableLong2IntMapOf(kotlin/Pair<kotlin/
 final fun io.github.sooniln.fastcollect/mutableLong2LongMapOf(): io.github.sooniln.fastcollect/MutableLong2LongMap // io.github.sooniln.fastcollect/mutableLong2LongMapOf|mutableLong2LongMapOf(){}[0]
 final fun io.github.sooniln.fastcollect/mutableLong2LongMapOf(kotlin/Array<out kotlin/Pair<kotlin/Long, kotlin/Long>>...): io.github.sooniln.fastcollect/MutableLong2LongMap // io.github.sooniln.fastcollect/mutableLong2LongMapOf|mutableLong2LongMapOf(kotlin.Array<out|kotlin.Pair<kotlin.Long,kotlin.Long>>...){}[0]
 final fun io.github.sooniln.fastcollect/mutableLong2LongMapOf(kotlin/Pair<kotlin/Long, kotlin/Long>): io.github.sooniln.fastcollect/MutableLong2LongMap // io.github.sooniln.fastcollect/mutableLong2LongMapOf|mutableLong2LongMapOf(kotlin.Pair<kotlin.Long,kotlin.Long>){}[0]
-final fun io.github.sooniln.fastcollect/mutableLong2ShortMapOf(): io.github.sooniln.fastcollect/MutableLong2ShortMap // io.github.sooniln.fastcollect/mutableLong2ShortMapOf|mutableLong2ShortMapOf(){}[0]
-final fun io.github.sooniln.fastcollect/mutableLong2ShortMapOf(kotlin/Array<out kotlin/Pair<kotlin/Long, kotlin/Short>>...): io.github.sooniln.fastcollect/MutableLong2ShortMap // io.github.sooniln.fastcollect/mutableLong2ShortMapOf|mutableLong2ShortMapOf(kotlin.Array<out|kotlin.Pair<kotlin.Long,kotlin.Short>>...){}[0]
-final fun io.github.sooniln.fastcollect/mutableLong2ShortMapOf(kotlin/Pair<kotlin/Long, kotlin/Short>): io.github.sooniln.fastcollect/MutableLong2ShortMap // io.github.sooniln.fastcollect/mutableLong2ShortMapOf|mutableLong2ShortMapOf(kotlin.Pair<kotlin.Long,kotlin.Short>){}[0]
 final fun io.github.sooniln.fastcollect/mutableLongListOf(): io.github.sooniln.fastcollect/MutableLongList // io.github.sooniln.fastcollect/mutableLongListOf|mutableLongListOf(){}[0]
 final fun io.github.sooniln.fastcollect/mutableLongListOf(kotlin/Long): io.github.sooniln.fastcollect/MutableLongList // io.github.sooniln.fastcollect/mutableLongListOf|mutableLongListOf(kotlin.Long){}[0]
 final fun io.github.sooniln.fastcollect/mutableLongListOf(kotlin/LongArray...): io.github.sooniln.fastcollect/MutableLongList // io.github.sooniln.fastcollect/mutableLongListOf|mutableLongListOf(kotlin.LongArray...){}[0]
 final fun io.github.sooniln.fastcollect/mutableLongSetOf(): io.github.sooniln.fastcollect/MutableLongSet // io.github.sooniln.fastcollect/mutableLongSetOf|mutableLongSetOf(){}[0]
 final fun io.github.sooniln.fastcollect/mutableLongSetOf(kotlin/Long): io.github.sooniln.fastcollect/MutableLongSet // io.github.sooniln.fastcollect/mutableLongSetOf|mutableLongSetOf(kotlin.Long){}[0]
 final fun io.github.sooniln.fastcollect/mutableLongSetOf(kotlin/LongArray...): io.github.sooniln.fastcollect/MutableLongSet // io.github.sooniln.fastcollect/mutableLongSetOf|mutableLongSetOf(kotlin.LongArray...){}[0]
-final fun io.github.sooniln.fastcollect/mutableShortListOf(): io.github.sooniln.fastcollect/MutableShortList // io.github.sooniln.fastcollect/mutableShortListOf|mutableShortListOf(){}[0]
-final fun io.github.sooniln.fastcollect/mutableShortListOf(kotlin/Short): io.github.sooniln.fastcollect/MutableShortList // io.github.sooniln.fastcollect/mutableShortListOf|mutableShortListOf(kotlin.Short){}[0]
-final fun io.github.sooniln.fastcollect/mutableShortListOf(kotlin/ShortArray...): io.github.sooniln.fastcollect/MutableShortList // io.github.sooniln.fastcollect/mutableShortListOf|mutableShortListOf(kotlin.ShortArray...){}[0]
-final fun io.github.sooniln.fastcollect/shortIteratorOf(kotlin/Short): io.github.sooniln.fastcollect/ShortListIterator // io.github.sooniln.fastcollect/shortIteratorOf|shortIteratorOf(kotlin.Short){}[0]
-final fun io.github.sooniln.fastcollect/shortListOf(): io.github.sooniln.fastcollect/ShortList // io.github.sooniln.fastcollect/shortListOf|shortListOf(){}[0]
-final fun io.github.sooniln.fastcollect/shortListOf(kotlin/Short): io.github.sooniln.fastcollect/ShortList // io.github.sooniln.fastcollect/shortListOf|shortListOf(kotlin.Short){}[0]
-final fun io.github.sooniln.fastcollect/shortListOf(kotlin/ShortArray...): io.github.sooniln.fastcollect/ShortList // io.github.sooniln.fastcollect/shortListOf|shortListOf(kotlin.ShortArray...){}[0]
-final fun io.github.sooniln.fastcollect/shortPriorityQueueOf(kotlin/ShortArray..., kotlin/Boolean = ...): io.github.sooniln.fastcollect/ShortPriorityQueue // io.github.sooniln.fastcollect/shortPriorityQueueOf|shortPriorityQueueOf(kotlin.ShortArray...;kotlin.Boolean){}[0]
 final inline fun (io.github.sooniln.fastcollect/ByteCollection).io.github.sooniln.fastcollect/all(kotlin/Function1<kotlin/Byte, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/all|all@io.github.sooniln.fastcollect.ByteCollection(kotlin.Function1<kotlin.Byte,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/ByteCollection).io.github.sooniln.fastcollect/any(kotlin/Function1<kotlin/Byte, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/any|any@io.github.sooniln.fastcollect.ByteCollection(kotlin.Function1<kotlin.Byte,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/ByteCollection).io.github.sooniln.fastcollect/none(kotlin/Function1<kotlin/Byte, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/none|none@io.github.sooniln.fastcollect.ByteCollection(kotlin.Function1<kotlin.Byte,kotlin.Boolean>){}[0]
@@ -3450,7 +2971,6 @@ final inline fun (io.github.sooniln.fastcollect/Int2DoubleMap).io.github.sooniln
 final inline fun (io.github.sooniln.fastcollect/Int2FloatMap).io.github.sooniln.fastcollect/getOrElse(kotlin/Int, kotlin/Function0<kotlin/Float>): kotlin/Float // io.github.sooniln.fastcollect/getOrElse|getOrElse@io.github.sooniln.fastcollect.Int2FloatMap(kotlin.Int;kotlin.Function0<kotlin.Float>){}[0]
 final inline fun (io.github.sooniln.fastcollect/Int2IntMap).io.github.sooniln.fastcollect/getOrElse(kotlin/Int, kotlin/Function0<kotlin/Int>): kotlin/Int // io.github.sooniln.fastcollect/getOrElse|getOrElse@io.github.sooniln.fastcollect.Int2IntMap(kotlin.Int;kotlin.Function0<kotlin.Int>){}[0]
 final inline fun (io.github.sooniln.fastcollect/Int2LongMap).io.github.sooniln.fastcollect/getOrElse(kotlin/Int, kotlin/Function0<kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/getOrElse|getOrElse@io.github.sooniln.fastcollect.Int2LongMap(kotlin.Int;kotlin.Function0<kotlin.Long>){}[0]
-final inline fun (io.github.sooniln.fastcollect/Int2ShortMap).io.github.sooniln.fastcollect/getOrElse(kotlin/Int, kotlin/Function0<kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/getOrElse|getOrElse@io.github.sooniln.fastcollect.Int2ShortMap(kotlin.Int;kotlin.Function0<kotlin.Short>){}[0]
 final inline fun (io.github.sooniln.fastcollect/IntCollection).io.github.sooniln.fastcollect/all(kotlin/Function1<kotlin/Int, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/all|all@io.github.sooniln.fastcollect.IntCollection(kotlin.Function1<kotlin.Int,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/IntCollection).io.github.sooniln.fastcollect/any(kotlin/Function1<kotlin/Int, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/any|any@io.github.sooniln.fastcollect.IntCollection(kotlin.Function1<kotlin.Int,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/IntCollection).io.github.sooniln.fastcollect/none(kotlin/Function1<kotlin/Int, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/none|none@io.github.sooniln.fastcollect.IntCollection(kotlin.Function1<kotlin.Int,kotlin.Boolean>){}[0]
@@ -3464,7 +2984,6 @@ final inline fun (io.github.sooniln.fastcollect/Long2DoubleMap).io.github.soonil
 final inline fun (io.github.sooniln.fastcollect/Long2FloatMap).io.github.sooniln.fastcollect/getOrElse(kotlin/Long, kotlin/Function0<kotlin/Float>): kotlin/Float // io.github.sooniln.fastcollect/getOrElse|getOrElse@io.github.sooniln.fastcollect.Long2FloatMap(kotlin.Long;kotlin.Function0<kotlin.Float>){}[0]
 final inline fun (io.github.sooniln.fastcollect/Long2IntMap).io.github.sooniln.fastcollect/getOrElse(kotlin/Long, kotlin/Function0<kotlin/Int>): kotlin/Int // io.github.sooniln.fastcollect/getOrElse|getOrElse@io.github.sooniln.fastcollect.Long2IntMap(kotlin.Long;kotlin.Function0<kotlin.Int>){}[0]
 final inline fun (io.github.sooniln.fastcollect/Long2LongMap).io.github.sooniln.fastcollect/getOrElse(kotlin/Long, kotlin/Function0<kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/getOrElse|getOrElse@io.github.sooniln.fastcollect.Long2LongMap(kotlin.Long;kotlin.Function0<kotlin.Long>){}[0]
-final inline fun (io.github.sooniln.fastcollect/Long2ShortMap).io.github.sooniln.fastcollect/getOrElse(kotlin/Long, kotlin/Function0<kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/getOrElse|getOrElse@io.github.sooniln.fastcollect.Long2ShortMap(kotlin.Long;kotlin.Function0<kotlin.Short>){}[0]
 final inline fun (io.github.sooniln.fastcollect/LongCollection).io.github.sooniln.fastcollect/all(kotlin/Function1<kotlin/Long, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/all|all@io.github.sooniln.fastcollect.LongCollection(kotlin.Function1<kotlin.Long,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/LongCollection).io.github.sooniln.fastcollect/any(kotlin/Function1<kotlin/Long, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/any|any@io.github.sooniln.fastcollect.LongCollection(kotlin.Function1<kotlin.Long,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/LongCollection).io.github.sooniln.fastcollect/none(kotlin/Function1<kotlin/Long, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/none|none@io.github.sooniln.fastcollect.LongCollection(kotlin.Function1<kotlin.Long,kotlin.Boolean>){}[0]
@@ -3499,10 +3018,6 @@ final inline fun (io.github.sooniln.fastcollect/MutableInt2LongMap).io.github.so
 final inline fun (io.github.sooniln.fastcollect/MutableInt2LongMap).io.github.sooniln.fastcollect/merge(kotlin/Int, kotlin/Long, kotlin/Function2<kotlin/Long, kotlin/Long, kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/merge|merge@io.github.sooniln.fastcollect.MutableInt2LongMap(kotlin.Int;kotlin.Long;kotlin.Function2<kotlin.Long,kotlin.Long,kotlin.Long>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableInt2LongMap).io.github.sooniln.fastcollect/removeOrElse(kotlin/Int, kotlin/Function0<kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/removeOrElse|removeOrElse@io.github.sooniln.fastcollect.MutableInt2LongMap(kotlin.Int;kotlin.Function0<kotlin.Long>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableInt2LongMap).io.github.sooniln.fastcollect/replaceOrSet(kotlin/Int, kotlin/Long, kotlin/Function0<kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/replaceOrSet|replaceOrSet@io.github.sooniln.fastcollect.MutableInt2LongMap(kotlin.Int;kotlin.Long;kotlin.Function0<kotlin.Long>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableInt2ShortMap).io.github.sooniln.fastcollect/getOrPut(kotlin/Int, kotlin/Function0<kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/getOrPut|getOrPut@io.github.sooniln.fastcollect.MutableInt2ShortMap(kotlin.Int;kotlin.Function0<kotlin.Short>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableInt2ShortMap).io.github.sooniln.fastcollect/merge(kotlin/Int, kotlin/Short, kotlin/Function2<kotlin/Short, kotlin/Short, kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/merge|merge@io.github.sooniln.fastcollect.MutableInt2ShortMap(kotlin.Int;kotlin.Short;kotlin.Function2<kotlin.Short,kotlin.Short,kotlin.Short>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableInt2ShortMap).io.github.sooniln.fastcollect/removeOrElse(kotlin/Int, kotlin/Function0<kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/removeOrElse|removeOrElse@io.github.sooniln.fastcollect.MutableInt2ShortMap(kotlin.Int;kotlin.Function0<kotlin.Short>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableInt2ShortMap).io.github.sooniln.fastcollect/replaceOrSet(kotlin/Int, kotlin/Short, kotlin/Function0<kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/replaceOrSet|replaceOrSet@io.github.sooniln.fastcollect.MutableInt2ShortMap(kotlin.Int;kotlin.Short;kotlin.Function0<kotlin.Short>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableIntCollection).io.github.sooniln.fastcollect/removeAll(kotlin/Function1<kotlin/Int, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.MutableIntCollection(kotlin.Function1<kotlin.Int,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableIntCollection).io.github.sooniln.fastcollect/retainAll(kotlin/Function1<kotlin/Int, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.MutableIntCollection(kotlin.Function1<kotlin.Int,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableLong2ByteMap).io.github.sooniln.fastcollect/getOrPut(kotlin/Long, kotlin/Function0<kotlin/Byte>): kotlin/Byte // io.github.sooniln.fastcollect/getOrPut|getOrPut@io.github.sooniln.fastcollect.MutableLong2ByteMap(kotlin.Long;kotlin.Function0<kotlin.Byte>){}[0]
@@ -3525,22 +3040,8 @@ final inline fun (io.github.sooniln.fastcollect/MutableLong2LongMap).io.github.s
 final inline fun (io.github.sooniln.fastcollect/MutableLong2LongMap).io.github.sooniln.fastcollect/merge(kotlin/Long, kotlin/Long, kotlin/Function2<kotlin/Long, kotlin/Long, kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/merge|merge@io.github.sooniln.fastcollect.MutableLong2LongMap(kotlin.Long;kotlin.Long;kotlin.Function2<kotlin.Long,kotlin.Long,kotlin.Long>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableLong2LongMap).io.github.sooniln.fastcollect/removeOrElse(kotlin/Long, kotlin/Function0<kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/removeOrElse|removeOrElse@io.github.sooniln.fastcollect.MutableLong2LongMap(kotlin.Long;kotlin.Function0<kotlin.Long>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableLong2LongMap).io.github.sooniln.fastcollect/replaceOrSet(kotlin/Long, kotlin/Long, kotlin/Function0<kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/replaceOrSet|replaceOrSet@io.github.sooniln.fastcollect.MutableLong2LongMap(kotlin.Long;kotlin.Long;kotlin.Function0<kotlin.Long>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableLong2ShortMap).io.github.sooniln.fastcollect/getOrPut(kotlin/Long, kotlin/Function0<kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/getOrPut|getOrPut@io.github.sooniln.fastcollect.MutableLong2ShortMap(kotlin.Long;kotlin.Function0<kotlin.Short>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableLong2ShortMap).io.github.sooniln.fastcollect/merge(kotlin/Long, kotlin/Short, kotlin/Function2<kotlin/Short, kotlin/Short, kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/merge|merge@io.github.sooniln.fastcollect.MutableLong2ShortMap(kotlin.Long;kotlin.Short;kotlin.Function2<kotlin.Short,kotlin.Short,kotlin.Short>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableLong2ShortMap).io.github.sooniln.fastcollect/removeOrElse(kotlin/Long, kotlin/Function0<kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/removeOrElse|removeOrElse@io.github.sooniln.fastcollect.MutableLong2ShortMap(kotlin.Long;kotlin.Function0<kotlin.Short>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableLong2ShortMap).io.github.sooniln.fastcollect/replaceOrSet(kotlin/Long, kotlin/Short, kotlin/Function0<kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/replaceOrSet|replaceOrSet@io.github.sooniln.fastcollect.MutableLong2ShortMap(kotlin.Long;kotlin.Short;kotlin.Function0<kotlin.Short>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableLongCollection).io.github.sooniln.fastcollect/removeAll(kotlin/Function1<kotlin/Long, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.MutableLongCollection(kotlin.Function1<kotlin.Long,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableLongCollection).io.github.sooniln.fastcollect/retainAll(kotlin/Function1<kotlin/Long, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.MutableLongCollection(kotlin.Function1<kotlin.Long,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableShortCollection).io.github.sooniln.fastcollect/removeAll(kotlin/Function1<kotlin/Short, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.MutableShortCollection(kotlin.Function1<kotlin.Short,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableShortCollection).io.github.sooniln.fastcollect/retainAll(kotlin/Function1<kotlin/Short, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.MutableShortCollection(kotlin.Function1<kotlin.Short,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/ShortCollection).io.github.sooniln.fastcollect/all(kotlin/Function1<kotlin/Short, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/all|all@io.github.sooniln.fastcollect.ShortCollection(kotlin.Function1<kotlin.Short,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/ShortCollection).io.github.sooniln.fastcollect/any(kotlin/Function1<kotlin/Short, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/any|any@io.github.sooniln.fastcollect.ShortCollection(kotlin.Function1<kotlin.Short,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/ShortCollection).io.github.sooniln.fastcollect/none(kotlin/Function1<kotlin/Short, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/none|none@io.github.sooniln.fastcollect.ShortCollection(kotlin.Function1<kotlin.Short,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/ShortCollection).io.github.sooniln.fastcollect/reduce(kotlin/Function2<kotlin/Short, kotlin/Short, kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/reduce|reduce@io.github.sooniln.fastcollect.ShortCollection(kotlin.Function2<kotlin.Short,kotlin.Short,kotlin.Short>){}[0]
-final inline fun (io.github.sooniln.fastcollect/ShortCollection).io.github.sooniln.fastcollect/sumOf(kotlin/Function1<kotlin/Short, kotlin/Double>): kotlin/Double // io.github.sooniln.fastcollect/sumOf|sumOf@io.github.sooniln.fastcollect.ShortCollection(kotlin.Function1<kotlin.Short,kotlin.Double>){}[0]
-final inline fun (io.github.sooniln.fastcollect/ShortCollection).io.github.sooniln.fastcollect/sumOf(kotlin/Function1<kotlin/Short, kotlin/Int>): kotlin/Int // io.github.sooniln.fastcollect/sumOf|sumOf@io.github.sooniln.fastcollect.ShortCollection(kotlin.Function1<kotlin.Short,kotlin.Int>){}[0]
-final inline fun (io.github.sooniln.fastcollect/ShortCollection).io.github.sooniln.fastcollect/sumOf(kotlin/Function1<kotlin/Short, kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/sumOf|sumOf@io.github.sooniln.fastcollect.ShortCollection(kotlin.Function1<kotlin.Short,kotlin.Long>){}[0]
-final inline fun (io.github.sooniln.fastcollect/ShortList).io.github.sooniln.fastcollect/reduceRight(kotlin/Function2<kotlin/Short, kotlin/Short, kotlin/Short>): kotlin/Short // io.github.sooniln.fastcollect/reduceRight|reduceRight@io.github.sooniln.fastcollect.ShortList(kotlin.Function2<kotlin.Short,kotlin.Short,kotlin.Short>){}[0]
 final inline fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/ByteCollection).io.github.sooniln.fastcollect/fold(#A, kotlin/Function2<#A, kotlin/Byte, #A>): #A // io.github.sooniln.fastcollect/fold|fold@io.github.sooniln.fastcollect.ByteCollection(0:0;kotlin.Function2<0:0,kotlin.Byte,0:0>){0§<kotlin.Any?>}[0]
 final inline fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/ByteList).io.github.sooniln.fastcollect/foldRight(#A, kotlin/Function2<kotlin/Byte, #A, #A>): #A // io.github.sooniln.fastcollect/foldRight|foldRight@io.github.sooniln.fastcollect.ByteList(0:0;kotlin.Function2<kotlin.Byte,0:0,0:0>){0§<kotlin.Any?>}[0]
 final inline fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/DoubleCollection).io.github.sooniln.fastcollect/fold(#A, kotlin/Function2<#A, kotlin/Double, #A>): #A // io.github.sooniln.fastcollect/fold|fold@io.github.sooniln.fastcollect.DoubleCollection(0:0;kotlin.Function2<0:0,kotlin.Double,0:0>){0§<kotlin.Any?>}[0]
@@ -3561,22 +3062,23 @@ final inline fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/MutableLong2An
 final inline fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/MutableLong2AnyMap<#A>).io.github.sooniln.fastcollect/merge(kotlin/Long, #A, kotlin/Function2<#A, #A, #A>): #A // io.github.sooniln.fastcollect/merge|merge@io.github.sooniln.fastcollect.MutableLong2AnyMap<0:0>(kotlin.Long;0:0;kotlin.Function2<0:0,0:0,0:0>){0§<kotlin.Any?>}[0]
 final inline fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/MutableLong2AnyMap<#A>).io.github.sooniln.fastcollect/removeOrElse(kotlin/Long, kotlin/Function0<#A>): #A // io.github.sooniln.fastcollect/removeOrElse|removeOrElse@io.github.sooniln.fastcollect.MutableLong2AnyMap<0:0>(kotlin.Long;kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]
 final inline fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/MutableLong2AnyMap<#A>).io.github.sooniln.fastcollect/replaceOrSet(kotlin/Long, #A, kotlin/Function0<#A>): #A // io.github.sooniln.fastcollect/replaceOrSet|replaceOrSet@io.github.sooniln.fastcollect.MutableLong2AnyMap<0:0>(kotlin.Long;0:0;kotlin.Function0<0:0>){0§<kotlin.Any?>}[0]
-final inline fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/ShortCollection).io.github.sooniln.fastcollect/fold(#A, kotlin/Function2<#A, kotlin/Short, #A>): #A // io.github.sooniln.fastcollect/fold|fold@io.github.sooniln.fastcollect.ShortCollection(0:0;kotlin.Function2<0:0,kotlin.Short,0:0>){0§<kotlin.Any?>}[0]
-final inline fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/ShortList).io.github.sooniln.fastcollect/foldRight(#A, kotlin/Function2<kotlin/Short, #A, #A>): #A // io.github.sooniln.fastcollect/foldRight|foldRight@io.github.sooniln.fastcollect.ShortList(0:0;kotlin.Function2<kotlin.Short,0:0,0:0>){0§<kotlin.Any?>}[0]
 final inline fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/buildInt2AnyMap(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableInt2AnyMap<#A>, kotlin/Unit>): io.github.sooniln.fastcollect/Int2AnyMap<#A> // io.github.sooniln.fastcollect/buildInt2AnyMap|buildInt2AnyMap(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableInt2AnyMap<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
 final inline fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/buildLong2AnyMap(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableLong2AnyMap<#A>, kotlin/Unit>): io.github.sooniln.fastcollect/Long2AnyMap<#A> // io.github.sooniln.fastcollect/buildLong2AnyMap|buildLong2AnyMap(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableLong2AnyMap<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
 final inline fun io.github.sooniln.fastcollect/ByteList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Byte>): io.github.sooniln.fastcollect/ByteList // io.github.sooniln.fastcollect/ByteList|ByteList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Byte>){}[0]
+final inline fun io.github.sooniln.fastcollect/BytePriorityQueue(kotlin/Int = ..., crossinline kotlin/Function2<kotlin/Byte, kotlin/Byte, kotlin/Boolean>): io.github.sooniln.fastcollect/AbstractBytePriorityQueue // io.github.sooniln.fastcollect/BytePriorityQueue|BytePriorityQueue(kotlin.Int;kotlin.Function2<kotlin.Byte,kotlin.Byte,kotlin.Boolean>){}[0]
 final inline fun io.github.sooniln.fastcollect/DoubleList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Double>): io.github.sooniln.fastcollect/DoubleList // io.github.sooniln.fastcollect/DoubleList|DoubleList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Double>){}[0]
+final inline fun io.github.sooniln.fastcollect/DoublePriorityQueue(kotlin/Int = ..., crossinline kotlin/Function2<kotlin/Double, kotlin/Double, kotlin/Boolean>): io.github.sooniln.fastcollect/AbstractDoublePriorityQueue // io.github.sooniln.fastcollect/DoublePriorityQueue|DoublePriorityQueue(kotlin.Int;kotlin.Function2<kotlin.Double,kotlin.Double,kotlin.Boolean>){}[0]
 final inline fun io.github.sooniln.fastcollect/FloatList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Float>): io.github.sooniln.fastcollect/FloatList // io.github.sooniln.fastcollect/FloatList|FloatList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Float>){}[0]
+final inline fun io.github.sooniln.fastcollect/FloatPriorityQueue(kotlin/Int = ..., crossinline kotlin/Function2<kotlin/Float, kotlin/Float, kotlin/Boolean>): io.github.sooniln.fastcollect/AbstractFloatPriorityQueue // io.github.sooniln.fastcollect/FloatPriorityQueue|FloatPriorityQueue(kotlin.Int;kotlin.Function2<kotlin.Float,kotlin.Float,kotlin.Boolean>){}[0]
 final inline fun io.github.sooniln.fastcollect/IntList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Int>): io.github.sooniln.fastcollect/IntList // io.github.sooniln.fastcollect/IntList|IntList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Int>){}[0]
+final inline fun io.github.sooniln.fastcollect/IntPriorityQueue(kotlin/Int = ..., crossinline kotlin/Function2<kotlin/Int, kotlin/Int, kotlin/Boolean>): io.github.sooniln.fastcollect/AbstractIntPriorityQueue // io.github.sooniln.fastcollect/IntPriorityQueue|IntPriorityQueue(kotlin.Int;kotlin.Function2<kotlin.Int,kotlin.Int,kotlin.Boolean>){}[0]
 final inline fun io.github.sooniln.fastcollect/LongList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Long>): io.github.sooniln.fastcollect/LongList // io.github.sooniln.fastcollect/LongList|LongList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Long>){}[0]
+final inline fun io.github.sooniln.fastcollect/LongPriorityQueue(kotlin/Int = ..., crossinline kotlin/Function2<kotlin/Long, kotlin/Long, kotlin/Boolean>): io.github.sooniln.fastcollect/AbstractLongPriorityQueue // io.github.sooniln.fastcollect/LongPriorityQueue|LongPriorityQueue(kotlin.Int;kotlin.Function2<kotlin.Long,kotlin.Long,kotlin.Boolean>){}[0]
 final inline fun io.github.sooniln.fastcollect/MutableByteList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Byte>): io.github.sooniln.fastcollect/MutableByteList // io.github.sooniln.fastcollect/MutableByteList|MutableByteList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Byte>){}[0]
 final inline fun io.github.sooniln.fastcollect/MutableDoubleList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Double>): io.github.sooniln.fastcollect/MutableDoubleList // io.github.sooniln.fastcollect/MutableDoubleList|MutableDoubleList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Double>){}[0]
 final inline fun io.github.sooniln.fastcollect/MutableFloatList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Float>): io.github.sooniln.fastcollect/MutableFloatList // io.github.sooniln.fastcollect/MutableFloatList|MutableFloatList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Float>){}[0]
 final inline fun io.github.sooniln.fastcollect/MutableIntList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Int>): io.github.sooniln.fastcollect/MutableIntList // io.github.sooniln.fastcollect/MutableIntList|MutableIntList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Int>){}[0]
 final inline fun io.github.sooniln.fastcollect/MutableLongList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Long>): io.github.sooniln.fastcollect/MutableLongList // io.github.sooniln.fastcollect/MutableLongList|MutableLongList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Long>){}[0]
-final inline fun io.github.sooniln.fastcollect/MutableShortList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Short>): io.github.sooniln.fastcollect/MutableShortList // io.github.sooniln.fastcollect/MutableShortList|MutableShortList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Short>){}[0]
-final inline fun io.github.sooniln.fastcollect/ShortList(kotlin/Int, kotlin/Function1<kotlin/Int, kotlin/Short>): io.github.sooniln.fastcollect/ShortList // io.github.sooniln.fastcollect/ShortList|ShortList(kotlin.Int;kotlin.Function1<kotlin.Int,kotlin.Short>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildByteList(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableByteList, kotlin/Unit>): io.github.sooniln.fastcollect/ByteList // io.github.sooniln.fastcollect/buildByteList|buildByteList(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableByteList,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildBytePriorityQueue(kotlin/Int = ..., kotlin/Boolean = ..., kotlin/Function1<io.github.sooniln.fastcollect/BytePriorityQueue, kotlin/Unit>): io.github.sooniln.fastcollect/BytePriorityQueue // io.github.sooniln.fastcollect/buildBytePriorityQueue|buildBytePriorityQueue(kotlin.Int;kotlin.Boolean;kotlin.Function1<io.github.sooniln.fastcollect.BytePriorityQueue,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildDoubleList(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableDoubleList, kotlin/Unit>): io.github.sooniln.fastcollect/DoubleList // io.github.sooniln.fastcollect/buildDoubleList|buildDoubleList(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableDoubleList,kotlin.Unit>){}[0]
@@ -3590,7 +3092,6 @@ final inline fun io.github.sooniln.fastcollect/buildInt2DoubleMap(kotlin/Int = .
 final inline fun io.github.sooniln.fastcollect/buildInt2FloatMap(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableInt2FloatMap, kotlin/Unit>): io.github.sooniln.fastcollect/Int2FloatMap // io.github.sooniln.fastcollect/buildInt2FloatMap|buildInt2FloatMap(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableInt2FloatMap,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildInt2IntMap(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableInt2IntMap, kotlin/Unit>): io.github.sooniln.fastcollect/Int2IntMap // io.github.sooniln.fastcollect/buildInt2IntMap|buildInt2IntMap(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableInt2IntMap,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildInt2LongMap(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableInt2LongMap, kotlin/Unit>): io.github.sooniln.fastcollect/Int2LongMap // io.github.sooniln.fastcollect/buildInt2LongMap|buildInt2LongMap(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableInt2LongMap,kotlin.Unit>){}[0]
-final inline fun io.github.sooniln.fastcollect/buildInt2ShortMap(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableInt2ShortMap, kotlin/Unit>): io.github.sooniln.fastcollect/Int2ShortMap // io.github.sooniln.fastcollect/buildInt2ShortMap|buildInt2ShortMap(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableInt2ShortMap,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildIntList(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableIntList, kotlin/Unit>): io.github.sooniln.fastcollect/IntList // io.github.sooniln.fastcollect/buildIntList|buildIntList(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableIntList,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildIntPriorityQueue(kotlin/Int = ..., kotlin/Boolean = ..., kotlin/Function1<io.github.sooniln.fastcollect/IntPriorityQueue, kotlin/Unit>): io.github.sooniln.fastcollect/IntPriorityQueue // io.github.sooniln.fastcollect/buildIntPriorityQueue|buildIntPriorityQueue(kotlin.Int;kotlin.Boolean;kotlin.Function1<io.github.sooniln.fastcollect.IntPriorityQueue,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildIntSet(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableIntSet, kotlin/Unit>): io.github.sooniln.fastcollect/IntSet // io.github.sooniln.fastcollect/buildIntSet|buildIntSet(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableIntSet,kotlin.Unit>){}[0]
@@ -3599,9 +3100,6 @@ final inline fun io.github.sooniln.fastcollect/buildLong2DoubleMap(kotlin/Int = 
 final inline fun io.github.sooniln.fastcollect/buildLong2FloatMap(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableLong2FloatMap, kotlin/Unit>): io.github.sooniln.fastcollect/Long2FloatMap // io.github.sooniln.fastcollect/buildLong2FloatMap|buildLong2FloatMap(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableLong2FloatMap,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildLong2IntMap(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableLong2IntMap, kotlin/Unit>): io.github.sooniln.fastcollect/Long2IntMap // io.github.sooniln.fastcollect/buildLong2IntMap|buildLong2IntMap(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableLong2IntMap,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildLong2LongMap(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableLong2LongMap, kotlin/Unit>): io.github.sooniln.fastcollect/Long2LongMap // io.github.sooniln.fastcollect/buildLong2LongMap|buildLong2LongMap(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableLong2LongMap,kotlin.Unit>){}[0]
-final inline fun io.github.sooniln.fastcollect/buildLong2ShortMap(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableLong2ShortMap, kotlin/Unit>): io.github.sooniln.fastcollect/Long2ShortMap // io.github.sooniln.fastcollect/buildLong2ShortMap|buildLong2ShortMap(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableLong2ShortMap,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildLongList(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableLongList, kotlin/Unit>): io.github.sooniln.fastcollect/LongList // io.github.sooniln.fastcollect/buildLongList|buildLongList(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableLongList,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildLongPriorityQueue(kotlin/Int = ..., kotlin/Boolean = ..., kotlin/Function1<io.github.sooniln.fastcollect/LongPriorityQueue, kotlin/Unit>): io.github.sooniln.fastcollect/LongPriorityQueue // io.github.sooniln.fastcollect/buildLongPriorityQueue|buildLongPriorityQueue(kotlin.Int;kotlin.Boolean;kotlin.Function1<io.github.sooniln.fastcollect.LongPriorityQueue,kotlin.Unit>){}[0]
 final inline fun io.github.sooniln.fastcollect/buildLongSet(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableLongSet, kotlin/Unit>): io.github.sooniln.fastcollect/LongSet // io.github.sooniln.fastcollect/buildLongSet|buildLongSet(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableLongSet,kotlin.Unit>){}[0]
-final inline fun io.github.sooniln.fastcollect/buildShortList(kotlin/Int = ..., kotlin/Function1<io.github.sooniln.fastcollect/MutableShortList, kotlin/Unit>): io.github.sooniln.fastcollect/ShortList // io.github.sooniln.fastcollect/buildShortList|buildShortList(kotlin.Int;kotlin.Function1<io.github.sooniln.fastcollect.MutableShortList,kotlin.Unit>){}[0]
-final inline fun io.github.sooniln.fastcollect/buildShortPriorityQueue(kotlin/Int = ..., kotlin/Boolean = ..., kotlin/Function1<io.github.sooniln.fastcollect/ShortPriorityQueue, kotlin/Unit>): io.github.sooniln.fastcollect/ShortPriorityQueue // io.github.sooniln.fastcollect/buildShortPriorityQueue|buildShortPriorityQueue(kotlin.Int;kotlin.Boolean;kotlin.Function1<io.github.sooniln.fastcollect.ShortPriorityQueue,kotlin.Unit>){}[0]

@@ -332,6 +332,8 @@ public inline fun FloatPriorityQueue(
     crossinline isHigherPriority: (Float, Float) -> Boolean,
 ): AbstractFloatPriorityQueue {
     return object : AbstractFloatPriorityQueue(initialCapacity) {
-        override fun isHigherPriority(element1: Float, element2: Float): Boolean = isHigherPriority(element1, element2)
+        override fun isHigherPriority(element1: Float, element2: Float): Boolean {
+            return isHigherPriority(element1, element2)
+        }
     }
 }

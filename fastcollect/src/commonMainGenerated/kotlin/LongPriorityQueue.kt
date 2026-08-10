@@ -332,6 +332,8 @@ public inline fun LongPriorityQueue(
     crossinline isHigherPriority: (Long, Long) -> Boolean,
 ): AbstractLongPriorityQueue {
     return object : AbstractLongPriorityQueue(initialCapacity) {
-        override fun isHigherPriority(element1: Long, element2: Long): Boolean = isHigherPriority(element1, element2)
+        override fun isHigherPriority(element1: Long, element2: Long): Boolean {
+            return isHigherPriority(element1, element2)
+        }
     }
 }

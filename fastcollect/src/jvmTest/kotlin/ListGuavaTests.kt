@@ -50,38 +50,6 @@ class ByteListGuavaTest {
     }
 }
 
-// ============================= Short =============================
-
-private abstract class TestShortListGenerator : TestListGenerator<Short> {
-    override fun samples(): SampleElements<Short> =
-        SampleElements(1.toShort(), 2.toShort(), 3.toShort(), 4.toShort(), 5.toShort())
-
-    override fun create(vararg elements: Any): List<Short> =
-        createList(elements.map { it as Short }.toShortArray())
-
-    protected abstract fun createList(elements: ShortArray): List<Short>
-
-    @Suppress("UNCHECKED_CAST")
-    override fun createArray(length: Int): Array<Short> = arrayOfNulls<Short>(length) as Array<Short>
-
-    override fun order(insertionOrder: MutableList<Short>): Iterable<Short> = insertionOrder
-}
-
-@RunWith(AllTests::class)
-class ShortListGuavaTest {
-    companion object {
-        @JvmStatic
-        fun suite(): TestSuite = ListTestSuiteBuilder
-            .using(object : TestShortListGenerator() {
-                override fun createList(elements: ShortArray): MutableList<Short> =
-                    mutableShortListOf(*elements).asMutableList()
-            })
-            .named("ShortList")
-            .withFeatures(*LIST_FEATURES)
-            .createTestSuite()
-    }
-}
-
 // ============================= Int =============================
 
 private abstract class TestIntListGenerator : TestListGenerator<Int> {

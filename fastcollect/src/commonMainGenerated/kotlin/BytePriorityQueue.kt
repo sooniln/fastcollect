@@ -332,6 +332,8 @@ public inline fun BytePriorityQueue(
     crossinline isHigherPriority: (Byte, Byte) -> Boolean,
 ): AbstractBytePriorityQueue {
     return object : AbstractBytePriorityQueue(initialCapacity) {
-        override fun isHigherPriority(element1: Byte, element2: Byte): Boolean = isHigherPriority(element1, element2)
+        override fun isHigherPriority(element1: Byte, element2: Byte): Boolean {
+            return isHigherPriority(element1, element2)
+        }
     }
 }
