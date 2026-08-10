@@ -322,3 +322,16 @@ public class LongPriorityQueue : AbstractLongPriorityQueue {
         return if (descending) element1 > element2 else element2 > element1
     }
 }
+
+/**
+ * Returns a priority queue of Longs, using the given comparator.
+ */
+@JvmSynthetic
+public inline fun LongPriorityQueue(
+    initialCapacity: Int = 0,
+    crossinline isHigherPriority: (Long, Long) -> Boolean,
+): AbstractLongPriorityQueue {
+    return object : AbstractLongPriorityQueue(initialCapacity) {
+        override fun isHigherPriority(element1: Long, element2: Long): Boolean = isHigherPriority(element1, element2)
+    }
+}

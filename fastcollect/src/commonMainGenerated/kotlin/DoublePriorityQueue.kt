@@ -322,3 +322,16 @@ public class DoublePriorityQueue : AbstractDoublePriorityQueue {
         return if (descending) element1 > element2 else element2 > element1
     }
 }
+
+/**
+ * Returns a priority queue of Doubles, using the given comparator.
+ */
+@JvmSynthetic
+public inline fun DoublePriorityQueue(
+    initialCapacity: Int = 0,
+    crossinline isHigherPriority: (Double, Double) -> Boolean,
+): AbstractDoublePriorityQueue {
+    return object : AbstractDoublePriorityQueue(initialCapacity) {
+        override fun isHigherPriority(element1: Double, element2: Double): Boolean = isHigherPriority(element1, element2)
+    }
+}

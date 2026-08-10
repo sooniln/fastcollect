@@ -322,3 +322,18 @@ public class ${Type}PriorityQueue : Abstract${Type}PriorityQueue {
         return if (descending) element1 > element2 else element2 > element1
     }
 }
+
+/**
+ * Returns a priority queue of ${Type}s, using the given comparator.
+ */
+@JvmSynthetic
+public inline fun ${Type}PriorityQueue(
+    initialCapacity: Int = 0,
+    crossinline isHigherPriority: (${Type}, ${Type}) -> Boolean,
+): Abstract${Type}PriorityQueue {
+    return object : Abstract${Type}PriorityQueue(initialCapacity) {
+        override fun isHigherPriority(element1: ${Type}, element2: ${Type}): Boolean {
+            return isHigherPriority(element1, element2)
+        }
+    }
+}

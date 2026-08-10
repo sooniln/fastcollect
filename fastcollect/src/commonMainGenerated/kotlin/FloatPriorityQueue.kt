@@ -322,3 +322,16 @@ public class FloatPriorityQueue : AbstractFloatPriorityQueue {
         return if (descending) element1 > element2 else element2 > element1
     }
 }
+
+/**
+ * Returns a priority queue of Floats, using the given comparator.
+ */
+@JvmSynthetic
+public inline fun FloatPriorityQueue(
+    initialCapacity: Int = 0,
+    crossinline isHigherPriority: (Float, Float) -> Boolean,
+): AbstractFloatPriorityQueue {
+    return object : AbstractFloatPriorityQueue(initialCapacity) {
+        override fun isHigherPriority(element1: Float, element2: Float): Boolean = isHigherPriority(element1, element2)
+    }
+}

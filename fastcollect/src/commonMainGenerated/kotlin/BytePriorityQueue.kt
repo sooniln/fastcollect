@@ -322,3 +322,16 @@ public class BytePriorityQueue : AbstractBytePriorityQueue {
         return if (descending) element1 > element2 else element2 > element1
     }
 }
+
+/**
+ * Returns a priority queue of Bytes, using the given comparator.
+ */
+@JvmSynthetic
+public inline fun BytePriorityQueue(
+    initialCapacity: Int = 0,
+    crossinline isHigherPriority: (Byte, Byte) -> Boolean,
+): AbstractBytePriorityQueue {
+    return object : AbstractBytePriorityQueue(initialCapacity) {
+        override fun isHigherPriority(element1: Byte, element2: Byte): Boolean = isHigherPriority(element1, element2)
+    }
+}

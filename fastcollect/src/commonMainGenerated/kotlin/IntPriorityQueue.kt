@@ -322,3 +322,16 @@ public class IntPriorityQueue : AbstractIntPriorityQueue {
         return if (descending) element1 > element2 else element2 > element1
     }
 }
+
+/**
+ * Returns a priority queue of Ints, using the given comparator.
+ */
+@JvmSynthetic
+public inline fun IntPriorityQueue(
+    initialCapacity: Int = 0,
+    crossinline isHigherPriority: (Int, Int) -> Boolean,
+): AbstractIntPriorityQueue {
+    return object : AbstractIntPriorityQueue(initialCapacity) {
+        override fun isHigherPriority(element1: Int, element2: Int): Boolean = isHigherPriority(element1, element2)
+    }
+}
