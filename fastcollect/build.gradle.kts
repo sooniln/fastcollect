@@ -20,7 +20,7 @@ repositories {
 }
 
 group = "io.github.sooniln"
-version = "4.0.1"
+version = "4.1.0"
 
 private data class TemplateInstantiation(
     val inputFile: String,
@@ -226,24 +226,20 @@ tasks.register<Sync>("GenerateCommonMain") {
                 listOf(
                     mapOf("KeyType" to "Int", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
                     mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
+                    mapOf("KeyType" to "Int", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
+                    mapOf("KeyType" to "Int", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
                     mapOf("KeyType" to "Int", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
                     mapOf("KeyType" to "Long", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
                     mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
+                    mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
+                    mapOf("KeyType" to "Long", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
                     mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
                 )) { expansion -> "${expansion["Name"]}HashMap.kt" },
             TemplateInstantiation(
                 "InterleavedHashMap.kte",
                 listOf(
                     mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
-                )) { expansion -> "${expansion["Name"]}HashMap.kt" },
-            TemplateInstantiation(
-                "FPHashMap.kte",
-                listOf(
-                    mapOf("KeyType" to "Int", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
                 )) { expansion -> "${expansion["Name"]}HashMap.kt" },
             TemplateInstantiation(
                 "PriorityQueue.kte",

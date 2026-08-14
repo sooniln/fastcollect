@@ -155,11 +155,14 @@ public interface MutableInt2IntMap : Int2IntMap {
     /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
     public fun replace(key: Int, value: Int): Int = replaceOrSet(key, value) { throw NoSuchElementException() }
 
-    /** Removes the given key and returns it's value, or the default value if the key is not present. */
+    /** Removes the given key and returns its value, or the default value if the key is not present. */
     public fun remove(key: Int): Int
 
     /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
     public fun removeKey(key: Int): Int = removeOrElse(key) { throw NoSuchElementException() }
+
+    /** Removes the given key if it is associated with the given value, return true if the key was removed. */
+    public fun remove(key: Int, value: Int): Boolean
 
     public fun clear()
 

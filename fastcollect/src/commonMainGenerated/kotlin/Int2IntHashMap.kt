@@ -143,6 +143,20 @@ public class Int2IntHashMap @JvmOverloads constructor(
             { throw NoSuchElementException() })
     }
 
+    override fun remove(key: Int, value: Int): Boolean {
+        return findSlot(
+            key,
+            { slot, entry ->
+                if (entry.value() equalsBoxed value) {
+                    removeSlot(slot)
+                    true
+                } else {
+                    false
+                }
+            },
+            { false })
+    }
+
     override fun clear() {
         if (kvArr !== EMPTY_ARRAY) {
             threshold += size

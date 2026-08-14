@@ -29,7 +29,7 @@ You can add FastCollect as a dependency in your project with:
 #### Gradle ####
 
 ```groovy
-implementation 'io.github.sooniln:fastcollect-kotlin:4.0.0'
+implementation 'io.github.sooniln:fastcollect-kotlin:4.1.0'
 ```
 
 #### Maven ####
@@ -38,7 +38,7 @@ implementation 'io.github.sooniln:fastcollect-kotlin:4.0.0'
 <dependency>
     <groupId>io.github.sooniln</groupId>
     <artifactId>fastcollect-kotlin</artifactId>
-    <version>4.0.0</version>
+    <version>4.1.0</version>
 </dependency>
 ```
 
@@ -52,13 +52,13 @@ FastCollect can interact with normal Kotlin collections through the use of exten
 Kotlin collection. Beware that using these wrappers may incur boxing penalties.
 
 Using FastCollect types should be quite straightforward for anyone familiar with standard Kotlin/Java collections.
-FastCollect provides ArrayList/ArrayDeque, HashSet, and HashMap analogues that can store primitives (and in the case of
-maps, primitive keys with reference or primitive values).
+FastCollect provides ArrayList/ArrayDeque, HashSet, HashMap, and PriorityQueue analogues that can store primitives
+(and in the case of maps, primitive keys with reference or primitive values).
 
 > [!NOTE]
 > FastCollect currently only supports Int/Long keys for HashSet/HashMap (all types of values are supported). This is
-> done out of a desire to reduce binary size and bloat by eliminating use cases that are unlikely to be very common or
-> useful. If you feel you have a compelling use case that is not currently supported, please reach out, as support is
+> out of a desire to reduce binary size and bloat by eliminating use cases that are unlikely to be very common or
+> useful. If you feel you have a compelling use case that is not currently supported, please file a bug, as support is
 > generally trivial to add.
 
 ### Overview ###
@@ -99,7 +99,7 @@ var set = mutableFloatSetOf(Float.NaN)
 // option 1 - removes NaN from the set
 set.remove(Float.NaN)
 // option 2 - does not remove NaN from the set
-set.removeAll(value -> value == Float.Nan)
+set.removeAll(value -> value == Float.NaN)
 ```
 
 Default Kotlin equality uses IEEE conventions for primitives. For this reason, FastUtil exposes publicly the comparison
@@ -112,7 +112,7 @@ var set = mutableFloatSetOf(Float.NaN)
 // option 1 - removes NaN from the set
 set.remove(Float.NaN)
 // option 2 - removes NaN from the set
-set.removeAll(value -> value equalsBoxed Float.Nan)
+set.removeAll(value -> value equalsBoxed Float.NaN)
 ```
 
 #### ConcurrentModificationException ####

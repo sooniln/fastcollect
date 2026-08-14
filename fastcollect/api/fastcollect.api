@@ -1141,6 +1141,7 @@ public final class io/github/sooniln/fastcollect/Int2AnyHashMap : io/github/soon
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (ILjava/lang/Object;)Ljava/lang/Object;
 	public fun remove (I)Ljava/lang/Object;
+	public fun remove (ILjava/lang/Object;)Z
 	public fun removeKey (I)Ljava/lang/Object;
 	public fun replace (ILjava/lang/Object;)Ljava/lang/Object;
 	public fun set (ILjava/lang/Object;)V
@@ -1221,6 +1222,7 @@ public final class io/github/sooniln/fastcollect/Int2ByteHashMap : io/github/soo
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (IB)B
 	public fun remove (I)B
+	public fun remove (IB)Z
 	public fun removeKey (I)B
 	public fun replace (IB)B
 	public fun set (IB)V
@@ -1273,6 +1275,8 @@ public final class io/github/sooniln/fastcollect/Int2ByteMaps {
 }
 
 public final class io/github/sooniln/fastcollect/Int2DoubleHashMap : io/github/sooniln/fastcollect/AbstractMutableInt2DoubleMap {
+	public fun <init> ()V
+	public fun <init> (I)V
 	public fun <init> (ID)V
 	public synthetic fun <init> (IDILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Int2DoubleMap;)V
@@ -1286,13 +1290,11 @@ public final class io/github/sooniln/fastcollect/Int2DoubleHashMap : io/github/s
 	public fun get (I)D
 	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/IntSet;
 	public fun getKeys ()Lio/github/sooniln/fastcollect/MutableIntSet;
-	public final fun getMap ()Lio/github/sooniln/fastcollect/Int2LongHashMap;
 	public fun getOrDefault (ID)D
 	public fun getSize ()I
 	public fun getValue (I)D
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/DoubleCollection;
-	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/MutableDoubleCollection;
-	public fun getValues ()Lio/github/sooniln/fastcollect/MutableLongCollection;
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableDoubleCollection;
 	public fun isDefaultValue (D)Z
 	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
 	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
@@ -1301,8 +1303,10 @@ public final class io/github/sooniln/fastcollect/Int2DoubleHashMap : io/github/s
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (ID)D
 	public fun remove (I)D
+	public fun remove (ID)Z
+	public fun removeKey (I)D
+	public fun replace (ID)D
 	public fun set (ID)V
-	public fun toString ()Ljava/lang/String;
 	public final fun trimToSize ()V
 }
 
@@ -1352,6 +1356,8 @@ public final class io/github/sooniln/fastcollect/Int2DoubleMaps {
 }
 
 public final class io/github/sooniln/fastcollect/Int2FloatHashMap : io/github/sooniln/fastcollect/AbstractMutableInt2FloatMap {
+	public fun <init> ()V
+	public fun <init> (I)V
 	public fun <init> (IF)V
 	public synthetic fun <init> (IFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Int2FloatMap;)V
@@ -1365,13 +1371,11 @@ public final class io/github/sooniln/fastcollect/Int2FloatHashMap : io/github/so
 	public fun get (I)F
 	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/IntSet;
 	public fun getKeys ()Lio/github/sooniln/fastcollect/MutableIntSet;
-	public final fun getMap ()Lio/github/sooniln/fastcollect/Int2IntHashMap;
 	public fun getOrDefault (IF)F
 	public fun getSize ()I
 	public fun getValue (I)F
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/FloatCollection;
-	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/MutableFloatCollection;
-	public fun getValues ()Lio/github/sooniln/fastcollect/MutableIntCollection;
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableFloatCollection;
 	public fun isDefaultValue (F)Z
 	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
 	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
@@ -1380,8 +1384,10 @@ public final class io/github/sooniln/fastcollect/Int2FloatHashMap : io/github/so
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (IF)F
 	public fun remove (I)F
+	public fun remove (IF)Z
+	public fun removeKey (I)F
+	public fun replace (IF)F
 	public fun set (IF)V
-	public fun toString ()Ljava/lang/String;
 	public final fun trimToSize ()V
 }
 
@@ -1459,6 +1465,7 @@ public final class io/github/sooniln/fastcollect/Int2IntHashMap : io/github/soon
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (II)I
 	public fun remove (I)I
+	public fun remove (II)Z
 	public fun removeKey (I)I
 	public fun replace (II)I
 	public fun set (II)V
@@ -1539,6 +1546,7 @@ public final class io/github/sooniln/fastcollect/Int2LongHashMap : io/github/soo
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (IJ)J
 	public fun remove (I)J
+	public fun remove (IJ)Z
 	public fun removeKey (I)J
 	public fun replace (IJ)J
 	public fun set (IJ)V
@@ -1920,6 +1928,7 @@ public final class io/github/sooniln/fastcollect/Long2AnyHashMap : io/github/soo
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (JLjava/lang/Object;)Ljava/lang/Object;
 	public fun remove (J)Ljava/lang/Object;
+	public fun remove (JLjava/lang/Object;)Z
 	public fun removeKey (J)Ljava/lang/Object;
 	public fun replace (JLjava/lang/Object;)Ljava/lang/Object;
 	public fun set (JLjava/lang/Object;)V
@@ -2000,6 +2009,7 @@ public final class io/github/sooniln/fastcollect/Long2ByteHashMap : io/github/so
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (JB)B
 	public fun remove (J)B
+	public fun remove (JB)Z
 	public fun removeKey (J)B
 	public fun replace (JB)B
 	public fun set (JB)V
@@ -2052,6 +2062,8 @@ public final class io/github/sooniln/fastcollect/Long2ByteMaps {
 }
 
 public final class io/github/sooniln/fastcollect/Long2DoubleHashMap : io/github/sooniln/fastcollect/AbstractMutableLong2DoubleMap {
+	public fun <init> ()V
+	public fun <init> (I)V
 	public fun <init> (ID)V
 	public synthetic fun <init> (IDILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Long2DoubleMap;)V
@@ -2065,13 +2077,11 @@ public final class io/github/sooniln/fastcollect/Long2DoubleHashMap : io/github/
 	public fun get (J)D
 	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/LongSet;
 	public fun getKeys ()Lio/github/sooniln/fastcollect/MutableLongSet;
-	public final fun getMap ()Lio/github/sooniln/fastcollect/Long2LongHashMap;
 	public fun getOrDefault (JD)D
 	public fun getSize ()I
 	public fun getValue (J)D
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/DoubleCollection;
-	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/MutableDoubleCollection;
-	public fun getValues ()Lio/github/sooniln/fastcollect/MutableLongCollection;
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableDoubleCollection;
 	public fun isDefaultValue (D)Z
 	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
 	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
@@ -2080,8 +2090,10 @@ public final class io/github/sooniln/fastcollect/Long2DoubleHashMap : io/github/
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (JD)D
 	public fun remove (J)D
+	public fun remove (JD)Z
+	public fun removeKey (J)D
+	public fun replace (JD)D
 	public fun set (JD)V
-	public fun toString ()Ljava/lang/String;
 	public final fun trimToSize ()V
 }
 
@@ -2131,6 +2143,8 @@ public final class io/github/sooniln/fastcollect/Long2DoubleMaps {
 }
 
 public final class io/github/sooniln/fastcollect/Long2FloatHashMap : io/github/sooniln/fastcollect/AbstractMutableLong2FloatMap {
+	public fun <init> ()V
+	public fun <init> (I)V
 	public fun <init> (IF)V
 	public synthetic fun <init> (IFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Long2FloatMap;)V
@@ -2144,13 +2158,11 @@ public final class io/github/sooniln/fastcollect/Long2FloatHashMap : io/github/s
 	public fun get (J)F
 	public synthetic fun getKeys ()Lio/github/sooniln/fastcollect/LongSet;
 	public fun getKeys ()Lio/github/sooniln/fastcollect/MutableLongSet;
-	public final fun getMap ()Lio/github/sooniln/fastcollect/Long2IntHashMap;
 	public fun getOrDefault (JF)F
 	public fun getSize ()I
 	public fun getValue (J)F
 	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/FloatCollection;
-	public synthetic fun getValues ()Lio/github/sooniln/fastcollect/MutableFloatCollection;
-	public fun getValues ()Lio/github/sooniln/fastcollect/MutableIntCollection;
+	public fun getValues ()Lio/github/sooniln/fastcollect/MutableFloatCollection;
 	public fun isDefaultValue (F)Z
 	public synthetic fun iterator ()Lio/github/sooniln/fastcollect/FastIterator;
 	public fun iterator ()Lio/github/sooniln/fastcollect/MutableFastIterator;
@@ -2159,8 +2171,10 @@ public final class io/github/sooniln/fastcollect/Long2FloatHashMap : io/github/s
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (JF)F
 	public fun remove (J)F
+	public fun remove (JF)Z
+	public fun removeKey (J)F
+	public fun replace (JF)F
 	public fun set (JF)V
-	public fun toString ()Ljava/lang/String;
 	public final fun trimToSize ()V
 }
 
@@ -2238,6 +2252,7 @@ public final class io/github/sooniln/fastcollect/Long2IntHashMap : io/github/soo
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (JI)I
 	public fun remove (J)I
+	public fun remove (JI)Z
 	public fun removeKey (J)I
 	public fun replace (JI)I
 	public fun set (JI)V
@@ -2318,6 +2333,7 @@ public final class io/github/sooniln/fastcollect/Long2LongHashMap : io/github/so
 	public fun putAll (Ljava/util/Map;)V
 	public final fun putIfAbsent (JJ)J
 	public fun remove (J)J
+	public fun remove (JJ)Z
 	public fun removeKey (J)J
 	public fun replace (JJ)J
 	public fun set (JJ)V
@@ -2731,6 +2747,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2AnyMap 
 	public fun putAll (Lio/github/sooniln/fastcollect/Int2AnyMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (I)Ljava/lang/Object;
+	public abstract fun remove (ILjava/lang/Object;)Z
 	public fun removeKey (I)Ljava/lang/Object;
 	public fun replace (ILjava/lang/Object;)Ljava/lang/Object;
 	public fun set (ILjava/lang/Object;)V
@@ -2753,6 +2770,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2ByteMap
 	public fun putAll (Lio/github/sooniln/fastcollect/Int2ByteMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (I)B
+	public abstract fun remove (IB)Z
 	public fun removeKey (I)B
 	public fun replace (IB)B
 	public fun set (IB)V
@@ -2775,6 +2793,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2DoubleM
 	public fun putAll (Lio/github/sooniln/fastcollect/Int2DoubleMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (I)D
+	public abstract fun remove (ID)Z
 	public fun removeKey (I)D
 	public fun replace (ID)D
 	public fun set (ID)V
@@ -2797,6 +2816,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2FloatMa
 	public fun putAll (Lio/github/sooniln/fastcollect/Int2FloatMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (I)F
+	public abstract fun remove (IF)Z
 	public fun removeKey (I)F
 	public fun replace (IF)F
 	public fun set (IF)V
@@ -2819,6 +2839,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2IntMap 
 	public fun putAll (Lio/github/sooniln/fastcollect/Int2IntMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (I)I
+	public abstract fun remove (II)Z
 	public fun removeKey (I)I
 	public fun replace (II)I
 	public fun set (II)V
@@ -2841,6 +2862,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2LongMap
 	public fun putAll (Lio/github/sooniln/fastcollect/Int2LongMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (I)J
+	public abstract fun remove (IJ)Z
 	public fun removeKey (I)J
 	public fun replace (IJ)J
 	public fun set (IJ)V
@@ -2925,6 +2947,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2AnyMap
 	public fun putAll (Lio/github/sooniln/fastcollect/Long2AnyMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (J)Ljava/lang/Object;
+	public abstract fun remove (JLjava/lang/Object;)Z
 	public fun removeKey (J)Ljava/lang/Object;
 	public fun replace (JLjava/lang/Object;)Ljava/lang/Object;
 	public fun set (JLjava/lang/Object;)V
@@ -2947,6 +2970,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2ByteMa
 	public fun putAll (Lio/github/sooniln/fastcollect/Long2ByteMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (J)B
+	public abstract fun remove (JB)Z
 	public fun removeKey (J)B
 	public fun replace (JB)B
 	public fun set (JB)V
@@ -2969,6 +2993,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2Double
 	public fun putAll (Lio/github/sooniln/fastcollect/Long2DoubleMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (J)D
+	public abstract fun remove (JD)Z
 	public fun removeKey (J)D
 	public fun replace (JD)D
 	public fun set (JD)V
@@ -2991,6 +3016,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2FloatM
 	public fun putAll (Lio/github/sooniln/fastcollect/Long2FloatMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (J)F
+	public abstract fun remove (JF)Z
 	public fun removeKey (J)F
 	public fun replace (JF)F
 	public fun set (JF)V
@@ -3013,6 +3039,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2IntMap
 	public fun putAll (Lio/github/sooniln/fastcollect/Long2IntMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (J)I
+	public abstract fun remove (JI)Z
 	public fun removeKey (J)I
 	public fun replace (JI)I
 	public fun set (JI)V
@@ -3035,6 +3062,7 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2LongMa
 	public fun putAll (Lio/github/sooniln/fastcollect/Long2LongMap;)V
 	public fun putAll (Ljava/util/Map;)V
 	public abstract fun remove (J)J
+	public abstract fun remove (JJ)Z
 	public fun removeKey (J)J
 	public fun replace (JJ)J
 	public fun set (JJ)V

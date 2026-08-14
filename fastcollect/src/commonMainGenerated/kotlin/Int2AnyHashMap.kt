@@ -150,6 +150,21 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             { throw NoSuchElementException() })
     }
 
+    override fun remove(key: Int, value: V): Boolean {
+            return findSlot(
+                key,
+                { slot ->
+                    val oldValue = valuesArr[slot]
+                    if (oldValue equalsBoxed value) {
+                        removeSlot(slot)
+                        true
+                    } else {
+                        false
+                    }
+                },
+                { false })
+        }
+
     override fun clear() {
         if (keysArr !== EMPTY_KEY_ARRAY) {
             keysArr.fill(emptyKey)

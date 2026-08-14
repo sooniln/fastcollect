@@ -184,6 +184,29 @@ class Int2ByteMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableInt2ByteMapOf(1 to 10.toByte(), 2 to 20.toByte())
+        assertTrue(map.remove(1, 10.toByte()))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableInt2ByteMapOf(1 to 10.toByte(), 2 to 20.toByte())
+        assertFalse(map.remove(1, 20.toByte()))
+        assertEquals(2, map.size)
+        assertEquals(10.toByte(), map[1])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableInt2ByteMapOf(1 to 10.toByte())
+        assertFalse(map.remove(99, 10.toByte()))
+        assertEquals(1, map.size)
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = int2ByteMapOf(1 to 10.toByte(), 2 to 20.toByte())
         val dest = mutableInt2ByteMapOf(3 to 30.toByte())
@@ -258,6 +281,23 @@ class Int2ByteMapTest {
 
         map.trimToSize()
         for (i in 2..500 step 2) assertEquals((i + 1000).toByte(), map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Int2ByteHashMap()
+        for (i in 1..500) map[i] = (i + 1000).toByte()
+
+        // mismatched value must not remove the entry
+        for (i in 1..500 step 2) assertFalse(map.remove(i, i.toByte()))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1..500 step 2) assertTrue(map.remove(i, (i + 1000).toByte()))
+        assertEquals(250, map.size)
+        for (i in 1..500) {
+            if (i % 2 == 0) assertEquals((i + 1000).toByte(), map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -497,6 +537,29 @@ class Int2IntMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableInt2IntMapOf(1 to 10, 2 to 20)
+        assertTrue(map.remove(1, 10))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableInt2IntMapOf(1 to 10, 2 to 20)
+        assertFalse(map.remove(1, 20))
+        assertEquals(2, map.size)
+        assertEquals(10, map[1])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableInt2IntMapOf(1 to 10)
+        assertFalse(map.remove(99, 10))
+        assertEquals(1, map.size)
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = int2IntMapOf(1 to 10, 2 to 20)
         val dest = mutableInt2IntMapOf(3 to 30)
@@ -597,6 +660,23 @@ class Int2IntMapTest {
 
         map.trimToSize()
         for (i in 2..500 step 2) assertEquals(i + 1000, map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Int2IntHashMap()
+        for (i in 1..500) map[i] = i + 1000
+
+        // mismatched value must not remove the entry
+        for (i in 1..500 step 2) assertFalse(map.remove(i, i))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1..500 step 2) assertTrue(map.remove(i, i + 1000))
+        assertEquals(250, map.size)
+        for (i in 1..500) {
+            if (i % 2 == 0) assertEquals(i + 1000, map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -856,6 +936,29 @@ class Int2LongMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableInt2LongMapOf(1 to 10L, 2 to 20L)
+        assertTrue(map.remove(1, 10L))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableInt2LongMapOf(1 to 10L, 2 to 20L)
+        assertFalse(map.remove(1, 20L))
+        assertEquals(2, map.size)
+        assertEquals(10L, map[1])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableInt2LongMapOf(1 to 10L)
+        assertFalse(map.remove(99, 10L))
+        assertEquals(1, map.size)
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = int2LongMapOf(1 to 10L, 2 to 20L)
         val dest = mutableInt2LongMapOf(3 to 30L)
@@ -927,6 +1030,23 @@ class Int2LongMapTest {
 
         map.trimToSize()
         for (i in 2..500 step 2) assertEquals(i + 1000L, map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Int2LongHashMap()
+        for (i in 1..500) map[i] = i + 1000L
+
+        // mismatched value must not remove the entry
+        for (i in 1..500 step 2) assertFalse(map.remove(i, i.toLong()))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1..500 step 2) assertTrue(map.remove(i, i + 1000L))
+        assertEquals(250, map.size)
+        for (i in 1..500) {
+            if (i % 2 == 0) assertEquals(i + 1000L, map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -1193,6 +1313,42 @@ class Int2FloatMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableInt2FloatMapOf(1 to 10f, 2 to 20f)
+        assertTrue(map.remove(1, 10f))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableInt2FloatMapOf(1 to 10f, 2 to 20f)
+        assertFalse(map.remove(1, 20f))
+        assertEquals(2, map.size)
+        assertEquals(10f, map[1])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableInt2FloatMapOf(1 to 10f)
+        assertFalse(map.remove(99, 10f))
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun remove_keyValue_nanAndNegativeZero_matchBoxedSemantics() {
+        // NaN must match NaN for removal, matching boxed semantics
+        val nanMap = mutableInt2FloatMapOf(1 to Float.NaN)
+        assertTrue(nanMap.remove(1, Float.NaN))
+        assertFalse(nanMap.containsKey(1))
+
+        // -0.0f must not match 0.0f for removal
+        val negZeroMap = mutableInt2FloatMapOf(1 to -0.0f)
+        assertFalse(negZeroMap.remove(1, 0.0f))
+        assertTrue(negZeroMap.containsKey(1))
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = int2FloatMapOf(1 to 10f, 2 to 20f)
         val dest = mutableInt2FloatMapOf(3 to 30f)
@@ -1247,6 +1403,23 @@ class Int2FloatMapTest {
 
         map.trimToSize()
         for (i in 2..500 step 2) assertEquals((i + 1000).toFloat(), map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Int2FloatHashMap()
+        for (i in 1..500) map[i] = (i + 1000).toFloat()
+
+        // mismatched value must not remove the entry
+        for (i in 1..500 step 2) assertFalse(map.remove(i, i.toFloat()))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1..500 step 2) assertTrue(map.remove(i, (i + 1000).toFloat()))
+        assertEquals(250, map.size)
+        for (i in 1..500) {
+            if (i % 2 == 0) assertEquals((i + 1000).toFloat(), map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -1513,6 +1686,42 @@ class Int2DoubleMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableInt2DoubleMapOf(1 to 10.0, 2 to 20.0)
+        assertTrue(map.remove(1, 10.0))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableInt2DoubleMapOf(1 to 10.0, 2 to 20.0)
+        assertFalse(map.remove(1, 20.0))
+        assertEquals(2, map.size)
+        assertEquals(10.0, map[1])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableInt2DoubleMapOf(1 to 10.0)
+        assertFalse(map.remove(99, 10.0))
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun remove_keyValue_nanAndNegativeZero_matchBoxedSemantics() {
+        // NaN must match NaN for removal, matching boxed semantics
+        val nanMap = mutableInt2DoubleMapOf(1 to Double.NaN)
+        assertTrue(nanMap.remove(1, Double.NaN))
+        assertFalse(nanMap.containsKey(1))
+
+        // -0.0 must not match 0.0 for removal
+        val negZeroMap = mutableInt2DoubleMapOf(1 to -0.0)
+        assertFalse(negZeroMap.remove(1, 0.0))
+        assertTrue(negZeroMap.containsKey(1))
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = int2DoubleMapOf(1 to 10.0, 2 to 20.0)
         val dest = mutableInt2DoubleMapOf(3 to 30.0)
@@ -1567,6 +1776,23 @@ class Int2DoubleMapTest {
 
         map.trimToSize()
         for (i in 2..500 step 2) assertEquals((i + 1000).toDouble(), map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Int2DoubleHashMap()
+        for (i in 1..500) map[i] = (i + 1000).toDouble()
+
+        // mismatched value must not remove the entry
+        for (i in 1..500 step 2) assertFalse(map.remove(i, i.toDouble()))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1..500 step 2) assertTrue(map.remove(i, (i + 1000).toDouble()))
+        assertEquals(250, map.size)
+        for (i in 1..500) {
+            if (i % 2 == 0) assertEquals((i + 1000).toDouble(), map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -1806,6 +2032,36 @@ class Int2AnyMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableInt2AnyMapOf(1 to "a", 2 to "b")
+        assertTrue(map.remove(1, "a"))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableInt2AnyMapOf(1 to "a", 2 to "b")
+        assertFalse(map.remove(1, "b"))
+        assertEquals(2, map.size)
+        assertEquals("a", map[1])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableInt2AnyMapOf(1 to "a")
+        assertFalse(map.remove(99, "a"))
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun remove_keyValue_nullValue_matchesStoredNull() {
+        val map = mutableInt2AnyMapOf<String?>(1 to null)
+        assertTrue(map.remove(1, null))
+        assertFalse(map.containsKey(1))
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = int2AnyMapOf(1 to "a", 2 to "b")
         val dest = mutableInt2AnyMapOf(3 to "c")
@@ -1877,6 +2133,23 @@ class Int2AnyMapTest {
 
         map.trimToSize()
         for (i in 2..500 step 2) assertEquals("v$i", map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Int2AnyHashMap<String>()
+        for (i in 1..500) map[i] = "v$i"
+
+        // mismatched value must not remove the entry
+        for (i in 1..500 step 2) assertFalse(map.remove(i, "wrong$i"))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1..500 step 2) assertTrue(map.remove(i, "v$i"))
+        assertEquals(250, map.size)
+        for (i in 1..500) {
+            if (i % 2 == 0) assertEquals("v$i", map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -2116,6 +2389,29 @@ class Long2ByteMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableLong2ByteMapOf(1L to 10.toByte(), 2L to 20.toByte())
+        assertTrue(map.remove(1L, 10.toByte()))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableLong2ByteMapOf(1L to 10.toByte(), 2L to 20.toByte())
+        assertFalse(map.remove(1L, 20.toByte()))
+        assertEquals(2, map.size)
+        assertEquals(10.toByte(), map[1L])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableLong2ByteMapOf(1L to 10.toByte())
+        assertFalse(map.remove(99L, 10.toByte()))
+        assertEquals(1, map.size)
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = long2ByteMapOf(1L to 10.toByte(), 2L to 20.toByte())
         val dest = mutableLong2ByteMapOf(3L to 30.toByte())
@@ -2191,6 +2487,23 @@ class Long2ByteMapTest {
 
         map.trimToSize()
         for (i in 2L..500L step 2) assertEquals((i + 1000).toByte(), map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Long2ByteHashMap()
+        for (i in 1L..500L) map[i] = (i + 1000).toByte()
+
+        // mismatched value must not remove the entry
+        for (i in 1L..500L step 2) assertFalse(map.remove(i, i.toByte()))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1L..500L step 2) assertTrue(map.remove(i, (i + 1000).toByte()))
+        assertEquals(250, map.size)
+        for (i in 1L..500L) {
+            if (i % 2 == 0L) assertEquals((i + 1000).toByte(), map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -2430,6 +2743,29 @@ class Long2IntMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableLong2IntMapOf(1L to 10, 2L to 20)
+        assertTrue(map.remove(1L, 10))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableLong2IntMapOf(1L to 10, 2L to 20)
+        assertFalse(map.remove(1L, 20))
+        assertEquals(2, map.size)
+        assertEquals(10, map[1L])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableLong2IntMapOf(1L to 10)
+        assertFalse(map.remove(99L, 10))
+        assertEquals(1, map.size)
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = long2IntMapOf(1L to 10, 2L to 20)
         val dest = mutableLong2IntMapOf(3L to 30)
@@ -2501,6 +2837,23 @@ class Long2IntMapTest {
 
         map.trimToSize()
         for (i in 2L..500L step 2) assertEquals((i + 1000).toInt(), map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Long2IntHashMap()
+        for (i in 1L..500L) map[i] = (i + 1000).toInt()
+
+        // mismatched value must not remove the entry
+        for (i in 1L..500L step 2) assertFalse(map.remove(i, i.toInt()))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1L..500L step 2) assertTrue(map.remove(i, (i + 1000).toInt()))
+        assertEquals(250, map.size)
+        for (i in 1L..500L) {
+            if (i % 2 == 0L) assertEquals((i + 1000).toInt(), map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -2740,6 +3093,29 @@ class Long2LongMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableLong2LongMapOf(1L to 10L, 2L to 20L)
+        assertTrue(map.remove(1L, 10L))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableLong2LongMapOf(1L to 10L, 2L to 20L)
+        assertFalse(map.remove(1L, 20L))
+        assertEquals(2, map.size)
+        assertEquals(10L, map[1L])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableLong2LongMapOf(1L to 10L)
+        assertFalse(map.remove(99L, 10L))
+        assertEquals(1, map.size)
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = long2LongMapOf(1L to 10L, 2L to 20L)
         val dest = mutableLong2LongMapOf(3L to 30L)
@@ -2811,6 +3187,23 @@ class Long2LongMapTest {
 
         map.trimToSize()
         for (i in 2L..500L step 2) assertEquals(i + 1000, map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Long2LongHashMap()
+        for (i in 1L..500L) map[i] = i + 1000
+
+        // mismatched value must not remove the entry
+        for (i in 1L..500L step 2) assertFalse(map.remove(i, i))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1L..500L step 2) assertTrue(map.remove(i, i + 1000))
+        assertEquals(250, map.size)
+        for (i in 1L..500L) {
+            if (i % 2 == 0L) assertEquals(i + 1000, map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -3077,6 +3470,42 @@ class Long2FloatMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableLong2FloatMapOf(1L to 10f, 2L to 20f)
+        assertTrue(map.remove(1L, 10f))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableLong2FloatMapOf(1L to 10f, 2L to 20f)
+        assertFalse(map.remove(1L, 20f))
+        assertEquals(2, map.size)
+        assertEquals(10f, map[1L])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableLong2FloatMapOf(1L to 10f)
+        assertFalse(map.remove(99L, 10f))
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun remove_keyValue_nanAndNegativeZero_matchBoxedSemantics() {
+        // NaN must match NaN for removal, matching boxed semantics
+        val nanMap = mutableLong2FloatMapOf(1L to Float.NaN)
+        assertTrue(nanMap.remove(1L, Float.NaN))
+        assertFalse(nanMap.containsKey(1L))
+
+        // -0.0f must not match 0.0f for removal
+        val negZeroMap = mutableLong2FloatMapOf(1L to -0.0f)
+        assertFalse(negZeroMap.remove(1L, 0.0f))
+        assertTrue(negZeroMap.containsKey(1L))
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = long2FloatMapOf(1L to 10f, 2L to 20f)
         val dest = mutableLong2FloatMapOf(3L to 30f)
@@ -3131,6 +3560,23 @@ class Long2FloatMapTest {
 
         map.trimToSize()
         for (i in 2L..500L step 2) assertEquals((i + 1000).toFloat(), map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Long2FloatHashMap()
+        for (i in 1L..500L) map[i] = (i + 1000).toFloat()
+
+        // mismatched value must not remove the entry
+        for (i in 1L..500L step 2) assertFalse(map.remove(i, i.toFloat()))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1L..500L step 2) assertTrue(map.remove(i, (i + 1000).toFloat()))
+        assertEquals(250, map.size)
+        for (i in 1L..500L) {
+            if (i % 2 == 0L) assertEquals((i + 1000).toFloat(), map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -3397,6 +3843,42 @@ class Long2DoubleMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableLong2DoubleMapOf(1L to 10.0, 2L to 20.0)
+        assertTrue(map.remove(1L, 10.0))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableLong2DoubleMapOf(1L to 10.0, 2L to 20.0)
+        assertFalse(map.remove(1L, 20.0))
+        assertEquals(2, map.size)
+        assertEquals(10.0, map[1L])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableLong2DoubleMapOf(1L to 10.0)
+        assertFalse(map.remove(99L, 10.0))
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun remove_keyValue_nanAndNegativeZero_matchBoxedSemantics() {
+        // NaN must match NaN for removal, matching boxed semantics
+        val nanMap = mutableLong2DoubleMapOf(1L to Double.NaN)
+        assertTrue(nanMap.remove(1L, Double.NaN))
+        assertFalse(nanMap.containsKey(1L))
+
+        // -0.0 must not match 0.0 for removal
+        val negZeroMap = mutableLong2DoubleMapOf(1L to -0.0)
+        assertFalse(negZeroMap.remove(1L, 0.0))
+        assertTrue(negZeroMap.containsKey(1L))
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = long2DoubleMapOf(1L to 10.0, 2L to 20.0)
         val dest = mutableLong2DoubleMapOf(3L to 30.0)
@@ -3451,6 +3933,23 @@ class Long2DoubleMapTest {
 
         map.trimToSize()
         for (i in 2L..500L step 2) assertEquals((i + 1000).toDouble(), map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Long2DoubleHashMap()
+        for (i in 1L..500L) map[i] = (i + 1000).toDouble()
+
+        // mismatched value must not remove the entry
+        for (i in 1L..500L step 2) assertFalse(map.remove(i, i.toDouble()))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1L..500L step 2) assertTrue(map.remove(i, (i + 1000).toDouble()))
+        assertEquals(250, map.size)
+        for (i in 1L..500L) {
+            if (i % 2 == 0L) assertEquals((i + 1000).toDouble(), map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test
@@ -3690,6 +4189,36 @@ class Long2AnyMapTest {
     }
 
     @Test
+    fun remove_presentKeyMatchingValue_removesAndReturnsTrue() {
+        val map = mutableLong2AnyMapOf(1L to "a", 2L to "b")
+        assertTrue(map.remove(1L, "a"))
+        assertEquals(1, map.size)
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
+    fun remove_presentKeyMismatchedValue_returnsFalseAndKeepsEntry() {
+        val map = mutableLong2AnyMapOf(1L to "a", 2L to "b")
+        assertFalse(map.remove(1L, "b"))
+        assertEquals(2, map.size)
+        assertEquals("a", map[1L])
+    }
+
+    @Test
+    fun remove_absentKey_returnsFalse() {
+        val map = mutableLong2AnyMapOf(1L to "a")
+        assertFalse(map.remove(99L, "a"))
+        assertEquals(1, map.size)
+    }
+
+    @Test
+    fun remove_keyValue_nullValue_matchesStoredNull() {
+        val map = mutableLong2AnyMapOf<String?>(1L to null)
+        assertTrue(map.remove(1L, null))
+        assertFalse(map.containsKey(1L))
+    }
+
+    @Test
     fun putAll_fromPrimitiveMap_copiesAllEntries() {
         val source = long2AnyMapOf(1L to "a", 2L to "b")
         val dest = mutableLong2AnyMapOf(3L to "c")
@@ -3761,6 +4290,23 @@ class Long2AnyMapTest {
 
         map.trimToSize()
         for (i in 2L..500L step 2) assertEquals("v$i", map[i])
+    }
+
+    @Test
+    fun remove_keyValue_manyEntriesWithMismatchesSurviveRehash() {
+        val map = Long2AnyHashMap<String>()
+        for (i in 1L..500L) map[i] = "v$i"
+
+        // mismatched value must not remove the entry
+        for (i in 1L..500L step 2) assertFalse(map.remove(i, "wrong$i"))
+        assertEquals(500, map.size)
+
+        // matching value removes it, exercising backward-shift chains through collision clusters
+        for (i in 1L..500L step 2) assertTrue(map.remove(i, "v$i"))
+        assertEquals(250, map.size)
+        for (i in 1L..500L) {
+            if (i % 2 == 0L) assertEquals("v$i", map[i]) else assertFalse(map.containsKey(i))
+        }
     }
 
     @Test

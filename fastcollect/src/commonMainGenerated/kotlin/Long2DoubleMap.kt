@@ -155,11 +155,14 @@ public interface MutableLong2DoubleMap : Long2DoubleMap {
     /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
     public fun replace(key: Long, value: Double): Double = replaceOrSet(key, value) { throw NoSuchElementException() }
 
-    /** Removes the given key and returns it's value, or the default value if the key is not present. */
+    /** Removes the given key and returns its value, or the default value if the key is not present. */
     public fun remove(key: Long): Double
 
     /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
     public fun removeKey(key: Long): Double = removeOrElse(key) { throw NoSuchElementException() }
+
+    /** Removes the given key if it is associated with the given value, return true if the key was removed. */
+    public fun remove(key: Long, value: Double): Boolean
 
     public fun clear()
 

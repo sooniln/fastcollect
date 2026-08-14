@@ -150,6 +150,21 @@ public class Long2LongHashMap @JvmOverloads constructor(
             { throw NoSuchElementException() })
     }
 
+    override fun remove(key: Long, value: Long): Boolean {
+            return findSlot(
+                key,
+                { slot ->
+                    val oldValue = valuesArr[slot]
+                    if (oldValue equalsBoxed value) {
+                        removeSlot(slot)
+                        true
+                    } else {
+                        false
+                    }
+                },
+                { false })
+        }
+
     override fun clear() {
         if (keysArr !== EMPTY_KEY_ARRAY) {
             keysArr.fill(emptyKey)

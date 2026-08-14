@@ -155,11 +155,14 @@ public interface MutableInt2LongMap : Int2LongMap {
     /** Replaces the old value for the given key, or throw [NoSuchElementException] if the key is not present. */
     public fun replace(key: Int, value: Long): Long = replaceOrSet(key, value) { throw NoSuchElementException() }
 
-    /** Removes the given key and returns it's value, or the default value if the key is not present. */
+    /** Removes the given key and returns its value, or the default value if the key is not present. */
     public fun remove(key: Int): Long
 
     /** Removes the given key or throws [NoSuchElementException] if the key is not present. */
     public fun removeKey(key: Int): Long = removeOrElse(key) { throw NoSuchElementException() }
+
+    /** Removes the given key if it is associated with the given value, return true if the key was removed. */
+    public fun remove(key: Int, value: Long): Boolean
 
     public fun clear()
 
