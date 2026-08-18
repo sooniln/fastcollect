@@ -273,6 +273,8 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
     override fun listIterator(): DoubleListIterator = listIterator(0)
     override fun listIterator(index: Int): DoubleListIterator = ListIteratorImpl(index)
 
+    override fun traverse(): DoubleTraverser = TraverserImpl()
+
     override fun subList(fromIndex: Int, toIndex: Int): DoubleList {
         return if (this is RandomAccess) {
             RandomAccessDoubleSubList(this, fromIndex, toIndex)
@@ -344,6 +346,20 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
 
         override fun nextIndex(): Int = index
         override fun previousIndex(): Int = index - 1
+    }
+
+    private inner class TraverserImpl : DoubleTraverser, DoubleCursor {
+        private val last = lastIndex
+        private var position: Int = -1
+
+        override val value: Double get() = get(position)
+
+        override fun advance(): DoubleCursor? {
+            if (position >= last) return null
+            if (last != lastIndex) throw ConcurrentModificationException()
+            ++position
+            return this
+        }
     }
 
     private open class DoubleSubList(private val list: DoubleList, fromIndex: Int, toIndex: Int) : AbstractDoubleList() {
@@ -539,6 +555,8 @@ private object EmptyDoubleList : DoubleList, RandomAccess {
     override fun iterator(): DoubleIterator = emptyDoubleIterator()
     override fun listIterator(): DoubleListIterator = emptyDoubleIterator()
     override fun listIterator(index: Int): DoubleListIterator = if (index == 0) listIterator() else throw IndexOutOfBoundsException()
+
+    override fun traverse(): DoubleTraverser = emptyDoubleTraverser()
 
     override fun subList(fromIndex: Int, toIndex: Int): DoubleList {
         if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()

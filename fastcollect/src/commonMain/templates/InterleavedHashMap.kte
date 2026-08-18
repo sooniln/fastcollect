@@ -319,7 +319,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
                 override fun add(element: ${KVType}): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: ${KVType}): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): Mutable${KVType}Iterator = KeyIterator()
-                override fun foreach(action: ${KVType}Consumer) = foreachKey(action)
+                override fun traverse(): ${KVType}Traverser = KeyTraverser()
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -334,7 +334,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
                 override fun add(element: ${KVType}): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: ${KVType}): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): Mutable${KVType}Iterator = ValueIterator()
-                override fun foreach(action: ${KVType}Consumer) = this@${Name}HashMap.foreach { _, value -> action.accept(value) }
+                override fun traverse(): ${KVType}Traverser = ValueTraverser()
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _values = it }
@@ -429,21 +429,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry> = FastEntryIterator()
 
-    override fun foreach(action: ${KVType}${KVType}Consumer) {
-        for (entry in kvArr) {
-            if (entry != emptyEntry) {
-                action.accept(entry.key(), entry.value())
-            }
-        }
-    }
-
-    override fun foreachKey(action: ${KVType}Consumer) {
-        for (entry in kvArr) {
-            if (entry != emptyEntry) {
-                action.accept(entry.key())
-            }
-        }
-    }
+    override fun traverse(): ${Name}Traverser = Traverser()
 
     private open inner class SlotIterator {
         private val kvArr = this@${Name}HashMap.kvArr
@@ -544,12 +530,36 @@ public class ${Name}HashMap @JvmOverloads constructor(
         override fun toString(): String = "\$key=\$value"
     }
 
-    private fun ${KVType}.slot(mask: Int): Int = Hash.mix(this) and mask
-    private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask
+    private inner class Traverser : ${Name}Traverser, ${Name}Cursor {
+        private val kvArr = this@${Name}HashMap.kvArr
+        private val emptyEntry = this@${Name}HashMap.emptyEntry
 
-    private fun ${ArrayType}.key(): ${KVType} = to${KVType}()
-    private fun ${ArrayType}.value(): ${KVType} = (this shr (8 * ${KVType}.SIZE_BYTES)).to${KVType}()
-    private fun arrayEntry(key: ${KVType}, value: ${KVType}): ${ArrayType} = (value.to${ArrayType}() shl (8 * ${KVType}.SIZE_BYTES)) or (key.toU${KVType}().to${ArrayType}())
+        private var position: Int = kvArr.size
+
+        override val key: ${KVType} get() = kvArr[position].key()
+        override val value: ${KVType} get() = kvArr[position].value()
+
+        override fun advance(): ${Name}Cursor? {
+            if (kvArr !== this@${Name}HashMap.kvArr) throw ConcurrentModificationException()
+            while (position != 0) {
+                --position
+                if (kvArr[position] != emptyEntry) return this
+            }
+            return null
+        }
+    }
+
+    private inner class KeyTraverser: ${KVType}Traverser, ${KVType}Cursor {
+        private val traverser = Traverser()
+        override val value: ${KVType} get() = traverser.key
+        override fun advance(): ${KVType}Cursor? = if (traverser.advance() != null) this else null
+    }
+
+    private inner class ValueTraverser: ${KVType}Traverser, ${KVType}Cursor {
+        private val traverser = Traverser()
+        override val value: ${KVType} get() = traverser.value
+        override fun advance(): ${KVType}Cursor? = if (traverser.advance() != null) this else null
+    }
 
     private companion object {
         // the value of a field in an uninitialized primitive array
@@ -566,6 +576,13 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX = 2 * CACHE_LINE_SIZE
+
+        private fun ${KVType}.slot(mask: Int): Int = Hash.mix(this) and mask
+        private fun ${KVType}.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask
+
+        private fun ${ArrayType}.key(): ${KVType} = to${KVType}()
+        private fun ${ArrayType}.value(): ${KVType} = (this shr (8 * ${KVType}.SIZE_BYTES)).to${KVType}()
+        private fun arrayEntry(key: ${KVType}, value: ${KVType}): ${ArrayType} = (value.to${ArrayType}() shl (8 * ${KVType}.SIZE_BYTES)) or (key.toU${KVType}().to${ArrayType}())
 
         private fun arraySize(capacity: Int, loadFactor: Double): Int {
             check(capacity >= 0)

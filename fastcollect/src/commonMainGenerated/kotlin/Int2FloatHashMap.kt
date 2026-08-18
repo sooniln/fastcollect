@@ -343,7 +343,7 @@ public class Int2FloatHashMap @JvmOverloads constructor(
                 override fun add(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableIntIterator = KeyIterator()
-                override fun foreach(action: IntConsumer) = foreachKey(action)
+                override fun traverse(): IntTraverser = KeyTraverser()
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -361,7 +361,7 @@ public class Int2FloatHashMap @JvmOverloads constructor(
                 override fun remove(element: Float): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableFloatIterator = ValueIterator()
 
-                override fun foreach(action: FloatConsumer) = foreach { _, value -> action.accept(value) }
+                override fun traverse(): FloatTraverser = ValueTraverser()
 
                 override fun clear() = throw UnsupportedOperationException()
             }
@@ -468,31 +468,7 @@ public class Int2FloatHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<MutableInt2FloatMap.MutableEntry> = FastEntryIterator()
 
-
-    override fun foreach(action: IntFloatConsumer) {
-
-        val keysArr = keysArr
-        val valuesArr = valuesArr
-
-        for (slot in keysArr.indices) {
-            val key = keysArr[slot]
-            if (key != emptyKey) {
-                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                action.accept(key, valuesArr[slot] as Float)
-            }
-        }
-    }
-
-    override fun foreachKey(action: IntConsumer) {
-        val keysArr = keysArr
-
-        for (slot in keysArr.indices) {
-            val key = keysArr[slot]
-            if (key != emptyKey) {
-                action.accept(key)
-            }
-        }
-    }
+    override fun traverse(): Int2FloatTraverser = Traverser()
 
     private open inner class SlotIterator {
         private val keysArr = this@Int2FloatHashMap.keysArr
@@ -597,6 +573,41 @@ public class Int2FloatHashMap @JvmOverloads constructor(
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         override fun toString(): String = "$key=$value"
     }
+
+    private inner class Traverser : Int2FloatTraverser, Int2FloatCursor {
+        private val keysArr = this@Int2FloatHashMap.keysArr
+        private val valuesArr = this@Int2FloatHashMap.valuesArr
+        private val emptyKey = this@Int2FloatHashMap.emptyKey
+
+        private var slot: Int = keysArr.size
+
+        override val key: Int get() = keysArr[slot]
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        override val value: Float get() = valuesArr[slot] as Float
+
+        override fun advance(): Int2FloatCursor? {
+            if (keysArr !== this@Int2FloatHashMap.keysArr) throw ConcurrentModificationException()
+            while (slot != 0) {
+                --slot
+                if (keysArr[slot] != emptyKey) return this
+            }
+            return null
+        }
+    }
+
+    private inner class KeyTraverser: IntTraverser, IntCursor {
+        private val traverser = Traverser()
+        override val value: Int get() = traverser.key
+        override fun advance(): IntCursor? = if (traverser.advance() != null) this else null
+    }
+
+
+    private inner class ValueTraverser: FloatTraverser, FloatCursor {
+        private val traverser = Traverser()
+        override val value: Float get() = traverser.value
+        override fun advance(): FloatCursor? = if (traverser.advance() != null) this else null
+    }
+
 
     private fun Int.slot(mask: Int): Int = Hash.mix(this) and mask
     private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask

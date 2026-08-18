@@ -319,7 +319,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
                 override fun add(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableIntIterator = KeyIterator()
-                override fun foreach(action: IntConsumer) = foreachKey(action)
+                override fun traverse(): IntTraverser = KeyTraverser()
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -334,7 +334,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
                 override fun add(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Int): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableIntIterator = ValueIterator()
-                override fun foreach(action: IntConsumer) = this@Int2IntHashMap.foreach { _, value -> action.accept(value) }
+                override fun traverse(): IntTraverser = ValueTraverser()
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _values = it }
@@ -429,21 +429,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<MutableInt2IntMap.MutableEntry> = FastEntryIterator()
 
-    override fun foreach(action: IntIntConsumer) {
-        for (entry in kvArr) {
-            if (entry != emptyEntry) {
-                action.accept(entry.key(), entry.value())
-            }
-        }
-    }
-
-    override fun foreachKey(action: IntConsumer) {
-        for (entry in kvArr) {
-            if (entry != emptyEntry) {
-                action.accept(entry.key())
-            }
-        }
-    }
+    override fun traverse(): Int2IntTraverser = Traverser()
 
     private open inner class SlotIterator {
         private val kvArr = this@Int2IntHashMap.kvArr
@@ -544,12 +530,36 @@ public class Int2IntHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private fun Int.slot(mask: Int): Int = Hash.mix(this) and mask
-    private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask
+    private inner class Traverser : Int2IntTraverser, Int2IntCursor {
+        private val kvArr = this@Int2IntHashMap.kvArr
+        private val emptyEntry = this@Int2IntHashMap.emptyEntry
 
-    private fun Long.key(): Int = toInt()
-    private fun Long.value(): Int = (this shr (8 * Int.SIZE_BYTES)).toInt()
-    private fun arrayEntry(key: Int, value: Int): Long = (value.toLong() shl (8 * Int.SIZE_BYTES)) or (key.toUInt().toLong())
+        private var position: Int = kvArr.size
+
+        override val key: Int get() = kvArr[position].key()
+        override val value: Int get() = kvArr[position].value()
+
+        override fun advance(): Int2IntCursor? {
+            if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()
+            while (position != 0) {
+                --position
+                if (kvArr[position] != emptyEntry) return this
+            }
+            return null
+        }
+    }
+
+    private inner class KeyTraverser: IntTraverser, IntCursor {
+        private val traverser = Traverser()
+        override val value: Int get() = traverser.key
+        override fun advance(): IntCursor? = if (traverser.advance() != null) this else null
+    }
+
+    private inner class ValueTraverser: IntTraverser, IntCursor {
+        private val traverser = Traverser()
+        override val value: Int get() = traverser.value
+        override fun advance(): IntCursor? = if (traverser.advance() != null) this else null
+    }
 
     private companion object {
         // the value of a field in an uninitialized primitive array
@@ -566,6 +576,13 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX = 2 * CACHE_LINE_SIZE
+
+        private fun Int.slot(mask: Int): Int = Hash.mix(this) and mask
+        private fun Int.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask
+
+        private fun Long.key(): Int = toInt()
+        private fun Long.value(): Int = (this shr (8 * Int.SIZE_BYTES)).toInt()
+        private fun arrayEntry(key: Int, value: Int): Long = (value.toLong() shl (8 * Int.SIZE_BYTES)) or (key.toUInt().toLong())
 
         private fun arraySize(capacity: Int, loadFactor: Double): Int {
             check(capacity >= 0)

@@ -273,6 +273,8 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
     override fun listIterator(): ByteListIterator = listIterator(0)
     override fun listIterator(index: Int): ByteListIterator = ListIteratorImpl(index)
 
+    override fun traverse(): ByteTraverser = TraverserImpl()
+
     override fun subList(fromIndex: Int, toIndex: Int): ByteList {
         return if (this is RandomAccess) {
             RandomAccessByteSubList(this, fromIndex, toIndex)
@@ -344,6 +346,20 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
 
         override fun nextIndex(): Int = index
         override fun previousIndex(): Int = index - 1
+    }
+
+    private inner class TraverserImpl : ByteTraverser, ByteCursor {
+        private val last = lastIndex
+        private var position: Int = -1
+
+        override val value: Byte get() = get(position)
+
+        override fun advance(): ByteCursor? {
+            if (position >= last) return null
+            if (last != lastIndex) throw ConcurrentModificationException()
+            ++position
+            return this
+        }
     }
 
     private open class ByteSubList(private val list: ByteList, fromIndex: Int, toIndex: Int) : AbstractByteList() {
@@ -539,6 +555,8 @@ private object EmptyByteList : ByteList, RandomAccess {
     override fun iterator(): ByteIterator = emptyByteIterator()
     override fun listIterator(): ByteListIterator = emptyByteIterator()
     override fun listIterator(index: Int): ByteListIterator = if (index == 0) listIterator() else throw IndexOutOfBoundsException()
+
+    override fun traverse(): ByteTraverser = emptyByteTraverser()
 
     override fun subList(fromIndex: Int, toIndex: Int): ByteList {
         if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()

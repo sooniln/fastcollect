@@ -8,8 +8,8 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
 public fun <V> emptyInt2AnyMap(): Int2AnyMap<V> = EmptyInt2AnyMap as Int2AnyMap<V>
@@ -23,7 +23,7 @@ public fun <V> mutableInt2AnyMapOf(): MutableInt2AnyMap<V> = Int2AnyHashMap()
 public fun <V> mutableInt2AnyMapOf(entry: Pair<Int, V>): MutableInt2AnyMap<V> = Int2AnyHashMap<V>(1).apply { set(entry.first, entry.second) }
 public fun <V> mutableInt2AnyMapOf(vararg entries: Pair<Int, V>): MutableInt2AnyMap<V> = Int2AnyHashMap<V>(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun <V> buildInt2AnyMap(expectedSize: Int = 0, builderAction: MutableInt2AnyMap<V>.() -> Unit): Int2AnyMap<V> {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
 
@@ -41,9 +41,7 @@ public inline fun <V> buildInt2AnyMap(expectedSize: Int = 0, builderAction: Muta
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
-
-public interface Int2AnyMap<out V> {
-
+public interface Int2AnyMap<out V> : Int2AnyTraversable<V> {
 
     public val size: Int
 
@@ -104,30 +102,6 @@ public interface Int2AnyMap<out V> {
 
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry<V>>
-
-    /**
-     * A method for iteration guaranteed to be as fast or faster than [iterator].
-     */
- 
-    public fun foreach(action: IntAnyConsumer<V>) {
- 
-        val it = iterator()
-        while (it.hasNext()) {
-            val entry = it.next()
-            action.accept(entry.key, entry.value)
-        }
-    }
-
-    /**
-     * A method for iteration over keys guaranteed to be as fast or faster than [iterator].
-     */
-    public fun foreachKey(action: IntConsumer) {
-        val it = iterator()
-        while (it.hasNext()) {
-            val entry = it.next()
-            action.accept(entry.key)
-        }
-    }
 }
 
 public fun <V> Int2AnyMap<V>.asMap(): Map<Int, V> = Int2AnyMapWrapper(this)
@@ -296,7 +270,11 @@ private object EmptyInt2AnyMap : Int2AnyMap<Nothing> {
     override val keys: IntSet get() = emptyIntSet()
 
     override val values: Collection<Nothing> get() = emptyList()
-    override fun iterator() = emptyFastIterator<Int2AnyMap.Entry<Nothing>>()
+    override fun iterator(): FastIterator<Int2AnyMap.Entry<Nothing>> = emptyFastIterator()
+
+
+
+    override fun traverse(): Int2AnyTraverser<Nothing>  = emptyInt2AnyTraverser()
 
 }
 
@@ -322,6 +300,17 @@ private class SingletonInt2AnyMap<V>(private val key: Int, private val value: V)
             if (complete) throw NoSuchElementException()
             complete = true
             return AbstractInt2AnyMap.SimpleEntry(key, value)
+        }
+    }
+
+    override fun traverse(): Int2AnyTraverser<V> = object : Int2AnyTraverser<V>, Int2AnyCursor<V> {
+        private var consumed = false
+        override val key: Int get() = this@SingletonInt2AnyMap.key
+        override val value: V get() = this@SingletonInt2AnyMap.value
+        override fun advance(): Int2AnyCursor<V>? {
+            if (consumed) return null
+            consumed = true
+            return this
         }
     }
 }

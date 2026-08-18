@@ -104,6 +104,8 @@ private object EmptyFloatSet : FloatSet {
     override fun containsAll(elements: FloatCollection): Boolean = elements.isEmpty()
 
     override fun iterator(): FloatIterator = emptyFloatIterator()
+
+    override fun traverse(): FloatTraverser = emptyFloatTraverser()
 }
 
 private class SingletonFloatSet(private val value: Float) : FloatSet {
@@ -122,6 +124,16 @@ private class SingletonFloatSet(private val value: Float) : FloatSet {
         }
 
         override fun hasNext(): Boolean = !complete
+    }
+
+    override fun traverse(): FloatTraverser = object : FloatTraverser, FloatCursor {
+        private var consumed = false
+        override val value: Float get() = this@SingletonFloatSet.value
+        override fun advance(): FloatCursor? {
+            if (consumed) return null
+            consumed = true
+            return this
+        }
     }
 }
 

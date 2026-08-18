@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect
 
+import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
@@ -314,13 +315,7 @@ public class DoubleHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableDoubleIterator = Iterator()
 
-    override fun foreach(action: DoubleConsumer) {
-        for (key in keysArr) {
-            if (key != emptyKey) {
-                action.accept(key)
-            }
-        }
-    }
+    override fun traverse(): DoubleTraverser = Traverser()
 
     private inner class Iterator : MutableDoubleIterator() {
         private val keysArr = this@DoubleHashSet.keysArr
@@ -363,6 +358,24 @@ public class DoubleHashSet @JvmOverloads constructor(
             do {
                 slot = (slot - 1) and mask
             } while (keysArr[slot] == emptyKey)
+        }
+    }
+
+    private inner class Traverser : DoubleTraverser, DoubleCursor {
+        private val keysArr = this@DoubleHashSet.keysArr
+        private val emptyKey = this@DoubleHashSet.emptyKey
+
+        private var position: Int = keysArr.size
+
+        override val value: Double get() = keysArr[position]
+
+        override fun advance(): DoubleCursor? {
+            if (keysArr !== this@DoubleHashSet.keysArr) throw ConcurrentModificationException()
+            while (position != 0) {
+                --position
+                if (keysArr[position] != emptyKey) return this
+            }
+            return null
         }
     }
 

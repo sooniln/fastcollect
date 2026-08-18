@@ -273,6 +273,8 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
     override fun listIterator(): IntListIterator = listIterator(0)
     override fun listIterator(index: Int): IntListIterator = ListIteratorImpl(index)
 
+    override fun traverse(): IntTraverser = TraverserImpl()
+
     override fun subList(fromIndex: Int, toIndex: Int): IntList {
         return if (this is RandomAccess) {
             RandomAccessIntSubList(this, fromIndex, toIndex)
@@ -344,6 +346,20 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
 
         override fun nextIndex(): Int = index
         override fun previousIndex(): Int = index - 1
+    }
+
+    private inner class TraverserImpl : IntTraverser, IntCursor {
+        private val last = lastIndex
+        private var position: Int = -1
+
+        override val value: Int get() = get(position)
+
+        override fun advance(): IntCursor? {
+            if (position >= last) return null
+            if (last != lastIndex) throw ConcurrentModificationException()
+            ++position
+            return this
+        }
     }
 
     private open class IntSubList(private val list: IntList, fromIndex: Int, toIndex: Int) : AbstractIntList() {
@@ -539,6 +555,8 @@ private object EmptyIntList : IntList, RandomAccess {
     override fun iterator(): IntIterator = emptyIntIterator()
     override fun listIterator(): IntListIterator = emptyIntIterator()
     override fun listIterator(index: Int): IntListIterator = if (index == 0) listIterator() else throw IndexOutOfBoundsException()
+
+    override fun traverse(): IntTraverser = emptyIntTraverser()
 
     override fun subList(fromIndex: Int, toIndex: Int): IntList {
         if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()

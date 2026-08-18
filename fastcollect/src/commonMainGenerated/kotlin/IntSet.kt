@@ -104,6 +104,8 @@ private object EmptyIntSet : IntSet {
     override fun containsAll(elements: IntCollection): Boolean = elements.isEmpty()
 
     override fun iterator(): IntIterator = emptyIntIterator()
+
+    override fun traverse(): IntTraverser = emptyIntTraverser()
 }
 
 private class SingletonIntSet(private val value: Int) : IntSet {
@@ -122,6 +124,16 @@ private class SingletonIntSet(private val value: Int) : IntSet {
         }
 
         override fun hasNext(): Boolean = !complete
+    }
+
+    override fun traverse(): IntTraverser = object : IntTraverser, IntCursor {
+        private var consumed = false
+        override val value: Int get() = this@SingletonIntSet.value
+        override fun advance(): IntCursor? {
+            if (consumed) return null
+            consumed = true
+            return this
+        }
     }
 }
 

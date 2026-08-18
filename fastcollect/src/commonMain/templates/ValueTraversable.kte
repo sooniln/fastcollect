@@ -1,0 +1,141 @@
+/**
+ * Methods for dealing with Traversables.
+ */
+@file:JvmName("Traversables")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
+
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+import kotlin.jvm.JvmMultifileClass
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
+
+public fun empty${Type}Traverser(): ${Type}Traverser = Empty${Type}Traverser
+
+/**
+ * Implementing this interface indicates that this object can be traversed through to produce a series of ${Type}s. Very
+ * similar to [Iterable] in concept - see [Traversable] for more details.
+ */
+public interface ${Type}Traversable: Traversable {
+    override fun traverse(): ${Type}Traverser
+}
+
+/**
+ * Provides a way of traversing through ${Type} values in a container. Very similar to [Iterator] in concept - see
+ * [Traverser] for more details.
+ */
+public interface ${Type}Traverser : Traverser {
+    override fun advance(): ${Type}Cursor?
+}
+
+/**
+ * A pointer to a single ${Type}, produced by a [${Type}Traverser] during iteration.
+ */
+public interface ${Type}Cursor : Cursor {
+    public val value: ${Type}
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Traversable.foreach(action: (${Type}) -> Unit) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverse()
+    while (true) {
+        val cursor = traverser.advance() ?: break
+        action(cursor.value)
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Traversable.any(predicate: (${Type}) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+
+    foreach { if (predicate(it)) return true }
+    return false
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Traversable.all(predicate: (${Type}) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Traversable.none(predicate: (${Type}) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> ${Type}Traversable.fold(initial: R, operation: (accumulated: R, ${Type}) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    foreach { accumulated = operation(accumulated, it) }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Traversable.reduce(operation: (accumulated: ${Type}, ${Type}) -> ${Type}): ${Type} {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val traverser = traverse()
+    var accumulated = (traverser.advance() ?: throw NoSuchElementException()).value
+    while (true) {
+        val cursor = traverser.advance() ?: break
+        accumulated = operation(accumulated, cursor.value)
+    }
+    return accumulated
+}
+
+<% if (Type == "Byte" || Type == "Short" || Type == "Int") { %>
+@Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
+public fun ${Type}Traversable.sum(): Int = sumOf { it.toInt() }
+<% } %>
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0
+    foreach { sum += selector(it) }
+    return sum
+}
+
+<% if (Type == "Long") { %>
+public fun ${Type}Traversable.sum(): Long = sumOf { it }
+<% } %>
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0L
+    foreach { sum += selector(it) }
+    return sum
+}
+
+<% if (Type == "Float" || Type == "Double") { %>
+@Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
+public fun ${Type}Traversable.sum(): Double = sumOf { it.toDouble() }
+<% } %>
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0.0
+    foreach { sum += selector(it) }
+    return sum
+}
+
+private object Empty${Type}Traverser : ${Type}Traverser {
+    override fun advance(): ${Type}Cursor? = null
+}

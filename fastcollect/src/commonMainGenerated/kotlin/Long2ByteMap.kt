@@ -8,8 +8,8 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
 public fun  emptyLong2ByteMap(): Long2ByteMap = EmptyLong2ByteMap as Long2ByteMap
@@ -23,7 +23,7 @@ public fun  mutableLong2ByteMapOf(): MutableLong2ByteMap = Long2ByteHashMap()
 public fun  mutableLong2ByteMapOf(entry: Pair<Long, Byte>): MutableLong2ByteMap = Long2ByteHashMap(1).apply { set(entry.first, entry.second) }
 public fun  mutableLong2ByteMapOf(vararg entries: Pair<Long, Byte>): MutableLong2ByteMap = Long2ByteHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun  buildLong2ByteMap(expectedSize: Int = 0, builderAction: MutableLong2ByteMap.() -> Unit): Long2ByteMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
 
@@ -41,9 +41,7 @@ public inline fun  buildLong2ByteMap(expectedSize: Int = 0, builderAction: Mutab
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
-
-public interface Long2ByteMap {
-
+public interface Long2ByteMap : Long2ByteTraversable {
 
     public val size: Int
 
@@ -104,30 +102,6 @@ public interface Long2ByteMap {
 
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry>
-
-    /**
-     * A method for iteration guaranteed to be as fast or faster than [iterator].
-     */
- 
-    public fun foreach(action: LongByteConsumer) {
- 
-        val it = iterator()
-        while (it.hasNext()) {
-            val entry = it.next()
-            action.accept(entry.key, entry.value)
-        }
-    }
-
-    /**
-     * A method for iteration over keys guaranteed to be as fast or faster than [iterator].
-     */
-    public fun foreachKey(action: LongConsumer) {
-        val it = iterator()
-        while (it.hasNext()) {
-            val entry = it.next()
-            action.accept(entry.key)
-        }
-    }
 }
 
 public fun  Long2ByteMap.asMap(): Map<Long, Byte> = Long2ByteMapWrapper(this)
@@ -296,7 +270,11 @@ private object EmptyLong2ByteMap : Long2ByteMap {
     override val keys: LongSet get() = emptyLongSet()
 
     override val values: ByteCollection get() = emptyByteList()
-    override fun iterator() = emptyFastIterator<Long2ByteMap.Entry>()
+    override fun iterator(): FastIterator<Long2ByteMap.Entry> = emptyFastIterator()
+
+
+
+    override fun traverse(): Long2ByteTraverser = emptyLong2ByteTraverser()
 
 }
 
@@ -322,6 +300,17 @@ private class SingletonLong2ByteMap(private val key: Long, private val value: By
             if (complete) throw NoSuchElementException()
             complete = true
             return AbstractLong2ByteMap.SimpleEntry(key, value)
+        }
+    }
+
+    override fun traverse(): Long2ByteTraverser = object : Long2ByteTraverser, Long2ByteCursor {
+        private var consumed = false
+        override val key: Long get() = this@SingletonLong2ByteMap.key
+        override val value: Byte get() = this@SingletonLong2ByteMap.value
+        override fun advance(): Long2ByteCursor? {
+            if (consumed) return null
+            consumed = true
+            return this
         }
     }
 }

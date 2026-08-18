@@ -9,7 +9,6 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
@@ -17,7 +16,7 @@ import kotlin.jvm.JvmSynthetic
 /**
  * A collection of Bytes.
  */
-public interface ByteCollection {
+public interface ByteCollection : ByteTraversable {
 
     public val size: Int
 
@@ -26,16 +25,6 @@ public interface ByteCollection {
     }
 
     public operator fun iterator(): ByteIterator
-
-    /**
-     * A method for iteration guaranteed to be as fast or faster than [iterator].
-     */
-    public fun foreach(action: ByteConsumer) {
-        val it = iterator()
-        while (it.hasNext()) {
-            action.accept(it.next())
-        }
-    }
 
     public fun contains(element: Byte): Boolean {
         for (e in this) {
@@ -70,95 +59,6 @@ public interface ByteCollection {
         }
         return array
     }
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun ByteCollection.any(predicate: (Byte) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-
-    for (element in this) {
-        if (predicate(element)) return true
-    }
-    return false
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun ByteCollection.all(predicate: (Byte) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-    return !any { !predicate(it) }
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun ByteCollection.none(predicate: (Byte) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-    return !any(predicate)
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun <R> ByteCollection.fold(initial: R, operation: (accumulated: R, Byte) -> R): R {
-    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
-
-    var accumulated = initial
-    for (element in this) {
-        accumulated = operation(accumulated, element)
-    }
-    return accumulated
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun ByteCollection.reduce(operation: (accumulated: Byte, Byte) -> Byte): Byte {
-    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var accumulated = it.nextByte()
-    while (it.hasNext()) {
-        accumulated = operation(accumulated, it.nextByte())
-    }
-    return accumulated
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun ByteCollection.sumOf(selector: (Byte) -> Int): Int {
-    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var sum = 0
-    while (it.hasNext()) {
-        sum += selector(it.nextByte())
-    }
-    return sum
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun ByteCollection.sumOf(selector: (Byte) -> Long): Long {
-    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var sum = 0L
-    while (it.hasNext()) {
-        sum += selector(it.nextByte())
-    }
-    return sum
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun ByteCollection.sumOf(selector: (Byte) -> Double): Double {
-    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var sum = 0.0
-    while (it.hasNext()) {
-        sum += selector(it.nextByte())
-    }
-    return sum
 }
 
 /**
@@ -262,8 +162,6 @@ public abstract class AbstractByteCollection : ByteCollection {
         return Iterable { iterator() }.joinToString(", ", "[", "]")
     }
 }
-
-
 
 public fun interface ByteConsumer {
     public fun accept(value: Byte)

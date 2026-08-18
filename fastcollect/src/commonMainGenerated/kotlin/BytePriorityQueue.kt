@@ -40,7 +40,7 @@ public inline fun buildBytePriorityQueue(
  * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
  * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
-public abstract class AbstractBytePriorityQueue(initialCapacity: Int = 0) {
+public abstract class AbstractBytePriorityQueue(initialCapacity: Int = 0): ByteTraversable {
 
     public constructor(array: ByteArray, fromIndex: Int = 0, toIndex: Int = array.size) : this(0) {
         heap = array.copyOfRange(fromIndex, toIndex)
@@ -205,6 +205,20 @@ public abstract class AbstractBytePriorityQueue(initialCapacity: Int = 0) {
         override fun nextByte(): Byte {
             if (!hasNext()) throw NoSuchElementException()
             return heap[index++]
+        }
+    }
+
+    override fun traverse(): ByteTraverser = object : ByteTraverser, ByteCursor {
+        private val last = size - 1
+        private var position: Int = -1
+
+        override val value: Byte get() = heap[position]
+
+        override fun advance(): ByteCursor? {
+            if (position == last) return null
+            if (last != size - 1) throw ConcurrentModificationException()
+            ++position
+            return this
         }
     }
 

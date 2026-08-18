@@ -358,6 +358,22 @@ class IntPriorityQueueTest {
     }
 
     @Test
+    fun foreach_visitsAllElementsExactlyOnce() {
+        val queue = intPriorityQueueOf(5, 3, 8, 1, 9, 2, 7)
+        val visited = mutableListOf<Int>()
+        queue.foreach { v -> visited.add(v) }
+
+        assertEquals(listOf(5, 3, 8, 1, 9, 2, 7).sorted(), visited.sorted())
+    }
+
+    @Test
+    fun foreach_emptyQueue_visitsNothing() {
+        val visited = mutableListOf<Int>()
+        IntPriorityQueue().foreach { v -> visited.add(v) }
+        assertTrue(visited.isEmpty())
+    }
+
+    @Test
     fun clear_emptiesQueue() {
         val queue = intPriorityQueueOf(1, 2, 3)
         queue.clear()

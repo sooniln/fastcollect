@@ -9,10 +9,6 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-
-import kotlin.jvm.JvmExposeBoxed
-import kotlin.jvm.JvmInline
-
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
@@ -20,7 +16,7 @@ import kotlin.jvm.JvmSynthetic
 /**
  * A collection of Floats.
  */
-public interface FloatCollection {
+public interface FloatCollection : FloatTraversable {
 
     public val size: Int
 
@@ -29,16 +25,6 @@ public interface FloatCollection {
     }
 
     public operator fun iterator(): FloatIterator
-
-    /**
-     * A method for iteration guaranteed to be as fast or faster than [iterator].
-     */
-    public fun foreach(action: FloatConsumer) {
-        val it = iterator()
-        while (it.hasNext()) {
-            action.accept(it.next())
-        }
-    }
 
     public fun contains(element: Float): Boolean {
         for (e in this) {
@@ -73,95 +59,6 @@ public interface FloatCollection {
         }
         return array
     }
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun FloatCollection.any(predicate: (Float) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-
-    for (element in this) {
-        if (predicate(element)) return true
-    }
-    return false
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun FloatCollection.all(predicate: (Float) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-    return !any { !predicate(it) }
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun FloatCollection.none(predicate: (Float) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-    return !any(predicate)
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun <R> FloatCollection.fold(initial: R, operation: (accumulated: R, Float) -> R): R {
-    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
-
-    var accumulated = initial
-    for (element in this) {
-        accumulated = operation(accumulated, element)
-    }
-    return accumulated
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun FloatCollection.reduce(operation: (accumulated: Float, Float) -> Float): Float {
-    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var accumulated = it.nextFloat()
-    while (it.hasNext()) {
-        accumulated = operation(accumulated, it.nextFloat())
-    }
-    return accumulated
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun FloatCollection.sumOf(selector: (Float) -> Int): Int {
-    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var sum = 0
-    while (it.hasNext()) {
-        sum += selector(it.nextFloat())
-    }
-    return sum
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun FloatCollection.sumOf(selector: (Float) -> Long): Long {
-    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var sum = 0L
-    while (it.hasNext()) {
-        sum += selector(it.nextFloat())
-    }
-    return sum
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun FloatCollection.sumOf(selector: (Float) -> Double): Double {
-    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var sum = 0.0
-    while (it.hasNext()) {
-        sum += selector(it.nextFloat())
-    }
-    return sum
 }
 
 /**
@@ -265,28 +162,6 @@ public abstract class AbstractFloatCollection : FloatCollection {
         return Iterable { iterator() }.joinToString(", ", "[", "]")
     }
 }
-
-
-
-@OptIn(ExperimentalStdlibApi::class)
-@JvmExposeBoxed
-@JvmInline
-public value class InlineFloatCollection public constructor(@PublishedApi internal val collection: MutableIntCollection) : MutableFloatCollection {
-    override val size: Int get() = collection.size
-    override fun contains(element: Float): Boolean = collection.contains(element.toBits())
-    override fun add(element: Float): Boolean = collection.add(element.toBits())
-    override fun remove(element: Float): Boolean = collection.remove(element.toBits())
-    override fun iterator(): InlineMutableFloatIterator = InlineMutableFloatIterator(collection.iterator())
-    override fun foreach(action: FloatConsumer): Unit = collection.foreach { value -> action.accept(Float.fromBits(value)) }
-}
-
-public class InlineMutableFloatIterator public constructor(@PublishedApi internal val it: MutableIntIterator) : MutableFloatIterator() {
-    override fun hasNext(): Boolean = it.hasNext()
-    override fun nextFloat(): Float = Float.fromBits(it.nextInt())
-    override fun remove() { it.remove() }
-}
-
-
 
 public fun interface FloatConsumer {
     public fun accept(value: Float)

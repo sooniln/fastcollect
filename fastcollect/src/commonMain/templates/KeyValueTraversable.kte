@@ -1,0 +1,142 @@
+/**
+ * Methods for dealing with Traversables.
+ */
+@file:JvmName("Traversables")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
+
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+import kotlin.jvm.JvmMultifileClass
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
+
+public fun ${Generics} empty${Name}Traverser(): ${Name}Traverser${Generics} = Empty${Name}Traverser
+
+/**
+ * Implementing this interface indicates that this object can be traversed through to produce a series of ${KeyType} and
+ * ${ValueType} tuples. Very similar to [Iterable] in concept - see [Traversable] for more details.
+ *
+ * Clients are generally encouraged not to use methods from this interface directly, but to use the inline extension
+ * methods [${Name}Traversable.foreach]/[${Name}Traversable.foreachKey].
+ */
+public interface ${Name}Traversable${OutGenerics}: Traversable {
+    override fun traverse(): ${Name}Traverser${Generics}
+}
+
+/**
+ * Provides a way of traversing through ${KeyType} and ${ValueType} tuples in a map. Very similar to [Iterator] in
+ * concept - see [Traverser] for more details.
+ */
+public interface ${Name}Traverser${OutGenerics} : Traverser {
+    override fun advance(): ${Name}Cursor${Generics}?
+}
+
+/**
+ * A pointer to a ${KeyType} -> ${ValueType} mapping, produced by a [${Name}Traverser] during iteration.
+ */
+public interface ${Name}Cursor${OutGenerics} : Cursor {
+    public val key: ${KeyType}
+    public val value: ${ValueType}
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Generics} ${Name}Traversable${Generics}.foreach(
+    action: (${KeyType}, ${ValueType}) -> Unit
+) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverse()
+    while (true) {
+        val cursor = traverser.advance() ?: break
+        action(cursor.key, cursor.value)
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Generics} ${Name}Traversable${Generics}.foreachKey(
+    action: (${KeyType}) -> Unit
+) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverse()
+    while (true) {
+        val cursor = traverser.advance() ?: break
+        action(cursor.key)
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Generics} ${Name}Traversable${Generics}.any(predicate: (${KeyType}, ${ValueType}) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+
+    foreach { key, value -> if (predicate(key, value)) return true }
+    return false
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Generics} ${Name}Traversable${Generics}.all(predicate: (${KeyType}, ${ValueType}) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { key, value -> !predicate(key, value) }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Generics} ${Name}Traversable${Generics}.none(predicate: (${KeyType}, ${ValueType}) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@OptIn(ExperimentalContracts::class)
+<% if (isReferenceValue) { %>
+public inline fun <R, V> ${Name}Traversable<V>.fold(initial: R, operation: (accumulated: R, ${KeyType}, ${ValueType}) -> R): R {
+<% } else { %>
+public inline fun <R> ${Name}Traversable.fold(initial: R, operation: (accumulated: R, ${KeyType}, ${ValueType}) -> R): R {
+<% } %>
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    foreach { key, value -> accumulated = operation(accumulated, key, value) }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${KeyType}, ${ValueType}) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0
+    foreach { key, value -> sum += selector(key, value) }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${KeyType}, ${ValueType}) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0L
+    foreach { key, value -> sum += selector(key, value) }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${KeyType}, ${ValueType}) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0.0
+    foreach { key, value -> sum += selector(key, value) }
+    return sum
+}
+
+<% if (isReferenceValue) { %>
+private object Empty${Name}Traverser : ${Name}Traverser<Nothing> {
+    override fun advance(): ${Name}Cursor<Nothing>? = null
+<% } else { %>
+private object Empty${Name}Traverser : ${Name}Traverser {
+    override fun advance(): ${Name}Cursor? = null
+<% } %>
+}

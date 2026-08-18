@@ -9,7 +9,6 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
@@ -17,7 +16,7 @@ import kotlin.jvm.JvmSynthetic
 /**
  * A collection of Longs.
  */
-public interface LongCollection {
+public interface LongCollection : LongTraversable {
 
     public val size: Int
 
@@ -26,16 +25,6 @@ public interface LongCollection {
     }
 
     public operator fun iterator(): LongIterator
-
-    /**
-     * A method for iteration guaranteed to be as fast or faster than [iterator].
-     */
-    public fun foreach(action: LongConsumer) {
-        val it = iterator()
-        while (it.hasNext()) {
-            action.accept(it.next())
-        }
-    }
 
     public fun contains(element: Long): Boolean {
         for (e in this) {
@@ -70,95 +59,6 @@ public interface LongCollection {
         }
         return array
     }
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun LongCollection.any(predicate: (Long) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-
-    for (element in this) {
-        if (predicate(element)) return true
-    }
-    return false
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun LongCollection.all(predicate: (Long) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-    return !any { !predicate(it) }
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun LongCollection.none(predicate: (Long) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-    return !any(predicate)
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun <R> LongCollection.fold(initial: R, operation: (accumulated: R, Long) -> R): R {
-    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
-
-    var accumulated = initial
-    for (element in this) {
-        accumulated = operation(accumulated, element)
-    }
-    return accumulated
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun LongCollection.reduce(operation: (accumulated: Long, Long) -> Long): Long {
-    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var accumulated = it.nextLong()
-    while (it.hasNext()) {
-        accumulated = operation(accumulated, it.nextLong())
-    }
-    return accumulated
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun LongCollection.sumOf(selector: (Long) -> Int): Int {
-    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var sum = 0
-    while (it.hasNext()) {
-        sum += selector(it.nextLong())
-    }
-    return sum
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun LongCollection.sumOf(selector: (Long) -> Long): Long {
-    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var sum = 0L
-    while (it.hasNext()) {
-        sum += selector(it.nextLong())
-    }
-    return sum
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun LongCollection.sumOf(selector: (Long) -> Double): Double {
-    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
-
-    val it = iterator()
-    var sum = 0.0
-    while (it.hasNext()) {
-        sum += selector(it.nextLong())
-    }
-    return sum
 }
 
 /**
@@ -262,8 +162,6 @@ public abstract class AbstractLongCollection : LongCollection {
         return Iterable { iterator() }.joinToString(", ", "[", "]")
     }
 }
-
-
 
 public fun interface LongConsumer {
     public fun accept(value: Long)

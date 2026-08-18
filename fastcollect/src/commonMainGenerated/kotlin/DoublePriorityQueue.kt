@@ -40,7 +40,7 @@ public inline fun buildDoublePriorityQueue(
  * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
  * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
-public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0) {
+public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): DoubleTraversable {
 
     public constructor(array: DoubleArray, fromIndex: Int = 0, toIndex: Int = array.size) : this(0) {
         heap = array.copyOfRange(fromIndex, toIndex)
@@ -205,6 +205,20 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0) {
         override fun nextDouble(): Double {
             if (!hasNext()) throw NoSuchElementException()
             return heap[index++]
+        }
+    }
+
+    override fun traverse(): DoubleTraverser = object : DoubleTraverser, DoubleCursor {
+        private val last = size - 1
+        private var position: Int = -1
+
+        override val value: Double get() = heap[position]
+
+        override fun advance(): DoubleCursor? {
+            if (position == last) return null
+            if (last != size - 1) throw ConcurrentModificationException()
+            ++position
+            return this
         }
     }
 

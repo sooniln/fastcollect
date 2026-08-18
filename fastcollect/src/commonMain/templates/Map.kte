@@ -8,8 +8,8 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
 public fun ${Generics} empty${Name}Map(): ${Name}Map${Generics} = Empty${Name}Map as ${Name}Map${Generics}
@@ -23,7 +23,7 @@ public fun ${Generics} mutable${Name}MapOf(): Mutable${Name}Map${Generics} = ${N
 public fun ${Generics} mutable${Name}MapOf(entry: Pair<${KeyType}, ${ValueType}>): Mutable${Name}Map${Generics} = ${Name}HashMap${Generics}(1).apply { set(entry.first, entry.second) }
 public fun ${Generics} mutable${Name}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): Mutable${Name}Map${Generics} = ${Name}HashMap${Generics}(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} build${Name}Map(expectedSize: Int = 0, builderAction: Mutable${Name}Map${Generics}.() -> Unit): ${Name}Map${Generics} {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
 
@@ -41,11 +41,7 @@ public inline fun ${Generics} build${Name}Map(expectedSize: Int = 0, builderActi
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
-<% if (!isReferenceValue) { %>
-public interface ${Name}Map {
-<% } else { %>
-public interface ${Name}Map<out V> {
-<% } %>
+public interface ${Name}Map${OutGenerics} : ${Name}Traversable${Generics} {
 
     public val size: Int
 
@@ -108,32 +104,6 @@ public interface ${Name}Map<out V> {
 
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry${Generics}>
-
-    /**
-     * A method for iteration guaranteed to be as fast or faster than [iterator].
-     */
- <% if (!isReferenceValue) { %>
-    public fun foreach(action: ${KeyType}${ValueType}Consumer) {
- <% } else { %>
-    public fun foreach(action: ${KeyType}AnyConsumer${Generics}) {
- <% } %>
-        val it = iterator()
-        while (it.hasNext()) {
-            val entry = it.next()
-            action.accept(entry.key, entry.value)
-        }
-    }
-
-    /**
-     * A method for iteration over keys guaranteed to be as fast or faster than [iterator].
-     */
-    public fun foreachKey(action: ${KeyType}Consumer) {
-        val it = iterator()
-        while (it.hasNext()) {
-            val entry = it.next()
-            action.accept(entry.key)
-        }
-    }
 }
 
 public fun ${Generics} ${Name}Map${Generics}.asMap(): Map<${KeyType}, ${ValueType}> = ${Name}MapWrapper(this)
@@ -309,10 +279,16 @@ private object Empty${Name}Map : ${Name}Map<Nothing> {
     override val keys: ${KeyType}Set get() = empty${KeyType}Set()
 <% if (!isReferenceValue) { %>
     override val values: ${ValueCollectionType}${Generics} get() = empty${ValueType}List()
-    override fun iterator() = emptyFastIterator<${Name}Map.Entry>()
+    override fun iterator(): FastIterator<${Name}Map.Entry> = emptyFastIterator()
 <% } else { %>
     override val values: ${ValueCollectionType}<Nothing> get() = emptyList()
-    override fun iterator() = emptyFastIterator<${Name}Map.Entry<Nothing>>()
+    override fun iterator(): FastIterator<${Name}Map.Entry<Nothing>> = emptyFastIterator()
+<% } %>
+
+<% if (!isReferenceValue) { %>
+    override fun traverse(): ${Name}Traverser = empty${Name}Traverser()
+<% } else { %>
+    override fun traverse(): ${Name}Traverser<Nothing>  = empty${Name}Traverser()
 <% } %>
 }
 
@@ -340,6 +316,17 @@ private class Singleton${Name}Map${Generics}(private val key: ${KeyType}, privat
             if (complete) throw NoSuchElementException()
             complete = true
             return Abstract${Name}Map.SimpleEntry(key, value)
+        }
+    }
+
+    override fun traverse(): ${Name}Traverser${Generics} = object : ${Name}Traverser${Generics}, ${Name}Cursor${Generics} {
+        private var consumed = false
+        override val key: ${KeyType} get() = this@Singleton${Name}Map.key
+        override val value: ${ValueType} get() = this@Singleton${Name}Map.value
+        override fun advance(): ${Name}Cursor${Generics}? {
+            if (consumed) return null
+            consumed = true
+            return this
         }
     }
 }

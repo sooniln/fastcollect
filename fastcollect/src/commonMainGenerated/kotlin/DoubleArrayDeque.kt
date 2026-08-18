@@ -80,11 +80,11 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
     }
 
     override fun get(index: Int): Double {
-        return ring[ring.position(rangeCheck(index))]
+        return ring[ring.position(head, rangeCheck(index))]
     }
 
     override fun set(index: Int, element: Double) {
-        ring[ring.position(rangeCheck(index))] = element
+        ring[ring.position(head, rangeCheck(index))] = element
     }
 
     override fun addFirst(element: Double) {
@@ -99,7 +99,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         val s = size
         val newSize = s + 1
         ensureCapacity(newSize)
-        ring[ring.position(s)] = element
+        ring[ring.position(head, s)] = element
         size = newSize
     }
 
@@ -117,7 +117,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         ensureCapacity(newSize)
 
         // attempt to shift a minimal number of elements depending on where position falls within the array
-        val position = ring.position(index)
+        val position = ring.position(head, index)
         if (index < newSize shr 1) {
             // shift elements before position
             val actualPosition = ring.decrementPosition(position)
@@ -136,7 +136,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
             head = newHead
         } else {
             // shift elements after position
-            val tail = ring.position(size)
+            val tail = ring.position(head, size)
             if (position < tail) {
                 // position before tail
                 ring.copyInto(ring, position + 1, position, tail)
@@ -162,13 +162,13 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
 
     override fun removeLast(): Double {
         if (isEmpty()) throw NoSuchElementException()
-        return ring[ring.position(--size)]
+        return ring[ring.position(head, --size)]
     }
 
     override fun removeAt(index: Int): Double {
         rangeCheck(index)
 
-        val position = ring.position(index)
+        val position = ring.position(head, index)
         val element = ring[position]
         removeAtInternal(position)
         return element
@@ -177,7 +177,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
     // returns -1 if the back half was shifted left and 0 if the front half was shifted right
     private fun removeAtInternal(position: Int): Int {
         // attempt to shift a minimal number of elements depending on where position falls within the array
-        if (ring.index(position) < size shr 1) {
+        if (ring.index(head, position) < size shr 1) {
             // shift front half right, then advance head
             if (position > head) {
                 ring.copyInto(ring, head + 1, head, position)
@@ -193,7 +193,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
             return 0
         } else {
             // shift back half left
-            val tail = ring.position(size - 1)
+            val tail = ring.position(head, size - 1)
             if (position < tail) {
                 ring.copyInto(ring, position, position + 1, tail + 1)
             } else if (position > tail) {
@@ -219,13 +219,13 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         if (fromIndex <= size - toIndex) {
             // Shift [0, fromIndex) right by `removed`, then advance head.
             for (i in fromIndex - 1 downTo 0) {
-                ring[ring.position(i + removed)] = ring[ring.position(i)]
+                ring[ring.position(head, i + removed)] = ring[ring.position(head, i)]
             }
             head = ring.positiveMod(head + removed)
         } else {
             // Shift [toIndex, size) left by `removed`.
             for (i in toIndex until size) {
-                ring[ring.position(i - removed)] = ring[ring.position(i)]
+                ring[ring.position(head, i - removed)] = ring[ring.position(head, i)]
             }
         }
         size -= removed
@@ -424,7 +424,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         val midPoint = size / 2
         if (midPoint < 1) return
         var i = head
-        var j = ring.position(size - 1)
+        var j = ring.position(head, size - 1)
         repeat(midPoint) {
             val tmp = ring[i]
             ring[i] = ring[j]
@@ -448,33 +448,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         }
     }
 
-    override fun foreach(action: DoubleConsumer) {
-        val ring = ring
-        val tail = head + size
-        if (tail > ring.size) {
-            foreachDiscrete(ring, action)
-        } else {
-            foreachContinuous(ring, tail, action)
-        }
-    }
-
-    private fun foreachContinuous(ring: DoubleArray, tail: Int, action: DoubleConsumer) {
-        var position = head
-        while (position < tail) {
-            action.accept(ring[position])
-            ++position
-        }
-    }
-
-    private fun foreachDiscrete(ring: DoubleArray, action: DoubleConsumer) {
-        var remaining = size
-        var position = head
-        while (remaining > 0) {
-            action.accept(ring[position])
-            position = ring.incrementPosition(position)
-            --remaining
-        }
-    }
+    override fun traverse(): DoubleTraverser = Traverser()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -483,7 +457,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         if (size != other.size) return false
         if (other is RandomAccess) {
             for (i in indices) {
-                if (!(ring[ring.position(i)] equalsBoxed other[i])) return false
+                if (!(ring[ring.position(head, i)] equalsBoxed other[i])) return false
             }
         } else {
             val it = other.iterator()
@@ -499,7 +473,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         var hashCode = 1
         if (!isEmpty()) {
             var position = head
-            val end = ring.position(size)
+            val end = ring.position(head, size)
             do {
                 hashCode = 31 * hashCode + ring[position].hashCode()
                 position = ring.incrementPosition(position)
@@ -566,24 +540,40 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         }
     }
 
-    private fun DoubleArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+    private inner class Traverser : DoubleTraverser, DoubleCursor {
+        private val ring = this@DoubleArrayDeque.ring
+        private var position: Int = head - 1
+        private var remaining = size
 
-    private fun DoubleArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+        override val value: Double get() = ring[position]
 
-    private fun DoubleArray.position(index: Int): Int = positiveMod(head + index)
-
-    private fun DoubleArray.index(position: Int): Int = negativeMod(position - head)
-
-    private fun DoubleArray.incrementPosition(position: Int): Int {
-        val next = position + 1
-        return if (next == size) 0 else next
+        override fun advance(): DoubleCursor? {
+            if (remaining == 0) return null
+            if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
+            position = ring.incrementPosition(position)
+            --remaining
+            return this
+        }
     }
-
-    private fun DoubleArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
     internal companion object {
         private val EMPTY_ARRAY = DoubleArray(0)
         private const val DEFAULT_CAPACITY = 8
+
+        private fun DoubleArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+
+        private fun DoubleArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+
+        private fun DoubleArray.position(head: Int, index: Int): Int = positiveMod(head + index)
+
+        private fun DoubleArray.index(head: Int, position: Int): Int = negativeMod(position - head)
+
+        private fun DoubleArray.incrementPosition(position: Int): Int {
+            val next = position + 1
+            return if (next == size) 0 else next
+        }
+
+        private fun DoubleArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
         fun wrap(array: DoubleArray): DoubleArrayDeque = DoubleArrayDeque(array)
     }

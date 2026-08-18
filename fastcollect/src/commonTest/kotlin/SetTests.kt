@@ -167,6 +167,12 @@ class IntSetTest {
     }
 
     @Test
+    fun foreach_emptyAndSingletonSet_matchesIterator() {
+        assertEquals(emptySet<Int>(), mutableSetOf<Int>().also { emptyIntSet().foreach { v -> it.add(v) } })
+        assertEquals(setOf(42), mutableSetOf<Int>().also { intSetOf(42).foreach { v -> it.add(v) } })
+    }
+
+    @Test
     fun equals_matchesAnySetImplementation() {
         // Set contract (Abstract*Set.equals()) requires equality against ANY IntSet implementation, not
         // just the same concrete class.

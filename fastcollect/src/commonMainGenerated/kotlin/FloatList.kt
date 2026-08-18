@@ -273,6 +273,8 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
     override fun listIterator(): FloatListIterator = listIterator(0)
     override fun listIterator(index: Int): FloatListIterator = ListIteratorImpl(index)
 
+    override fun traverse(): FloatTraverser = TraverserImpl()
+
     override fun subList(fromIndex: Int, toIndex: Int): FloatList {
         return if (this is RandomAccess) {
             RandomAccessFloatSubList(this, fromIndex, toIndex)
@@ -344,6 +346,20 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
 
         override fun nextIndex(): Int = index
         override fun previousIndex(): Int = index - 1
+    }
+
+    private inner class TraverserImpl : FloatTraverser, FloatCursor {
+        private val last = lastIndex
+        private var position: Int = -1
+
+        override val value: Float get() = get(position)
+
+        override fun advance(): FloatCursor? {
+            if (position >= last) return null
+            if (last != lastIndex) throw ConcurrentModificationException()
+            ++position
+            return this
+        }
     }
 
     private open class FloatSubList(private val list: FloatList, fromIndex: Int, toIndex: Int) : AbstractFloatList() {
@@ -539,6 +555,8 @@ private object EmptyFloatList : FloatList, RandomAccess {
     override fun iterator(): FloatIterator = emptyFloatIterator()
     override fun listIterator(): FloatListIterator = emptyFloatIterator()
     override fun listIterator(index: Int): FloatListIterator = if (index == 0) listIterator() else throw IndexOutOfBoundsException()
+
+    override fun traverse(): FloatTraverser = emptyFloatTraverser()
 
     override fun subList(fromIndex: Int, toIndex: Int): FloatList {
         if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()

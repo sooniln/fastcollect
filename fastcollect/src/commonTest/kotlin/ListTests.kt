@@ -464,6 +464,32 @@ class IntListTest {
     }
 
     @Test
+    fun foreach_afterRingBufferWraparound_matchesIteratorInOrder() {
+        // fill to capacity, then free the front and refill so the ring buffer wraps around the end of its backing
+        // array (head + size > backing array size).
+        val list = IntArrayDeque(8)
+        for (i in 1..8) list.add(i)
+        for (i in 1..4) list.removeFirst()
+        for (i in 9..12) list.add(i)
+
+        val fromIterator = mutableListOf<Int>()
+        val it = list.iterator()
+        while (it.hasNext()) fromIterator.add(it.nextInt())
+
+        val fromForeach = mutableListOf<Int>()
+        list.foreach { v -> fromForeach.add(v) }
+
+        assertEquals(fromIterator, fromForeach)
+        assertEquals(listOf(5, 6, 7, 8, 9, 10, 11, 12), fromForeach)
+    }
+
+    @Test
+    fun foreach_emptyAndSingletonList_matchesIterator() {
+        assertEquals(emptyList<Int>(), mutableListOf<Int>().also { intListOf().foreach { v -> it.add(v) } })
+        assertEquals(listOf(42), mutableListOf<Int>().also { intListOf(42).foreach { v -> it.add(v) } })
+    }
+
+    @Test
     fun equals_matchesAnyIntListImplementation() {
         // IntList contract (Abstract*List.equals()) requires equality against ANY IntList
         // implementation, not just the same concrete class.

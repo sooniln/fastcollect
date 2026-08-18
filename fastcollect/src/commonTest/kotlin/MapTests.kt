@@ -738,6 +738,32 @@ class Int2IntMapTest {
     }
 
     @Test
+    fun foreachKey_matchesKeysIterator() {
+        val map = Int2IntHashMap()
+        for (i in 1..50) map[i] = i + 1000
+
+        val fromKeys = mutableListOf<Int>()
+        val it = map.keys.iterator()
+        while (it.hasNext()) fromKeys.add(it.nextInt())
+
+        val fromForeachKey = mutableListOf<Int>()
+        map.foreachKey { k -> fromForeachKey.add(k) }
+
+        assertEquals(fromKeys.toSet(), fromForeachKey.toSet())
+    }
+
+    @Test
+    fun foreach_emptyAndSingletonMap_matchesIterator() {
+        val fromEmpty = mutableListOf<Pair<Int, Int>>()
+        emptyInt2IntMap().foreach { k, v -> fromEmpty.add(k to v) }
+        assertTrue(fromEmpty.isEmpty())
+
+        val fromSingleton = mutableListOf<Pair<Int, Int>>()
+        int2IntMapOf(1 to 42).foreach { k, v -> fromSingleton.add(k to v) }
+        assertEquals(listOf(1 to 42), fromSingleton)
+    }
+
+    @Test
     fun equals_matchesAnyMapImplementation() {
         // Map contract (Abstract*Map.equals()) requires equality against ANY Int2IntMap implementation,
         // not just the same concrete class.

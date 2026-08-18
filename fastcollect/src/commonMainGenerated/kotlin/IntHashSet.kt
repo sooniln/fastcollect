@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect
 
+import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
@@ -314,13 +315,7 @@ public class IntHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableIntIterator = Iterator()
 
-    override fun foreach(action: IntConsumer) {
-        for (key in keysArr) {
-            if (key != emptyKey) {
-                action.accept(key)
-            }
-        }
-    }
+    override fun traverse(): IntTraverser = Traverser()
 
     private inner class Iterator : MutableIntIterator() {
         private val keysArr = this@IntHashSet.keysArr
@@ -363,6 +358,24 @@ public class IntHashSet @JvmOverloads constructor(
             do {
                 slot = (slot - 1) and mask
             } while (keysArr[slot] == emptyKey)
+        }
+    }
+
+    private inner class Traverser : IntTraverser, IntCursor {
+        private val keysArr = this@IntHashSet.keysArr
+        private val emptyKey = this@IntHashSet.emptyKey
+
+        private var position: Int = keysArr.size
+
+        override val value: Int get() = keysArr[position]
+
+        override fun advance(): IntCursor? {
+            if (keysArr !== this@IntHashSet.keysArr) throw ConcurrentModificationException()
+            while (position != 0) {
+                --position
+                if (keysArr[position] != emptyKey) return this
+            }
+            return null
         }
     }
 

@@ -352,7 +352,7 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
                 override fun add(element: ${KeyType}): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: ${KeyType}): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): Mutable${KeyType}Iterator = KeyIterator()
-                override fun foreach(action: ${KeyType}Consumer) = foreachKey(action)
+                override fun traverse(): ${KeyType}Traverser = KeyTraverser()
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -372,7 +372,7 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
                 override fun remove(element: ${ValueType}): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): Mutable${ValueIteratorType}${Generics} = ValueIterator()
 <% if (!isReferenceValue) { %>
-                override fun foreach(action: ${ValueType}Consumer) = foreach { _, value -> action.accept(value) }
+                override fun traverse(): ${ValueType}Traverser = ValueTraverser()
 <% } %>
                 override fun clear() = throw UnsupportedOperationException()
             }
@@ -485,33 +485,7 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<Mutable${Name}Map.MutableEntry${Generics}> = FastEntryIterator()
 
-<% if (!isReferenceValue) { %>
-    override fun foreach(action: ${KeyType}${ValueType}Consumer) {
-<% } else { %>
-    override fun foreach(action: ${KeyType}AnyConsumer${Generics}) {
-<% } %>
-        val keysArr = keysArr
-        val valuesArr = valuesArr
-
-        for (slot in keysArr.indices) {
-            val key = keysArr[slot]
-            if (key != emptyKey) {
-                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                action.accept(key, valuesArr[slot] as ${ValueType})
-            }
-        }
-    }
-
-    override fun foreachKey(action: ${KeyType}Consumer) {
-        val keysArr = keysArr
-
-        for (slot in keysArr.indices) {
-            val key = keysArr[slot]
-            if (key != emptyKey) {
-                action.accept(key)
-            }
-        }
-    }
+    override fun traverse(): ${Name}Traverser${Generics} = Traverser()
 
     private open inner class SlotIterator {
         private val keysArr = this@${Name}HashMap.keysArr
@@ -620,6 +594,41 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         override fun toString(): String = "\$key=\$value"
     }
+
+    private inner class Traverser : ${Name}Traverser${Generics}, ${Name}Cursor${Generics} {
+        private val keysArr = this@${Name}HashMap.keysArr
+        private val valuesArr = this@${Name}HashMap.valuesArr
+        private val emptyKey = this@${Name}HashMap.emptyKey
+
+        private var slot: Int = keysArr.size
+
+        override val key: ${KeyType} get() = keysArr[slot]
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        override val value: ${ValueType} get() = valuesArr[slot] as ${ValueType}
+
+        override fun advance(): ${Name}Cursor${Generics}? {
+            if (keysArr !== this@${Name}HashMap.keysArr) throw ConcurrentModificationException()
+            while (slot != 0) {
+                --slot
+                if (keysArr[slot] != emptyKey) return this
+            }
+            return null
+        }
+    }
+
+    private inner class KeyTraverser: ${KeyType}Traverser, ${KeyType}Cursor {
+        private val traverser = Traverser()
+        override val value: ${KeyType} get() = traverser.key
+        override fun advance(): ${KeyType}Cursor? = if (traverser.advance() != null) this else null
+    }
+
+<% if (!isReferenceValue) { %>
+    private inner class ValueTraverser: ${ValueType}Traverser, ${ValueType}Cursor {
+        private val traverser = Traverser()
+        override val value: ${ValueType} get() = traverser.value
+        override fun advance(): ${ValueType}Cursor? = if (traverser.advance() != null) this else null
+    }
+<% } %>
 
     private fun ${KeyType}.slot(mask: Int): Int = Hash.mix(this) and mask
     private fun ${KeyType}.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask

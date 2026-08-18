@@ -8,8 +8,8 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
 public fun  emptyLong2IntMap(): Long2IntMap = EmptyLong2IntMap as Long2IntMap
@@ -23,7 +23,7 @@ public fun  mutableLong2IntMapOf(): MutableLong2IntMap = Long2IntHashMap()
 public fun  mutableLong2IntMapOf(entry: Pair<Long, Int>): MutableLong2IntMap = Long2IntHashMap(1).apply { set(entry.first, entry.second) }
 public fun  mutableLong2IntMapOf(vararg entries: Pair<Long, Int>): MutableLong2IntMap = Long2IntHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun  buildLong2IntMap(expectedSize: Int = 0, builderAction: MutableLong2IntMap.() -> Unit): Long2IntMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
 
@@ -41,9 +41,7 @@ public inline fun  buildLong2IntMap(expectedSize: Int = 0, builderAction: Mutabl
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
-
-public interface Long2IntMap {
-
+public interface Long2IntMap : Long2IntTraversable {
 
     public val size: Int
 
@@ -104,30 +102,6 @@ public interface Long2IntMap {
 
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry>
-
-    /**
-     * A method for iteration guaranteed to be as fast or faster than [iterator].
-     */
- 
-    public fun foreach(action: LongIntConsumer) {
- 
-        val it = iterator()
-        while (it.hasNext()) {
-            val entry = it.next()
-            action.accept(entry.key, entry.value)
-        }
-    }
-
-    /**
-     * A method for iteration over keys guaranteed to be as fast or faster than [iterator].
-     */
-    public fun foreachKey(action: LongConsumer) {
-        val it = iterator()
-        while (it.hasNext()) {
-            val entry = it.next()
-            action.accept(entry.key)
-        }
-    }
 }
 
 public fun  Long2IntMap.asMap(): Map<Long, Int> = Long2IntMapWrapper(this)
@@ -296,7 +270,11 @@ private object EmptyLong2IntMap : Long2IntMap {
     override val keys: LongSet get() = emptyLongSet()
 
     override val values: IntCollection get() = emptyIntList()
-    override fun iterator() = emptyFastIterator<Long2IntMap.Entry>()
+    override fun iterator(): FastIterator<Long2IntMap.Entry> = emptyFastIterator()
+
+
+
+    override fun traverse(): Long2IntTraverser = emptyLong2IntTraverser()
 
 }
 
@@ -322,6 +300,17 @@ private class SingletonLong2IntMap(private val key: Long, private val value: Int
             if (complete) throw NoSuchElementException()
             complete = true
             return AbstractLong2IntMap.SimpleEntry(key, value)
+        }
+    }
+
+    override fun traverse(): Long2IntTraverser = object : Long2IntTraverser, Long2IntCursor {
+        private var consumed = false
+        override val key: Long get() = this@SingletonLong2IntMap.key
+        override val value: Int get() = this@SingletonLong2IntMap.value
+        override fun advance(): Long2IntCursor? {
+            if (consumed) return null
+            consumed = true
+            return this
         }
     }
 }

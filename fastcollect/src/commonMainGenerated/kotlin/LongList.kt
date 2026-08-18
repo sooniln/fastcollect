@@ -273,6 +273,8 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
     override fun listIterator(): LongListIterator = listIterator(0)
     override fun listIterator(index: Int): LongListIterator = ListIteratorImpl(index)
 
+    override fun traverse(): LongTraverser = TraverserImpl()
+
     override fun subList(fromIndex: Int, toIndex: Int): LongList {
         return if (this is RandomAccess) {
             RandomAccessLongSubList(this, fromIndex, toIndex)
@@ -344,6 +346,20 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
 
         override fun nextIndex(): Int = index
         override fun previousIndex(): Int = index - 1
+    }
+
+    private inner class TraverserImpl : LongTraverser, LongCursor {
+        private val last = lastIndex
+        private var position: Int = -1
+
+        override val value: Long get() = get(position)
+
+        override fun advance(): LongCursor? {
+            if (position >= last) return null
+            if (last != lastIndex) throw ConcurrentModificationException()
+            ++position
+            return this
+        }
     }
 
     private open class LongSubList(private val list: LongList, fromIndex: Int, toIndex: Int) : AbstractLongList() {
@@ -539,6 +555,8 @@ private object EmptyLongList : LongList, RandomAccess {
     override fun iterator(): LongIterator = emptyLongIterator()
     override fun listIterator(): LongListIterator = emptyLongIterator()
     override fun listIterator(index: Int): LongListIterator = if (index == 0) listIterator() else throw IndexOutOfBoundsException()
+
+    override fun traverse(): LongTraverser = emptyLongTraverser()
 
     override fun subList(fromIndex: Int, toIndex: Int): LongList {
         if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()

@@ -40,7 +40,7 @@ public inline fun buildFloatPriorityQueue(
  * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
  * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
-public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0) {
+public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0): FloatTraversable {
 
     public constructor(array: FloatArray, fromIndex: Int = 0, toIndex: Int = array.size) : this(0) {
         heap = array.copyOfRange(fromIndex, toIndex)
@@ -205,6 +205,20 @@ public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0) {
         override fun nextFloat(): Float {
             if (!hasNext()) throw NoSuchElementException()
             return heap[index++]
+        }
+    }
+
+    override fun traverse(): FloatTraverser = object : FloatTraverser, FloatCursor {
+        private val last = size - 1
+        private var position: Int = -1
+
+        override val value: Float get() = heap[position]
+
+        override fun advance(): FloatCursor? {
+            if (position == last) return null
+            if (last != size - 1) throw ConcurrentModificationException()
+            ++position
+            return this
         }
     }
 

@@ -347,7 +347,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
                 override fun add(element: Long): Boolean = throw UnsupportedOperationException()
                 override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
                 override fun iterator(): MutableLongIterator = KeyIterator()
-                override fun foreach(action: LongConsumer) = foreachKey(action)
+                override fun traverse(): LongTraverser = KeyTraverser()
                 override fun clear() = throw UnsupportedOperationException()
             }
             .also { _keys = it }
@@ -470,31 +470,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
 
     override operator fun iterator(): MutableFastIterator<MutableLong2AnyMap.MutableEntry<V>> = FastEntryIterator()
 
-
-    override fun foreach(action: LongAnyConsumer<V>) {
-
-        val keysArr = keysArr
-        val valuesArr = valuesArr
-
-        for (slot in keysArr.indices) {
-            val key = keysArr[slot]
-            if (key != emptyKey) {
-                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                action.accept(key, valuesArr[slot] as V)
-            }
-        }
-    }
-
-    override fun foreachKey(action: LongConsumer) {
-        val keysArr = keysArr
-
-        for (slot in keysArr.indices) {
-            val key = keysArr[slot]
-            if (key != emptyKey) {
-                action.accept(key)
-            }
-        }
-    }
+    override fun traverse(): Long2AnyTraverser<V> = Traverser()
 
     private open inner class SlotIterator {
         private val keysArr = this@Long2AnyHashMap.keysArr
@@ -599,6 +575,35 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
         override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         override fun toString(): String = "$key=$value"
     }
+
+    private inner class Traverser : Long2AnyTraverser<V>, Long2AnyCursor<V> {
+        private val keysArr = this@Long2AnyHashMap.keysArr
+        private val valuesArr = this@Long2AnyHashMap.valuesArr
+        private val emptyKey = this@Long2AnyHashMap.emptyKey
+
+        private var slot: Int = keysArr.size
+
+        override val key: Long get() = keysArr[slot]
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        override val value: V get() = valuesArr[slot] as V
+
+        override fun advance(): Long2AnyCursor<V>? {
+            if (keysArr !== this@Long2AnyHashMap.keysArr) throw ConcurrentModificationException()
+            while (slot != 0) {
+                --slot
+                if (keysArr[slot] != emptyKey) return this
+            }
+            return null
+        }
+    }
+
+    private inner class KeyTraverser: LongTraverser, LongCursor {
+        private val traverser = Traverser()
+        override val value: Long get() = traverser.key
+        override fun advance(): LongCursor? = if (traverser.advance() != null) this else null
+    }
+
+
 
     private fun Long.slot(mask: Int): Int = Hash.mix(this) and mask
     private fun Long.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask

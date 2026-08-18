@@ -20,7 +20,7 @@ repositories {
 }
 
 group = "io.github.sooniln"
-version = "4.1.0"
+version = "5.0.0"
 
 private data class TemplateInstantiation(
     val inputFile: String,
@@ -36,14 +36,6 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
         val type = map["Type"] as String?
         if (type != null) {
             putIfAbsent("lowerType", type.lowercase())
-
-            val isFPType = type == "Float" || type == "Double"
-            putIfAbsent("isFPType", isFPType)
-            if (isFPType) {
-                val nonFPType = if (type == "Float") "Int" else "Long"
-                putIfAbsent("NonFPType", nonFPType)
-                putIfAbsent("lowerNonFPType", nonFPType.lowercase())
-            }
         }
 
         val kvType = map["KVType"] as String?
@@ -61,27 +53,11 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
         val keyType = map["KeyType"] as String?
         if (keyType != null) {
             putIfAbsent("lowerKeyType", keyType.lowercase())
-
-            val isFPKey = keyType == "Float" || keyType == "Double"
-            putIfAbsent("isFPKey", isFPKey)
-            if (isFPKey) {
-                val nonFPKeyType = if (keyType == "Float") "Int" else "Long"
-                putIfAbsent("NonFPKeyType", nonFPKeyType)
-                putIfAbsent("lowerNonFPKeyType", nonFPKeyType.lowercase())
-            }
         }
 
         val valueType = map["ValueType"] as String?
         if (valueType != null) {
             putIfAbsent("lowerValueType", valueType.lowercase())
-
-            val isFPValue = valueType == "Float" || valueType == "Double"
-            putIfAbsent("isFPValue", isFPValue)
-            if (isFPValue) {
-                val nonFPValueType = if (valueType == "Float") "Int" else "Long"
-                putIfAbsent("NonFPValueType", nonFPValueType)
-                putIfAbsent("lowerNonFPValueType", nonFPValueType.lowercase())
-            }
         }
 
         if (keyType != null && valueType != null) {
@@ -95,6 +71,7 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
                 putIfAbsent("ValueIteratorType", "Iterator")
                 putIfAbsent("Nullable", "?")
                 putIfAbsent("Generics", "<$valueType>")
+                putIfAbsent("OutGenerics", "<out $valueType>")
                 putIfAbsent("StarGenerics", "<*>")
             } else {
                 putIfAbsent("Name", "${keyType}2${valueType}")
@@ -103,17 +80,8 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
                 putIfAbsent("ValueIteratorType", "${valueType}Iterator")
                 putIfAbsent("Nullable", "")
                 putIfAbsent("Generics", "")
+                putIfAbsent("OutGenerics", "")
                 putIfAbsent("StarGenerics", "")
-            }
-
-            val isFPKeyOrValue = get("isFPKey") as Boolean || get("isFPValue") as Boolean
-            putIfAbsent("isFPKeyOrValue", isFPKeyOrValue)
-            if (isFPKeyOrValue) {
-                val nonFPKeyType = getOrElse("NonFPKeyType") { getValue("KeyType") } as String
-                val nonFPValueType = getOrElse("NonFPValueType") { getValue("ValueType") } as String
-
-                put("NonFPName", "${nonFPKeyType}2${nonFPValueType}")
-                putIfAbsent("lowerNonFPName", "${get("lowernonFPKeyType")}2${valueType}")
             }
         }
     }
@@ -152,6 +120,15 @@ tasks.register<Sync>("GenerateCommonMain") {
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
                 )) { expansion -> "${expansion["Type"]}Predicate.kt" },
+            TemplateInstantiation(
+                "ValueTraversable.kte",
+                listOf(
+                    mapOf("Type" to "Byte"),
+                    mapOf("Type" to "Int"),
+                    mapOf("Type" to "Long"),
+                    mapOf("Type" to "Float"),
+                    mapOf("Type" to "Double"),
+                )) { expansion -> "${expansion["Type"]}Traversable.kt" },
             TemplateInstantiation(
                 "Iterator.kte",
                 listOf(
@@ -205,6 +182,22 @@ tasks.register<Sync>("GenerateCommonMain") {
                     mapOf("Type" to "Float"),
                     mapOf("Type" to "Double"),
                 )) { expansion -> "${expansion["Type"]}HashSet.kt" },
+            TemplateInstantiation(
+                "KeyValueTraversable.kte",
+                listOf(
+                    mapOf("KeyType" to "Int", "ValueType" to "Byte"),
+                    mapOf("KeyType" to "Int", "ValueType" to "Int"),
+                    mapOf("KeyType" to "Int", "ValueType" to "Long"),
+                    mapOf("KeyType" to "Int", "ValueType" to "Float"),
+                    mapOf("KeyType" to "Int", "ValueType" to "Double"),
+                    mapOf("KeyType" to "Int", "ValueType" to "V", "isReferenceValue" to true),
+                    mapOf("KeyType" to "Long", "ValueType" to "Byte"),
+                    mapOf("KeyType" to "Long", "ValueType" to "Int"),
+                    mapOf("KeyType" to "Long", "ValueType" to "Long"),
+                    mapOf("KeyType" to "Long", "ValueType" to "Float"),
+                    mapOf("KeyType" to "Long", "ValueType" to "Double"),
+                    mapOf("KeyType" to "Long", "ValueType" to "V", "isReferenceValue" to true),
+                )) { expansion -> "${expansion["Name"]}Traversable.kt" },
             TemplateInstantiation(
                 "Map.kte",
                 listOf(

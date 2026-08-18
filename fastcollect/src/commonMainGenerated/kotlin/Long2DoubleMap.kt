@@ -8,8 +8,8 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
 public fun  emptyLong2DoubleMap(): Long2DoubleMap = EmptyLong2DoubleMap as Long2DoubleMap
@@ -23,7 +23,7 @@ public fun  mutableLong2DoubleMapOf(): MutableLong2DoubleMap = Long2DoubleHashMa
 public fun  mutableLong2DoubleMapOf(entry: Pair<Long, Double>): MutableLong2DoubleMap = Long2DoubleHashMap(1).apply { set(entry.first, entry.second) }
 public fun  mutableLong2DoubleMapOf(vararg entries: Pair<Long, Double>): MutableLong2DoubleMap = Long2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun  buildLong2DoubleMap(expectedSize: Int = 0, builderAction: MutableLong2DoubleMap.() -> Unit): Long2DoubleMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
 
@@ -41,9 +41,7 @@ public inline fun  buildLong2DoubleMap(expectedSize: Int = 0, builderAction: Mut
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
-
-public interface Long2DoubleMap {
-
+public interface Long2DoubleMap : Long2DoubleTraversable {
 
     public val size: Int
 
@@ -104,30 +102,6 @@ public interface Long2DoubleMap {
 
     /** Returns a [FastIterator] over the map entries. */
     public operator fun iterator(): FastIterator<Entry>
-
-    /**
-     * A method for iteration guaranteed to be as fast or faster than [iterator].
-     */
- 
-    public fun foreach(action: LongDoubleConsumer) {
- 
-        val it = iterator()
-        while (it.hasNext()) {
-            val entry = it.next()
-            action.accept(entry.key, entry.value)
-        }
-    }
-
-    /**
-     * A method for iteration over keys guaranteed to be as fast or faster than [iterator].
-     */
-    public fun foreachKey(action: LongConsumer) {
-        val it = iterator()
-        while (it.hasNext()) {
-            val entry = it.next()
-            action.accept(entry.key)
-        }
-    }
 }
 
 public fun  Long2DoubleMap.asMap(): Map<Long, Double> = Long2DoubleMapWrapper(this)
@@ -296,7 +270,11 @@ private object EmptyLong2DoubleMap : Long2DoubleMap {
     override val keys: LongSet get() = emptyLongSet()
 
     override val values: DoubleCollection get() = emptyDoubleList()
-    override fun iterator() = emptyFastIterator<Long2DoubleMap.Entry>()
+    override fun iterator(): FastIterator<Long2DoubleMap.Entry> = emptyFastIterator()
+
+
+
+    override fun traverse(): Long2DoubleTraverser = emptyLong2DoubleTraverser()
 
 }
 
@@ -322,6 +300,17 @@ private class SingletonLong2DoubleMap(private val key: Long, private val value: 
             if (complete) throw NoSuchElementException()
             complete = true
             return AbstractLong2DoubleMap.SimpleEntry(key, value)
+        }
+    }
+
+    override fun traverse(): Long2DoubleTraverser = object : Long2DoubleTraverser, Long2DoubleCursor {
+        private var consumed = false
+        override val key: Long get() = this@SingletonLong2DoubleMap.key
+        override val value: Double get() = this@SingletonLong2DoubleMap.value
+        override fun advance(): Long2DoubleCursor? {
+            if (consumed) return null
+            consumed = true
+            return this
         }
     }
 }

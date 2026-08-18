@@ -80,11 +80,11 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
     }
 
     override fun get(index: Int): Int {
-        return ring[ring.position(rangeCheck(index))]
+        return ring[ring.position(head, rangeCheck(index))]
     }
 
     override fun set(index: Int, element: Int) {
-        ring[ring.position(rangeCheck(index))] = element
+        ring[ring.position(head, rangeCheck(index))] = element
     }
 
     override fun addFirst(element: Int) {
@@ -99,7 +99,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         val s = size
         val newSize = s + 1
         ensureCapacity(newSize)
-        ring[ring.position(s)] = element
+        ring[ring.position(head, s)] = element
         size = newSize
     }
 
@@ -117,7 +117,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         ensureCapacity(newSize)
 
         // attempt to shift a minimal number of elements depending on where position falls within the array
-        val position = ring.position(index)
+        val position = ring.position(head, index)
         if (index < newSize shr 1) {
             // shift elements before position
             val actualPosition = ring.decrementPosition(position)
@@ -136,7 +136,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
             head = newHead
         } else {
             // shift elements after position
-            val tail = ring.position(size)
+            val tail = ring.position(head, size)
             if (position < tail) {
                 // position before tail
                 ring.copyInto(ring, position + 1, position, tail)
@@ -162,13 +162,13 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
 
     override fun removeLast(): Int {
         if (isEmpty()) throw NoSuchElementException()
-        return ring[ring.position(--size)]
+        return ring[ring.position(head, --size)]
     }
 
     override fun removeAt(index: Int): Int {
         rangeCheck(index)
 
-        val position = ring.position(index)
+        val position = ring.position(head, index)
         val element = ring[position]
         removeAtInternal(position)
         return element
@@ -177,7 +177,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
     // returns -1 if the back half was shifted left and 0 if the front half was shifted right
     private fun removeAtInternal(position: Int): Int {
         // attempt to shift a minimal number of elements depending on where position falls within the array
-        if (ring.index(position) < size shr 1) {
+        if (ring.index(head, position) < size shr 1) {
             // shift front half right, then advance head
             if (position > head) {
                 ring.copyInto(ring, head + 1, head, position)
@@ -193,7 +193,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
             return 0
         } else {
             // shift back half left
-            val tail = ring.position(size - 1)
+            val tail = ring.position(head, size - 1)
             if (position < tail) {
                 ring.copyInto(ring, position, position + 1, tail + 1)
             } else if (position > tail) {
@@ -219,13 +219,13 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         if (fromIndex <= size - toIndex) {
             // Shift [0, fromIndex) right by `removed`, then advance head.
             for (i in fromIndex - 1 downTo 0) {
-                ring[ring.position(i + removed)] = ring[ring.position(i)]
+                ring[ring.position(head, i + removed)] = ring[ring.position(head, i)]
             }
             head = ring.positiveMod(head + removed)
         } else {
             // Shift [toIndex, size) left by `removed`.
             for (i in toIndex until size) {
-                ring[ring.position(i - removed)] = ring[ring.position(i)]
+                ring[ring.position(head, i - removed)] = ring[ring.position(head, i)]
             }
         }
         size -= removed
@@ -424,7 +424,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         val midPoint = size / 2
         if (midPoint < 1) return
         var i = head
-        var j = ring.position(size - 1)
+        var j = ring.position(head, size - 1)
         repeat(midPoint) {
             val tmp = ring[i]
             ring[i] = ring[j]
@@ -448,33 +448,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    override fun foreach(action: IntConsumer) {
-        val ring = ring
-        val tail = head + size
-        if (tail > ring.size) {
-            foreachDiscrete(ring, action)
-        } else {
-            foreachContinuous(ring, tail, action)
-        }
-    }
-
-    private fun foreachContinuous(ring: IntArray, tail: Int, action: IntConsumer) {
-        var position = head
-        while (position < tail) {
-            action.accept(ring[position])
-            ++position
-        }
-    }
-
-    private fun foreachDiscrete(ring: IntArray, action: IntConsumer) {
-        var remaining = size
-        var position = head
-        while (remaining > 0) {
-            action.accept(ring[position])
-            position = ring.incrementPosition(position)
-            --remaining
-        }
-    }
+    override fun traverse(): IntTraverser = Traverser()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -483,7 +457,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         if (size != other.size) return false
         if (other is RandomAccess) {
             for (i in indices) {
-                if (!(ring[ring.position(i)] equalsBoxed other[i])) return false
+                if (!(ring[ring.position(head, i)] equalsBoxed other[i])) return false
             }
         } else {
             val it = other.iterator()
@@ -499,7 +473,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         var hashCode = 1
         if (!isEmpty()) {
             var position = head
-            val end = ring.position(size)
+            val end = ring.position(head, size)
             do {
                 hashCode = 31 * hashCode + ring[position].hashCode()
                 position = ring.incrementPosition(position)
@@ -566,24 +540,40 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    private fun IntArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+    private inner class Traverser : IntTraverser, IntCursor {
+        private val ring = this@IntArrayDeque.ring
+        private var position: Int = head - 1
+        private var remaining = size
 
-    private fun IntArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+        override val value: Int get() = ring[position]
 
-    private fun IntArray.position(index: Int): Int = positiveMod(head + index)
-
-    private fun IntArray.index(position: Int): Int = negativeMod(position - head)
-
-    private fun IntArray.incrementPosition(position: Int): Int {
-        val next = position + 1
-        return if (next == size) 0 else next
+        override fun advance(): IntCursor? {
+            if (remaining == 0) return null
+            if (ring !== this@IntArrayDeque.ring) throw ConcurrentModificationException()
+            position = ring.incrementPosition(position)
+            --remaining
+            return this
+        }
     }
-
-    private fun IntArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
     internal companion object {
         private val EMPTY_ARRAY = IntArray(0)
         private const val DEFAULT_CAPACITY = 8
+
+        private fun IntArray.positiveMod(position: Int): Int = if (position < size) position else position - size
+
+        private fun IntArray.negativeMod(position: Int): Int = if (position < 0) position + size else position
+
+        private fun IntArray.position(head: Int, index: Int): Int = positiveMod(head + index)
+
+        private fun IntArray.index(head: Int, position: Int): Int = negativeMod(position - head)
+
+        private fun IntArray.incrementPosition(position: Int): Int {
+            val next = position + 1
+            return if (next == size) 0 else next
+        }
+
+        private fun IntArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
 
         fun wrap(array: IntArray): IntArrayDeque = IntArrayDeque(array)
     }
