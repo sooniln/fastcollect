@@ -1,6 +1,5 @@
 package io.github.sooniln.fastcollect
 
-import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min

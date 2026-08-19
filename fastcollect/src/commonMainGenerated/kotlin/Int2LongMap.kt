@@ -9,7 +9,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
-import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
 public fun  emptyInt2LongMap(): Int2LongMap = EmptyInt2LongMap as Int2LongMap

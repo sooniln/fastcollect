@@ -11,7 +11,6 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
-import kotlin.jvm.JvmSynthetic
 
 /**
  * A collection of Floats.
