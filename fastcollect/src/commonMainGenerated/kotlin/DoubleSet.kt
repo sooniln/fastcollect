@@ -126,13 +126,13 @@ private class SingletonDoubleSet(private val value: Double) : DoubleSet {
         override fun hasNext(): Boolean = !complete
     }
 
-    override fun traverse(): DoubleTraverser = object : DoubleTraverser, DoubleCursor {
+    override fun traverse(): DoubleTraverser = object : DoubleTraverser {
         private var consumed = false
         override val value: Double get() = this@SingletonDoubleSet.value
-        override fun advance(): DoubleCursor? {
-            if (consumed) return null
+        override fun advance(): Boolean {
+            if (consumed) return false
             consumed = true
-            return this
+            return true
         }
     }
 }

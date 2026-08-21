@@ -540,19 +540,19 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         }
     }
 
-    private inner class Traverser : DoubleTraverser, DoubleCursor {
+    private inner class Traverser : DoubleTraverser {
         private val ring = this@DoubleArrayDeque.ring
         private var position: Int = head - 1
         private var remaining = size
 
         override val value: Double get() = ring[position]
 
-        override fun advance(): DoubleCursor? {
-            if (remaining == 0) return null
+        override fun advance(): Boolean {
+            if (remaining == 0) return false
             if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
             position = ring.incrementPosition(position)
             --remaining
-            return this
+            return true
         }
     }
 

@@ -576,7 +576,7 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private inner class Traverser : Long2AnyTraverser<V>, Long2AnyCursor<V> {
+    private inner class Traverser : Long2AnyTraverser<V> {
         private val keysArr = this@Long2AnyHashMap.keysArr
         private val valuesArr = this@Long2AnyHashMap.valuesArr
         private val emptyKey = this@Long2AnyHashMap.emptyKey
@@ -587,20 +587,20 @@ public class Long2AnyHashMap<V> @JvmOverloads constructor(
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         override val value: V get() = valuesArr[slot] as V
 
-        override fun advance(): Long2AnyCursor<V>? {
+        override fun advance(): Boolean {
             if (keysArr !== this@Long2AnyHashMap.keysArr) throw ConcurrentModificationException()
             while (slot != 0) {
                 --slot
-                if (keysArr[slot] != emptyKey) return this
+                if (keysArr[slot] != emptyKey) return true
             }
-            return null
+            return false
         }
     }
 
-    private inner class KeyTraverser: LongTraverser, LongCursor {
+    private inner class KeyTraverser: LongTraverser {
         private val traverser = Traverser()
         override val value: Long get() = traverser.key
-        override fun advance(): LongCursor? = if (traverser.advance() != null) this else null
+        override fun advance(): Boolean = traverser.advance()
     }
 
 

@@ -51,6 +51,14 @@ public interface Traversable {
     public fun traverse(): Traverser
 }
 
+public interface ValueTraversable<V> : Traversable {
+    override fun traverse(): ValueTraverser<V>
+}
+
+public interface KeyValueTraversable<K, V> : Traversable {
+    override fun traverse(): KeyValueTraverser<K, V>
+}
+
 /**
  * Provides a way of traversing through positions in a container. Usually specialized further to provide methods of
  * accessing values for the given position (see [IntTraverser] or [Int2IntTraverser] for example). Similar in use to
@@ -73,7 +81,7 @@ public interface Traverser : Iterator<Nothing> {
      *
      * Similar in use to [Iterator.hasNext] and [Iterator.next] combined.
      */
-    public fun advance(): Cursor?
+    public fun advance(): Boolean
 
     // see class-level note on why iterator interface exists here at all
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "Not a real method, do not use.")
@@ -84,6 +92,15 @@ public interface Traverser : Iterator<Nothing> {
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "Not a real method, do not use.")
     @JvmSynthetic
     override fun next(): Nothing = throw UnsupportedOperationException()
+}
+
+public interface ValueTraverser<V> : Traverser {
+    public val value: V
+}
+
+public interface KeyValueTraverser<K, V> : Traverser {
+    public val key: K
+    public val value: V
 }
 
 /**

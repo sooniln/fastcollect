@@ -595,7 +595,7 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
         override fun toString(): String = "\$key=\$value"
     }
 
-    private inner class Traverser : ${Name}Traverser${Generics}, ${Name}Cursor${Generics} {
+    private inner class Traverser : ${Name}Traverser${Generics} {
         private val keysArr = this@${Name}HashMap.keysArr
         private val valuesArr = this@${Name}HashMap.valuesArr
         private val emptyKey = this@${Name}HashMap.emptyKey
@@ -606,27 +606,27 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         override val value: ${ValueType} get() = valuesArr[slot] as ${ValueType}
 
-        override fun advance(): ${Name}Cursor${Generics}? {
+        override fun advance(): Boolean {
             if (keysArr !== this@${Name}HashMap.keysArr) throw ConcurrentModificationException()
             while (slot != 0) {
                 --slot
-                if (keysArr[slot] != emptyKey) return this
+                if (keysArr[slot] != emptyKey) return true
             }
-            return null
+            return false
         }
     }
 
-    private inner class KeyTraverser: ${KeyType}Traverser, ${KeyType}Cursor {
+    private inner class KeyTraverser: ${KeyType}Traverser {
         private val traverser = Traverser()
         override val value: ${KeyType} get() = traverser.key
-        override fun advance(): ${KeyType}Cursor? = if (traverser.advance() != null) this else null
+        override fun advance(): Boolean = traverser.advance()
     }
 
 <% if (!isReferenceValue) { %>
-    private inner class ValueTraverser: ${ValueType}Traverser, ${ValueType}Cursor {
+    private inner class ValueTraverser: ${ValueType}Traverser {
         private val traverser = Traverser()
         override val value: ${ValueType} get() = traverser.value
-        override fun advance(): ${ValueType}Cursor? = if (traverser.advance() != null) this else null
+        override fun advance(): Boolean = traverser.advance()
     }
 <% } %>
 

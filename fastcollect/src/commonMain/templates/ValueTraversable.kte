@@ -29,13 +29,6 @@ public interface ${Type}Traversable: Traversable {
  * [Traverser] for more details.
  */
 public interface ${Type}Traverser : Traverser {
-    override fun advance(): ${Type}Cursor?
-}
-
-/**
- * A pointer to a single ${Type}, produced by a [${Type}Traverser] during iteration.
- */
-public interface ${Type}Cursor : Cursor {
     public val value: ${Type}
 }
 
@@ -44,9 +37,8 @@ public inline fun ${Type}Traversable.foreach(action: (${Type}) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverse()
-    while (true) {
-        val cursor = traverser.advance() ?: break
-        action(cursor.value)
+    while (traverser.advance()) {
+        action(traverser.value)
     }
 }
 
@@ -84,10 +76,10 @@ public inline fun ${Type}Traversable.reduce(operation: (accumulated: ${Type}, ${
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     val traverser = traverse()
-    var accumulated = (traverser.advance() ?: throw NoSuchElementException()).value
-    while (true) {
-        val cursor = traverser.advance() ?: break
-        accumulated = operation(accumulated, cursor.value)
+    if (!traverser.advance()) throw NoSuchElementException()
+    var accumulated = traverser.value
+    while (traverser.advance()) {
+        accumulated = operation(accumulated, traverser.value)
     }
     return accumulated
 }
@@ -137,5 +129,6 @@ public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Double): Doubl
 }
 
 private object Empty${Type}Traverser : ${Type}Traverser {
-    override fun advance(): ${Type}Cursor? = null
+    override fun advance(): Boolean = false
+    override val value: Nothing get() = throw IllegalStateException()
 }

@@ -208,17 +208,17 @@ public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0): Floa
         }
     }
 
-    override fun traverse(): FloatTraverser = object : FloatTraverser, FloatCursor {
+    override fun traverse(): FloatTraverser = object : FloatTraverser {
         private val last = size - 1
         private var position: Int = -1
 
         override val value: Float get() = heap[position]
 
-        override fun advance(): FloatCursor? {
-            if (position == last) return null
+        override fun advance(): Boolean {
+            if (position == last) return false
             if (last != size - 1) throw ConcurrentModificationException()
             ++position
-            return this
+            return true
         }
     }
 

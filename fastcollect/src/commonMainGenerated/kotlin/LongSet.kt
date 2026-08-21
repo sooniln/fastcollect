@@ -126,13 +126,13 @@ private class SingletonLongSet(private val value: Long) : LongSet {
         override fun hasNext(): Boolean = !complete
     }
 
-    override fun traverse(): LongTraverser = object : LongTraverser, LongCursor {
+    override fun traverse(): LongTraverser = object : LongTraverser {
         private var consumed = false
         override val value: Long get() = this@SingletonLongSet.value
-        override fun advance(): LongCursor? {
-            if (consumed) return null
+        override fun advance(): Boolean {
+            if (consumed) return false
             consumed = true
-            return this
+            return true
         }
     }
 }

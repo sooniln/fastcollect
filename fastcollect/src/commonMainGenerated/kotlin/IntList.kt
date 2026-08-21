@@ -348,17 +348,17 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
         override fun previousIndex(): Int = index - 1
     }
 
-    private inner class TraverserImpl : IntTraverser, IntCursor {
+    private inner class TraverserImpl : IntTraverser {
         private val last = lastIndex
         private var position: Int = -1
 
         override val value: Int get() = get(position)
 
-        override fun advance(): IntCursor? {
-            if (position >= last) return null
+        override fun advance(): Boolean {
+            if (position >= last) return false
             if (last != lastIndex) throw ConcurrentModificationException()
             ++position
-            return this
+            return true
         }
     }
 

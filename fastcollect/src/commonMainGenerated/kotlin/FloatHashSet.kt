@@ -360,7 +360,7 @@ public class FloatHashSet @JvmOverloads constructor(
         }
     }
 
-    private inner class Traverser : FloatTraverser, FloatCursor {
+    private inner class Traverser : FloatTraverser {
         private val keysArr = this@FloatHashSet.keysArr
         private val emptyKey = this@FloatHashSet.emptyKey
 
@@ -368,13 +368,13 @@ public class FloatHashSet @JvmOverloads constructor(
 
         override val value: Float get() = keysArr[position]
 
-        override fun advance(): FloatCursor? {
+        override fun advance(): Boolean {
             if (keysArr !== this@FloatHashSet.keysArr) throw ConcurrentModificationException()
             while (position != 0) {
                 --position
-                if (keysArr[position] != emptyKey) return this
+                if (keysArr[position] != emptyKey) return true
             }
-            return null
+            return false
         }
     }
 

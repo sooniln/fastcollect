@@ -360,7 +360,7 @@ public class IntHashSet @JvmOverloads constructor(
         }
     }
 
-    private inner class Traverser : IntTraverser, IntCursor {
+    private inner class Traverser : IntTraverser {
         private val keysArr = this@IntHashSet.keysArr
         private val emptyKey = this@IntHashSet.emptyKey
 
@@ -368,13 +368,13 @@ public class IntHashSet @JvmOverloads constructor(
 
         override val value: Int get() = keysArr[position]
 
-        override fun advance(): IntCursor? {
+        override fun advance(): Boolean {
             if (keysArr !== this@IntHashSet.keysArr) throw ConcurrentModificationException()
             while (position != 0) {
                 --position
-                if (keysArr[position] != emptyKey) return this
+                if (keysArr[position] != emptyKey) return true
             }
-            return null
+            return false
         }
     }
 

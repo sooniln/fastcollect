@@ -126,13 +126,13 @@ private class Singleton${Type}Set(private val value: ${Type}) : ${Type}Set {
         override fun hasNext(): Boolean = !complete
     }
 
-    override fun traverse(): ${Type}Traverser = object : ${Type}Traverser, ${Type}Cursor {
+    override fun traverse(): ${Type}Traverser = object : ${Type}Traverser {
         private var consumed = false
         override val value: ${Type} get() = this@Singleton${Type}Set.value
-        override fun advance(): ${Type}Cursor? {
-            if (consumed) return null
+        override fun advance(): Boolean {
+            if (consumed) return false
             consumed = true
-            return this
+            return true
         }
     }
 }

@@ -360,7 +360,7 @@ public class LongHashSet @JvmOverloads constructor(
         }
     }
 
-    private inner class Traverser : LongTraverser, LongCursor {
+    private inner class Traverser : LongTraverser {
         private val keysArr = this@LongHashSet.keysArr
         private val emptyKey = this@LongHashSet.emptyKey
 
@@ -368,13 +368,13 @@ public class LongHashSet @JvmOverloads constructor(
 
         override val value: Long get() = keysArr[position]
 
-        override fun advance(): LongCursor? {
+        override fun advance(): Boolean {
             if (keysArr !== this@LongHashSet.keysArr) throw ConcurrentModificationException()
             while (position != 0) {
                 --position
-                if (keysArr[position] != emptyKey) return this
+                if (keysArr[position] != emptyKey) return true
             }
-            return null
+            return false
         }
     }
 

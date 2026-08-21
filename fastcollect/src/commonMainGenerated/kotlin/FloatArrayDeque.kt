@@ -540,19 +540,19 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         }
     }
 
-    private inner class Traverser : FloatTraverser, FloatCursor {
+    private inner class Traverser : FloatTraverser {
         private val ring = this@FloatArrayDeque.ring
         private var position: Int = head - 1
         private var remaining = size
 
         override val value: Float get() = ring[position]
 
-        override fun advance(): FloatCursor? {
-            if (remaining == 0) return null
+        override fun advance(): Boolean {
+            if (remaining == 0) return false
             if (ring !== this@FloatArrayDeque.ring) throw ConcurrentModificationException()
             position = ring.incrementPosition(position)
             --remaining
-            return this
+            return true
         }
     }
 

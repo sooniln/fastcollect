@@ -126,13 +126,13 @@ private class SingletonIntSet(private val value: Int) : IntSet {
         override fun hasNext(): Boolean = !complete
     }
 
-    override fun traverse(): IntTraverser = object : IntTraverser, IntCursor {
+    override fun traverse(): IntTraverser = object : IntTraverser {
         private var consumed = false
         override val value: Int get() = this@SingletonIntSet.value
-        override fun advance(): IntCursor? {
-            if (consumed) return null
+        override fun advance(): Boolean {
+            if (consumed) return false
             consumed = true
-            return this
+            return true
         }
     }
 }

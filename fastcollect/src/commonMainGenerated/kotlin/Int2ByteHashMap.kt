@@ -574,7 +574,7 @@ public class Int2ByteHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private inner class Traverser : Int2ByteTraverser, Int2ByteCursor {
+    private inner class Traverser : Int2ByteTraverser {
         private val keysArr = this@Int2ByteHashMap.keysArr
         private val valuesArr = this@Int2ByteHashMap.valuesArr
         private val emptyKey = this@Int2ByteHashMap.emptyKey
@@ -585,27 +585,27 @@ public class Int2ByteHashMap @JvmOverloads constructor(
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         override val value: Byte get() = valuesArr[slot] as Byte
 
-        override fun advance(): Int2ByteCursor? {
+        override fun advance(): Boolean {
             if (keysArr !== this@Int2ByteHashMap.keysArr) throw ConcurrentModificationException()
             while (slot != 0) {
                 --slot
-                if (keysArr[slot] != emptyKey) return this
+                if (keysArr[slot] != emptyKey) return true
             }
-            return null
+            return false
         }
     }
 
-    private inner class KeyTraverser: IntTraverser, IntCursor {
+    private inner class KeyTraverser: IntTraverser {
         private val traverser = Traverser()
         override val value: Int get() = traverser.key
-        override fun advance(): IntCursor? = if (traverser.advance() != null) this else null
+        override fun advance(): Boolean = traverser.advance()
     }
 
 
-    private inner class ValueTraverser: ByteTraverser, ByteCursor {
+    private inner class ValueTraverser: ByteTraverser {
         private val traverser = Traverser()
         override val value: Byte get() = traverser.value
-        override fun advance(): ByteCursor? = if (traverser.advance() != null) this else null
+        override fun advance(): Boolean = traverser.advance()
     }
 
 

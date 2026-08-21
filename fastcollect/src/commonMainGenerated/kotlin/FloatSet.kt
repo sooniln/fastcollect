@@ -126,13 +126,13 @@ private class SingletonFloatSet(private val value: Float) : FloatSet {
         override fun hasNext(): Boolean = !complete
     }
 
-    override fun traverse(): FloatTraverser = object : FloatTraverser, FloatCursor {
+    override fun traverse(): FloatTraverser = object : FloatTraverser {
         private var consumed = false
         override val value: Float get() = this@SingletonFloatSet.value
-        override fun advance(): FloatCursor? {
-            if (consumed) return null
+        override fun advance(): Boolean {
+            if (consumed) return false
             consumed = true
-            return this
+            return true
         }
     }
 }

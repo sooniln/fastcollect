@@ -348,17 +348,17 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
         override fun previousIndex(): Int = index - 1
     }
 
-    private inner class TraverserImpl : FloatTraverser, FloatCursor {
+    private inner class TraverserImpl : FloatTraverser {
         private val last = lastIndex
         private var position: Int = -1
 
         override val value: Float get() = get(position)
 
-        override fun advance(): FloatCursor? {
-            if (position >= last) return null
+        override fun advance(): Boolean {
+            if (position >= last) return false
             if (last != lastIndex) throw ConcurrentModificationException()
             ++position
-            return this
+            return true
         }
     }
 

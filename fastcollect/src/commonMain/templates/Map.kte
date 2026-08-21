@@ -318,14 +318,14 @@ private class Singleton${Name}Map${Generics}(private val key: ${KeyType}, privat
         }
     }
 
-    override fun traverse(): ${Name}Traverser${Generics} = object : ${Name}Traverser${Generics}, ${Name}Cursor${Generics} {
+    override fun traverse(): ${Name}Traverser${Generics} = object : ${Name}Traverser${Generics} {
         private var consumed = false
         override val key: ${KeyType} get() = this@Singleton${Name}Map.key
         override val value: ${ValueType} get() = this@Singleton${Name}Map.value
-        override fun advance(): ${Name}Cursor${Generics}? {
-            if (consumed) return null
+        override fun advance(): Boolean {
+            if (consumed) return false
             consumed = true
-            return this
+            return true
         }
     }
 }

@@ -32,13 +32,6 @@ public interface ${Name}Traversable${OutGenerics}: Traversable {
  * concept - see [Traverser] for more details.
  */
 public interface ${Name}Traverser${OutGenerics} : Traverser {
-    override fun advance(): ${Name}Cursor${Generics}?
-}
-
-/**
- * A pointer to a ${KeyType} -> ${ValueType} mapping, produced by a [${Name}Traverser] during iteration.
- */
-public interface ${Name}Cursor${OutGenerics} : Cursor {
     public val key: ${KeyType}
     public val value: ${ValueType}
 }
@@ -50,9 +43,8 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.foreach(
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverse()
-    while (true) {
-        val cursor = traverser.advance() ?: break
-        action(cursor.key, cursor.value)
+    while (traverser.advance()) {
+        action(traverser.key, traverser.value)
     }
 }
 
@@ -63,9 +55,8 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.foreachKey(
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverse()
-    while (true) {
-        val cursor = traverser.advance() ?: break
-        action(cursor.key)
+    while (traverser.advance()) {
+        action(traverser.key)
     }
 }
 
@@ -134,9 +125,10 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${K
 
 <% if (isReferenceValue) { %>
 private object Empty${Name}Traverser : ${Name}Traverser<Nothing> {
-    override fun advance(): ${Name}Cursor<Nothing>? = null
 <% } else { %>
 private object Empty${Name}Traverser : ${Name}Traverser {
-    override fun advance(): ${Name}Cursor? = null
 <% } %>
+    override fun advance(): Boolean = false
+    override val key: Nothing = throw IllegalStateException()
+    override val value: Nothing = throw IllegalStateException()
 }

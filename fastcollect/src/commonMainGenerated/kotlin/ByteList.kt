@@ -348,17 +348,17 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
         override fun previousIndex(): Int = index - 1
     }
 
-    private inner class TraverserImpl : ByteTraverser, ByteCursor {
+    private inner class TraverserImpl : ByteTraverser {
         private val last = lastIndex
         private var position: Int = -1
 
         override val value: Byte get() = get(position)
 
-        override fun advance(): ByteCursor? {
-            if (position >= last) return null
+        override fun advance(): Boolean {
+            if (position >= last) return false
             if (last != lastIndex) throw ConcurrentModificationException()
             ++position
-            return this
+            return true
         }
     }
 

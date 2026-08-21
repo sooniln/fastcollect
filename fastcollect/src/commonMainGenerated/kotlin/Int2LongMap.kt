@@ -302,14 +302,14 @@ private class SingletonInt2LongMap(private val key: Int, private val value: Long
         }
     }
 
-    override fun traverse(): Int2LongTraverser = object : Int2LongTraverser, Int2LongCursor {
+    override fun traverse(): Int2LongTraverser = object : Int2LongTraverser {
         private var consumed = false
         override val key: Int get() = this@SingletonInt2LongMap.key
         override val value: Long get() = this@SingletonInt2LongMap.value
-        override fun advance(): Int2LongCursor? {
-            if (consumed) return null
+        override fun advance(): Boolean {
+            if (consumed) return false
             consumed = true
-            return this
+            return true
         }
     }
 }

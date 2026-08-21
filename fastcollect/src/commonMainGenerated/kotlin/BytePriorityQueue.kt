@@ -208,17 +208,17 @@ public abstract class AbstractBytePriorityQueue(initialCapacity: Int = 0): ByteT
         }
     }
 
-    override fun traverse(): ByteTraverser = object : ByteTraverser, ByteCursor {
+    override fun traverse(): ByteTraverser = object : ByteTraverser {
         private val last = size - 1
         private var position: Int = -1
 
         override val value: Byte get() = heap[position]
 
-        override fun advance(): ByteCursor? {
-            if (position == last) return null
+        override fun advance(): Boolean {
+            if (position == last) return false
             if (last != size - 1) throw ConcurrentModificationException()
             ++position
-            return this
+            return true
         }
     }
 

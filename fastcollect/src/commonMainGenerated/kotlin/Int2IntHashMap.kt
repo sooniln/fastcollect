@@ -522,7 +522,19 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
         override fun next(): MutableInt2IntMap.MutableEntry {
             nextSlot()
-            return this
+            return object: MutableInt2IntMap.MutableEntry {
+                override val key: Int
+                    get() = key()
+                override var value: Int
+                    get() = value()
+                    set(value) {
+                        updateValue(value)
+                    }
+
+                override fun equals(other: Any?): Boolean = other is Int2IntMap.Entry && other.key equalsBoxed key && other.value equalsBoxed value
+                override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+                override fun toString(): String = "$key=$value"
+            }
         }
 
         override fun equals(other: Any?): Boolean = other is Int2IntMap.Entry && other.key equalsBoxed key && other.value equalsBoxed value
@@ -530,35 +542,41 @@ public class Int2IntHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private inner class Traverser : Int2IntTraverser, Int2IntCursor {
+    private inner class Traverser : Int2IntTraverser {
         private val kvArr = this@Int2IntHashMap.kvArr
         private val emptyEntry = this@Int2IntHashMap.emptyEntry
+        private val mask = kvArr.size - 1
 
-        private var position: Int = kvArr.size
+        private var slotsLeft = size
+        private var slot: Int = kvArr.size
 
-        override val key: Int get() = kvArr[position].key()
-        override val value: Int get() = kvArr[position].value()
+        override val key: Int get() = kvArr[slot].key()
+        override val value: Int get() = kvArr[slot].value()
 
-        override fun advance(): Int2IntCursor? {
-            if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()
-            while (position != 0) {
-                --position
-                if (kvArr[position] != emptyEntry) return this
+        override fun advance(): Boolean {
+            //if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()
+            while (slotsLeft > 0) {
+                slot = (slot - 1) and mask
+                val entry = kvArr[slot]
+                if (entry != emptyEntry) {
+                    --slotsLeft
+                    return true
+                }
             }
-            return null
+            return false
         }
     }
 
-    private inner class KeyTraverser: IntTraverser, IntCursor {
+    private inner class KeyTraverser: IntTraverser {
         private val traverser = Traverser()
         override val value: Int get() = traverser.key
-        override fun advance(): IntCursor? = if (traverser.advance() != null) this else null
+        override fun advance(): Boolean = traverser.advance()
     }
 
-    private inner class ValueTraverser: IntTraverser, IntCursor {
+    private inner class ValueTraverser: IntTraverser {
         private val traverser = Traverser()
         override val value: Int get() = traverser.value
-        override fun advance(): IntCursor? = if (traverser.advance() != null) this else null
+        override fun advance(): Boolean = traverser.advance()
     }
 
     private companion object {

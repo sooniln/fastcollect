@@ -540,19 +540,19 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    private inner class Traverser : ByteTraverser, ByteCursor {
+    private inner class Traverser : ByteTraverser {
         private val ring = this@ByteArrayDeque.ring
         private var position: Int = head - 1
         private var remaining = size
 
         override val value: Byte get() = ring[position]
 
-        override fun advance(): ByteCursor? {
-            if (remaining == 0) return null
+        override fun advance(): Boolean {
+            if (remaining == 0) return false
             if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
             position = ring.incrementPosition(position)
             --remaining
-            return this
+            return true
         }
     }
 

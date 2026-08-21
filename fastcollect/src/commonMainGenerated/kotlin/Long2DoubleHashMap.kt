@@ -574,7 +574,7 @@ public class Long2DoubleHashMap @JvmOverloads constructor(
         override fun toString(): String = "$key=$value"
     }
 
-    private inner class Traverser : Long2DoubleTraverser, Long2DoubleCursor {
+    private inner class Traverser : Long2DoubleTraverser {
         private val keysArr = this@Long2DoubleHashMap.keysArr
         private val valuesArr = this@Long2DoubleHashMap.valuesArr
         private val emptyKey = this@Long2DoubleHashMap.emptyKey
@@ -585,27 +585,27 @@ public class Long2DoubleHashMap @JvmOverloads constructor(
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         override val value: Double get() = valuesArr[slot] as Double
 
-        override fun advance(): Long2DoubleCursor? {
+        override fun advance(): Boolean {
             if (keysArr !== this@Long2DoubleHashMap.keysArr) throw ConcurrentModificationException()
             while (slot != 0) {
                 --slot
-                if (keysArr[slot] != emptyKey) return this
+                if (keysArr[slot] != emptyKey) return true
             }
-            return null
+            return false
         }
     }
 
-    private inner class KeyTraverser: LongTraverser, LongCursor {
+    private inner class KeyTraverser: LongTraverser {
         private val traverser = Traverser()
         override val value: Long get() = traverser.key
-        override fun advance(): LongCursor? = if (traverser.advance() != null) this else null
+        override fun advance(): Boolean = traverser.advance()
     }
 
 
-    private inner class ValueTraverser: DoubleTraverser, DoubleCursor {
+    private inner class ValueTraverser: DoubleTraverser {
         private val traverser = Traverser()
         override val value: Double get() = traverser.value
-        override fun advance(): DoubleCursor? = if (traverser.advance() != null) this else null
+        override fun advance(): Boolean = traverser.advance()
     }
 
 

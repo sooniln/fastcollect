@@ -360,7 +360,7 @@ public class DoubleHashSet @JvmOverloads constructor(
         }
     }
 
-    private inner class Traverser : DoubleTraverser, DoubleCursor {
+    private inner class Traverser : DoubleTraverser {
         private val keysArr = this@DoubleHashSet.keysArr
         private val emptyKey = this@DoubleHashSet.emptyKey
 
@@ -368,13 +368,13 @@ public class DoubleHashSet @JvmOverloads constructor(
 
         override val value: Double get() = keysArr[position]
 
-        override fun advance(): DoubleCursor? {
+        override fun advance(): Boolean {
             if (keysArr !== this@DoubleHashSet.keysArr) throw ConcurrentModificationException()
             while (position != 0) {
                 --position
-                if (keysArr[position] != emptyKey) return this
+                if (keysArr[position] != emptyKey) return true
             }
-            return null
+            return false
         }
     }
 

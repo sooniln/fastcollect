@@ -348,17 +348,17 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
         override fun previousIndex(): Int = index - 1
     }
 
-    private inner class TraverserImpl : DoubleTraverser, DoubleCursor {
+    private inner class TraverserImpl : DoubleTraverser {
         private val last = lastIndex
         private var position: Int = -1
 
         override val value: Double get() = get(position)
 
-        override fun advance(): DoubleCursor? {
-            if (position >= last) return null
+        override fun advance(): Boolean {
+            if (position >= last) return false
             if (last != lastIndex) throw ConcurrentModificationException()
             ++position
-            return this
+            return true
         }
     }
 
