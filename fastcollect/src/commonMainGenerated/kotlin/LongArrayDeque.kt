@@ -625,12 +625,12 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
          }
      }
 
-    // TODO: detect and throw ConcurrentModificationException
     private inner class ListTraverser(position: Int) : MutableLongListTraverser {
         init {
             indexCheckInclusive(position)
         }
 
+        private var size = this@LongArrayDeque.size
         private var cursor = if (position == 0) head - 1 else ring.position(head, position - 1)
         private var ringPosition = if (position == 0) -1 else cursor
 
@@ -643,9 +643,8 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
 
         override fun forward(): Boolean {
-            if (position >= size) {
-                return false
-            }
+            if (position >= size) return false
+            if (size != this@LongArrayDeque.size) throw ConcurrentModificationException()
 
             cursor = ring.incrementPosition(cursor)
             ringPosition = cursor
@@ -654,9 +653,8 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
         }
 
         override fun backward(): Boolean {
-            if (position <= 0) {
-                return false
-            }
+            if (position <= 0) return false
+            if (size != this@LongArrayDeque.size) throw ConcurrentModificationException()
 
             ringPosition = cursor
             cursor = ring.decrementPosition(cursor)
@@ -672,6 +670,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
             position = index
             cursor = ring.negativeMod(ringPosition + d)
             ringPosition = -1
+            --size
         }
 
         override fun set(value: Long) {
@@ -683,6 +682,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
             add(position, value)
             cursor = ring.position(head, position++)
             ringPosition = -1
+            ++size
         }
     }
 

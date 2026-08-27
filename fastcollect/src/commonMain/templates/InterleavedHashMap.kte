@@ -170,7 +170,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
             // performance we only check once every half cache line.
             var i = 0
             do {
-                if (currEntry.key() == emptyEntry.key()) {
+                if (currEntry == emptyEntry) {
                     return onFail()
                 } else if (currEntry.key() == key) {
                     return onFind(slot, currEntry)
