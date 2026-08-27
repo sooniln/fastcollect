@@ -314,7 +314,7 @@ public class IntHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableIntIterator = Iterator()
 
-    override fun traverse(): IntTraverser = Traverser()
+    override fun traverser(): MutableIntTraverser = Traverser()
 
     private inner class Iterator : MutableIntIterator() {
         private val keysArr = this@IntHashSet.keysArr
@@ -360,21 +360,43 @@ public class IntHashSet @JvmOverloads constructor(
         }
     }
 
-    private inner class Traverser : IntTraverser {
+    private inner class Traverser : MutableIntTraverser {
         private val keysArr = this@IntHashSet.keysArr
         private val emptyKey = this@IntHashSet.emptyKey
+        private val mask = keysArr.size - 1
 
-        private var position: Int = keysArr.size
+        private var slotsLeft = size
+        private var slot = keysArr.size
+        private var key = emptyKey
 
-        override val value: Int get() = keysArr[position]
+        override val value: Int get() {
+            if (key == emptyKey) throw NoSuchElementException()
+            return key
+        }
 
-        override fun advance(): Boolean {
-            if (keysArr !== this@IntHashSet.keysArr) throw ConcurrentModificationException()
-            while (position != 0) {
-                --position
-                if (keysArr[position] != emptyKey) return true
+        override fun forward(): Boolean {
+            if (slotsLeft == 0) {
+                key = emptyKey
+                return false
             }
-            return false
+            if (keysArr !== this@IntHashSet.keysArr) throw ConcurrentModificationException()
+
+            while (true) {
+                slot = (slot - 1) and mask
+                key = keysArr[slot]
+                if (key != emptyKey) {
+                    --slotsLeft
+                    return true
+                }
+            }
+        }
+
+        override fun remove() {
+            check(key != emptyKey)
+            if (keysArr !== this@IntHashSet.keysArr) throw ConcurrentModificationException()
+
+            removeSlot(slot)
+            key = emptyKey
         }
     }
 

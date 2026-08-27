@@ -89,9 +89,10 @@ public interface Long2IntMap : Long2IntTraversable {
     @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
     public fun values(): IntCollection = values
 
+    public operator fun iterator(): Iterator<Entry>
 
+    /** Prefer to always implement this interface via [AbstractEntry] for correct behavior. */
     public interface Entry {
-
         public val key: Long
         public val value: Int
 
@@ -99,8 +100,12 @@ public interface Long2IntMap : Long2IntTraversable {
         public operator fun component2(): Int = value
     }
 
-    /** Returns a [FastIterator] over the map entries. */
-    public operator fun iterator(): FastIterator<Entry>
+    /** An implementation of [Entry] with correct equals/hashCode/toString. */
+    public abstract class AbstractEntry : Entry {
+        final override fun equals(other: Any?): Boolean = other is Entry && other.key equalsBoxed key && other.value equalsBoxed value
+        final override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+        final override fun toString(): String = "$key=$value"
+    }
 }
 
 public fun  Long2IntMap.asMap(): Map<Long, Int> = Long2IntMapWrapper(this)
@@ -117,7 +122,7 @@ public inline fun  Long2IntMap.getOrElse(key: Long, defaultValue: () -> Int): In
 /**
  * A mutable map of Longs to Ints.
  */
-public interface MutableLong2IntMap : Long2IntMap {
+public interface MutableLong2IntMap : Long2IntMap, MutableLong2IntTraversable {
 
     public fun put(key: Long, value: Int): Int
 
@@ -139,26 +144,30 @@ public interface MutableLong2IntMap : Long2IntMap {
 
     public fun clear()
 
-    override val keys: MutableLongSet
-    override val values: MutableIntCollection
+    override val keys: LongSet
+    override val values: IntCollection
 
     public fun putAll(from: Long2IntMap) {
-        for (entry in from) {
-            set(entry.key, entry.value)
+        from.foreach { key, value ->
+            set(key, value)
         }
     }
 
     public fun putAll(from: Map<out Long, Int>) {
-        for (entry in from) {
-            set(entry.key, entry.value)
+        for ((key, value) in from) {
+            set(key, value)
         }
     }
 
+    override fun iterator(): MutableIterator<MutableEntry>
+
+    /** Prefer to always implement this interface via [AbstractMutableEntry] for correct behavior. */
     public interface MutableEntry : Long2IntMap.Entry {
         override var value: Int
     }
 
-    override fun iterator(): MutableFastIterator<MutableEntry>
+    /** An implementation of [Entry] with correct equals/hashCode/toString. */
+    public abstract class AbstractMutableEntry : Long2IntMap.AbstractEntry(), MutableEntry
 }
 
 public fun  MutableLong2IntMap.asMutableMap(): MutableMap<Long, Int> = MutableLong2IntMapWrapper(this)
@@ -269,11 +278,11 @@ private object EmptyLong2IntMap : Long2IntMap {
     override val keys: LongSet get() = emptyLongSet()
 
     override val values: IntCollection get() = emptyIntList()
-    override fun iterator(): FastIterator<Long2IntMap.Entry> = emptyFastIterator()
+    override fun iterator(): Iterator<Long2IntMap.Entry> = emptyList<Long2IntMap.Entry>().iterator()
 
 
 
-    override fun traverse(): Long2IntTraverser = emptyLong2IntTraverser()
+    override fun traverser(): Long2IntTraverser = emptyLong2IntTraverser()
 
 }
 
@@ -291,7 +300,7 @@ private class SingletonLong2IntMap(private val key: Long, private val value: Int
 
     override val values: IntCollection by lazy { intListOf(value) }
 
-    override fun iterator() = object : FastIterator<Long2IntMap.Entry> {
+    override fun iterator() = object : Iterator<Long2IntMap.Entry> {
         private var complete: Boolean = false
 
         override fun hasNext() = !complete
@@ -302,11 +311,11 @@ private class SingletonLong2IntMap(private val key: Long, private val value: Int
         }
     }
 
-    override fun traverse(): Long2IntTraverser = object : Long2IntTraverser {
+    override fun traverser(): Long2IntTraverser = object : Long2IntTraverser {
         private var consumed = false
         override val key: Long get() = this@SingletonLong2IntMap.key
         override val value: Int get() = this@SingletonLong2IntMap.value
-        override fun advance(): Boolean {
+        override fun forward(): Boolean {
             if (consumed) return false
             consumed = true
             return true
@@ -318,7 +327,7 @@ private class Long2IntMapWrapper(private val map: Long2IntMap) : AbstractMap<Lon
     override val size: Int get() = map.size
 
     override fun get(key: Long): Int? {
-        val value = map.get(key)
+        val value = map[key]
         return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
     }
 
@@ -331,8 +340,7 @@ private class Long2IntMapWrapper(private val map: Long2IntMap) : AbstractMap<Lon
 
         override fun contains(element: Map.Entry<Long, Int>): Boolean {
             val value = map[element.key]
-            if (map.isDefaultValue(value) && !containsKey(element.key)) return false
-            return value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
         }
 
         override fun iterator(): Iterator<Map.Entry<Long, Int>> = object : Iterator<Map.Entry<Long, Int>> {
@@ -354,7 +362,7 @@ private class MutableLong2IntMapWrapper(private val map: MutableLong2IntMap) : A
     override val size: Int get() = map.size
 
     override fun get(key: Long): Int? {
-        val value = map.get(key)
+        val value = map[key]
         return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
     }
 
@@ -379,8 +387,7 @@ private class MutableLong2IntMapWrapper(private val map: MutableLong2IntMap) : A
 
         override fun contains(element: MutableMap.MutableEntry<Long, Int>): Boolean {
             val value = map[element.key]
-            if (map.isDefaultValue(value) && !containsKey(element.key)) return false
-            return value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
         }
 
         override fun add(element: MutableMap.MutableEntry<Long, Int>): Boolean = throw UnsupportedOperationException()

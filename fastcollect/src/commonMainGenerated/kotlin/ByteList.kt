@@ -9,7 +9,6 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
@@ -28,7 +27,7 @@ public fun mutableByteListOf(vararg elements: Byte): MutableByteList = ByteArray
 public fun ByteArray.asByteList(): ByteList = ByteArrayListWrapper(this)
 
 @JvmSynthetic
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun buildByteList(expectedSize: Int = 0, builderAction: MutableByteList.() -> Unit): ByteList {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
 
@@ -38,14 +37,14 @@ public inline fun buildByteList(expectedSize: Int = 0, builderAction: MutableByt
 }
 
 @JvmSynthetic
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun ByteList(size: Int, init: (index: Int) -> Byte): ByteList {
     contract { callsInPlace(init, InvocationKind.UNKNOWN) }
     return MutableByteList(size, init)
 }
 
 @JvmSynthetic
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun MutableByteList(size: Int, init: (index: Int) -> Byte): MutableByteList {
     contract { callsInPlace(init, InvocationKind.UNKNOWN) }
 
@@ -54,12 +53,60 @@ public inline fun MutableByteList(size: Int, init: (index: Int) -> Byte): Mutabl
     return list
 }
 
+public interface ByteListTraversable: ByteTraversable {
+    public fun traverser(position: Int): ByteListTraverser
+}
+
+public interface MutableByteListTraversable: MutableByteTraversable {
+    public fun traverser(position: Int): MutableByteListTraverser
+}
+
+public interface ByteListTraverser : ByteTraverser {
+    public val position: Int
+    public fun backward(): Boolean
+}
+
+public interface MutableByteListTraverser : ByteListTraverser, MutableByteTraverser {
+    public fun set(value: Byte)
+    public fun insert(value: Byte)
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ByteList.foreachReverse(action: (Byte) -> Unit) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverser(size)
+    while (traverser.backward()) {
+        action(traverser.value)
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ByteListTraversable.foreachIndexed(action: (Int, Byte) -> Unit) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverser(0)
+    var index = 0
+    while (traverser.forward()) {
+        action(index++, traverser.value)
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun ByteList.foreachReverseIndexed(action: (Int, Byte) -> Unit) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverser(size)
+    var index = size
+    while (traverser.backward()) {
+        action(--index, traverser.value)
+    }
+}
+
 /**
  * A list of Bytes.
  */
-public interface ByteList : ByteCollection {
-    public fun listIterator(): ByteListIterator
-    public fun listIterator(index: Int): ByteListIterator
+public interface ByteList : ByteCollection, ByteListTraversable {
 
     override fun contains(element: Byte): Boolean {
         return indexOf(element) != -1
@@ -67,23 +114,19 @@ public interface ByteList : ByteCollection {
 
     public operator fun get(index: Int): Byte
 
-    override fun containsAll(elements: Collection<Byte>): Boolean = super.containsAll(elements)
-
     public fun indexOf(element: Byte): Int {
-        val it = listIterator()
-        while (it.hasNext()) {
-            if (it.nextByte() equalsBoxed element) {
-                return it.previousIndex()
+        foreachIndexed { index, value ->
+            if (value equalsBoxed element) {
+                return index
             }
         }
         return -1
     }
 
     public fun lastIndexOf(element: Byte): Int {
-        val it = listIterator(size)
-        while (it.hasPrevious()) {
-            if (it.previousByte() equalsBoxed element) {
-                return it.nextIndex()
+        foreachReverseIndexed { index, value ->
+            if (value equalsBoxed element) {
+                return index
             }
         }
         return -1
@@ -119,27 +162,27 @@ public fun ByteList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.si
 }
 
 @JvmSynthetic
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun <R> ByteList.foldRight(initial: R, operation: (Byte, accumulated: R) -> R): R {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    val it = listIterator(size)
-    while (it.hasPrevious()) {
-        accumulated = operation(it.previousByte(), accumulated)
+    foreachReverse { value ->
+        accumulated = operation(value, accumulated)
     }
     return accumulated
 }
 
 @JvmSynthetic
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun ByteList.reduceRight(operation: (Byte, accumulated: Byte) -> Byte) : Byte {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
-    val it = listIterator(size)
-    var accumulated = it.previousByte()
-    while (it.hasPrevious()) {
-        accumulated = operation(it.previousByte(), accumulated)
+    val traverser = traverser(size)
+    if (!traverser.backward()) throw NoSuchElementException()
+    var accumulated = traverser.value
+    while (traverser.backward()) {
+        accumulated = operation(traverser.value, accumulated)
     }
     return accumulated
 }
@@ -149,9 +192,9 @@ public fun ByteList.asList(): List<Byte> = ByteListWrapper(this)
 /**
  * A mutable list of Bytes.
  */
-public interface MutableByteList : ByteList, MutableByteCollection {
-    override fun listIterator(): MutableByteListIterator
-    override fun listIterator(index: Int): MutableByteListIterator
+public interface MutableByteList : ByteList, MutableByteCollection, MutableByteTraversable {
+
+    override fun traverser(position: Int): MutableByteListTraverser
 
     public operator fun set(index: Int, element: Byte)
 
@@ -206,37 +249,33 @@ public interface MutableByteList : ByteList, MutableByteCollection {
         for (element in elements) add(i++, element)
     }
 
-    override fun removeAll(elements: Collection<Byte>): Boolean = super.removeAll(elements)
-    override fun retainAll(elements: Collection<Byte>): Boolean = super.retainAll(elements)
-
     public fun sort() {
         val sorted = toByteArray().also { it.sort() }
-        val it = listIterator()
+        val traverser = traverser(0)
         for (element in sorted) {
-            it.next()
-            it.set(element)
+            check(traverser.forward())
+            traverser.set(element)
         }
     }
 
     public fun sortDescending() {
         val sorted = toByteArray().also { it.sortDescending() }
-        val it = listIterator()
+        val traverser = traverser(0)
         for (element in sorted) {
-            it.next()
-            it.set(element)
+            check(traverser.forward())
+            traverser.set(element)
         }
     }
 
     public fun fill(element: Byte) {
         if (this is RandomAccess) {
-            for (index in 0..lastIndex) {
+            for (index in 0..<size) {
                 set(index, element)
             }
         } else {
-            val it = listIterator()
-            while (it.hasNext()) {
-                it.next()
-                it.set(element)
+            val traverser = traverser(0)
+            while (traverser.forward()) {
+                traverser.set(element)
             }
         }
     }
@@ -270,10 +309,8 @@ public fun MutableByteList.asMutableList(): MutableList<Byte> = MutableByteListW
 public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
 
     override fun iterator(): ByteIterator = IteratorImpl()
-    override fun listIterator(): ByteListIterator = listIterator(0)
-    override fun listIterator(index: Int): ByteListIterator = ListIteratorImpl(index)
-
-    override fun traverse(): ByteTraverser = TraverserImpl()
+    override fun traverser(): ByteTraverser = TraverserImpl()
+    override fun traverser(position: Int): ByteListTraverser = ListTraverserImpl(position)
 
     override fun subList(fromIndex: Int, toIndex: Int): ByteList {
         return if (this is RandomAccess) {
@@ -288,76 +325,69 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
         if (other !is ByteList) return false
         if (size != other.size) return false
 
-        val it = listIterator()
-        val otherIt = other.listIterator()
-        while (it.hasNext() && otherIt.hasNext()) {
-            if (!(it.nextByte() equalsBoxed otherIt.nextByte())) {
+        val traverser = traverser()
+        val otherTraverser = other.traverser()
+
+        var hasNext = traverser.forward()
+        var otherHasNext = traverser.forward()
+        while (hasNext && otherHasNext) {
+            if (!(traverser.value equalsBoxed otherTraverser.value)) {
                 return false
             }
+            hasNext = traverser.forward()
+            otherHasNext = traverser.forward()
         }
-        return !(it.hasNext() || otherIt.hasNext())
+        return !hasNext && !otherHasNext
     }
 
     override fun hashCode(): Int {
         var hashCode = 1
-        for (element in this) {
+        foreach { element ->
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode
     }
 
     private inner class IteratorImpl: ByteIterator() {
-
         private var index = 0
-
+        override fun hasNext(): Boolean = index != size
         override fun nextByte(): Byte {
             if (index == size) throw NoSuchElementException()
-            val value = get(index)
-            index++
-            return value
+            return get(index++)
         }
-
-        override fun hasNext(): Boolean = index != size
-    }
-
-    private inner class ListIteratorImpl(private var index: Int = 0): ByteListIterator() {
-
-        init {
-            if (index != 0) rangeCheckInclusive(index)
-        }
-
-        override fun previousByte(): Byte {
-            if (index == 0) throw NoSuchElementException()
-            val i = index - 1
-            val value = get(i)
-            index = i
-            return value
-        }
-
-        override fun nextByte(): Byte {
-            if (index == size) throw NoSuchElementException()
-            val value = get(index)
-            index++
-            return value
-        }
-
-        override fun hasNext(): Boolean = index != size
-        override fun hasPrevious(): Boolean = index != 0
-
-        override fun nextIndex(): Int = index
-        override fun previousIndex(): Int = index - 1
     }
 
     private inner class TraverserImpl : ByteTraverser {
-        private val last = lastIndex
-        private var position: Int = -1
+        private val last = size - 1
+        private var index = -1
+        override val value: Byte get() = get(index)
+        override fun forward(): Boolean {
+            if (index == last) return false
+            ++index
+            return true
+        }
+    }
 
-        override val value: Byte get() = get(position)
+    private inner class ListTraverserImpl(position: Int) : ByteListTraverser {
+        init {
+            require(position in 0..size)
+        }
 
-        override fun advance(): Boolean {
-            if (position >= last) return false
-            if (last != lastIndex) throw ConcurrentModificationException()
-            ++position
+        private var index = position - 1
+
+        override var position: Int = position
+            private set
+        override val value: Byte get() = get(index)
+
+        override fun forward(): Boolean {
+            if (position == size) return false
+            index = position++
+            return true
+        }
+
+        override fun backward(): Boolean {
+            if (position == 0) return false
+            index = --position
             return true
         }
     }
@@ -374,7 +404,7 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
 
         override fun get(index: Int): Byte {
             rangeCheck(index)
-            return list.get(index + offset)
+            return list[index + offset]
         }
     }
 
@@ -383,28 +413,21 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
 
 public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteList {
 
-    override fun add(element: Byte): Boolean = super<MutableByteList>.add(element)
-    override fun remove(element: Byte): Boolean = super<MutableByteList>.remove(element)
-    override fun clear(): Unit = super<MutableByteList>.clear()
-    override fun addAll(elements: Collection<Byte>): Boolean = super<MutableByteList>.addAll(elements)
-    override fun removeAll(elements: Collection<Byte>): Boolean = super<MutableByteList>.removeAll(elements)
-    override fun retainAll(elements: Collection<Byte>): Boolean = super<MutableByteList>.retainAll(elements)
+    override fun iterator(): MutableByteIterator = IteratorImpl()
+    override fun traverser(): MutableByteTraverser = ListTraverserImpl(0)
+    override fun traverser(position: Int): MutableByteListTraverser = ListTraverserImpl(position)
 
     override fun removeRange(fromIndex: Int, toIndex: Int) {
         if (fromIndex == 0 && toIndex == 0) return
 
         rangeCheck(fromIndex, toIndex)
 
-        val it = listIterator(fromIndex)
+        val traverser = traverser(toIndex)
         repeat(toIndex-fromIndex) { _ ->
-            it.nextByte()
-            it.remove()
+            check(traverser.backward())
+            traverser.remove()
         }
     }
-
-    override fun iterator(): MutableByteIterator = IteratorImpl()
-    override fun listIterator(): MutableByteListIterator = listIterator(0)
-    override fun listIterator(index: Int): MutableByteListIterator = ListIteratorImpl(index)
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableByteList {
         return if (this is RandomAccess) {
@@ -417,77 +440,62 @@ public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteL
     private inner class IteratorImpl: MutableByteIterator() {
         private var index = 0
         private var lastIndex = -1
-
+        override fun hasNext(): Boolean = index != size
         override fun nextByte(): Byte {
             if (index == size) throw NoSuchElementException()
-            val i = index
-            val value = get(i)
-            lastIndex = i
-            index = i + 1
-            return value
+            lastIndex = index++
+            return get(lastIndex)
         }
-
-        override fun hasNext(): Boolean = index != size
-
         override fun remove() {
-            check(lastIndex >= 0)
-
+            check(lastIndex != -1)
             removeAt(lastIndex)
-            if (lastIndex < index) index--
+            index--
             lastIndex = -1
         }
     }
 
-    private inner class ListIteratorImpl(private var index: Int = 0): MutableByteListIterator() {
-
+    private inner class ListTraverserImpl(position: Int) : MutableByteListTraverser {
         init {
-            if (index != 0) rangeCheckInclusive(index)
+            require(position in 0..size)
         }
 
-        private var lastIndex = -1
+        private var index = position - 1
 
-        override fun previousByte(): Byte {
-            if (index == 0) throw NoSuchElementException()
-            val i = index - 1
-            val value = get(i)
-            index = i
-            lastIndex = i
-            return value
+        override var position: Int = position
+            private set
+        override val value: Byte get() {
+            check(index != -1)
+            return get(index)
         }
 
-        override fun nextByte(): Byte {
-            if (index == size) throw NoSuchElementException()
-            val i = index
-            val value = get(i)
-            lastIndex = i
-            index = i + 1
-            return value
+        override fun forward(): Boolean {
+            if (position == size) return false
+            index = position++
+            return true
         }
 
-        override fun hasNext(): Boolean = index != size
-        override fun hasPrevious(): Boolean = index != 0
-
-        override fun nextIndex(): Int = index
-        override fun previousIndex(): Int = index - 1
+        override fun backward(): Boolean {
+            if (position == 0) return false
+            index = --position
+            return true
+        }
 
         override fun remove() {
-            check(lastIndex >= 0)
-
-            removeAt(lastIndex)
-            if (lastIndex < index) index--
-            lastIndex = -1
+            check(index != -1)
+            removeAt(index)
+            if (position > index) --position
+            index = -1
         }
 
-        override fun set(element: Byte) {
-            check(lastIndex >= 0)
-            set(lastIndex, element)
+        override fun set(value: Byte) {
+            check(index != -1)
+            set(index, value)
         }
 
-        override fun add(element: Byte) {
-            val i = index
-            add(i, element)
-            lastIndex = -1
-            index = i + 1
+        override fun insert(value: Byte) {
+            add(position, value)
+            ++position
+            ++index
         }
     }
 
@@ -506,7 +514,7 @@ public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteL
         }
 
         override fun get(index: Int): Byte {
-            return list.get(rangeCheck(index) + offset)
+            return list[rangeCheck(index) + offset]
         }
 
         override fun add(index: Int, element: Byte) {
@@ -540,6 +548,13 @@ public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteL
     private class RandomAccessByteSubList(list: MutableByteList, fromIndex: Int, toIndex: Int) : ByteSubList(list, fromIndex, toIndex), RandomAccess
 }
 
+private object EmptyByteListTraverser : ByteListTraverser {
+    override val position: Int get() = 0
+    override val value: Byte get() = throw IllegalStateException()
+    override fun forward(): Boolean = false
+    override fun backward(): Boolean = false
+}
+
 private object EmptyByteList : ByteList, RandomAccess {
     override val size: Int get() = 0
 
@@ -553,10 +568,11 @@ private object EmptyByteList : ByteList, RandomAccess {
     override fun lastIndexOf(element: Byte): Int = -1
 
     override fun iterator(): ByteIterator = emptyByteIterator()
-    override fun listIterator(): ByteListIterator = emptyByteIterator()
-    override fun listIterator(index: Int): ByteListIterator = if (index == 0) listIterator() else throw IndexOutOfBoundsException()
-
-    override fun traverse(): ByteTraverser = emptyByteTraverser()
+    override fun traverser(): ByteTraverser = EmptyByteListTraverser
+    override fun traverser(position: Int): ByteListTraverser {
+        require(position == 0)
+        return EmptyByteListTraverser
+    }
 
     override fun subList(fromIndex: Int, toIndex: Int): ByteList {
         if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()
@@ -594,9 +610,35 @@ private class ByteListWrapper(private val list: ByteList) : AbstractList<Byte>()
     override fun indexOf(element: Byte) = list.indexOf(element)
     override fun lastIndexOf(element: Byte) = list.lastIndexOf(element)
 
-    override fun iterator() = list.iterator()
-    override fun listIterator() = list.listIterator()
-    override fun listIterator(index: Int) = list.listIterator(index)
+    override fun iterator(): Iterator<Byte> = listIterator()
+    override fun listIterator(): ListIterator<Byte> = ListIteratorImpl(0)
+    override fun listIterator(index: Int): ListIterator<Byte> = ListIteratorImpl(index)
+
+    private inner class ListIteratorImpl(position: Int): ListIterator<Byte> {
+        private val size = list.size
+        private val traverser = list.traverser(position)
+
+        override fun hasNext(): Boolean {
+            if (list.size != size) throw ConcurrentModificationException()
+            return traverser.position != size
+        }
+        override fun next(): Byte {
+            if (!hasNext()) throw NoSuchElementException()
+            traverser.forward()
+            return traverser.value
+        }
+        override fun hasPrevious(): Boolean {
+            if (list.size != size) throw ConcurrentModificationException()
+            return traverser.position != 0
+        }
+        override fun previous(): Byte {
+            if (!hasPrevious()) throw NoSuchElementException()
+            traverser.backward()
+            return traverser.value
+        }
+        override fun nextIndex(): Int = traverser.position
+        override fun previousIndex(): Int = traverser.position - 1
+    }
 }
 
 private class MutableByteListWrapper(private val list: MutableByteList) : AbstractMutableList<Byte>() {
@@ -608,9 +650,9 @@ private class MutableByteListWrapper(private val list: MutableByteList) : Abstra
     override fun indexOf(element: Byte) = list.indexOf(element)
     override fun lastIndexOf(element: Byte) = list.lastIndexOf(element)
 
-    override fun iterator() = list.iterator()
-    override fun listIterator() = list.listIterator()
-    override fun listIterator(index: Int) = list.listIterator(index)
+    override fun iterator(): MutableIterator<Byte> = listIterator()
+    override fun listIterator(): MutableListIterator<Byte> = ListIteratorImpl(0)
+    override fun listIterator(index: Int): MutableListIterator<Byte> = ListIteratorImpl(index)
 
     override fun set(index: Int, element: Byte) = list.replace(index, element)
 
@@ -624,4 +666,33 @@ private class MutableByteListWrapper(private val list: MutableByteList) : Abstra
     override fun clear() = list.clear()
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<Byte> = list.subList(fromIndex, toIndex).asMutableList()
+
+    private inner class ListIteratorImpl(position: Int): MutableListIterator<Byte> {
+        private val size = list.size
+        private val traverser = list.traverser(position)
+
+        override fun hasNext(): Boolean {
+            if (list.size != size) throw ConcurrentModificationException()
+            return traverser.position != size
+        }
+        override fun next(): Byte {
+            if (!hasNext()) throw NoSuchElementException()
+            traverser.forward()
+            return traverser.value
+        }
+        override fun hasPrevious(): Boolean {
+            if (list.size != size) throw ConcurrentModificationException()
+            return traverser.position != 0
+        }
+        override fun previous(): Byte {
+            if (!hasPrevious()) throw NoSuchElementException()
+            traverser.backward()
+            return traverser.value
+        }
+        override fun nextIndex(): Int = traverser.position
+        override fun previousIndex(): Int = traverser.position - 1
+        override fun remove() = traverser.remove()
+        override fun set(element: Byte) = traverser.set(element)
+        override fun add(element: Byte) = traverser.insert(element)
+    }
 }

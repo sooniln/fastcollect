@@ -764,6 +764,27 @@ class Int2IntMapTest {
     }
 
     @Test
+    fun traverseRemove_visitsEveryEntryExactlyOnceAndRemovesMatching() {
+        // regression test: InterleavedHashMap's Traverser.remove() must not skip the slot immediately preceding the
+        // removed one
+        val map = Int2IntHashMap()
+        for (i in 1..50) map[i] = i + 1000
+
+        val kept = mutableListOf<Int>()
+        val traverser = map.traverser()
+        while (traverser.forward()) {
+            val key = traverser.key
+            if (key % 2 == 0) traverser.remove() else kept.add(key)
+        }
+
+        assertEquals((1..50).filter { it % 2 != 0 }.toSet(), kept.toSet())
+        assertEquals(kept.size, kept.toSet().size, "an entry was visited more than once")
+        assertEquals(25, map.size)
+        for (k in kept) assertTrue(map.containsKey(k))
+        for (k in (1..50).filter { it % 2 == 0 }) assertFalse(map.containsKey(k))
+    }
+
+    @Test
     fun equals_matchesAnyMapImplementation() {
         // Map contract (Abstract*Map.equals()) requires equality against ANY Int2IntMap implementation,
         // not just the same concrete class.
@@ -1092,6 +1113,53 @@ class Int2LongMapTest {
         }
         assertTrue(map.isEmpty())
         assertEquals((1..200).toList(), visited.sorted())
+    }
+
+    @Test
+    fun traverserRemove_removesAllEntries() {
+        // regression test: HashMap's Traverser.remove() must not skip the slot immediately preceding the removed one.
+        // a trimmed, densely loaded table makes the removal adjustment paths likely
+        val map = Int2LongHashMap()
+        for (i in 1..200) map[i] = i + 1000L
+        map.trimToSize()
+
+        val visited = mutableListOf<Int>()
+        val traverser = map.traverser()
+        while (traverser.forward()) {
+            assertEquals(traverser.key + 1000L, traverser.value)
+            visited.add(traverser.key)
+            traverser.remove()
+        }
+        assertTrue(map.isEmpty())
+        assertEquals((1..200).toList(), visited.sorted())
+    }
+
+    @Test
+    fun traverserRemove_partialRemoval_visitsEveryEntryExactlyOnce() {
+        // regression test: a naive "removeSlot(slot--)" only manifests when some visited entries survive (a full
+        // remove-everything traversal self-corrects via wraparound); here every other entry is kept, which exposes
+        // entries getting silently skipped (and other entries silently double-visited) after a removal
+        val map = Int2LongHashMap()
+        for (i in 1..200) map[i] = i + 1000L
+        map.trimToSize()
+
+        val kept = mutableListOf<Int>()
+        val removed = mutableListOf<Int>()
+        val traverser = map.traverser()
+        while (traverser.forward()) {
+            val key = traverser.key
+            if (key % 2 == 0) {
+                removed.add(key)
+                traverser.remove()
+            } else {
+                kept.add(key)
+            }
+        }
+
+        assertEquals((1..200).filter { it % 2 != 0 }, kept.sorted())
+        assertEquals((1..200).filter { it % 2 == 0 }, removed.sorted())
+        assertEquals(kept.size, kept.toSet().size, "an entry was visited more than once")
+        assertEquals(100, map.size)
     }
 
     @Test

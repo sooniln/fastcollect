@@ -314,7 +314,7 @@ public class DoubleHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableDoubleIterator = Iterator()
 
-    override fun traverse(): DoubleTraverser = Traverser()
+    override fun traverser(): MutableDoubleTraverser = Traverser()
 
     private inner class Iterator : MutableDoubleIterator() {
         private val keysArr = this@DoubleHashSet.keysArr
@@ -360,21 +360,43 @@ public class DoubleHashSet @JvmOverloads constructor(
         }
     }
 
-    private inner class Traverser : DoubleTraverser {
+    private inner class Traverser : MutableDoubleTraverser {
         private val keysArr = this@DoubleHashSet.keysArr
         private val emptyKey = this@DoubleHashSet.emptyKey
+        private val mask = keysArr.size - 1
 
-        private var position: Int = keysArr.size
+        private var slotsLeft = size
+        private var slot = keysArr.size
+        private var key = emptyKey
 
-        override val value: Double get() = keysArr[position]
+        override val value: Double get() {
+            if (key == emptyKey) throw NoSuchElementException()
+            return key
+        }
 
-        override fun advance(): Boolean {
-            if (keysArr !== this@DoubleHashSet.keysArr) throw ConcurrentModificationException()
-            while (position != 0) {
-                --position
-                if (keysArr[position] != emptyKey) return true
+        override fun forward(): Boolean {
+            if (slotsLeft == 0) {
+                key = emptyKey
+                return false
             }
-            return false
+            if (keysArr !== this@DoubleHashSet.keysArr) throw ConcurrentModificationException()
+
+            while (true) {
+                slot = (slot - 1) and mask
+                key = keysArr[slot]
+                if (key != emptyKey) {
+                    --slotsLeft
+                    return true
+                }
+            }
+        }
+
+        override fun remove() {
+            check(key != emptyKey)
+            if (keysArr !== this@DoubleHashSet.keysArr) throw ConcurrentModificationException()
+
+            removeSlot(slot)
+            key = emptyKey
         }
     }
 

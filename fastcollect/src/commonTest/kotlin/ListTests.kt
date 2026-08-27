@@ -490,6 +490,65 @@ class IntListTest {
     }
 
     @Test
+    fun traverseRemove_continuousArrayDeque_removesMatchingWithoutSkippingOrDuplicating() {
+        // regression test: ArrayDeque's plain Traverser.remove() must shift position by the same delta
+        // removeAtInternal used to shift the backing array, whether it shifted the front half right or the back
+        // half left
+        val list = mutableIntListOf()
+        for (i in 1..20) list.add(i)
+
+        val kept = mutableListOf<Int>()
+        val traverser = list.traverser()
+        while (traverser.forward()) {
+            val value = traverser.value
+            if (value % 2 == 0) traverser.remove() else kept.add(value)
+        }
+
+        assertEquals((1..20).filter { it % 2 != 0 }.toList(), kept)
+        list.assertContents(*kept.toIntArray())
+    }
+
+    @Test
+    fun traverseRemove_afterRingBufferWraparound_removesMatchingWithoutSkippingOrDuplicating() {
+        // regression test: same as traverseRemove_continuousArrayDeque, but forces the ring-wraparound path by
+        // wrapping the ring buffer around the end of its backing array (head + size > backing array size)
+        val list = IntArrayDeque(8)
+        for (i in 1..8) list.add(i)
+        for (i in 1..4) list.removeFirst()
+        for (i in 9..12) list.add(i)
+        // list is now [5, 6, 7, 8, 9, 10, 11, 12], wrapped around the backing array
+
+        val kept = mutableListOf<Int>()
+        val traverser = list.traverser()
+        while (traverser.forward()) {
+            val value = traverser.value
+            if (value % 2 == 0) traverser.remove() else kept.add(value)
+        }
+
+        assertEquals(listOf(5, 7, 9, 11), kept)
+        list.assertContents(5, 7, 9, 11)
+    }
+
+    @Test
+    fun traverseRemove_subList_doesNotThrowSpuriousConcurrentModificationException() {
+        // regression test: AbstractMutableList.TraverserImpl cached the list's lastIndex once at construction and
+        // never updated it after remove(), which threw a spurious CME on the very next forward() call
+        val backing = mutableIntListOf(1, 2, 3, 4, 5, 6)
+        val sub = backing.subList(1, 5)
+
+        val kept = mutableListOf<Int>()
+        val traverser = sub.traverser()
+        while (traverser.forward()) {
+            val value = traverser.value
+            if (value % 2 == 0) traverser.remove() else kept.add(value)
+        }
+
+        assertEquals(listOf(3, 5), kept)
+        sub.assertContents(3, 5)
+        backing.assertContents(1, 3, 5, 6)
+    }
+
+    @Test
     fun equals_matchesAnyIntListImplementation() {
         // IntList contract (Abstract*List.equals()) requires equality against ANY IntList
         // implementation, not just the same concrete class.

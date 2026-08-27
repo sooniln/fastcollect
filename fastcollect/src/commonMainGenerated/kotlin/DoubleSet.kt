@@ -104,8 +104,7 @@ private object EmptyDoubleSet : DoubleSet {
     override fun containsAll(elements: DoubleCollection): Boolean = elements.isEmpty()
 
     override fun iterator(): DoubleIterator = emptyDoubleIterator()
-
-    override fun traverse(): DoubleTraverser = emptyDoubleTraverser()
+    override fun traverser(): DoubleTraverser = emptyDoubleTraverser()
 }
 
 private class SingletonDoubleSet(private val value: Double) : DoubleSet {
@@ -116,22 +115,20 @@ private class SingletonDoubleSet(private val value: Double) : DoubleSet {
 
     override fun iterator(): DoubleIterator = object : DoubleIterator() {
         private var complete = false
-
+        override fun hasNext(): Boolean = !complete
         override fun nextDouble(): Double {
             if (complete) throw NoSuchElementException()
             complete = true
             return value
         }
-
-        override fun hasNext(): Boolean = !complete
     }
 
-    override fun traverse(): DoubleTraverser = object : DoubleTraverser {
-        private var consumed = false
+    override fun traverser(): DoubleTraverser = object : DoubleTraverser {
+        private var complete = false
         override val value: Double get() = this@SingletonDoubleSet.value
-        override fun advance(): Boolean {
-            if (consumed) return false
-            consumed = true
+        override fun forward(): Boolean {
+            if (complete) return false
+            complete = true
             return true
         }
     }

@@ -63,17 +63,16 @@ public interface FloatCollection : FloatTraversable {
 /**
  * A mutable collection of Floats.
  */
-public interface MutableFloatCollection : FloatCollection {
+public interface MutableFloatCollection : FloatCollection, MutableFloatTraversable {
     override fun iterator(): MutableFloatIterator
 
     public fun add(element: Float): Boolean
     public fun remove(element: Float): Boolean
 
     public fun clear() {
-        val it = iterator()
-        while (it.hasNext()) {
-            it.nextFloat()
-            it.remove()
+        val traverser = traverser()
+        while (traverser.forward()) {
+            traverser.remove()
         }
     }
 
@@ -125,10 +124,10 @@ public inline fun MutableFloatCollection.removeAll(predicate: (Float) -> Boolean
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (predicate(it.nextFloat())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (predicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }
@@ -146,10 +145,10 @@ internal inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (removePredicate(it.nextFloat())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (removePredicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }

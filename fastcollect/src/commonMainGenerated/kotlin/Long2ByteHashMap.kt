@@ -9,13 +9,6 @@ import kotlin.random.Random
  * A [HashMap](https://en.wikipedia.org/wiki/Hash_table) implementation for storing Long to Byte
  * relationships.
  *
- * The [keys]/[values] mutable collections exposed by this class will throw [UnsupportedOperationException] on any
- * attempt to mutate the collection, EXCEPT that [MutableIterator.remove] will work as expected. Other mutation
- * operations should be made directly on the map rather than on the sub-collections.
- *
- * The entry [iterator] exposed by this class is a [FastIterator] - clients may not allow the returned entry to escape.
- * See the [FastIterator] documentation for more information.
- *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  *
  * Note that a load factor of 1.0 is accepted - this is interpreted to mean that only 1 slot need ever remain free (i.e.
@@ -311,7 +304,7 @@ public class Long2ByteHashMap @JvmOverloads constructor(
             trimToSize()
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
-            for ((key, value) in from) {
+            from.foreach { key, value ->
                 set(key, value)
             }
         }
@@ -334,36 +327,30 @@ public class Long2ByteHashMap @JvmOverloads constructor(
         threshold = from.threshold
     }
 
-    private var _keys: MutableLongSet? = null
-    override val keys: MutableLongSet get() {
+    private var _keys: LongSet? = null
+    override val keys: LongSet get() {
         return _keys ?:
-            object : MutableLongSet {
+            object : LongSet {
                 override val size: Int get() = this@Long2ByteHashMap.size
                 override fun contains(element: Long): Boolean = containsKey(element)
-                override fun add(element: Long): Boolean = throw UnsupportedOperationException()
-                override fun remove(element: Long): Boolean = throw UnsupportedOperationException()
-                override fun iterator(): MutableLongIterator = KeyIterator()
-                override fun traverse(): LongTraverser = KeyTraverser()
-                override fun clear() = throw UnsupportedOperationException()
+                override fun iterator(): LongIterator = KeyIterator()
+                override fun traverser(): LongTraverser = Traverser().asKeyTraverser()
             }
             .also { _keys = it }
     }
 
-    private var _values: MutableByteCollection? = null
-    override val values: MutableByteCollection get() {
+    private var _values: ByteCollection? = null
+    override val values: ByteCollection get() {
         return _values ?:
 
-            object : MutableByteCollection {
+            object : ByteCollection {
 
                 override val size: Int get() = this@Long2ByteHashMap.size
                 override fun contains(element: Byte): Boolean = containsValue(element)
-                override fun add(element: Byte): Boolean = throw UnsupportedOperationException()
-                override fun remove(element: Byte): Boolean = throw UnsupportedOperationException()
-                override fun iterator(): MutableByteIterator = ValueIterator()
+                override fun iterator(): ByteIterator = ValueIterator()
 
-                override fun traverse(): ByteTraverser = ValueTraverser()
+                override fun traverser(): ByteTraverser = Traverser().asValueTraverser()
 
-                override fun clear() = throw UnsupportedOperationException()
             }
             .also { _values = it }
     }
@@ -466,9 +453,9 @@ public class Long2ByteHashMap @JvmOverloads constructor(
         emptyKey = candidate
     }
 
-    override operator fun iterator(): MutableFastIterator<MutableLong2ByteMap.MutableEntry> = FastEntryIterator()
+    override operator fun iterator(): MutableIterator<MutableLong2ByteMap.MutableEntry> = EntryIterator()
 
-    override fun traverse(): Long2ByteTraverser = Traverser()
+    override fun traverser(): MutableLong2ByteTraverser = Traverser()
 
     private open inner class SlotIterator {
         private val keysArr = this@Long2ByteHashMap.keysArr
@@ -555,59 +542,71 @@ public class Long2ByteHashMap @JvmOverloads constructor(
         override fun remove() = it.remove()
     }
 
-    private inner class FastEntryIterator: SlotIterator(), MutableFastIterator<MutableLong2ByteMap.MutableEntry>, MutableLong2ByteMap.MutableEntry {
-
-        override val key: Long get() = key()
-        override var value: Byte
-            get() = value()
-            set(value) {
-                updateValue(value)
-            }
-
+    private inner class EntryIterator: SlotIterator(), MutableIterator<MutableLong2ByteMap.MutableEntry> {
         override fun next(): MutableLong2ByteMap.MutableEntry {
             nextSlot()
-            return this
+            return object: MutableLong2ByteMap.AbstractMutableEntry() {
+                override val key = key()
+                override var value: Byte = value()
+                    set(value) {
+                        if (get(key) != field) throw IllegalStateException()
+                        set(key, value)
+                        field = value
+                    }
+            }
         }
-
-        override fun equals(other: Any?): Boolean = other is Long2ByteMap.Entry && other.key equalsBoxed key && other.value equalsBoxed value
-        override fun hashCode(): Int = key.hashCode() xor value.hashCode()
-        override fun toString(): String = "$key=$value"
     }
 
-    private inner class Traverser : Long2ByteTraverser {
+    private inner class Traverser : MutableLong2ByteTraverser {
         private val keysArr = this@Long2ByteHashMap.keysArr
         private val valuesArr = this@Long2ByteHashMap.valuesArr
         private val emptyKey = this@Long2ByteHashMap.emptyKey
+        private val mask = keysArr.size - 1
 
-        private var slot: Int = keysArr.size
+        private var slotsLeft = size
+        private var slot = keysArr.size
+        private var _key = emptyKey
 
-        override val key: Long get() = keysArr[slot]
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        override val value: Byte get() = valuesArr[slot] as Byte
-
-        override fun advance(): Boolean {
-            if (keysArr !== this@Long2ByteHashMap.keysArr) throw ConcurrentModificationException()
-            while (slot != 0) {
-                --slot
-                if (keysArr[slot] != emptyKey) return true
+        override val key: Long get() {
+            if (_key == emptyKey) throw NoSuchElementException()
+            return _key
+        }
+        override var value: Byte
+            get() {
+                if (_key == emptyKey) throw NoSuchElementException()
+                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+                return valuesArr[slot] as Byte
             }
-            return false
+            set(value) {
+                if (_key == emptyKey) throw NoSuchElementException()
+                valuesArr[slot] = value
+            }
+
+        override fun forward(): Boolean {
+            if (slotsLeft == 0) {
+                _key = emptyKey
+                return false
+            }
+            if (keysArr !== this@Long2ByteHashMap.keysArr) throw ConcurrentModificationException()
+
+            while (true) {
+                slot = (slot - 1) and mask
+                _key = keysArr[slot]
+                if (_key != emptyKey) {
+                    --slotsLeft
+                    return true
+                }
+            }
+        }
+
+        override fun remove() {
+            check(key != emptyKey)
+            if (keysArr !== this@Long2ByteHashMap.keysArr) throw ConcurrentModificationException()
+
+            removeSlot(slot)
+            _key = emptyKey
         }
     }
-
-    private inner class KeyTraverser: LongTraverser {
-        private val traverser = Traverser()
-        override val value: Long get() = traverser.key
-        override fun advance(): Boolean = traverser.advance()
-    }
-
-
-    private inner class ValueTraverser: ByteTraverser {
-        private val traverser = Traverser()
-        override val value: Byte get() = traverser.value
-        override fun advance(): Boolean = traverser.advance()
-    }
-
 
     private fun Long.slot(mask: Int): Int = Hash.mix(this) and mask
     private fun Long.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask

@@ -89,11 +89,10 @@ public interface ${Name}Map${OutGenerics} : ${Name}Traversable${Generics} {
     @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
     public fun values(): ${ValueCollectionType}${Generics} = values
 
-<% if (!isReferenceValue) { %>
-    public interface Entry {
-<% } else { %>
-    public interface Entry<out V> {
-<% } %>
+    public operator fun iterator(): Iterator<Entry${Generics}>
+
+    /** Prefer to always implement this interface via [AbstractEntry] for correct behavior. */
+    public interface Entry${OutGenerics} {
         public val key: ${KeyType}
         public val value: ${ValueType}
 
@@ -101,8 +100,12 @@ public interface ${Name}Map${OutGenerics} : ${Name}Traversable${Generics} {
         public operator fun component2(): ${ValueType} = value
     }
 
-    /** Returns a [FastIterator] over the map entries. */
-    public operator fun iterator(): FastIterator<Entry${Generics}>
+    /** An implementation of [Entry] with correct equals/hashCode/toString. */
+    public abstract class AbstractEntry${OutGenerics} : Entry${Generics} {
+        final override fun equals(other: Any?): Boolean = other is Entry${StarGenerics} && other.key equalsBoxed key && other.value equalsBoxed value
+        final override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+        final override fun toString(): String = "\$key=\$value"
+    }
 }
 
 public fun ${Generics} ${Name}Map${Generics}.asMap(): Map<${KeyType}, ${ValueType}> = ${Name}MapWrapper(this)
@@ -119,7 +122,7 @@ public inline fun ${Generics} ${Name}Map${Generics}.getOrElse(key: ${KeyType}, d
 /**
  * A mutable map of ${KeyType}s to ${ValueType}s.
  */
-public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics} {
+public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics}, Mutable${Name}Traversable${Generics} {
 
     public fun put(key: ${KeyType}, value: ${ValueType}): ${ValueType}${Nullable}
 
@@ -141,26 +144,30 @@ public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics} {
 
     public fun clear()
 
-    override val keys: Mutable${KeyType}Set
-    override val values: Mutable${ValueCollectionType}${Generics}
+    override val keys: ${KeyType}Set
+    override val values: ${ValueCollectionType}${Generics}
 
     public fun putAll(from: ${Name}Map${Generics}) {
-        for (entry in from) {
-            set(entry.key, entry.value)
+        from.foreach { key, value ->
+            set(key, value)
         }
     }
 
     public fun putAll(from: Map<out ${KeyType}, ${ValueType}>) {
-        for (entry in from) {
-            set(entry.key, entry.value)
+        for ((key, value) in from) {
+            set(key, value)
         }
     }
 
+    override fun iterator(): MutableIterator<MutableEntry${Generics}>
+
+    /** Prefer to always implement this interface via [AbstractMutableEntry] for correct behavior. */
     public interface MutableEntry${Generics} : ${Name}Map.Entry${Generics} {
         override var value: ${ValueType}
     }
 
-    override fun iterator(): MutableFastIterator<MutableEntry${Generics}>
+    /** An implementation of [Entry] with correct equals/hashCode/toString. */
+    public abstract class AbstractMutableEntry${Generics} : ${Name}Map.AbstractEntry${Generics}(), MutableEntry${Generics}
 }
 
 public fun ${Generics} Mutable${Name}Map${Generics}.asMutableMap(): MutableMap<${KeyType}, ${ValueType}> = Mutable${Name}MapWrapper(this)
@@ -278,16 +285,16 @@ private object Empty${Name}Map : ${Name}Map<Nothing> {
     override val keys: ${KeyType}Set get() = empty${KeyType}Set()
 <% if (!isReferenceValue) { %>
     override val values: ${ValueCollectionType}${Generics} get() = empty${ValueType}List()
-    override fun iterator(): FastIterator<${Name}Map.Entry> = emptyFastIterator()
+    override fun iterator(): Iterator<${Name}Map.Entry> = emptyList<${Name}Map.Entry>().iterator()
 <% } else { %>
     override val values: ${ValueCollectionType}<Nothing> get() = emptyList()
-    override fun iterator(): FastIterator<${Name}Map.Entry<Nothing>> = emptyFastIterator()
+    override fun iterator(): Iterator<${Name}Map.Entry<Nothing>> = emptyList<${Name}Map.Entry<Nothing>>().iterator()
 <% } %>
 
 <% if (!isReferenceValue) { %>
-    override fun traverse(): ${Name}Traverser = empty${Name}Traverser()
+    override fun traverser(): ${Name}Traverser = empty${Name}Traverser()
 <% } else { %>
-    override fun traverse(): ${Name}Traverser<Nothing>  = empty${Name}Traverser()
+    override fun traverser(): ${Name}Traverser<Nothing>  = empty${Name}Traverser()
 <% } %>
 }
 
@@ -307,7 +314,7 @@ private class Singleton${Name}Map${Generics}(private val key: ${KeyType}, privat
 <% } else { %>
     override val values: ${ValueCollectionType}${Generics} by lazy { listOf(value) }
 <% } %>
-    override fun iterator() = object : FastIterator<${Name}Map.Entry${Generics}> {
+    override fun iterator() = object : Iterator<${Name}Map.Entry${Generics}> {
         private var complete: Boolean = false
 
         override fun hasNext() = !complete
@@ -318,11 +325,11 @@ private class Singleton${Name}Map${Generics}(private val key: ${KeyType}, privat
         }
     }
 
-    override fun traverse(): ${Name}Traverser${Generics} = object : ${Name}Traverser${Generics} {
+    override fun traverser(): ${Name}Traverser${Generics} = object : ${Name}Traverser${Generics} {
         private var consumed = false
         override val key: ${KeyType} get() = this@Singleton${Name}Map.key
         override val value: ${ValueType} get() = this@Singleton${Name}Map.value
-        override fun advance(): Boolean {
+        override fun forward(): Boolean {
             if (consumed) return false
             consumed = true
             return true
@@ -334,7 +341,7 @@ private class ${Name}MapWrapper${Generics}(private val map: ${Name}Map${Generics
     override val size: Int get() = map.size
 
     override fun get(key: ${KeyType}): ${ValueType}? {
-        val value = map.get(key)
+        val value = map[key]
         return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
     }
 
@@ -347,8 +354,7 @@ private class ${Name}MapWrapper${Generics}(private val map: ${Name}Map${Generics
 
         override fun contains(element: Map.Entry<${KeyType}, ${ValueType}>): Boolean {
             val value = map[element.key]
-            if (map.isDefaultValue(value) && !containsKey(element.key)) return false
-            return value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
         }
 
         override fun iterator(): Iterator<Map.Entry<${KeyType}, ${ValueType}>> = object : Iterator<Map.Entry<${KeyType}, ${ValueType}>> {
@@ -370,7 +376,7 @@ private class Mutable${Name}MapWrapper${Generics}(private val map: Mutable${Name
     override val size: Int get() = map.size
 
     override fun get(key: ${KeyType}): ${ValueType}? {
-        val value = map.get(key)
+        val value = map[key]
         return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
     }
 
@@ -395,8 +401,7 @@ private class Mutable${Name}MapWrapper${Generics}(private val map: Mutable${Name
 
         override fun contains(element: MutableMap.MutableEntry<${KeyType}, ${ValueType}>): Boolean {
             val value = map[element.key]
-            if (map.isDefaultValue(value) && !containsKey(element.key)) return false
-            return value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
         }
 
         override fun add(element: MutableMap.MutableEntry<${KeyType}, ${ValueType}>): Boolean = throw UnsupportedOperationException()

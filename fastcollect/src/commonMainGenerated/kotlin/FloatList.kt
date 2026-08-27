@@ -9,7 +9,6 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
@@ -28,7 +27,7 @@ public fun mutableFloatListOf(vararg elements: Float): MutableFloatList = FloatA
 public fun FloatArray.asFloatList(): FloatList = FloatArrayListWrapper(this)
 
 @JvmSynthetic
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun buildFloatList(expectedSize: Int = 0, builderAction: MutableFloatList.() -> Unit): FloatList {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
 
@@ -38,14 +37,14 @@ public inline fun buildFloatList(expectedSize: Int = 0, builderAction: MutableFl
 }
 
 @JvmSynthetic
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun FloatList(size: Int, init: (index: Int) -> Float): FloatList {
     contract { callsInPlace(init, InvocationKind.UNKNOWN) }
     return MutableFloatList(size, init)
 }
 
 @JvmSynthetic
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun MutableFloatList(size: Int, init: (index: Int) -> Float): MutableFloatList {
     contract { callsInPlace(init, InvocationKind.UNKNOWN) }
 
@@ -54,12 +53,60 @@ public inline fun MutableFloatList(size: Int, init: (index: Int) -> Float): Muta
     return list
 }
 
+public interface FloatListTraversable: FloatTraversable {
+    public fun traverser(position: Int): FloatListTraverser
+}
+
+public interface MutableFloatListTraversable: MutableFloatTraversable {
+    public fun traverser(position: Int): MutableFloatListTraverser
+}
+
+public interface FloatListTraverser : FloatTraverser {
+    public val position: Int
+    public fun backward(): Boolean
+}
+
+public interface MutableFloatListTraverser : FloatListTraverser, MutableFloatTraverser {
+    public fun set(value: Float)
+    public fun insert(value: Float)
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatList.foreachReverse(action: (Float) -> Unit) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverser(size)
+    while (traverser.backward()) {
+        action(traverser.value)
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatListTraversable.foreachIndexed(action: (Int, Float) -> Unit) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverser(0)
+    var index = 0
+    while (traverser.forward()) {
+        action(index++, traverser.value)
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatList.foreachReverseIndexed(action: (Int, Float) -> Unit) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverser(size)
+    var index = size
+    while (traverser.backward()) {
+        action(--index, traverser.value)
+    }
+}
+
 /**
  * A list of Floats.
  */
-public interface FloatList : FloatCollection {
-    public fun listIterator(): FloatListIterator
-    public fun listIterator(index: Int): FloatListIterator
+public interface FloatList : FloatCollection, FloatListTraversable {
 
     override fun contains(element: Float): Boolean {
         return indexOf(element) != -1
@@ -67,23 +114,19 @@ public interface FloatList : FloatCollection {
 
     public operator fun get(index: Int): Float
 
-    override fun containsAll(elements: Collection<Float>): Boolean = super.containsAll(elements)
-
     public fun indexOf(element: Float): Int {
-        val it = listIterator()
-        while (it.hasNext()) {
-            if (it.nextFloat() equalsBoxed element) {
-                return it.previousIndex()
+        foreachIndexed { index, value ->
+            if (value equalsBoxed element) {
+                return index
             }
         }
         return -1
     }
 
     public fun lastIndexOf(element: Float): Int {
-        val it = listIterator(size)
-        while (it.hasPrevious()) {
-            if (it.previousFloat() equalsBoxed element) {
-                return it.nextIndex()
+        foreachReverseIndexed { index, value ->
+            if (value equalsBoxed element) {
+                return index
             }
         }
         return -1
@@ -119,27 +162,27 @@ public fun FloatList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.s
 }
 
 @JvmSynthetic
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun <R> FloatList.foldRight(initial: R, operation: (Float, accumulated: R) -> R): R {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    val it = listIterator(size)
-    while (it.hasPrevious()) {
-        accumulated = operation(it.previousFloat(), accumulated)
+    foreachReverse { value ->
+        accumulated = operation(value, accumulated)
     }
     return accumulated
 }
 
 @JvmSynthetic
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OptIn(ExperimentalContracts::class)
 public inline fun FloatList.reduceRight(operation: (Float, accumulated: Float) -> Float) : Float {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
-    val it = listIterator(size)
-    var accumulated = it.previousFloat()
-    while (it.hasPrevious()) {
-        accumulated = operation(it.previousFloat(), accumulated)
+    val traverser = traverser(size)
+    if (!traverser.backward()) throw NoSuchElementException()
+    var accumulated = traverser.value
+    while (traverser.backward()) {
+        accumulated = operation(traverser.value, accumulated)
     }
     return accumulated
 }
@@ -149,9 +192,9 @@ public fun FloatList.asList(): List<Float> = FloatListWrapper(this)
 /**
  * A mutable list of Floats.
  */
-public interface MutableFloatList : FloatList, MutableFloatCollection {
-    override fun listIterator(): MutableFloatListIterator
-    override fun listIterator(index: Int): MutableFloatListIterator
+public interface MutableFloatList : FloatList, MutableFloatCollection, MutableFloatTraversable {
+
+    override fun traverser(position: Int): MutableFloatListTraverser
 
     public operator fun set(index: Int, element: Float)
 
@@ -206,37 +249,33 @@ public interface MutableFloatList : FloatList, MutableFloatCollection {
         for (element in elements) add(i++, element)
     }
 
-    override fun removeAll(elements: Collection<Float>): Boolean = super.removeAll(elements)
-    override fun retainAll(elements: Collection<Float>): Boolean = super.retainAll(elements)
-
     public fun sort() {
         val sorted = toFloatArray().also { it.sort() }
-        val it = listIterator()
+        val traverser = traverser(0)
         for (element in sorted) {
-            it.next()
-            it.set(element)
+            check(traverser.forward())
+            traverser.set(element)
         }
     }
 
     public fun sortDescending() {
         val sorted = toFloatArray().also { it.sortDescending() }
-        val it = listIterator()
+        val traverser = traverser(0)
         for (element in sorted) {
-            it.next()
-            it.set(element)
+            check(traverser.forward())
+            traverser.set(element)
         }
     }
 
     public fun fill(element: Float) {
         if (this is RandomAccess) {
-            for (index in 0..lastIndex) {
+            for (index in 0..<size) {
                 set(index, element)
             }
         } else {
-            val it = listIterator()
-            while (it.hasNext()) {
-                it.next()
-                it.set(element)
+            val traverser = traverser(0)
+            while (traverser.forward()) {
+                traverser.set(element)
             }
         }
     }
@@ -270,10 +309,8 @@ public fun MutableFloatList.asMutableList(): MutableList<Float> = MutableFloatLi
 public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
 
     override fun iterator(): FloatIterator = IteratorImpl()
-    override fun listIterator(): FloatListIterator = listIterator(0)
-    override fun listIterator(index: Int): FloatListIterator = ListIteratorImpl(index)
-
-    override fun traverse(): FloatTraverser = TraverserImpl()
+    override fun traverser(): FloatTraverser = TraverserImpl()
+    override fun traverser(position: Int): FloatListTraverser = ListTraverserImpl(position)
 
     override fun subList(fromIndex: Int, toIndex: Int): FloatList {
         return if (this is RandomAccess) {
@@ -288,76 +325,69 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
         if (other !is FloatList) return false
         if (size != other.size) return false
 
-        val it = listIterator()
-        val otherIt = other.listIterator()
-        while (it.hasNext() && otherIt.hasNext()) {
-            if (!(it.nextFloat() equalsBoxed otherIt.nextFloat())) {
+        val traverser = traverser()
+        val otherTraverser = other.traverser()
+
+        var hasNext = traverser.forward()
+        var otherHasNext = traverser.forward()
+        while (hasNext && otherHasNext) {
+            if (!(traverser.value equalsBoxed otherTraverser.value)) {
                 return false
             }
+            hasNext = traverser.forward()
+            otherHasNext = traverser.forward()
         }
-        return !(it.hasNext() || otherIt.hasNext())
+        return !hasNext && !otherHasNext
     }
 
     override fun hashCode(): Int {
         var hashCode = 1
-        for (element in this) {
+        foreach { element ->
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode
     }
 
     private inner class IteratorImpl: FloatIterator() {
-
         private var index = 0
-
+        override fun hasNext(): Boolean = index != size
         override fun nextFloat(): Float {
             if (index == size) throw NoSuchElementException()
-            val value = get(index)
-            index++
-            return value
+            return get(index++)
         }
-
-        override fun hasNext(): Boolean = index != size
-    }
-
-    private inner class ListIteratorImpl(private var index: Int = 0): FloatListIterator() {
-
-        init {
-            if (index != 0) rangeCheckInclusive(index)
-        }
-
-        override fun previousFloat(): Float {
-            if (index == 0) throw NoSuchElementException()
-            val i = index - 1
-            val value = get(i)
-            index = i
-            return value
-        }
-
-        override fun nextFloat(): Float {
-            if (index == size) throw NoSuchElementException()
-            val value = get(index)
-            index++
-            return value
-        }
-
-        override fun hasNext(): Boolean = index != size
-        override fun hasPrevious(): Boolean = index != 0
-
-        override fun nextIndex(): Int = index
-        override fun previousIndex(): Int = index - 1
     }
 
     private inner class TraverserImpl : FloatTraverser {
-        private val last = lastIndex
-        private var position: Int = -1
+        private val last = size - 1
+        private var index = -1
+        override val value: Float get() = get(index)
+        override fun forward(): Boolean {
+            if (index == last) return false
+            ++index
+            return true
+        }
+    }
 
-        override val value: Float get() = get(position)
+    private inner class ListTraverserImpl(position: Int) : FloatListTraverser {
+        init {
+            require(position in 0..size)
+        }
 
-        override fun advance(): Boolean {
-            if (position >= last) return false
-            if (last != lastIndex) throw ConcurrentModificationException()
-            ++position
+        private var index = position - 1
+
+        override var position: Int = position
+            private set
+        override val value: Float get() = get(index)
+
+        override fun forward(): Boolean {
+            if (position == size) return false
+            index = position++
+            return true
+        }
+
+        override fun backward(): Boolean {
+            if (position == 0) return false
+            index = --position
             return true
         }
     }
@@ -374,7 +404,7 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
 
         override fun get(index: Int): Float {
             rangeCheck(index)
-            return list.get(index + offset)
+            return list[index + offset]
         }
     }
 
@@ -383,28 +413,21 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
 
 public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFloatList {
 
-    override fun add(element: Float): Boolean = super<MutableFloatList>.add(element)
-    override fun remove(element: Float): Boolean = super<MutableFloatList>.remove(element)
-    override fun clear(): Unit = super<MutableFloatList>.clear()
-    override fun addAll(elements: Collection<Float>): Boolean = super<MutableFloatList>.addAll(elements)
-    override fun removeAll(elements: Collection<Float>): Boolean = super<MutableFloatList>.removeAll(elements)
-    override fun retainAll(elements: Collection<Float>): Boolean = super<MutableFloatList>.retainAll(elements)
+    override fun iterator(): MutableFloatIterator = IteratorImpl()
+    override fun traverser(): MutableFloatTraverser = ListTraverserImpl(0)
+    override fun traverser(position: Int): MutableFloatListTraverser = ListTraverserImpl(position)
 
     override fun removeRange(fromIndex: Int, toIndex: Int) {
         if (fromIndex == 0 && toIndex == 0) return
 
         rangeCheck(fromIndex, toIndex)
 
-        val it = listIterator(fromIndex)
+        val traverser = traverser(toIndex)
         repeat(toIndex-fromIndex) { _ ->
-            it.nextFloat()
-            it.remove()
+            check(traverser.backward())
+            traverser.remove()
         }
     }
-
-    override fun iterator(): MutableFloatIterator = IteratorImpl()
-    override fun listIterator(): MutableFloatListIterator = listIterator(0)
-    override fun listIterator(index: Int): MutableFloatListIterator = ListIteratorImpl(index)
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableFloatList {
         return if (this is RandomAccess) {
@@ -417,77 +440,62 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
     private inner class IteratorImpl: MutableFloatIterator() {
         private var index = 0
         private var lastIndex = -1
-
+        override fun hasNext(): Boolean = index != size
         override fun nextFloat(): Float {
             if (index == size) throw NoSuchElementException()
-            val i = index
-            val value = get(i)
-            lastIndex = i
-            index = i + 1
-            return value
+            lastIndex = index++
+            return get(lastIndex)
         }
-
-        override fun hasNext(): Boolean = index != size
-
         override fun remove() {
-            check(lastIndex >= 0)
-
+            check(lastIndex != -1)
             removeAt(lastIndex)
-            if (lastIndex < index) index--
+            index--
             lastIndex = -1
         }
     }
 
-    private inner class ListIteratorImpl(private var index: Int = 0): MutableFloatListIterator() {
-
+    private inner class ListTraverserImpl(position: Int) : MutableFloatListTraverser {
         init {
-            if (index != 0) rangeCheckInclusive(index)
+            require(position in 0..size)
         }
 
-        private var lastIndex = -1
+        private var index = position - 1
 
-        override fun previousFloat(): Float {
-            if (index == 0) throw NoSuchElementException()
-            val i = index - 1
-            val value = get(i)
-            index = i
-            lastIndex = i
-            return value
+        override var position: Int = position
+            private set
+        override val value: Float get() {
+            check(index != -1)
+            return get(index)
         }
 
-        override fun nextFloat(): Float {
-            if (index == size) throw NoSuchElementException()
-            val i = index
-            val value = get(i)
-            lastIndex = i
-            index = i + 1
-            return value
+        override fun forward(): Boolean {
+            if (position == size) return false
+            index = position++
+            return true
         }
 
-        override fun hasNext(): Boolean = index != size
-        override fun hasPrevious(): Boolean = index != 0
-
-        override fun nextIndex(): Int = index
-        override fun previousIndex(): Int = index - 1
+        override fun backward(): Boolean {
+            if (position == 0) return false
+            index = --position
+            return true
+        }
 
         override fun remove() {
-            check(lastIndex >= 0)
-
-            removeAt(lastIndex)
-            if (lastIndex < index) index--
-            lastIndex = -1
+            check(index != -1)
+            removeAt(index)
+            if (position > index) --position
+            index = -1
         }
 
-        override fun set(element: Float) {
-            check(lastIndex >= 0)
-            set(lastIndex, element)
+        override fun set(value: Float) {
+            check(index != -1)
+            set(index, value)
         }
 
-        override fun add(element: Float) {
-            val i = index
-            add(i, element)
-            lastIndex = -1
-            index = i + 1
+        override fun insert(value: Float) {
+            add(position, value)
+            ++position
+            ++index
         }
     }
 
@@ -506,7 +514,7 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
         }
 
         override fun get(index: Int): Float {
-            return list.get(rangeCheck(index) + offset)
+            return list[rangeCheck(index) + offset]
         }
 
         override fun add(index: Int, element: Float) {
@@ -540,6 +548,13 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
     private class RandomAccessFloatSubList(list: MutableFloatList, fromIndex: Int, toIndex: Int) : FloatSubList(list, fromIndex, toIndex), RandomAccess
 }
 
+private object EmptyFloatListTraverser : FloatListTraverser {
+    override val position: Int get() = 0
+    override val value: Float get() = throw IllegalStateException()
+    override fun forward(): Boolean = false
+    override fun backward(): Boolean = false
+}
+
 private object EmptyFloatList : FloatList, RandomAccess {
     override val size: Int get() = 0
 
@@ -553,10 +568,11 @@ private object EmptyFloatList : FloatList, RandomAccess {
     override fun lastIndexOf(element: Float): Int = -1
 
     override fun iterator(): FloatIterator = emptyFloatIterator()
-    override fun listIterator(): FloatListIterator = emptyFloatIterator()
-    override fun listIterator(index: Int): FloatListIterator = if (index == 0) listIterator() else throw IndexOutOfBoundsException()
-
-    override fun traverse(): FloatTraverser = emptyFloatTraverser()
+    override fun traverser(): FloatTraverser = EmptyFloatListTraverser
+    override fun traverser(position: Int): FloatListTraverser {
+        require(position == 0)
+        return EmptyFloatListTraverser
+    }
 
     override fun subList(fromIndex: Int, toIndex: Int): FloatList {
         if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()
@@ -594,9 +610,35 @@ private class FloatListWrapper(private val list: FloatList) : AbstractList<Float
     override fun indexOf(element: Float) = list.indexOf(element)
     override fun lastIndexOf(element: Float) = list.lastIndexOf(element)
 
-    override fun iterator() = list.iterator()
-    override fun listIterator() = list.listIterator()
-    override fun listIterator(index: Int) = list.listIterator(index)
+    override fun iterator(): Iterator<Float> = listIterator()
+    override fun listIterator(): ListIterator<Float> = ListIteratorImpl(0)
+    override fun listIterator(index: Int): ListIterator<Float> = ListIteratorImpl(index)
+
+    private inner class ListIteratorImpl(position: Int): ListIterator<Float> {
+        private val size = list.size
+        private val traverser = list.traverser(position)
+
+        override fun hasNext(): Boolean {
+            if (list.size != size) throw ConcurrentModificationException()
+            return traverser.position != size
+        }
+        override fun next(): Float {
+            if (!hasNext()) throw NoSuchElementException()
+            traverser.forward()
+            return traverser.value
+        }
+        override fun hasPrevious(): Boolean {
+            if (list.size != size) throw ConcurrentModificationException()
+            return traverser.position != 0
+        }
+        override fun previous(): Float {
+            if (!hasPrevious()) throw NoSuchElementException()
+            traverser.backward()
+            return traverser.value
+        }
+        override fun nextIndex(): Int = traverser.position
+        override fun previousIndex(): Int = traverser.position - 1
+    }
 }
 
 private class MutableFloatListWrapper(private val list: MutableFloatList) : AbstractMutableList<Float>() {
@@ -608,9 +650,9 @@ private class MutableFloatListWrapper(private val list: MutableFloatList) : Abst
     override fun indexOf(element: Float) = list.indexOf(element)
     override fun lastIndexOf(element: Float) = list.lastIndexOf(element)
 
-    override fun iterator() = list.iterator()
-    override fun listIterator() = list.listIterator()
-    override fun listIterator(index: Int) = list.listIterator(index)
+    override fun iterator(): MutableIterator<Float> = listIterator()
+    override fun listIterator(): MutableListIterator<Float> = ListIteratorImpl(0)
+    override fun listIterator(index: Int): MutableListIterator<Float> = ListIteratorImpl(index)
 
     override fun set(index: Int, element: Float) = list.replace(index, element)
 
@@ -624,4 +666,33 @@ private class MutableFloatListWrapper(private val list: MutableFloatList) : Abst
     override fun clear() = list.clear()
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<Float> = list.subList(fromIndex, toIndex).asMutableList()
+
+    private inner class ListIteratorImpl(position: Int): MutableListIterator<Float> {
+        private val size = list.size
+        private val traverser = list.traverser(position)
+
+        override fun hasNext(): Boolean {
+            if (list.size != size) throw ConcurrentModificationException()
+            return traverser.position != size
+        }
+        override fun next(): Float {
+            if (!hasNext()) throw NoSuchElementException()
+            traverser.forward()
+            return traverser.value
+        }
+        override fun hasPrevious(): Boolean {
+            if (list.size != size) throw ConcurrentModificationException()
+            return traverser.position != 0
+        }
+        override fun previous(): Float {
+            if (!hasPrevious()) throw NoSuchElementException()
+            traverser.backward()
+            return traverser.value
+        }
+        override fun nextIndex(): Int = traverser.position
+        override fun previousIndex(): Int = traverser.position - 1
+        override fun remove() = traverser.remove()
+        override fun set(element: Float) = traverser.set(element)
+        override fun add(element: Float) = traverser.insert(element)
+    }
 }

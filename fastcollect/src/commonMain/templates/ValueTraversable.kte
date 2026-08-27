@@ -12,32 +12,47 @@ import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
-import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmSynthetic
 
-public fun empty${Type}Traverser(): ${Type}Traverser = Empty${Type}Traverser
+public fun empty${Type}Traverser(): Mutable${Type}Traverser = Empty${Type}Traverser
 
 /**
- * Implementing this interface indicates that this object can be traversed through to produce a series of ${Type}s. Very
- * similar to [Iterable] in concept - see [Traversable] for more details.
+ * A primitively typed [Traversable] of ${Type}s.
  */
-public interface ${Type}Traversable: Traversable {
-    override fun traverse(): ${Type}Traverser
+public interface ${Type}Traversable: Traversable<${Type}> {
+    override fun traverser(): ${Type}Traverser
 }
 
 /**
- * Provides a way of traversing through ${Type} values in a container. Very similar to [Iterator] in concept - see
- * [Traverser] for more details.
+ * A primitively typed [MutableTraversable] of ${Type}s.
  */
-public interface ${Type}Traverser : Traverser {
+public interface Mutable${Type}Traversable: MutableTraversable<${Type}> {
+    override fun traverser(): Mutable${Type}Traverser
+}
+
+/**
+ * A primitively typed [Traverser] of ${Type}s.
+ */
+public interface ${Type}Traverser : Traverser<${Type}> {
     public val value: ${Type}
+
+    /** DO NOT USE. May cause boxing. */
+    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.", replaceWith = ReplaceWith("value"))
+    @get:JvmSynthetic
+    override val element: ${Type} get() = value
 }
+
+/**
+ * A primitively typed [MutableTraverser] of ${Type}s.
+ */
+public interface Mutable${Type}Traverser : ${Type}Traverser, MutableTraverser<${Type}>
 
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}Traversable.foreach(action: (${Type}) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
-    val traverser = traverse()
-    while (traverser.advance()) {
+    val traverser = traverser()
+    while (traverser.forward()) {
         action(traverser.value)
     }
 }
@@ -75,10 +90,10 @@ public inline fun <R> ${Type}Traversable.fold(initial: R, operation: (accumulate
 public inline fun ${Type}Traversable.reduce(operation: (accumulated: ${Type}, ${Type}) -> ${Type}): ${Type} {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
-    val traverser = traverse()
-    if (!traverser.advance()) throw NoSuchElementException()
+    val traverser = traverser()
+    if (!traverser.forward()) throw NoSuchElementException()
     var accumulated = traverser.value
-    while (traverser.advance()) {
+    while (traverser.forward()) {
         accumulated = operation(accumulated, traverser.value)
     }
     return accumulated
@@ -128,7 +143,8 @@ public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Double): Doubl
     return sum
 }
 
-private object Empty${Type}Traverser : ${Type}Traverser {
-    override fun advance(): Boolean = false
-    override val value: Nothing get() = throw IllegalStateException()
+private object Empty${Type}Traverser : Mutable${Type}Traverser {
+    override fun forward(): Boolean = false
+    override val value: ${Type} get() = throw IllegalStateException()
+    override fun remove() = throw IllegalStateException()
 }

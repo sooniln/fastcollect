@@ -208,13 +208,13 @@ public abstract class AbstractIntPriorityQueue(initialCapacity: Int = 0): IntTra
         }
     }
 
-    override fun traverse(): IntTraverser = object : IntTraverser {
+    override fun traverser(): IntTraverser = object : IntTraverser {
         private val last = size - 1
         private var position: Int = -1
 
         override val value: Int get() = heap[position]
 
-        override fun advance(): Boolean {
+        override fun forward(): Boolean {
             if (position == last) return false
             if (last != size - 1) throw ConcurrentModificationException()
             ++position

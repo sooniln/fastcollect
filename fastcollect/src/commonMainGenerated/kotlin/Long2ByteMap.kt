@@ -89,9 +89,10 @@ public interface Long2ByteMap : Long2ByteTraversable {
     @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
     public fun values(): ByteCollection = values
 
+    public operator fun iterator(): Iterator<Entry>
 
+    /** Prefer to always implement this interface via [AbstractEntry] for correct behavior. */
     public interface Entry {
-
         public val key: Long
         public val value: Byte
 
@@ -99,8 +100,12 @@ public interface Long2ByteMap : Long2ByteTraversable {
         public operator fun component2(): Byte = value
     }
 
-    /** Returns a [FastIterator] over the map entries. */
-    public operator fun iterator(): FastIterator<Entry>
+    /** An implementation of [Entry] with correct equals/hashCode/toString. */
+    public abstract class AbstractEntry : Entry {
+        final override fun equals(other: Any?): Boolean = other is Entry && other.key equalsBoxed key && other.value equalsBoxed value
+        final override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+        final override fun toString(): String = "$key=$value"
+    }
 }
 
 public fun  Long2ByteMap.asMap(): Map<Long, Byte> = Long2ByteMapWrapper(this)
@@ -117,7 +122,7 @@ public inline fun  Long2ByteMap.getOrElse(key: Long, defaultValue: () -> Byte): 
 /**
  * A mutable map of Longs to Bytes.
  */
-public interface MutableLong2ByteMap : Long2ByteMap {
+public interface MutableLong2ByteMap : Long2ByteMap, MutableLong2ByteTraversable {
 
     public fun put(key: Long, value: Byte): Byte
 
@@ -139,26 +144,30 @@ public interface MutableLong2ByteMap : Long2ByteMap {
 
     public fun clear()
 
-    override val keys: MutableLongSet
-    override val values: MutableByteCollection
+    override val keys: LongSet
+    override val values: ByteCollection
 
     public fun putAll(from: Long2ByteMap) {
-        for (entry in from) {
-            set(entry.key, entry.value)
+        from.foreach { key, value ->
+            set(key, value)
         }
     }
 
     public fun putAll(from: Map<out Long, Byte>) {
-        for (entry in from) {
-            set(entry.key, entry.value)
+        for ((key, value) in from) {
+            set(key, value)
         }
     }
 
+    override fun iterator(): MutableIterator<MutableEntry>
+
+    /** Prefer to always implement this interface via [AbstractMutableEntry] for correct behavior. */
     public interface MutableEntry : Long2ByteMap.Entry {
         override var value: Byte
     }
 
-    override fun iterator(): MutableFastIterator<MutableEntry>
+    /** An implementation of [Entry] with correct equals/hashCode/toString. */
+    public abstract class AbstractMutableEntry : Long2ByteMap.AbstractEntry(), MutableEntry
 }
 
 public fun  MutableLong2ByteMap.asMutableMap(): MutableMap<Long, Byte> = MutableLong2ByteMapWrapper(this)
@@ -269,11 +278,11 @@ private object EmptyLong2ByteMap : Long2ByteMap {
     override val keys: LongSet get() = emptyLongSet()
 
     override val values: ByteCollection get() = emptyByteList()
-    override fun iterator(): FastIterator<Long2ByteMap.Entry> = emptyFastIterator()
+    override fun iterator(): Iterator<Long2ByteMap.Entry> = emptyList<Long2ByteMap.Entry>().iterator()
 
 
 
-    override fun traverse(): Long2ByteTraverser = emptyLong2ByteTraverser()
+    override fun traverser(): Long2ByteTraverser = emptyLong2ByteTraverser()
 
 }
 
@@ -291,7 +300,7 @@ private class SingletonLong2ByteMap(private val key: Long, private val value: By
 
     override val values: ByteCollection by lazy { byteListOf(value) }
 
-    override fun iterator() = object : FastIterator<Long2ByteMap.Entry> {
+    override fun iterator() = object : Iterator<Long2ByteMap.Entry> {
         private var complete: Boolean = false
 
         override fun hasNext() = !complete
@@ -302,11 +311,11 @@ private class SingletonLong2ByteMap(private val key: Long, private val value: By
         }
     }
 
-    override fun traverse(): Long2ByteTraverser = object : Long2ByteTraverser {
+    override fun traverser(): Long2ByteTraverser = object : Long2ByteTraverser {
         private var consumed = false
         override val key: Long get() = this@SingletonLong2ByteMap.key
         override val value: Byte get() = this@SingletonLong2ByteMap.value
-        override fun advance(): Boolean {
+        override fun forward(): Boolean {
             if (consumed) return false
             consumed = true
             return true
@@ -318,7 +327,7 @@ private class Long2ByteMapWrapper(private val map: Long2ByteMap) : AbstractMap<L
     override val size: Int get() = map.size
 
     override fun get(key: Long): Byte? {
-        val value = map.get(key)
+        val value = map[key]
         return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
     }
 
@@ -331,8 +340,7 @@ private class Long2ByteMapWrapper(private val map: Long2ByteMap) : AbstractMap<L
 
         override fun contains(element: Map.Entry<Long, Byte>): Boolean {
             val value = map[element.key]
-            if (map.isDefaultValue(value) && !containsKey(element.key)) return false
-            return value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
         }
 
         override fun iterator(): Iterator<Map.Entry<Long, Byte>> = object : Iterator<Map.Entry<Long, Byte>> {
@@ -354,7 +362,7 @@ private class MutableLong2ByteMapWrapper(private val map: MutableLong2ByteMap) :
     override val size: Int get() = map.size
 
     override fun get(key: Long): Byte? {
-        val value = map.get(key)
+        val value = map[key]
         return if (map.isDefaultValue(value) && !map.containsKey(key)) null else value
     }
 
@@ -379,8 +387,7 @@ private class MutableLong2ByteMapWrapper(private val map: MutableLong2ByteMap) :
 
         override fun contains(element: MutableMap.MutableEntry<Long, Byte>): Boolean {
             val value = map[element.key]
-            if (map.isDefaultValue(value) && !containsKey(element.key)) return false
-            return value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
         }
 
         override fun add(element: MutableMap.MutableEntry<Long, Byte>): Boolean = throw UnsupportedOperationException()

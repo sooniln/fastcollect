@@ -314,7 +314,7 @@ public class FloatHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableFloatIterator = Iterator()
 
-    override fun traverse(): FloatTraverser = Traverser()
+    override fun traverser(): MutableFloatTraverser = Traverser()
 
     private inner class Iterator : MutableFloatIterator() {
         private val keysArr = this@FloatHashSet.keysArr
@@ -360,21 +360,43 @@ public class FloatHashSet @JvmOverloads constructor(
         }
     }
 
-    private inner class Traverser : FloatTraverser {
+    private inner class Traverser : MutableFloatTraverser {
         private val keysArr = this@FloatHashSet.keysArr
         private val emptyKey = this@FloatHashSet.emptyKey
+        private val mask = keysArr.size - 1
 
-        private var position: Int = keysArr.size
+        private var slotsLeft = size
+        private var slot = keysArr.size
+        private var key = emptyKey
 
-        override val value: Float get() = keysArr[position]
+        override val value: Float get() {
+            if (key == emptyKey) throw NoSuchElementException()
+            return key
+        }
 
-        override fun advance(): Boolean {
-            if (keysArr !== this@FloatHashSet.keysArr) throw ConcurrentModificationException()
-            while (position != 0) {
-                --position
-                if (keysArr[position] != emptyKey) return true
+        override fun forward(): Boolean {
+            if (slotsLeft == 0) {
+                key = emptyKey
+                return false
             }
-            return false
+            if (keysArr !== this@FloatHashSet.keysArr) throw ConcurrentModificationException()
+
+            while (true) {
+                slot = (slot - 1) and mask
+                key = keysArr[slot]
+                if (key != emptyKey) {
+                    --slotsLeft
+                    return true
+                }
+            }
+        }
+
+        override fun remove() {
+            check(key != emptyKey)
+            if (keysArr !== this@FloatHashSet.keysArr) throw ConcurrentModificationException()
+
+            removeSlot(slot)
+            key = emptyKey
         }
     }
 

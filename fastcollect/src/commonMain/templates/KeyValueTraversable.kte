@@ -12,29 +12,71 @@ import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
-import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmSynthetic
 
 public fun ${Generics} empty${Name}Traverser(): ${Name}Traverser${Generics} = Empty${Name}Traverser
 
 /**
- * Implementing this interface indicates that this object can be traversed through to produce a series of ${KeyType} and
- * ${ValueType} tuples. Very similar to [Iterable] in concept - see [Traversable] for more details.
- *
- * Clients are generally encouraged not to use methods from this interface directly, but to use the inline extension
- * methods [${Name}Traversable.foreach]/[${Name}Traversable.foreachKey].
+ * A primitively typed [Traversable] of ${KeyType} to ${ValueType} tuples.
  */
-public interface ${Name}Traversable${OutGenerics}: Traversable {
-    override fun traverse(): ${Name}Traverser${Generics}
+public interface ${Name}Traversable${OutGenerics}: Traversable<${Name}Map.Entry${Generics}> {
+    override fun traverser(): ${Name}Traverser${Generics}
 }
 
 /**
- * Provides a way of traversing through ${KeyType} and ${ValueType} tuples in a map. Very similar to [Iterator] in
- * concept - see [Traverser] for more details.
+ * A primitively typed [MutableTraversable] of ${KeyType} to ${ValueType} tuples.
  */
-public interface ${Name}Traverser${OutGenerics} : Traverser {
+public interface Mutable${Name}Traversable${Generics}: MutableTraversable<${Name}Map.Entry${Generics}> {
+    override fun traverser(): Mutable${Name}Traverser${Generics}
+}
+
+/**
+ * A primitively typed [Traverser] of ${KeyType} to ${ValueType} tuples.
+ */
+public interface ${Name}Traverser${OutGenerics}: Traverser<${Name}Map.Entry${Generics}> {
     public val key: ${KeyType}
     public val value: ${ValueType}
+
+    /** DO NOT USE. May cause boxing. */
+    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
+    @get:JvmSynthetic
+    override val element: ${Name}Map.Entry${Generics} get() = object: ${Name}Map.AbstractEntry${Generics}() {
+        override val key: ${KeyType} get() = this@${Name}Traverser.key
+        override val value: ${ValueType} get() = this@${Name}Traverser.value
+    }
 }
+/**
+ * A primitively typed [MutableTraverser] of ${KeyType} to ${ValueType} tuples.
+ */
+public interface Mutable${Name}Traverser${Generics} : ${Name}Traverser${Generics}, MutableTraverser<${Name}Map.Entry${Generics}> {
+    override var value: ${ValueType}
+
+    /** DO NOT USE. May cause boxing. */
+    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
+    @get:JvmSynthetic
+    override val element: Mutable${Name}Map.MutableEntry${Generics} get() = object: Mutable${Name}Map.AbstractMutableEntry${Generics}() {
+        override val key: ${KeyType} get() = this@Mutable${Name}Traverser.key
+        override var value: ${ValueType}
+            get() = this@Mutable${Name}Traverser.value
+            set(value) { this@Mutable${Name}Traverser.value = value }
+    }
+}
+
+public fun ${Generics} ${Name}Traverser${Generics}.asKeyTraverser(): ${KeyType}Traverser {
+    return object: ${KeyType}Traverser {
+        override fun forward(): Boolean = this@asKeyTraverser.forward()
+        override val value: ${KeyType} get() = key
+    }
+}
+
+<% if (!isReferenceValue) { %>
+public fun ${Generics} ${Name}Traverser${Generics}.asValueTraverser(): ${ValueType}Traverser {
+    return object: ${ValueType}Traverser {
+        override fun forward(): Boolean = this@asValueTraverser.forward()
+        override val value: ${ValueType} get() = this@asValueTraverser.value
+    }
+}
+<% } %>
 
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} ${Name}Traversable${Generics}.foreach(
@@ -42,8 +84,8 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.foreach(
 ) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
-    val traverser = traverse()
-    while (traverser.advance()) {
+    val traverser = traverser()
+    while (traverser.forward()) {
         action(traverser.key, traverser.value)
     }
 }
@@ -54,8 +96,8 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.foreachKey(
 ) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
-    val traverser = traverse()
-    while (traverser.advance()) {
+    val traverser = traverser()
+    while (traverser.forward()) {
         action(traverser.key)
     }
 }
@@ -128,7 +170,7 @@ private object Empty${Name}Traverser : ${Name}Traverser<Nothing> {
 <% } else { %>
 private object Empty${Name}Traverser : ${Name}Traverser {
 <% } %>
-    override fun advance(): Boolean = false
-    override val key: Nothing = throw IllegalStateException()
-    override val value: Nothing = throw IllegalStateException()
+    override fun forward(): Boolean = false
+    override val key: Nothing get() = throw IllegalStateException()
+    override val value: Nothing get() = throw IllegalStateException()
 }

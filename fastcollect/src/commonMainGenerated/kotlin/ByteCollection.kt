@@ -63,17 +63,16 @@ public interface ByteCollection : ByteTraversable {
 /**
  * A mutable collection of Bytes.
  */
-public interface MutableByteCollection : ByteCollection {
+public interface MutableByteCollection : ByteCollection, MutableByteTraversable {
     override fun iterator(): MutableByteIterator
 
     public fun add(element: Byte): Boolean
     public fun remove(element: Byte): Boolean
 
     public fun clear() {
-        val it = iterator()
-        while (it.hasNext()) {
-            it.nextByte()
-            it.remove()
+        val traverser = traverser()
+        while (traverser.forward()) {
+            traverser.remove()
         }
     }
 
@@ -125,10 +124,10 @@ public inline fun MutableByteCollection.removeAll(predicate: (Byte) -> Boolean):
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (predicate(it.nextByte())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (predicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }
@@ -146,10 +145,10 @@ internal inline fun MutableByteCollection.filterInPlace(removePredicate: (Byte) 
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (removePredicate(it.nextByte())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (removePredicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }

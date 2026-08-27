@@ -208,13 +208,13 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
         }
     }
 
-    override fun traverse(): DoubleTraverser = object : DoubleTraverser {
+    override fun traverser(): DoubleTraverser = object : DoubleTraverser {
         private val last = size - 1
         private var position: Int = -1
 
         override val value: Double get() = heap[position]
 
-        override fun advance(): Boolean {
+        override fun forward(): Boolean {
             if (position == last) return false
             if (last != size - 1) throw ConcurrentModificationException()
             ++position

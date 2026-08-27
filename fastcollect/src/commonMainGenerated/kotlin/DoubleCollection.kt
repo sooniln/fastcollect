@@ -63,17 +63,16 @@ public interface DoubleCollection : DoubleTraversable {
 /**
  * A mutable collection of Doubles.
  */
-public interface MutableDoubleCollection : DoubleCollection {
+public interface MutableDoubleCollection : DoubleCollection, MutableDoubleTraversable {
     override fun iterator(): MutableDoubleIterator
 
     public fun add(element: Double): Boolean
     public fun remove(element: Double): Boolean
 
     public fun clear() {
-        val it = iterator()
-        while (it.hasNext()) {
-            it.nextDouble()
-            it.remove()
+        val traverser = traverser()
+        while (traverser.forward()) {
+            traverser.remove()
         }
     }
 
@@ -125,10 +124,10 @@ public inline fun MutableDoubleCollection.removeAll(predicate: (Double) -> Boole
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (predicate(it.nextDouble())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (predicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }
@@ -146,10 +145,10 @@ internal inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Doub
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (removePredicate(it.nextDouble())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (removePredicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }

@@ -63,17 +63,16 @@ public interface LongCollection : LongTraversable {
 /**
  * A mutable collection of Longs.
  */
-public interface MutableLongCollection : LongCollection {
+public interface MutableLongCollection : LongCollection, MutableLongTraversable {
     override fun iterator(): MutableLongIterator
 
     public fun add(element: Long): Boolean
     public fun remove(element: Long): Boolean
 
     public fun clear() {
-        val it = iterator()
-        while (it.hasNext()) {
-            it.nextLong()
-            it.remove()
+        val traverser = traverser()
+        while (traverser.forward()) {
+            traverser.remove()
         }
     }
 
@@ -125,10 +124,10 @@ public inline fun MutableLongCollection.removeAll(predicate: (Long) -> Boolean):
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (predicate(it.nextLong())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (predicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }
@@ -146,10 +145,10 @@ internal inline fun MutableLongCollection.filterInPlace(removePredicate: (Long) 
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (removePredicate(it.nextLong())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (removePredicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }

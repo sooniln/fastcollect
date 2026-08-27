@@ -63,17 +63,16 @@ public interface ${Type}Collection : ${Type}Traversable {
 /**
  * A mutable collection of ${Type}s.
  */
-public interface Mutable${Type}Collection : ${Type}Collection {
+public interface Mutable${Type}Collection : ${Type}Collection, Mutable${Type}Traversable {
     override fun iterator(): Mutable${Type}Iterator
 
     public fun add(element: ${Type}): Boolean
     public fun remove(element: ${Type}): Boolean
 
     public fun clear() {
-        val it = iterator()
-        while (it.hasNext()) {
-            it.next${Type}()
-            it.remove()
+        val traverser = traverser()
+        while (traverser.forward()) {
+            traverser.remove()
         }
     }
 
@@ -125,10 +124,10 @@ public inline fun Mutable${Type}Collection.removeAll(predicate: (${Type}) -> Boo
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (predicate(it.next${Type}())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (predicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }
@@ -146,10 +145,10 @@ internal inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${T
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (removePredicate(it.next${Type}())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (removePredicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }

@@ -63,17 +63,16 @@ public interface IntCollection : IntTraversable {
 /**
  * A mutable collection of Ints.
  */
-public interface MutableIntCollection : IntCollection {
+public interface MutableIntCollection : IntCollection, MutableIntTraversable {
     override fun iterator(): MutableIntIterator
 
     public fun add(element: Int): Boolean
     public fun remove(element: Int): Boolean
 
     public fun clear() {
-        val it = iterator()
-        while (it.hasNext()) {
-            it.nextInt()
-            it.remove()
+        val traverser = traverser()
+        while (traverser.forward()) {
+            traverser.remove()
         }
     }
 
@@ -125,10 +124,10 @@ public inline fun MutableIntCollection.removeAll(predicate: (Int) -> Boolean): B
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (predicate(it.nextInt())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (predicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }
@@ -146,10 +145,10 @@ internal inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) ->
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val it = iterator()
-    while (it.hasNext()) {
-        if (removePredicate(it.nextInt())) {
-            it.remove()
+    val traverser = traverser()
+    while (traverser.forward()) {
+        if (removePredicate(traverser.value)) {
+            traverser.remove()
             modified = true
         }
     }

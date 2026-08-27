@@ -1,0 +1,144 @@
+/**
+ * Methods for dealing with Traversables.
+ */
+@file:JvmName("Traversables")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
+
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+import kotlin.jvm.JvmMultifileClass
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
+
+public fun emptyLongTraverser(): MutableLongTraverser = EmptyLongTraverser
+
+/**
+ * A primitively typed [Traversable] of Longs.
+ */
+public interface LongTraversable: Traversable<Long> {
+    override fun traverser(): LongTraverser
+}
+
+/**
+ * A primitively typed [MutableTraversable] of Longs.
+ */
+public interface MutableLongTraversable: MutableTraversable<Long> {
+    override fun traverser(): MutableLongTraverser
+}
+
+/**
+ * A primitively typed [Traverser] of Longs.
+ */
+public interface LongTraverser : Traverser<Long> {
+    public val value: Long
+
+    /** DO NOT USE. May cause boxing. */
+    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.", replaceWith = ReplaceWith("value"))
+    @get:JvmSynthetic
+    override val element: Long get() = value
+}
+
+/**
+ * A primitively typed [MutableTraverser] of Longs.
+ */
+public interface MutableLongTraverser : LongTraverser, MutableTraverser<Long>
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongTraversable.foreach(action: (Long) -> Unit) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverser()
+    while (traverser.forward()) {
+        action(traverser.value)
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongTraversable.any(predicate: (Long) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+
+    foreach { if (predicate(it)) return true }
+    return false
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongTraversable.all(predicate: (Long) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongTraversable.none(predicate: (Long) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> LongTraversable.fold(initial: R, operation: (accumulated: R, Long) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    foreach { accumulated = operation(accumulated, it) }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun LongTraversable.reduce(operation: (accumulated: Long, Long) -> Long): Long {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    val traverser = traverser()
+    if (!traverser.forward()) throw NoSuchElementException()
+    var accumulated = traverser.value
+    while (traverser.forward()) {
+        accumulated = operation(accumulated, traverser.value)
+    }
+    return accumulated
+}
+
+
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun LongTraversable.sumOf(selector: (Long) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0
+    foreach { sum += selector(it) }
+    return sum
+}
+
+
+public fun LongTraversable.sum(): Long = sumOf { it }
+
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun LongTraversable.sumOf(selector: (Long) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0L
+    foreach { sum += selector(it) }
+    return sum
+}
+
+
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun LongTraversable.sumOf(selector: (Long) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0.0
+    foreach { sum += selector(it) }
+    return sum
+}
+
+private object EmptyLongTraverser : MutableLongTraverser {
+    override fun forward(): Boolean = false
+    override val value: Long get() = throw IllegalStateException()
+    override fun remove() = throw IllegalStateException()
+}

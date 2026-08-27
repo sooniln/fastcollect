@@ -104,8 +104,7 @@ private object EmptyLongSet : LongSet {
     override fun containsAll(elements: LongCollection): Boolean = elements.isEmpty()
 
     override fun iterator(): LongIterator = emptyLongIterator()
-
-    override fun traverse(): LongTraverser = emptyLongTraverser()
+    override fun traverser(): LongTraverser = emptyLongTraverser()
 }
 
 private class SingletonLongSet(private val value: Long) : LongSet {
@@ -116,22 +115,20 @@ private class SingletonLongSet(private val value: Long) : LongSet {
 
     override fun iterator(): LongIterator = object : LongIterator() {
         private var complete = false
-
+        override fun hasNext(): Boolean = !complete
         override fun nextLong(): Long {
             if (complete) throw NoSuchElementException()
             complete = true
             return value
         }
-
-        override fun hasNext(): Boolean = !complete
     }
 
-    override fun traverse(): LongTraverser = object : LongTraverser {
-        private var consumed = false
+    override fun traverser(): LongTraverser = object : LongTraverser {
+        private var complete = false
         override val value: Long get() = this@SingletonLongSet.value
-        override fun advance(): Boolean {
-            if (consumed) return false
-            consumed = true
+        override fun forward(): Boolean {
+            if (complete) return false
+            complete = true
             return true
         }
     }

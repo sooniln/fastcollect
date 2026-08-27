@@ -104,8 +104,7 @@ private object Empty${Type}Set : ${Type}Set {
     override fun containsAll(elements: ${Type}Collection): Boolean = elements.isEmpty()
 
     override fun iterator(): ${Type}Iterator = empty${Type}Iterator()
-
-    override fun traverse(): ${Type}Traverser = empty${Type}Traverser()
+    override fun traverser(): ${Type}Traverser = empty${Type}Traverser()
 }
 
 private class Singleton${Type}Set(private val value: ${Type}) : ${Type}Set {
@@ -116,22 +115,20 @@ private class Singleton${Type}Set(private val value: ${Type}) : ${Type}Set {
 
     override fun iterator(): ${Type}Iterator = object : ${Type}Iterator() {
         private var complete = false
-
+        override fun hasNext(): Boolean = !complete
         override fun next${Type}(): ${Type} {
             if (complete) throw NoSuchElementException()
             complete = true
             return value
         }
-
-        override fun hasNext(): Boolean = !complete
     }
 
-    override fun traverse(): ${Type}Traverser = object : ${Type}Traverser {
-        private var consumed = false
+    override fun traverser(): ${Type}Traverser = object : ${Type}Traverser {
+        private var complete = false
         override val value: ${Type} get() = this@Singleton${Type}Set.value
-        override fun advance(): Boolean {
-            if (consumed) return false
-            consumed = true
+        override fun forward(): Boolean {
+            if (complete) return false
+            complete = true
             return true
         }
     }

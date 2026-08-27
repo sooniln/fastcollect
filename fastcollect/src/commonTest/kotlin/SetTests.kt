@@ -173,6 +173,26 @@ class IntSetTest {
     }
 
     @Test
+    fun traverse_remove_visitsEveryElementExactlyOnceAndRemovesMatching() {
+        // regression test: Traverser.remove() must not skip the slot immediately preceding the removed one
+        val set = IntHashSet()
+        for (i in 1..50) set.add(i)
+
+        val kept = mutableListOf<Int>()
+        val traverser = set.traverser()
+        while (traverser.forward()) {
+            val value = traverser.value
+            if (value % 2 == 0) traverser.remove() else kept.add(value)
+        }
+
+        assertEquals((1..50).filter { it % 2 != 0 }.toSet(), kept.toSet())
+        assertEquals(kept.size, kept.toSet().size, "an element was visited more than once")
+        assertEquals(25, set.size)
+        for (v in kept) assertTrue(set.contains(v))
+        for (v in (1..50).filter { it % 2 == 0 }) assertFalse(set.contains(v))
+    }
+
+    @Test
     fun equals_matchesAnySetImplementation() {
         // Set contract (Abstract*Set.equals()) requires equality against ANY IntSet implementation, not
         // just the same concrete class.

@@ -65,23 +65,23 @@ FastCollect provides ArrayList/ArrayDeque, HashSet, HashMap, and PriorityQueue a
 
 Concrete primitive collection types supported:
 * **Iterator**
-* **ArrayDeque** (and ArrayList via the same API)
+* **Traverser**
+* **ArrayList/Deque**
 * **HashSet**
 * **HashMap**
-* **PriorityQueue** (and optionally indirect priority queues)
-* **Mutable and read-only types** for all of the above
+* **PriorityQueue**
 
 Unsupported collection types:
 * **LinkedList** - primitive linked lists are assumed useless in any reasonable scenarios until proven otherwise.
 * **ConcurrentHashMap** - supporting arbitrary concurrency within a hashmap is assumed to be useless in any reasonable
   scenario until proven otherwise. In scenarios where arbitrary levels of concurrency are useful (such as in a cache
   perhaps), ConcurrentHashMap is almost always inferior to specialized designs for the problem domain. In scenarios
-  where a lower level of concurrency is required, locking is assumed to be superior.
+  where a lower level of concurrency is required, explicit synchronization is assumed to be superior.
 * **LinkedHashSet/Map** - stable ordering within a HashSet/Map is assumed to be unnecessary until proven otherwise.
-* **TreeSet/Map** - useful in some scenarios, but often too niche to justify including for the moment.
+* **TreeSet/Map** - useful in some important scenarios, but often too niche to justify including for the moment.
 * **Big collections (64-bit indexing)** - useful only in very niche scenarios.
-* **Fully immutable types** - occasionally useful, but do not currently appear to give a sufficient benefit vs read-only
-  types and effective immutability to justify inclusion.
+* **Fully immutable types** - occasionally useful, but do not currently give a sufficient benefit vs read-only types
+  and effective immutability to justify inclusion.
 
 #### Floating-Point Comparisons ####
 
@@ -120,7 +120,25 @@ set.removeAll(value -> value equalsBoxed Float.NaN)
 The standard JRE libraries make reasonable efforts to throw ConcurrentModificationException if they detect
 collections being modified in inappropriate ways. This already only a best effort with no guarantees made, but
 FastCollect makes even less of an effort in the interests of performance. Do not expect FastCollect to throw
-ConcurrentModificationException if you are shooting yourself in the foot, except in very rare instances.
+ConcurrentModificationException every time you shoot yourself in the foot, only occasionally.
+
+#### Traverser ####
+
+FastCollect introduces a new method of iterating through collections called Traverser. Traversable/Traverser are roughly
+equivalent to Iterable/Iterator, but offer a slightly different API shape which (1) makes it easier to implement
+iteration correctly (2) offers increased opportunities for compiler optimizations in complex implementations.
+Benchmarking shows up to a 20% speed improvement using Traverser vs Iterator for complex collections such as HashMaps.
+
+Traverser APIs offer many of the same utility extension methods as Iterable, such as:
+
+* **foreach** (note the capitalization, it's not 'forEach')
+* **any/all/none**
+* **fold/reduce**
+* **sum/sumBy**
+* **joinToString**
+* etc...
+
+See the following examples section for further usage.
 
 ### Examples ###
 
@@ -128,6 +146,8 @@ You'll find that FastCollect collection usage is pretty much exactly like Kotlin
 (non-exhaustive) examples of common APIs follow:
 
 ```kotlin
+import io.github.sooniln.fastcollect.*
+
 // creating a list
 var list = IntArrayList()
 list = mutableIntList(1, 2, 3)
@@ -142,7 +162,7 @@ list.lastIndexOf(2)
 list.contains(3)
 
 // iterate over list
-for (i in list) { ... }
+list.foreach { value -> ... }
 
 // mutate list
 list.add(5)
@@ -168,7 +188,7 @@ set = mutableIntSetOf(1, 2, 3) // directly create FastCollect set
 set.contains(3)
 
 // iterate over set
-for (i in set) { ... }
+set.foreach { value -> ... }
 
 // mutate set
 set.add(5)
@@ -193,9 +213,8 @@ map.containsKey(1)
 map.containsValue(2)
 
 // iterate over map
-for (k in map.keys) { ... }
-for (v in map.values) { ... }
-for ((k, v) in map) { ... }
+map.foreach { key, value -> ... }
+map.foreachKey { key -> ... }
 
 // mutate map
 map.remove(5)
@@ -222,7 +241,7 @@ priorityQueue.removeFirst() // returns 8
 priorityQueue.clear()
 
 // iterate over priority queue
-for (e in priorityQueue) { ... }
+priorityQueue.foreach { value -> ... }
 
 // use the priority queue somewhere a Kotlin queue is required
 legacyApi(priorityQueue.asQueue())

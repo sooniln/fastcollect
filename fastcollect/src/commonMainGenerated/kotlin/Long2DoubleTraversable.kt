@@ -1,0 +1,172 @@
+/**
+ * Methods for dealing with Traversables.
+ */
+@file:JvmName("Traversables")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
+
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+import kotlin.experimental.ExperimentalTypeInference
+import kotlin.jvm.JvmMultifileClass
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
+
+public fun  emptyLong2DoubleTraverser(): Long2DoubleTraverser = EmptyLong2DoubleTraverser
+
+/**
+ * A primitively typed [Traversable] of Long to Double tuples.
+ */
+public interface Long2DoubleTraversable: Traversable<Long2DoubleMap.Entry> {
+    override fun traverser(): Long2DoubleTraverser
+}
+
+/**
+ * A primitively typed [MutableTraversable] of Long to Double tuples.
+ */
+public interface MutableLong2DoubleTraversable: MutableTraversable<Long2DoubleMap.Entry> {
+    override fun traverser(): MutableLong2DoubleTraverser
+}
+
+/**
+ * A primitively typed [Traverser] of Long to Double tuples.
+ */
+public interface Long2DoubleTraverser: Traverser<Long2DoubleMap.Entry> {
+    public val key: Long
+    public val value: Double
+
+    /** DO NOT USE. May cause boxing. */
+    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
+    @get:JvmSynthetic
+    override val element: Long2DoubleMap.Entry get() = object: Long2DoubleMap.AbstractEntry() {
+        override val key: Long get() = this@Long2DoubleTraverser.key
+        override val value: Double get() = this@Long2DoubleTraverser.value
+    }
+}
+/**
+ * A primitively typed [MutableTraverser] of Long to Double tuples.
+ */
+public interface MutableLong2DoubleTraverser : Long2DoubleTraverser, MutableTraverser<Long2DoubleMap.Entry> {
+    override var value: Double
+
+    /** DO NOT USE. May cause boxing. */
+    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
+    @get:JvmSynthetic
+    override val element: MutableLong2DoubleMap.MutableEntry get() = object: MutableLong2DoubleMap.AbstractMutableEntry() {
+        override val key: Long get() = this@MutableLong2DoubleTraverser.key
+        override var value: Double
+            get() = this@MutableLong2DoubleTraverser.value
+            set(value) { this@MutableLong2DoubleTraverser.value = value }
+    }
+}
+
+public fun  Long2DoubleTraverser.asKeyTraverser(): LongTraverser {
+    return object: LongTraverser {
+        override fun forward(): Boolean = this@asKeyTraverser.forward()
+        override val value: Long get() = key
+    }
+}
+
+
+public fun  Long2DoubleTraverser.asValueTraverser(): DoubleTraverser {
+    return object: DoubleTraverser {
+        override fun forward(): Boolean = this@asValueTraverser.forward()
+        override val value: Double get() = this@asValueTraverser.value
+    }
+}
+
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  Long2DoubleTraversable.foreach(
+    action: (Long, Double) -> Unit
+) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverser()
+    while (traverser.forward()) {
+        action(traverser.key, traverser.value)
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  Long2DoubleTraversable.foreachKey(
+    action: (Long) -> Unit
+) {
+    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
+
+    val traverser = traverser()
+    while (traverser.forward()) {
+        action(traverser.key)
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  Long2DoubleTraversable.any(predicate: (Long, Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+
+    foreach { key, value -> if (predicate(key, value)) return true }
+    return false
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  Long2DoubleTraversable.all(predicate: (Long, Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { key, value -> !predicate(key, value) }
+}
+
+@OptIn(ExperimentalContracts::class)
+public inline fun  Long2DoubleTraversable.none(predicate: (Long, Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@OptIn(ExperimentalContracts::class)
+
+public inline fun <R> Long2DoubleTraversable.fold(initial: R, operation: (accumulated: R, Long, Double) -> R): R {
+
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+
+    var accumulated = initial
+    foreach { key, value -> accumulated = operation(accumulated, key, value) }
+    return accumulated
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Int): Int {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0
+    foreach { key, value -> sum += selector(key, value) }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Long): Long {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0L
+    foreach { key, value -> sum += selector(key, value) }
+    return sum
+}
+
+@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@OverloadResolutionByLambdaReturnType
+public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Double): Double {
+    contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
+
+    var sum = 0.0
+    foreach { key, value -> sum += selector(key, value) }
+    return sum
+}
+
+
+private object EmptyLong2DoubleTraverser : Long2DoubleTraverser {
+
+    override fun forward(): Boolean = false
+    override val key: Nothing get() = throw IllegalStateException()
+    override val value: Nothing get() = throw IllegalStateException()
+}

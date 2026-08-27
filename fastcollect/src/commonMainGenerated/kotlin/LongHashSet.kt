@@ -314,7 +314,7 @@ public class LongHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableLongIterator = Iterator()
 
-    override fun traverse(): LongTraverser = Traverser()
+    override fun traverser(): MutableLongTraverser = Traverser()
 
     private inner class Iterator : MutableLongIterator() {
         private val keysArr = this@LongHashSet.keysArr
@@ -360,21 +360,43 @@ public class LongHashSet @JvmOverloads constructor(
         }
     }
 
-    private inner class Traverser : LongTraverser {
+    private inner class Traverser : MutableLongTraverser {
         private val keysArr = this@LongHashSet.keysArr
         private val emptyKey = this@LongHashSet.emptyKey
+        private val mask = keysArr.size - 1
 
-        private var position: Int = keysArr.size
+        private var slotsLeft = size
+        private var slot = keysArr.size
+        private var key = emptyKey
 
-        override val value: Long get() = keysArr[position]
+        override val value: Long get() {
+            if (key == emptyKey) throw NoSuchElementException()
+            return key
+        }
 
-        override fun advance(): Boolean {
-            if (keysArr !== this@LongHashSet.keysArr) throw ConcurrentModificationException()
-            while (position != 0) {
-                --position
-                if (keysArr[position] != emptyKey) return true
+        override fun forward(): Boolean {
+            if (slotsLeft == 0) {
+                key = emptyKey
+                return false
             }
-            return false
+            if (keysArr !== this@LongHashSet.keysArr) throw ConcurrentModificationException()
+
+            while (true) {
+                slot = (slot - 1) and mask
+                key = keysArr[slot]
+                if (key != emptyKey) {
+                    --slotsLeft
+                    return true
+                }
+            }
+        }
+
+        override fun remove() {
+            check(key != emptyKey)
+            if (keysArr !== this@LongHashSet.keysArr) throw ConcurrentModificationException()
+
+            removeSlot(slot)
+            key = emptyKey
         }
     }
 
