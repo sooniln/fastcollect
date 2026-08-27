@@ -43,7 +43,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
         ensureCapacity(capacity)
     }
 
-    override fun isDefaultValue(value: ${KVType}): Boolean = value == defaultValue
+    override fun isDefaultValue(value: ${KVType}): Boolean = value equalsRaw defaultValue
 
     /**
      * Ensures that the map can hold at least given number of key/value pairs without any further resizing of the
@@ -71,7 +71,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
         val kvArr = kvArr
         for (slot in kvArr.indices) {
             val entry = kvArr[slot]
-            if (entry != emptyEntry && entry.value() == value) return true
+            if (entry != emptyEntry && entry.value() equalsRaw value) return true
         }
         return false
     }
@@ -83,9 +83,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
     override fun getOrDefault(key: ${KVType}, defaultValue: ${KVType}): ${KVType} = findSlot(key, { _, entry -> entry.value() }, { defaultValue })
 
     override fun put(key: ${KVType}, value: ${KVType}): ${KVType} {
-        var returnValue = ZERO
+        var returnValue = defaultValue
         set(key, {
-            returnValue = defaultValue
             value
         }, { entry ->
             returnValue = entry.value()
@@ -94,7 +93,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
         return returnValue
     }
 
-    public fun putIfAbsent(key: ${KVType}, value: ${KVType}): ${KVType} {
+    override fun putIfAbsent(key: ${KVType}, value: ${KVType}): ${KVType} {
         set(key, { value }, { entry -> return entry.value() })
         return defaultValue
     }
@@ -104,14 +103,13 @@ public class ${Name}HashMap @JvmOverloads constructor(
     }
 
     override fun replace(key: ${KVType}, value: ${KVType}): ${KVType} {
-        var returnValue = defaultValue
-        set(key, {
+        return findSlot(key, { slot, entry ->
+            val oldValue = entry.value()
+            kvArr[slot] = arrayEntry(entry.key(), value)
+            oldValue
+        }, {
             throw NoSuchElementException()
-        }, { entry ->
-            returnValue = entry.value()
-            value
         })
-        return returnValue
     }
 
     override fun remove(key: ${KVType}): ${KVType} {
@@ -140,7 +138,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
         return findSlot(
             key,
             { slot, entry ->
-                if (entry.value() equalsBoxed value) {
+                if (entry.value() equalsRaw value) {
                     removeSlot(slot)
                     true
                 } else {
@@ -244,7 +242,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
         // k* ≈ 80·log₂(n) − C   -> overestimate with power-of-two ->   k* ≈ 128·b, b=log₂(n)
 
         if (threshold < size && ((nextSlot - slot) and mask) > 128 * mask.countOneBits()) {
-            rehash((threshold + size) shl 1)
+            val newCapacity = (threshold + size) shl 1
+            if (newCapacity > size) rehash(newCapacity)
         }
     }
 
@@ -281,7 +280,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
             trimToSize()
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
-            for ((key, value) in from) {
+            from.foreach { key, value ->
                 set(key, value)
             }
         }
@@ -306,7 +305,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
     private var _keys: ${KVType}Set? = null
     override val keys: ${KVType}Set get() {
         return _keys ?:
-            object : ${KVType}Set {
+            object : Abstract${KVType}Set() {
                 override val size: Int get() = this@${Name}HashMap.size
                 override fun contains(element: ${KVType}): Boolean = containsKey(element)
                 override fun iterator(): ${KVType}Iterator = KeyIterator()
@@ -318,7 +317,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
     private var _values: ${KVType}Collection? = null
     override val values: ${KVType}Collection get() {
         return _values ?:
-            object : ${KVType}Collection {
+            object : Abstract${KVType}Collection() {
                 override val size: Int get() = this@${Name}HashMap.size
                 override fun contains(element: ${KVType}): Boolean = containsValue(element)
                 override fun iterator(): ${KVType}Iterator = ValueIterator()
@@ -399,7 +398,6 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
     // changes emptyEntry to a value not currently in the map, rewriting all empty slots
     private fun changeEmptyEntry() {
-        @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
         var candidate = ZERO
         while (candidate == emptyEntry.key() || containsKey(candidate)) {
             candidate = Random.next${KVType}()
@@ -444,13 +442,6 @@ public class ${Name}HashMap @JvmOverloads constructor(
         fun key(): ${KVType} = kvArr[previousSlot].key()
         fun value(): ${KVType} = kvArr[previousSlot].value()
 
-        fun updateValue(newValue: ${KVType}) {
-            check(previousSlot != -1)
-            if (kvArr !== this@${Name}HashMap.kvArr) throw ConcurrentModificationException()
-
-            kvArr[previousSlot] = arrayEntry(key(), newValue)
-        }
-
         fun remove() {
             check(previousSlot != -1)
             if (kvArr !== this@${Name}HashMap.kvArr) throw ConcurrentModificationException()
@@ -471,7 +462,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
         }
     }
 
-    private inner class KeyIterator : Mutable${KVType}Iterator() {
+    private inner class KeyIterator : ${KVType}Iterator() {
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
@@ -480,11 +471,9 @@ public class ${Name}HashMap @JvmOverloads constructor(
             it.nextSlot()
             return it.key()
         }
-
-        override fun remove() = it.remove()
     }
 
-    private inner class ValueIterator : Mutable${KVType}Iterator() {
+    private inner class ValueIterator : ${KVType}Iterator() {
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
@@ -493,40 +482,21 @@ public class ${Name}HashMap @JvmOverloads constructor(
             it.nextSlot()
             return it.value()
         }
-
-        override fun remove() = it.remove()
     }
 
-    private inner class EntryIterator: SlotIterator(), MutableIterator<Mutable${Name}Map.MutableEntry>, Mutable${Name}Map.MutableEntry {
-
-        override val key: ${KVType}
-            get() = key()
-        override var value: ${KVType}
-            get() = value()
-            set(value) {
-                updateValue(value)
-            }
-
+    private inner class EntryIterator: SlotIterator(), MutableIterator<Mutable${Name}Map.MutableEntry> {
         override fun next(): Mutable${Name}Map.MutableEntry {
             nextSlot()
-            return object: Mutable${Name}Map.MutableEntry {
-                override val key: ${KVType}
-                    get() = key()
-                override var value: ${KVType}
-                    get() = value()
+            return object: Mutable${Name}Map.AbstractMutableEntry() {
+                override val key: ${KVType} = key()
+                override var value: ${KVType} = value()
                     set(value) {
-                        updateValue(value)
+                        if (get(key) notEqualsRaw field) throw ConcurrentModificationException()
+                        set(key, value)
+                        field = value
                     }
-
-                override fun equals(other: Any?): Boolean = other is ${Name}Map.Entry && other.key equalsBoxed key && other.value equalsBoxed value
-                override fun hashCode(): Int = key.hashCode() xor value.hashCode()
-                override fun toString(): String = "\$key=\$value"
             }
         }
-
-        override fun equals(other: Any?): Boolean = other is ${Name}Map.Entry && other.key equalsBoxed key && other.value equalsBoxed value
-        override fun hashCode(): Int = key.hashCode() xor value.hashCode()
-        override fun toString(): String = "\$key=\$value"
     }
 
     private inner class Traverser : Mutable${Name}Traverser {
@@ -539,23 +509,23 @@ public class ${Name}HashMap @JvmOverloads constructor(
         private var entry = emptyEntry
 
         override val key: ${KVType} get() {
-            if (entry == emptyEntry) throw NoSuchElementException()
+            check(entry != emptyEntry)
             return entry.key()
         }
         override var value: ${KVType}
             get() {
-                if (entry == emptyEntry) throw NoSuchElementException()
+                check(entry != emptyEntry)
                 return entry.value()
             }
             set(value) {
-                if (entry == emptyEntry) throw NoSuchElementException()
+                check(entry != emptyEntry)
                 if (kvArr !== this@${Name}HashMap.kvArr) throw ConcurrentModificationException()
-                kvArr[slot] = arrayEntry(entry.key(), value)
+                entry = arrayEntry(entry.key(), value)
+                kvArr[slot] = entry
             }
 
         override fun forward(): Boolean {
-            if (slotsLeft == 0) {
-                entry = emptyEntry
+            if (slotsLeft <= 0) {
                 return false
             }
             if (kvArr !== this@${Name}HashMap.kvArr) throw ConcurrentModificationException()

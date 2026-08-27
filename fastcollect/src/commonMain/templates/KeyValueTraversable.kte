@@ -1,8 +1,7 @@
 /**
- * Methods for dealing with Traversables.
+ * Methods for dealing with ${Name}Traversables.
  */
-@file:JvmName("Traversables")
-@file:JvmMultifileClass
+@file:JvmName("${Name}Traversables")
 
 package io.github.sooniln.fastcollect
 
@@ -10,7 +9,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -26,7 +24,7 @@ public interface ${Name}Traversable${OutGenerics}: Traversable<${Name}Map.Entry$
 /**
  * A primitively typed [MutableTraversable] of ${KeyType} to ${ValueType} tuples.
  */
-public interface Mutable${Name}Traversable${Generics}: MutableTraversable<${Name}Map.Entry${Generics}> {
+public interface Mutable${Name}Traversable${Generics}: MutableTraversable<${Name}Map.Entry${Generics}>, ${Name}Traversable${Generics} {
     override fun traverser(): Mutable${Name}Traverser${Generics}
 }
 
@@ -135,6 +133,7 @@ public inline fun <R> ${Name}Traversable.fold(initial: R, operation: (accumulate
     return accumulated
 }
 
+@JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${KeyType}, ${ValueType}) -> Int): Int {
@@ -145,6 +144,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${K
     return sum
 }
 
+@JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${KeyType}, ${ValueType}) -> Long): Long {
@@ -155,6 +155,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${K
     return sum
 }
 
+@JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${KeyType}, ${ValueType}) -> Double): Double {

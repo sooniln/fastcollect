@@ -103,16 +103,16 @@ set.removeAll(value -> value == Float.NaN)
 ```
 
 Default Kotlin equality uses IEEE conventions for primitives. For this reason, FastUtil exposes publicly the comparison
-methods it uses internally, as `equalsBoxed()`.
+methods it uses internally, as `equalsRaw()` and `notEqualsRaw()`.
 
 ```kotlin
-import io.github.sooniln.fastcollect.equalsBoxed
+import io.github.sooniln.fastcollect.equalsRaw
 
 var set = mutableFloatSetOf(Float.NaN)
 // option 1 - removes NaN from the set
 set.remove(Float.NaN)
 // option 2 - removes NaN from the set
-set.removeAll(value -> value equalsBoxed Float.NaN)
+set.removeAll(value -> value equalsRaw Float.NaN)
 ```
 
 #### ConcurrentModificationException ####

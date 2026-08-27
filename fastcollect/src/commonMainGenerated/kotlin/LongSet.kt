@@ -8,8 +8,8 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 public fun emptyLongSet(): LongSet = EmptyLongSet
 
@@ -21,7 +21,8 @@ public fun mutableLongSetOf(): MutableLongSet = LongHashSet()
 public fun mutableLongSetOf(element: Long): MutableLongSet = LongHashSet(1).apply { add(element) }
 public fun mutableLongSetOf(vararg elements: Long): MutableLongSet = LongHashSet(elements.asLongList())
 
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
 public inline fun buildLongSet(expectedSize: Int = 0, builderAction: MutableLongSet.() -> Unit): LongSet {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
     val set = LongHashSet(expectedSize)
@@ -34,8 +35,8 @@ public inline fun buildLongSet(expectedSize: Int = 0, builderAction: MutableLong
  */
 public interface LongSet : LongCollection {
     override fun contains(element: Long): Boolean {
-        for (e in this) {
-            if (e equalsBoxed element) return true
+        foreach { e ->
+            if (e equalsRaw element) return true
         }
         return false
     }
@@ -46,10 +47,10 @@ public fun LongSet.asSet(): Set<Long> = LongSetWrapper(this)
 public infix fun LongSet.union(other: LongSet): LongSet = LongHashSet(this).apply { addAll(other) }
 
 public infix fun LongSet.intersect(other: LongSet): LongSet {
-    if (other.size < size) return other.intersect(this)
+    if (other.size > size) return other.intersect(this)
 
-    val set = LongHashSet(size)
-    for (element in other) {
+    val set = LongHashSet(other.size)
+    other.foreach { element ->
         if (contains(element)) set.add(element)
     }
     return set
@@ -57,7 +58,7 @@ public infix fun LongSet.intersect(other: LongSet): LongSet {
 
 public infix fun LongSet.subtract(other: LongSet): LongSet {
     val set = LongHashSet(size)
-    for (element in this) {
+    foreach { element ->
         if (!other.contains(element)) set.add(element)
     }
     return set
@@ -81,7 +82,7 @@ public abstract class AbstractLongSet : AbstractLongCollection(), LongSet {
 
     override fun hashCode(): Int {
         var hashCode = 0
-        for (element in this) {
+        foreach { element ->
             hashCode += element.hashCode()
         }
         return hashCode
@@ -93,9 +94,9 @@ public abstract class AbstractMutableLongSet : AbstractLongSet(), MutableLongSet
     override fun retainAll(elements: Collection<Long>): Boolean = super<MutableLongSet>.retainAll(elements)
 }
 
-public fun MutableLongSet.asMutableSet(): MutableSet<Long> = MutableLongSetWrapper(this)
+public fun MutableLongSet.asSet(): MutableSet<Long> = MutableLongSetWrapper(this)
 
-private object EmptyLongSet : LongSet {
+private object EmptyLongSet : AbstractLongSet() {
     override val size: Int get() = 0
 
     override fun isEmpty(): Boolean = true
@@ -107,11 +108,11 @@ private object EmptyLongSet : LongSet {
     override fun traverser(): LongTraverser = emptyLongTraverser()
 }
 
-private class SingletonLongSet(private val value: Long) : LongSet {
+private class SingletonLongSet(private val value: Long) : AbstractLongSet() {
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: Long): Boolean = value equalsBoxed element
+    override fun contains(element: Long): Boolean = value equalsRaw element
 
     override fun iterator(): LongIterator = object : LongIterator() {
         private var complete = false
@@ -143,6 +144,7 @@ private class LongSetWrapper(private val set: LongSet) : AbstractSet<Long>() {
 private class MutableLongSetWrapper(private val set: MutableLongSet) : AbstractMutableSet<Long>() {
     override val size: Int get() = set.size
     override fun contains(element: Long) = set.contains(element)
+    override fun containsAll(elements: Collection<Long>): Boolean = set.containsAll(elements)
     override fun iterator() = set.iterator()
 
     override fun add(element: Long) = set.add(element)
@@ -150,4 +152,6 @@ private class MutableLongSetWrapper(private val set: MutableLongSet) : AbstractM
     override fun clear() = set.clear()
 
     override fun addAll(elements: Collection<Long>): Boolean = set.addAll(elements)
+    override fun removeAll(elements: Collection<Long>): Boolean = set.removeAll(elements)
+    override fun retainAll(elements: Collection<Long>): Boolean = set.retainAll(elements)
 }

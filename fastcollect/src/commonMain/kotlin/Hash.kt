@@ -2,11 +2,9 @@
  * Methods for dealing with primitive hashes.
  */
 @file:JvmName("Hashes")
-@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
 internal object Hash {

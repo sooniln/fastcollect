@@ -2,14 +2,12 @@
  * Methods for dealing with Traversables.
  */
 @file:JvmName("Traversables")
-@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -64,8 +62,8 @@ public interface Traverser<out T> : Iterator<Any?> {
     /**
      * Returns the last element of the sequence the position moved over. If the position has never been moved, then
      * this returns the element behind the initial position (as if initial position were reached by invoking [forward]),
-     * or throws an exception if there is no element behind the initial position (the initial position is at the
-     * beginning).
+     * or throws [IllegalStateException] if there is no element behind the initial position (the initial position is at
+     * the beginning).
      */
     public val element: T
 
@@ -118,7 +116,9 @@ public fun <T, A : Appendable> Traversable<T>.joinTo(
 ): A {
     buffer.append(prefix)
     var count = 0
-    foreach { element ->
+    val traverser = traverser()
+    while (traverser.forward()) {
+        val element = traverser.element
         if (++count > 1) buffer.append(separator)
         if (limit !in 0..<count) {
             when {
@@ -129,7 +129,7 @@ public fun <T, A : Appendable> Traversable<T>.joinTo(
             }
         } else {
             buffer.append(truncated)
-            return@foreach
+            break
         }
     }
     buffer.append(postfix)

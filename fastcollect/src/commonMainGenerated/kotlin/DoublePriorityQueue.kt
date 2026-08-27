@@ -1,21 +1,24 @@
 /**
- * Methods for dealing with primitive PriorityQueues.
+ * Methods for dealing with DoublePriorityQueues.
  */
-@file:JvmName("PriorityQueues")
-@file:JvmMultifileClass
+@file:JvmName("DoublePriorityQueues")
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
 
-public fun doublePriorityQueueOf(vararg elements: Double, descending: Boolean = false): DoublePriorityQueue {
-    return DoublePriorityQueue(elements, descending = descending)
+public fun doublePriorityQueueOf(vararg elements: Double): DoublePriorityQueue {
+    return DoublePriorityQueue(elements, descending = false)
+}
+
+public fun doubleDescendingPriorityQueueOf(vararg elements: Double): DoublePriorityQueue {
+    return DoublePriorityQueue(elements, descending = true)
 }
 
 @JvmSynthetic
@@ -40,13 +43,10 @@ public inline fun buildDoublePriorityQueue(
  * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
  * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
-public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): DoubleTraversable {
+public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): DoubleCollection {
 
     public constructor(array: DoubleArray, fromIndex: Int = 0, toIndex: Int = array.size) : this(0) {
-        heap = array.copyOfRange(fromIndex, toIndex)
-        size = toIndex - fromIndex
-        for (i in 0..<size) onIndexChanged(heap[i], i)
-        heapify()
+        addAll(array, fromIndex, toIndex)
     }
 
     public constructor(elements: DoubleCollection) : this(elements.size) {
@@ -58,10 +58,8 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
     }
 
     private var heap: DoubleArray = if (initialCapacity == 0) EMPTY_ARRAY else DoubleArray(initialCapacity)
-    public var size: Int = 0
+    final override var size: Int = 0
         private set
-
-    public fun isEmpty(): Boolean = size == 0
 
     public fun ensureCapacity(capacity: Int) {
         if (capacity > heap.size) grow(capacity)
@@ -69,7 +67,7 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
 
     private fun grow(capacity: Int) {
         val oldCapacity = heap.size
-        val newCapacity = if (oldCapacity > 0 || heap !== EMPTY_ARRAY) {
+        val newCapacity = if (oldCapacity > 0) {
             growArraySize(oldCapacity, capacity - oldCapacity)
         } else {
             max(DEFAULT_CAPACITY, capacity)
@@ -90,9 +88,18 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
 
     /**
      * Invoked whenever [element] is stored at [index] in the backing heap. Subclasses can use this to store element ⟷
-     * index mappings, and in turn use the index to interact with [updatePriority].
+     * index mappings, and in turn use the index to interact with [updatePriority]. The heap is not in a consistent
+     * state when this method is invoked, and it should not further interact with the heap as this could damage the heap
+     * property.
      */
     protected open fun onIndexChanged(element: Double, index: Int) {}
+
+    /**
+     * Invoked after [element] is removed from the heap, where [index] is where it was stored prior to remove.
+     * Subclasses can use this to maintain element ⟷ index mappings. The heap is not in a consistent state when this
+     * method is invoked, and it should not further interact with the heap as this could damage the heap property.
+     */
+    protected open fun onRemoved(element: Double, index: Int) {}
 
     /**
      * Returns the head of this priority queue without removing it. Throws [NoSuchElementException] if the queue is
@@ -104,11 +111,12 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
     }
 
     /**
-     * Removes and returns the head of this priority queue.Throws [NoSuchElementException] if the queue is empty.
+     * Removes and returns the head of this priority queue. Throws [NoSuchElementException] if the queue is empty.
      */
     public fun removeFirst(): Double {
         if (isEmpty()) throw NoSuchElementException()
         val result = heap[0]
+        onRemoved(result, 0)
         --size
         if (size > 0) {
             setHeap(0, heap[size])
@@ -126,7 +134,7 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
 
     public fun remove(element: Double): Boolean {
         for (i in 0..<size) {
-            if (heap[i] equalsBoxed element) {
+            if (heap[i] equalsRaw element) {
                 removeAt(i)
                 return true
             }
@@ -134,9 +142,9 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
         return false
     }
 
-    public fun contains(element: Double): Boolean {
+    final override fun contains(element: Double): Boolean {
         for (i in 0..<size) {
-            if (heap[i] equalsBoxed element) {
+            if (heap[i] equalsRaw element) {
                 return true
             }
         }
@@ -144,7 +152,20 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
     }
 
     public fun clear() {
+        for (i in 0..<size) {
+            onRemoved(heap[i], i)
+        }
         size = 0
+    }
+
+    public fun addAll(array: DoubleArray, fromIndex: Int = 0, toIndex: Int = array.size) {
+        val additionalSize = toIndex - fromIndex
+        ensureCapacity(size + additionalSize)
+        array.copyInto(heap, size, fromIndex, toIndex)
+        val oldSize = size
+        size += additionalSize
+        for (i in oldSize..<size) onIndexChanged(heap[i], i)
+        heapify()
     }
 
     public fun addAll(elements: DoubleCollection) {
@@ -180,6 +201,7 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
             if (index == size) {
                 return false
             } else if (removePredicate(heap[index])) {
+                onRemoved(heap[index], index)
                 break
             }
             ++index
@@ -190,6 +212,8 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
             val element = heap[index]
             if (!removePredicate(element)) {
                 setHeap(newSize++, element)
+            } else {
+                onRemoved(element, index)
             }
             ++index
         }
@@ -199,7 +223,7 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
         return true
     }
 
-    public fun iterator(): DoubleIterator = object : DoubleIterator() {
+    final override fun iterator(): DoubleIterator = object : DoubleIterator() {
         private var index = 0
         override fun hasNext(): Boolean = index < size
         override fun nextDouble(): Double {
@@ -208,14 +232,17 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
         }
     }
 
-    override fun traverser(): DoubleTraverser = object : DoubleTraverser {
+    final override fun traverser(): DoubleTraverser = object : DoubleTraverser {
         private val last = size - 1
         private var position: Int = -1
 
-        override val value: Double get() = heap[position]
+        override val value: Double get() {
+            check(position >= 0)
+            return heap[position]
+        }
 
         override fun forward(): Boolean {
-            if (position == last) return false
+            if (position >= last) return false
             if (last != size - 1) throw ConcurrentModificationException()
             ++position
             return true
@@ -233,6 +260,7 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
      * Removes the element at the given index and re-establishes the heap invariant.
      */
     protected fun removeAt(index: Int) {
+        onRemoved(heap[index], index)
         if (--size != index) {
             setHeap(index, heap[size])
             updatePriority(index)
@@ -245,7 +273,7 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int = 0): Dou
         }
     }
 
-    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "[", "]")
+    final override fun toString(): String = Iterable { iterator() }.joinToString(", ", "[", "]")
 
     private fun setHeap(index: Int, element: Double) {
         heap[index] = element
@@ -301,33 +329,36 @@ public fun AbstractDoublePriorityQueue.retainAll(predicate: DoublePredicate): Bo
  *
  * The [ensureCapacity]/[trimToSize] methods can be used to manage the size of the backing array.
  *
- * Methods all conform to normal array based binomial heap performance expectations, and [remove] operations take O(N)
+ * Methods all conform to normal array based binary heap performance expectations, and [remove] operations take O(N)
  * (linear) time with respect to queue size. If an indirect heap implementation is desired (with faster remove
  * operations and the option to change an element's priority), one can be implemented by subclassing
  * [AbstractDoublePriorityQueue] and implementing [onIndexChanged] to store an element ⟷ index mapping.
  */
-public class DoublePriorityQueue : AbstractDoublePriorityQueue {
+public class DoublePriorityQueue private constructor(private val descending: Boolean) : AbstractDoublePriorityQueue() {
 
-    private val descending: Boolean
-
-    public constructor(initialCapacity: Int = 0, descending: Boolean = false) : super(initialCapacity) {
-        this.descending = descending
+    @JvmOverloads
+    public constructor(initialCapacity: Int = 0, descending: Boolean = false) : this(descending) {
+        ensureCapacity(initialCapacity)
     }
 
-    public constructor(array: DoubleArray, fromIndex: Int = 0, toIndex: Int = array.size, descending: Boolean = false) : super(array, fromIndex, toIndex) {
-        this.descending = descending
+    @JvmOverloads
+    public constructor(array: DoubleArray, fromIndex: Int = 0, toIndex: Int = array.size, descending: Boolean = false) : this(descending) {
+        addAll(array, fromIndex, toIndex)
     }
 
-    public constructor(elements: DoubleCollection, descending: Boolean = false) : super(elements) {
-        this.descending = descending
+    @JvmOverloads
+    public constructor(elements: DoubleCollection, descending: Boolean = false) : this(descending) {
+        addAll(elements)
     }
 
-    public constructor(elements: Collection<Double>, descending: Boolean = false) : super(elements) {
-        this.descending = descending
+    @JvmOverloads
+    public constructor(elements: Collection<Double>, descending: Boolean = false) : this(descending) {
+        addAll(elements)
     }
 
     override fun isHigherPriority(element1: Double, element2: Double): Boolean {
-        return if (descending) element1 > element2 else element2 > element1
+        val d = element1.compareTo(element2)
+        return if (descending) d > 0 else d < 0
     }
 }
 

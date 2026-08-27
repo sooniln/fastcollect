@@ -78,7 +78,11 @@ class ApiTest {
         assertTrue(violations.isEmpty(), violations.joinToString("\n"))
     }
 
-    val allowedJvmNameMismatches = mapOf<String, String>()
+    val allowedJvmNameMismatches = mapOf(
+        "doubleSumOf" to "sumOf",
+        "intSumOf" to "sumOf",
+        "longSumOf" to "sumOf",
+    )
 
     /**
      * JvmName annotations should match the Kotlin function name wherever possible to reduce API confusion.
@@ -96,7 +100,7 @@ class ApiTest {
             val kotlinName = method.kotlinFunction?.name ?: continue
 
             if (name != kotlinName) {
-                if (allowedJvmNameMismatches["$className.$name"] == kotlinName) continue
+                if (allowedJvmNameMismatches[name] == kotlinName) continue
 
                 violations += "Kotlin('$kotlinName') != JVM('$name') in $className"
             }

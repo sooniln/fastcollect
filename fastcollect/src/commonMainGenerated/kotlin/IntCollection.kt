@@ -1,15 +1,13 @@
 /**
- * Methods for dealing with primitive Collections.
+ * Methods for dealing with IntCollections.
  */
-@file:JvmName("Collections")
-@file:JvmMultifileClass
+@file:JvmName("IntCollections")
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
 /**
@@ -26,15 +24,15 @@ public interface IntCollection : IntTraversable {
     public operator fun iterator(): IntIterator
 
     public fun contains(element: Int): Boolean {
-        for (e in this) {
-            if (e equalsBoxed element) return true
+        foreach { e ->
+            if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: IntCollection): Boolean {
-        for (e in elements) {
-            if (!contains(e)) {
+        elements.foreach { element ->
+            if (!contains(element)) {
                 return false
             }
         }
@@ -53,7 +51,7 @@ public interface IntCollection : IntTraversable {
     public fun toIntArray(): IntArray {
         val array = IntArray(size)
         var index = 0
-        for (element in this) {
+        foreach { element ->
             array[index++] = element
         }
         return array
@@ -78,16 +76,16 @@ public interface MutableIntCollection : IntCollection, MutableIntTraversable {
 
     public fun addAll(elements: IntCollection): Boolean {
         var modified = false
-        for (e in elements) {
-            modified = add(e) or modified
+        elements.foreach { element ->
+            modified = add(element) or modified
         }
         return modified
     }
 
     public fun addAll(elements: Collection<Int>): Boolean {
         var modified = false
-        for (e in elements) {
-            modified = add(e) or modified
+        for (element in elements) {
+            modified = add(element) or modified
         }
         return modified
     }

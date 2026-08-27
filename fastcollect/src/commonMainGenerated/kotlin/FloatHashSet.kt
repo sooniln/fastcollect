@@ -95,9 +95,9 @@ public class FloatHashSet @JvmOverloads constructor(
             // performance we only check once every half cache line.
             var i = 0
             do {
-                if (currKey == emptyKey) {
+                if (currKey equalsRaw emptyKey) {
                     return onFail()
-                } else if (currKey equalsBoxed key) {
+                } else if (currKey equalsRaw key) {
                     return onFind(slot)
                 }
 
@@ -114,7 +114,7 @@ public class FloatHashSet @JvmOverloads constructor(
 
     private inline fun <T> add(key: Float, onPresent: () -> T, onAbsent: () -> T): T {
         if (threshold <= 0) increaseCapacity()
-        if (key == emptyKey) changeEmptyKey()
+        if (key equalsRaw emptyKey) changeEmptyKey()
 
         val keysArr = keysArr
         val mask = keysArr.size - 1
@@ -123,9 +123,9 @@ public class FloatHashSet @JvmOverloads constructor(
         var distance = 0
         while (true) {
             val currKey = keysArr[slot]
-            if (currKey equalsBoxed key) {
+            if (currKey equalsRaw key) {
                 return onPresent()
-            } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {
+            } else if (currKey equalsRaw emptyKey || distance > currKey.slotDistance(slot, mask)) {
                 shiftAndInsert(keysArr, mask, slot, currKey, key)
                 return onAbsent()
             }
@@ -140,7 +140,7 @@ public class FloatHashSet @JvmOverloads constructor(
         var currKey = currKey
         var newKey = newKey
 
-        while (currKey != emptyKey) {
+        while (currKey notEqualsRaw emptyKey) {
             keysArr[nextSlot] = newKey
             newKey = currKey
             nextSlot = (nextSlot + 1) and mask
@@ -166,7 +166,8 @@ public class FloatHashSet @JvmOverloads constructor(
         // k* ≈ 80·log₂(n) − C   -> overestimate with power-of-two ->   k* ≈ 128·b, b=log₂(n)
 
         if (threshold < size && ((nextSlot - slot) and mask) > 128 * mask.countOneBits()) {
-            rehash((threshold + size) shl 1)
+            val newCapacity = (threshold + size) shl 1
+            if (newCapacity > size) rehash(newCapacity)
         }
     }
 
@@ -177,7 +178,7 @@ public class FloatHashSet @JvmOverloads constructor(
         var currSlot = slot
         var nextSlot = (currSlot + 1) and mask
         var nextKey = keysArr[nextSlot]
-        while (nextKey != emptyKey && nextKey.slotDistance(nextSlot, mask) > 0) {
+        while (nextKey notEqualsRaw emptyKey && nextKey.slotDistance(nextSlot, mask) > 0) {
             keysArr[currSlot] = nextKey
 
             currSlot = nextSlot
@@ -191,25 +192,25 @@ public class FloatHashSet @JvmOverloads constructor(
     }
 
     override fun addAll(elements: FloatCollection): Boolean {
-        var modified = false
+        val oldSize = size
         if (elements is FloatHashSet && elements.size / 2 > size) {
             val oldKeysArr = keysArr
             val oldEmptyKey = emptyKey
 
             resetTo(elements)
             for (key in oldKeysArr) {
-                if (key != oldEmptyKey) {
-                    modified = add(key) or modified
+                if (key notEqualsRaw oldEmptyKey) {
+                    add(key)
                 }
             }
             trimToSize()
         } else {
             ensureCapacity(max(size + (elements.size / 2), elements.size))
-            for (element in elements) {
-                modified = add(element) or modified
+            elements.foreach { element ->
+                add(element)
             }
         }
-        return modified
+        return size != oldSize
     }
 
     override fun addAll(elements: Collection<Float>): Boolean {
@@ -256,12 +257,12 @@ public class FloatHashSet @JvmOverloads constructor(
         if (keysArr.size == newLength) return
 
         val newKeysArr = FloatArray(newLength)
-        if (emptyKey != ZERO) newKeysArr.fill(emptyKey)
+        if (emptyKey notEqualsRaw ZERO) newKeysArr.fill(emptyKey)
         val newMask = newKeysArr.size - 1
 
         for (slot in keysArr.indices) {
             val key = keysArr[slot]
-            if (key != emptyKey) addRehashing(newKeysArr, newMask, key)
+            if (key notEqualsRaw emptyKey) addRehashing(newKeysArr, newMask, key)
         }
 
         keysArr = newKeysArr
@@ -276,7 +277,7 @@ public class FloatHashSet @JvmOverloads constructor(
         var distance = 0
         while (true) {
             var currKey = keysArr[slot]
-            if (currKey == emptyKey) {
+            if (currKey equalsRaw emptyKey) {
                 keysArr[slot] = key
                 return
             } else if (distance > currKey.slotDistance(slot, mask)) {
@@ -287,7 +288,7 @@ public class FloatHashSet @JvmOverloads constructor(
                     newKey = currKey
                     slot = (slot + 1) and mask
                     currKey = keysArr[slot]
-                } while (currKey != emptyKey)
+                } while (currKey notEqualsRaw emptyKey)
 
                 keysArr[slot] = newKey
                 return
@@ -301,13 +302,13 @@ public class FloatHashSet @JvmOverloads constructor(
     // changes emptyKey to a value not currently in the set, rewriting all empty slots
     private fun changeEmptyKey() {
         var candidate = ZERO
-        while (candidate == emptyKey || contains(candidate)) {
+        while (candidate equalsRaw emptyKey || contains(candidate)) {
             candidate = Random.nextFloat()
         }
 
         val keysArr = keysArr
         for (i in keysArr.indices) {
-            if (keysArr[i] == emptyKey) keysArr[i] = candidate
+            if (keysArr[i] equalsRaw emptyKey) keysArr[i] = candidate
         }
         emptyKey = candidate
     }
@@ -348,7 +349,7 @@ public class FloatHashSet @JvmOverloads constructor(
             previousSlot = -1
 
             // if removal wrapped all the way around to our next slot then we need to adjust
-            if (keysArr[slot] == emptyKey) {
+            if (keysArr[slot] equalsRaw emptyKey) {
                 slot = (slot - 1) and mask
             }
         }
@@ -356,7 +357,7 @@ public class FloatHashSet @JvmOverloads constructor(
         private fun decrement() {
             do {
                 slot = (slot - 1) and mask
-            } while (keysArr[slot] == emptyKey)
+            } while (keysArr[slot] equalsRaw emptyKey)
         }
     }
 
@@ -370,13 +371,12 @@ public class FloatHashSet @JvmOverloads constructor(
         private var key = emptyKey
 
         override val value: Float get() {
-            if (key == emptyKey) throw NoSuchElementException()
+            check(key notEqualsRaw emptyKey)
             return key
         }
 
         override fun forward(): Boolean {
-            if (slotsLeft == 0) {
-                key = emptyKey
+            if (slotsLeft <= 0) {
                 return false
             }
             if (keysArr !== this@FloatHashSet.keysArr) throw ConcurrentModificationException()
@@ -384,7 +384,7 @@ public class FloatHashSet @JvmOverloads constructor(
             while (true) {
                 slot = (slot - 1) and mask
                 key = keysArr[slot]
-                if (key != emptyKey) {
+                if (key notEqualsRaw emptyKey) {
                     --slotsLeft
                     return true
                 }
@@ -392,7 +392,7 @@ public class FloatHashSet @JvmOverloads constructor(
         }
 
         override fun remove() {
-            check(key != emptyKey)
+            check(key notEqualsRaw emptyKey)
             if (keysArr !== this@FloatHashSet.keysArr) throw ConcurrentModificationException()
 
             removeSlot(slot)

@@ -12,7 +12,6 @@ import org.junit.runners.AllTests
 
 private val SET_FEATURES = arrayOf<Feature<*>>(
     CollectionSize.ANY,
-    CollectionFeature.ALLOWS_NULL_QUERIES,
     CollectionFeature.SUPPORTS_ADD,
     CollectionFeature.SUPPORTS_REMOVE,
     CollectionFeature.SUPPORTS_ITERATOR_REMOVE,
@@ -41,7 +40,7 @@ class IntSetGuavaTest {
         fun suite(): TestSuite = SetTestSuiteBuilder
             .using(object : TestIntSetGenerator() {
                 override fun createSet(elements: IntArray): MutableSet<Int> =
-                    mutableIntSetOf(*elements).asMutableSet()
+                    mutableIntSetOf(*elements).asSet()
             })
             .named("IntSet")
             .withFeatures(*SET_FEATURES)
@@ -72,7 +71,7 @@ class LongSetGuavaTest {
         fun suite(): TestSuite = SetTestSuiteBuilder
             .using(object : TestLongSetGenerator() {
                 override fun createSet(elements: LongArray): MutableSet<Long> =
-                    mutableLongSetOf(*elements).asMutableSet()
+                    mutableLongSetOf(*elements).asSet()
             })
             .named("LongSet")
             .withFeatures(*SET_FEATURES)

@@ -8,8 +8,8 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 public fun emptyFloatSet(): FloatSet = EmptyFloatSet
 
@@ -21,7 +21,8 @@ public fun mutableFloatSetOf(): MutableFloatSet = FloatHashSet()
 public fun mutableFloatSetOf(element: Float): MutableFloatSet = FloatHashSet(1).apply { add(element) }
 public fun mutableFloatSetOf(vararg elements: Float): MutableFloatSet = FloatHashSet(elements.asFloatList())
 
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
 public inline fun buildFloatSet(expectedSize: Int = 0, builderAction: MutableFloatSet.() -> Unit): FloatSet {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
     val set = FloatHashSet(expectedSize)
@@ -34,8 +35,8 @@ public inline fun buildFloatSet(expectedSize: Int = 0, builderAction: MutableFlo
  */
 public interface FloatSet : FloatCollection {
     override fun contains(element: Float): Boolean {
-        for (e in this) {
-            if (e equalsBoxed element) return true
+        foreach { e ->
+            if (e equalsRaw element) return true
         }
         return false
     }
@@ -46,10 +47,10 @@ public fun FloatSet.asSet(): Set<Float> = FloatSetWrapper(this)
 public infix fun FloatSet.union(other: FloatSet): FloatSet = FloatHashSet(this).apply { addAll(other) }
 
 public infix fun FloatSet.intersect(other: FloatSet): FloatSet {
-    if (other.size < size) return other.intersect(this)
+    if (other.size > size) return other.intersect(this)
 
-    val set = FloatHashSet(size)
-    for (element in other) {
+    val set = FloatHashSet(other.size)
+    other.foreach { element ->
         if (contains(element)) set.add(element)
     }
     return set
@@ -57,7 +58,7 @@ public infix fun FloatSet.intersect(other: FloatSet): FloatSet {
 
 public infix fun FloatSet.subtract(other: FloatSet): FloatSet {
     val set = FloatHashSet(size)
-    for (element in this) {
+    foreach { element ->
         if (!other.contains(element)) set.add(element)
     }
     return set
@@ -81,7 +82,7 @@ public abstract class AbstractFloatSet : AbstractFloatCollection(), FloatSet {
 
     override fun hashCode(): Int {
         var hashCode = 0
-        for (element in this) {
+        foreach { element ->
             hashCode += element.hashCode()
         }
         return hashCode
@@ -93,9 +94,9 @@ public abstract class AbstractMutableFloatSet : AbstractFloatSet(), MutableFloat
     override fun retainAll(elements: Collection<Float>): Boolean = super<MutableFloatSet>.retainAll(elements)
 }
 
-public fun MutableFloatSet.asMutableSet(): MutableSet<Float> = MutableFloatSetWrapper(this)
+public fun MutableFloatSet.asSet(): MutableSet<Float> = MutableFloatSetWrapper(this)
 
-private object EmptyFloatSet : FloatSet {
+private object EmptyFloatSet : AbstractFloatSet() {
     override val size: Int get() = 0
 
     override fun isEmpty(): Boolean = true
@@ -107,11 +108,11 @@ private object EmptyFloatSet : FloatSet {
     override fun traverser(): FloatTraverser = emptyFloatTraverser()
 }
 
-private class SingletonFloatSet(private val value: Float) : FloatSet {
+private class SingletonFloatSet(private val value: Float) : AbstractFloatSet() {
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: Float): Boolean = value equalsBoxed element
+    override fun contains(element: Float): Boolean = value equalsRaw element
 
     override fun iterator(): FloatIterator = object : FloatIterator() {
         private var complete = false
@@ -143,6 +144,7 @@ private class FloatSetWrapper(private val set: FloatSet) : AbstractSet<Float>() 
 private class MutableFloatSetWrapper(private val set: MutableFloatSet) : AbstractMutableSet<Float>() {
     override val size: Int get() = set.size
     override fun contains(element: Float) = set.contains(element)
+    override fun containsAll(elements: Collection<Float>): Boolean = set.containsAll(elements)
     override fun iterator() = set.iterator()
 
     override fun add(element: Float) = set.add(element)
@@ -150,4 +152,6 @@ private class MutableFloatSetWrapper(private val set: MutableFloatSet) : Abstrac
     override fun clear() = set.clear()
 
     override fun addAll(elements: Collection<Float>): Boolean = set.addAll(elements)
+    override fun removeAll(elements: Collection<Float>): Boolean = set.removeAll(elements)
+    override fun retainAll(elements: Collection<Float>): Boolean = set.retainAll(elements)
 }

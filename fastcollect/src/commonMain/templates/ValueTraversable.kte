@@ -1,8 +1,7 @@
 /**
- * Methods for dealing with Traversables.
+ * Methods for dealing with ${Type}Traversables.
  */
-@file:JvmName("Traversables")
-@file:JvmMultifileClass
+@file:JvmName("${Type}Traversables")
 
 package io.github.sooniln.fastcollect
 
@@ -10,7 +9,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -104,6 +102,7 @@ public inline fun ${Type}Traversable.reduce(operation: (accumulated: ${Type}, ${
 public fun ${Type}Traversable.sum(): Int = sumOf { it.toInt() }
 <% } %>
 
+@JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Int): Int {
@@ -118,6 +117,7 @@ public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Int): Int {
 public fun ${Type}Traversable.sum(): Long = sumOf { it }
 <% } %>
 
+@JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Long): Long {
@@ -133,6 +133,7 @@ public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Long): Long {
 public fun ${Type}Traversable.sum(): Double = sumOf { it.toDouble() }
 <% } %>
 
+@JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Double): Double {

@@ -65,7 +65,7 @@ class Int2ByteMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractInt2ByteMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Int, Byte>>): MutableMap<Int, Byte> =
-                    mutableInt2ByteMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableInt2ByteMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Int2ByteMap")
             .withFeatures(*MAP_FEATURES)
@@ -114,7 +114,7 @@ class Int2IntMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractInt2IntMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Int, Int>>): MutableMap<Int, Int> =
-                    mutableInt2IntMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableInt2IntMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Int2IntMap")
             .withFeatures(*MAP_FEATURES)
@@ -163,7 +163,7 @@ class Int2LongMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractInt2LongMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Int, Long>>): MutableMap<Int, Long> =
-                    mutableInt2LongMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableInt2LongMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Int2LongMap")
             .withFeatures(*MAP_FEATURES)
@@ -212,7 +212,7 @@ class Int2FloatMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractInt2FloatMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Int, Float>>): MutableMap<Int, Float> =
-                    mutableInt2FloatMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableInt2FloatMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Int2FloatMap")
             .withFeatures(*MAP_FEATURES)
@@ -261,7 +261,7 @@ class Int2DoubleMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractInt2DoubleMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Int, Double>>): MutableMap<Int, Double> =
-                    mutableInt2DoubleMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableInt2DoubleMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Int2DoubleMap")
             .withFeatures(*MAP_FEATURES)
@@ -308,7 +308,7 @@ class Int2AnyMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractInt2AnyStringMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Int, String?>>): MutableMap<Int, String?> =
-                    mutableInt2AnyMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableInt2AnyMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Int2AnyMap")
             .withFeatures(*MAP_FEATURES, MapFeature.ALLOWS_NULL_VALUES)
@@ -356,7 +356,7 @@ class Long2ByteMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractLong2ByteMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Long, Byte>>): MutableMap<Long, Byte> =
-                    mutableLong2ByteMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableLong2ByteMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Long2ByteMap")
             .withFeatures(*MAP_FEATURES)
@@ -405,7 +405,7 @@ class Long2IntMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractLong2IntMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Long, Int>>): MutableMap<Long, Int> =
-                    mutableLong2IntMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableLong2IntMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Long2IntMap")
             .withFeatures(*MAP_FEATURES)
@@ -454,7 +454,7 @@ class Long2LongMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractLong2LongMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Long, Long>>): MutableMap<Long, Long> =
-                    mutableLong2LongMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableLong2LongMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Long2LongMap")
             .withFeatures(*MAP_FEATURES)
@@ -503,7 +503,7 @@ class Long2FloatMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractLong2FloatMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Long, Float>>): MutableMap<Long, Float> =
-                    mutableLong2FloatMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableLong2FloatMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Long2FloatMap")
             .withFeatures(*MAP_FEATURES)
@@ -552,7 +552,7 @@ class Long2DoubleMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractLong2DoubleMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Long, Double>>): MutableMap<Long, Double> =
-                    mutableLong2DoubleMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableLong2DoubleMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Long2DoubleMap")
             .withFeatures(*MAP_FEATURES)
@@ -601,7 +601,7 @@ class Long2AnyMapGuavaTest {
         fun suite(): TestSuite = MapTestSuiteBuilder
             .using(object : AbstractLong2AnyStringMapGenerator() {
                 override fun createMap(entries: Array<Map.Entry<Long, String?>>): MutableMap<Long, String?> =
-                    mutableLong2AnyMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMutableMap()
+                    mutableLong2AnyMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Long2AnyMap")
         .withFeatures(*MAP_FEATURES, MapFeature.ALLOWS_NULL_VALUES)

@@ -9,6 +9,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
 public fun ${Generics} empty${Name}Map(): ${Name}Map${Generics} = Empty${Name}Map as ${Name}Map${Generics}
@@ -22,6 +23,7 @@ public fun ${Generics} mutable${Name}MapOf(): Mutable${Name}Map${Generics} = ${N
 public fun ${Generics} mutable${Name}MapOf(entry: Pair<${KeyType}, ${ValueType}>): Mutable${Name}Map${Generics} = ${Name}HashMap${Generics}(1).apply { set(entry.first, entry.second) }
 public fun ${Generics} mutable${Name}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): Mutable${Name}Map${Generics} = ${Name}HashMap${Generics}(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} build${Name}Map(expectedSize: Int = 0, builderAction: Mutable${Name}Map${Generics}.() -> Unit): ${Name}Map${Generics} {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
@@ -68,15 +70,15 @@ public interface ${Name}Map${OutGenerics} : ${Name}Traversable${Generics} {
     public fun getOrDefault(key: ${KeyType}, defaultValue: @UnsafeVariance ${ValueType}): ${ValueType} = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: ${KeyType}): Boolean {
-        for (k in keys) {
-            if (k equalsBoxed key) return true
+        foreachKey { k ->
+            if (k equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance ${ValueType}): Boolean {
-        for (v in values) {
-            if (v equalsBoxed value) return true
+        foreach { _, v ->
+            if (v equalsRaw value) return true
         }
         return false
     }
@@ -102,13 +104,15 @@ public interface ${Name}Map${OutGenerics} : ${Name}Traversable${Generics} {
 
     /** An implementation of [Entry] with correct equals/hashCode/toString. */
     public abstract class AbstractEntry${OutGenerics} : Entry${Generics} {
-        final override fun equals(other: Any?): Boolean = other is Entry${StarGenerics} && other.key equalsBoxed key && other.value equalsBoxed value
+        final override fun equals(other: Any?): Boolean = other is Entry${StarGenerics} && other.key equalsRaw key && other.value equalsRaw value
         final override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         final override fun toString(): String = "\$key=\$value"
     }
 }
 
 public fun ${Generics} ${Name}Map${Generics}.asMap(): Map<${KeyType}, ${ValueType}> = ${Name}MapWrapper(this)
+
+public fun ${Generics} ${Name}Map.Entry${Generics}.asEntry(): Map.Entry<${KeyType}, ${ValueType}> = ${Name}MapEntryWrapper(this)
 
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} ${Name}Map${Generics}.getOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
@@ -125,6 +129,14 @@ public inline fun ${Generics} ${Name}Map${Generics}.getOrElse(key: ${KeyType}, d
 public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics}, Mutable${Name}Traversable${Generics} {
 
     public fun put(key: ${KeyType}, value: ${ValueType}): ${ValueType}${Nullable}
+
+    public fun putIfAbsent(key: ${KeyType}, value: ${ValueType}): ${ValueType}${Nullable} {
+        val oldValue = get(key)
+        if (isDefaultValue(oldValue) && !containsKey(key)) {
+            return put(key, value)
+        }
+        return oldValue
+    }
 
     public operator fun set(key: ${KeyType}, value: ${ValueType}) {
         put(key, value)
@@ -143,9 +155,6 @@ public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics}, Mutable${
     public fun remove(key: ${KeyType}, value: ${ValueType}): Boolean
 
     public fun clear()
-
-    override val keys: ${KeyType}Set
-    override val values: ${ValueCollectionType}${Generics}
 
     public fun putAll(from: ${Name}Map${Generics}) {
         from.foreach { key, value ->
@@ -170,7 +179,9 @@ public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics}, Mutable${
     public abstract class AbstractMutableEntry${Generics} : ${Name}Map.AbstractEntry${Generics}(), MutableEntry${Generics}
 }
 
-public fun ${Generics} Mutable${Name}Map${Generics}.asMutableMap(): MutableMap<${KeyType}, ${ValueType}> = Mutable${Name}MapWrapper(this)
+public fun ${Generics} Mutable${Name}Map${Generics}.asMap(): MutableMap<${KeyType}, ${ValueType}> = Mutable${Name}MapWrapper(this)
+
+public fun ${Generics} Mutable${Name}Map.MutableEntry${Generics}.asEntry(): MutableMap.MutableEntry<${KeyType}, ${ValueType}> = Mutable${Name}MapEntryWrapper(this)
 
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} Mutable${Name}Map${Generics}.merge(key: ${KeyType}, value: ${ValueType}, merge: (oldValue: ${ValueType}, value: ${ValueType}) -> ${ValueType}): ${ValueType} {
@@ -180,7 +191,7 @@ public inline fun ${Generics} Mutable${Name}Map${Generics}.merge(key: ${KeyType}
     val absent = isDefaultValue(oldValue) && !containsKey(key)
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     val newValue = if (absent) value else merge(oldValue as ${ValueType}, value)
-    if (absent || !(newValue equalsBoxed oldValue)) {
+    if (absent || !(newValue equalsRaw oldValue)) {
         set(key, newValue)
     }
     return newValue
@@ -234,8 +245,8 @@ public abstract class Abstract${Name}Map${Generics} : ${Name}Map${Generics} {
         if (other is ${Name}Map${StarGenerics}) {
             if (other.size != size) return false
 
-            for (entry in this) {
-                if (!(other[entry.key] equalsBoxed entry.value)) return false
+            foreach { key, value ->
+                if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
             }
 
             return true
@@ -246,23 +257,23 @@ public abstract class Abstract${Name}Map${Generics} : ${Name}Map${Generics} {
 
     override fun hashCode(): Int {
         var result = 0
-        for (entry in this) {
-            result += entry.key.hashCode() xor entry.value.hashCode()
+        foreach { key, value ->
+            result += key.hashCode() xor value.hashCode()
         }
         return result
     }
 
     override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
-    public class SimpleEntry${Generics}(override val key: ${KeyType}, override val value: ${ValueType}) : ${Name}Map.Entry${Generics}
+    public class SimpleEntry${Generics}(override val key: ${KeyType}, override val value: ${ValueType}) : ${Name}Map.AbstractEntry${Generics}()
 }
 
 public abstract class AbstractMutable${Name}Map${Generics} : Abstract${Name}Map${Generics}(), Mutable${Name}Map${Generics}
 
 <% if (!isReferenceValue) { %>
-private object Empty${Name}Map : ${Name}Map${Generics} {
+private object Empty${Name}Map : Abstract${Name}Map${Generics}() {
 <% } else { %>
-private object Empty${Name}Map : ${Name}Map<Nothing> {
+private object Empty${Name}Map : Abstract${Name}Map<Nothing>() {
 <% } %>
 <% if (!isReferenceValue) { %>
     override fun isDefaultValue(value: ${ValueType}): Boolean = true
@@ -298,21 +309,24 @@ private object Empty${Name}Map : ${Name}Map<Nothing> {
 <% } %>
 }
 
-private class Singleton${Name}Map${Generics}(private val key: ${KeyType}, private val value: ${ValueType}) : ${Name}Map${Generics} {
-    override fun isDefaultValue(value: ${ValueType}${Nullable}): Boolean = value equalsBoxed ${DefaultValue}
+private class Singleton${Name}Map${Generics}(
+    private val key: ${KeyType},
+    private val value: ${ValueType}
+) : Abstract${Name}Map${Generics}() {
+    override fun isDefaultValue(value: ${ValueType}${Nullable}): Boolean = value equalsRaw ${DefaultValue}
 
     override val size: Int get() = 1
     override fun isEmpty(): Boolean = false
 
-    override fun containsKey(key: ${KeyType}): Boolean = key equalsBoxed this.key
-    override fun containsValue(value: ${ValueType}): Boolean = value equalsBoxed this.value
-    override fun get(key: ${KeyType}): ${ValueType}${Nullable} = if (key equalsBoxed this.key) value else ${DefaultValue}
+    override fun containsKey(key: ${KeyType}): Boolean = key equalsRaw this.key
+    override fun containsValue(value: ${ValueType}): Boolean = value equalsRaw this.value
+    override fun get(key: ${KeyType}): ${ValueType}${Nullable} = if (key equalsRaw this.key) value else ${DefaultValue}
 
-    override val keys: ${KeyType}Set by lazy { ${lowerKeyType}SetOf(key) }
+    override val keys: ${KeyType}Set get() = ${lowerKeyType}SetOf(key)
 <% if (!isReferenceValue) { %>
-    override val values: ${ValueCollectionType}${Generics} by lazy { ${lowerValueType}ListOf(value) }
+    override val values: ${ValueCollectionType}${Generics} get() = ${lowerValueType}ListOf(value)
 <% } else { %>
-    override val values: ${ValueCollectionType}${Generics} by lazy { listOf(value) }
+    override val values: ${ValueCollectionType}${Generics} get() = listOf(value)
 <% } %>
     override fun iterator() = object : Iterator<${Name}Map.Entry${Generics}> {
         private var complete: Boolean = false
@@ -321,7 +335,7 @@ private class Singleton${Name}Map${Generics}(private val key: ${KeyType}, privat
         override fun next(): ${Name}Map.Entry${Generics} {
             if (complete) throw NoSuchElementException()
             complete = true
-            return Abstract${Name}Map.SimpleEntry(key, value)
+            return SimpleEntry(key, value)
         }
     }
 
@@ -354,22 +368,25 @@ private class ${Name}MapWrapper${Generics}(private val map: ${Name}Map${Generics
 
         override fun contains(element: Map.Entry<${KeyType}, ${ValueType}>): Boolean {
             val value = map[element.key]
-            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsRaw element.value
         }
 
         override fun iterator(): Iterator<Map.Entry<${KeyType}, ${ValueType}>> = object : Iterator<Map.Entry<${KeyType}, ${ValueType}>> {
             private val it = map.iterator()
-
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): Map.Entry<${KeyType}, ${ValueType}> {
-                val entry = it.next()
-                return object : Map.Entry<${KeyType}, ${ValueType}> {
-                    override val key = entry.key
-                    override val value = entry.value
-                }
-            }
+            override fun next(): Map.Entry<${KeyType}, ${ValueType}> = it.next().asEntry()
         }
     }
+}
+
+private class ${Name}MapEntryWrapper${Generics}(
+    private val entry: ${Name}Map.Entry${Generics}
+) : Map.Entry<${KeyType}, ${ValueType}> {
+    override val key: ${KeyType} get() = entry.key
+    override val value: ${ValueType} get() = entry.value
+    override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+    override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+    override fun toString(): String = "\$key=\$value"
 }
 
 private class Mutable${Name}MapWrapper${Generics}(private val map: Mutable${Name}Map${Generics}) : AbstractMutableMap<${KeyType}, ${ValueType}>() {
@@ -401,7 +418,7 @@ private class Mutable${Name}MapWrapper${Generics}(private val map: Mutable${Name
 
         override fun contains(element: MutableMap.MutableEntry<${KeyType}, ${ValueType}>): Boolean {
             val value = map[element.key]
-            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsRaw element.value
         }
 
         override fun add(element: MutableMap.MutableEntry<${KeyType}, ${ValueType}>): Boolean = throw UnsupportedOperationException()
@@ -410,28 +427,27 @@ private class Mutable${Name}MapWrapper${Generics}(private val map: Mutable${Name
             private val it = map.iterator()
 
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): MutableMap.MutableEntry<${KeyType}, ${ValueType}> = it.next().let { e -> Entry(e.key, e.value) }
+            override fun next(): MutableMap.MutableEntry<${KeyType}, ${ValueType}> = it.next().asEntry()
             override fun remove() = it.remove()
-        }
-
-        private inner class Entry(override val key: ${KeyType}, value: ${ValueType}) : MutableMap.MutableEntry<${KeyType}, ${ValueType}> {
-            override var value = value
-                private set
-
-            override fun setValue(newValue: ${ValueType}): ${ValueType} {
-                val oldValue = value
-                if (!(map.put(key, newValue) equalsBoxed oldValue)) throw ConcurrentModificationException()
-                value = newValue
-                return oldValue
-            }
-
-            override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
-            override fun hashCode(): Int = key.hashCode() xor value.hashCode()
-            override fun toString(): String = "\$key=\$value"
         }
     }
 
     override fun putAll(from: Map<out ${KeyType}, ${ValueType}>): Unit = map.putAll(from)
+}
+
+private class Mutable${Name}MapEntryWrapper${Generics}(
+    private val entry: Mutable${Name}Map.MutableEntry${Generics}
+) : MutableMap.MutableEntry<${KeyType}, ${ValueType}> {
+    override val key: ${KeyType} get() = entry.key
+    override val value: ${ValueType} get() = entry.value
+    override fun setValue(newValue: ${ValueType}): ${ValueType} {
+        val oldValue = entry.value
+        entry.value = newValue
+        return oldValue
+    }
+    override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+    override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+    override fun toString(): String = "\$key=\$value"
 }
 
 <% if (!isReferenceValue) { %>

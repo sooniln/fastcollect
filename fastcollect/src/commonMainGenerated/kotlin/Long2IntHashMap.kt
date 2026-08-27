@@ -47,7 +47,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
         ensureCapacity(capacity)
     }
 
-    override fun isDefaultValue(value: Int): Boolean = value equalsBoxed defaultValue
+    override fun isDefaultValue(value: Int): Boolean = value equalsRaw defaultValue
 
     /**
      * Ensures that the map can hold at least given number of key/value pairs without any further resizing of the
@@ -75,7 +75,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
         val keysArr = keysArr
         val valuesArr = valuesArr
         for (slot in keysArr.indices) {
-            if (valuesArr[slot] equalsBoxed value && keysArr[slot] != emptyKey) return true
+            if (valuesArr[slot] equalsRaw value && keysArr[slot] != emptyKey) return true
         }
         return false
     }
@@ -99,7 +99,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
         return returnValue
     }
 
-    public fun putIfAbsent(key: Long, value: Int): Int {
+    override fun putIfAbsent(key: Long, value: Int): Int {
         set(key, { value }, { slot -> return valuesArr[slot] })
         return defaultValue
     }
@@ -109,15 +109,14 @@ public class Long2IntHashMap @JvmOverloads constructor(
     }
 
     override fun replace(key: Long, value: Int): Int {
-        var returnValue = defaultValue
-        set(key, {
+        return findSlot(key, { slot ->
+            val oldValue = valuesArr[slot]
+            valuesArr[slot] = value
+            @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+            oldValue as Int
+        }, {
             throw NoSuchElementException()
-        }, { slot ->
-            returnValue = valuesArr[slot]
-            value
         })
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        return returnValue as Int
     }
 
     override fun remove(key: Long): Int {
@@ -148,7 +147,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
                 key,
                 { slot ->
                     val oldValue = valuesArr[slot]
-                    if (oldValue equalsBoxed value) {
+                    if (oldValue equalsRaw value) {
                         removeSlot(slot)
                         true
                     } else {
@@ -183,7 +182,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
             do {
                 if (currKey == emptyKey) {
                     return onFail()
-                } else if (currKey equalsBoxed key) {
+                } else if (currKey equalsRaw key) {
                     return onFind(slot)
                 }
 
@@ -209,7 +208,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
         var distance = 0
         while (true) {
             val currKey = keysArr[slot]
-            if (currKey equalsBoxed key) {
+            if (currKey equalsRaw key) {
                 valuesArr[slot] = onReplace(slot)
                 return
             } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {
@@ -330,7 +329,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
     private var _keys: LongSet? = null
     override val keys: LongSet get() {
         return _keys ?:
-            object : LongSet {
+            object : AbstractLongSet() {
                 override val size: Int get() = this@Long2IntHashMap.size
                 override fun contains(element: Long): Boolean = containsKey(element)
                 override fun iterator(): LongIterator = KeyIterator()
@@ -343,7 +342,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
     override val values: IntCollection get() {
         return _values ?:
 
-            object : IntCollection {
+            object : AbstractIntCollection() {
 
                 override val size: Int get() = this@Long2IntHashMap.size
                 override fun contains(element: Int): Boolean = containsValue(element)
@@ -485,13 +484,6 @@ public class Long2IntHashMap @JvmOverloads constructor(
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         fun value(): Int = valuesArr[previousSlot] as Int
 
-        fun updateValue(newValue: Int) {
-            check(previousSlot != -1)
-            if (keysArr !== this@Long2IntHashMap.keysArr) throw ConcurrentModificationException()
-
-            valuesArr[previousSlot] = newValue
-        }
-
         fun remove() {
             check(previousSlot != -1)
             if (keysArr !== this@Long2IntHashMap.keysArr) throw ConcurrentModificationException()
@@ -512,7 +504,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
         }
     }
 
-    private inner class KeyIterator : MutableLongIterator() {
+    private inner class KeyIterator : LongIterator() {
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
@@ -521,12 +513,10 @@ public class Long2IntHashMap @JvmOverloads constructor(
             it.nextSlot()
             return it.key()
         }
-
-        override fun remove() = it.remove()
     }
 
 
-    private inner class ValueIterator : MutableIntIterator() {
+    private inner class ValueIterator : IntIterator() {
 
         private val it = SlotIterator()
 
@@ -538,18 +528,16 @@ public class Long2IntHashMap @JvmOverloads constructor(
             it.nextSlot()
             return it.value()
         }
-
-        override fun remove() = it.remove()
     }
 
     private inner class EntryIterator: SlotIterator(), MutableIterator<MutableLong2IntMap.MutableEntry> {
         override fun next(): MutableLong2IntMap.MutableEntry {
             nextSlot()
             return object: MutableLong2IntMap.AbstractMutableEntry() {
-                override val key = key()
+                override val key: Long = key()
                 override var value: Int = value()
                     set(value) {
-                        if (get(key) != field) throw IllegalStateException()
+                        if (get(key) notEqualsRaw field) throw ConcurrentModificationException()
                         set(key, value)
                         field = value
                     }
@@ -568,23 +556,22 @@ public class Long2IntHashMap @JvmOverloads constructor(
         private var _key = emptyKey
 
         override val key: Long get() {
-            if (_key == emptyKey) throw NoSuchElementException()
+            check(_key != emptyKey)
             return _key
         }
         override var value: Int
             get() {
-                if (_key == emptyKey) throw NoSuchElementException()
+                check(_key != emptyKey)
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
                 return valuesArr[slot] as Int
             }
             set(value) {
-                if (_key == emptyKey) throw NoSuchElementException()
+                check(_key != emptyKey)
                 valuesArr[slot] = value
             }
 
         override fun forward(): Boolean {
-            if (slotsLeft == 0) {
-                _key = emptyKey
+            if (slotsLeft <= 0) {
                 return false
             }
             if (keysArr !== this@Long2IntHashMap.keysArr) throw ConcurrentModificationException()
@@ -600,7 +587,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
         }
 
         override fun remove() {
-            check(key != emptyKey)
+            check(_key != emptyKey)
             if (keysArr !== this@Long2IntHashMap.keysArr) throw ConcurrentModificationException()
 
             removeSlot(slot)

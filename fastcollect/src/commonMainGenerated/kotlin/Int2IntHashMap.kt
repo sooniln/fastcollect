@@ -43,7 +43,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         ensureCapacity(capacity)
     }
 
-    override fun isDefaultValue(value: Int): Boolean = value == defaultValue
+    override fun isDefaultValue(value: Int): Boolean = value equalsRaw defaultValue
 
     /**
      * Ensures that the map can hold at least given number of key/value pairs without any further resizing of the
@@ -71,7 +71,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         val kvArr = kvArr
         for (slot in kvArr.indices) {
             val entry = kvArr[slot]
-            if (entry != emptyEntry && entry.value() == value) return true
+            if (entry != emptyEntry && entry.value() equalsRaw value) return true
         }
         return false
     }
@@ -83,9 +83,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
     override fun getOrDefault(key: Int, defaultValue: Int): Int = findSlot(key, { _, entry -> entry.value() }, { defaultValue })
 
     override fun put(key: Int, value: Int): Int {
-        var returnValue = ZERO
+        var returnValue = defaultValue
         set(key, {
-            returnValue = defaultValue
             value
         }, { entry ->
             returnValue = entry.value()
@@ -94,7 +93,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         return returnValue
     }
 
-    public fun putIfAbsent(key: Int, value: Int): Int {
+    override fun putIfAbsent(key: Int, value: Int): Int {
         set(key, { value }, { entry -> return entry.value() })
         return defaultValue
     }
@@ -104,14 +103,13 @@ public class Int2IntHashMap @JvmOverloads constructor(
     }
 
     override fun replace(key: Int, value: Int): Int {
-        var returnValue = defaultValue
-        set(key, {
+        return findSlot(key, { slot, entry ->
+            val oldValue = entry.value()
+            kvArr[slot] = arrayEntry(entry.key(), value)
+            oldValue
+        }, {
             throw NoSuchElementException()
-        }, { entry ->
-            returnValue = entry.value()
-            value
         })
-        return returnValue
     }
 
     override fun remove(key: Int): Int {
@@ -140,7 +138,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         return findSlot(
             key,
             { slot, entry ->
-                if (entry.value() equalsBoxed value) {
+                if (entry.value() equalsRaw value) {
                     removeSlot(slot)
                     true
                 } else {
@@ -244,7 +242,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
         // k* ≈ 80·log₂(n) − C   -> overestimate with power-of-two ->   k* ≈ 128·b, b=log₂(n)
 
         if (threshold < size && ((nextSlot - slot) and mask) > 128 * mask.countOneBits()) {
-            rehash((threshold + size) shl 1)
+            val newCapacity = (threshold + size) shl 1
+            if (newCapacity > size) rehash(newCapacity)
         }
     }
 
@@ -281,7 +280,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             trimToSize()
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
-            for ((key, value) in from) {
+            from.foreach { key, value ->
                 set(key, value)
             }
         }
@@ -306,7 +305,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
     private var _keys: IntSet? = null
     override val keys: IntSet get() {
         return _keys ?:
-            object : IntSet {
+            object : AbstractIntSet() {
                 override val size: Int get() = this@Int2IntHashMap.size
                 override fun contains(element: Int): Boolean = containsKey(element)
                 override fun iterator(): IntIterator = KeyIterator()
@@ -318,7 +317,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
     private var _values: IntCollection? = null
     override val values: IntCollection get() {
         return _values ?:
-            object : IntCollection {
+            object : AbstractIntCollection() {
                 override val size: Int get() = this@Int2IntHashMap.size
                 override fun contains(element: Int): Boolean = containsValue(element)
                 override fun iterator(): IntIterator = ValueIterator()
@@ -399,7 +398,6 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     // changes emptyEntry to a value not currently in the map, rewriting all empty slots
     private fun changeEmptyEntry() {
-        @Suppress("REDUNDANT_CALL_OF_CONVERSION_METHOD")
         var candidate = ZERO
         while (candidate == emptyEntry.key() || containsKey(candidate)) {
             candidate = Random.nextInt()
@@ -444,13 +442,6 @@ public class Int2IntHashMap @JvmOverloads constructor(
         fun key(): Int = kvArr[previousSlot].key()
         fun value(): Int = kvArr[previousSlot].value()
 
-        fun updateValue(newValue: Int) {
-            check(previousSlot != -1)
-            if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()
-
-            kvArr[previousSlot] = arrayEntry(key(), newValue)
-        }
-
         fun remove() {
             check(previousSlot != -1)
             if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()
@@ -471,7 +462,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         }
     }
 
-    private inner class KeyIterator : MutableIntIterator() {
+    private inner class KeyIterator : IntIterator() {
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
@@ -480,11 +471,9 @@ public class Int2IntHashMap @JvmOverloads constructor(
             it.nextSlot()
             return it.key()
         }
-
-        override fun remove() = it.remove()
     }
 
-    private inner class ValueIterator : MutableIntIterator() {
+    private inner class ValueIterator : IntIterator() {
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
@@ -493,40 +482,21 @@ public class Int2IntHashMap @JvmOverloads constructor(
             it.nextSlot()
             return it.value()
         }
-
-        override fun remove() = it.remove()
     }
 
-    private inner class EntryIterator: SlotIterator(), MutableIterator<MutableInt2IntMap.MutableEntry>, MutableInt2IntMap.MutableEntry {
-
-        override val key: Int
-            get() = key()
-        override var value: Int
-            get() = value()
-            set(value) {
-                updateValue(value)
-            }
-
+    private inner class EntryIterator: SlotIterator(), MutableIterator<MutableInt2IntMap.MutableEntry> {
         override fun next(): MutableInt2IntMap.MutableEntry {
             nextSlot()
-            return object: MutableInt2IntMap.MutableEntry {
-                override val key: Int
-                    get() = key()
-                override var value: Int
-                    get() = value()
+            return object: MutableInt2IntMap.AbstractMutableEntry() {
+                override val key: Int = key()
+                override var value: Int = value()
                     set(value) {
-                        updateValue(value)
+                        if (get(key) notEqualsRaw field) throw ConcurrentModificationException()
+                        set(key, value)
+                        field = value
                     }
-
-                override fun equals(other: Any?): Boolean = other is Int2IntMap.Entry && other.key equalsBoxed key && other.value equalsBoxed value
-                override fun hashCode(): Int = key.hashCode() xor value.hashCode()
-                override fun toString(): String = "$key=$value"
             }
         }
-
-        override fun equals(other: Any?): Boolean = other is Int2IntMap.Entry && other.key equalsBoxed key && other.value equalsBoxed value
-        override fun hashCode(): Int = key.hashCode() xor value.hashCode()
-        override fun toString(): String = "$key=$value"
     }
 
     private inner class Traverser : MutableInt2IntTraverser {
@@ -539,23 +509,23 @@ public class Int2IntHashMap @JvmOverloads constructor(
         private var entry = emptyEntry
 
         override val key: Int get() {
-            if (entry == emptyEntry) throw NoSuchElementException()
+            check(entry != emptyEntry)
             return entry.key()
         }
         override var value: Int
             get() {
-                if (entry == emptyEntry) throw NoSuchElementException()
+                check(entry != emptyEntry)
                 return entry.value()
             }
             set(value) {
-                if (entry == emptyEntry) throw NoSuchElementException()
+                check(entry != emptyEntry)
                 if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()
-                kvArr[slot] = arrayEntry(entry.key(), value)
+                entry = arrayEntry(entry.key(), value)
+                kvArr[slot] = entry
             }
 
         override fun forward(): Boolean {
-            if (slotsLeft == 0) {
-                entry = emptyEntry
+            if (slotsLeft <= 0) {
                 return false
             }
             if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()

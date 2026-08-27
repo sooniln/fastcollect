@@ -1,15 +1,13 @@
 /**
- * Methods for dealing with primitive Collections.
+ * Methods for dealing with FloatCollections.
  */
-@file:JvmName("Collections")
-@file:JvmMultifileClass
+@file:JvmName("FloatCollections")
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
 /**
@@ -26,15 +24,15 @@ public interface FloatCollection : FloatTraversable {
     public operator fun iterator(): FloatIterator
 
     public fun contains(element: Float): Boolean {
-        for (e in this) {
-            if (e equalsBoxed element) return true
+        foreach { e ->
+            if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: FloatCollection): Boolean {
-        for (e in elements) {
-            if (!contains(e)) {
+        elements.foreach { element ->
+            if (!contains(element)) {
                 return false
             }
         }
@@ -53,7 +51,7 @@ public interface FloatCollection : FloatTraversable {
     public fun toFloatArray(): FloatArray {
         val array = FloatArray(size)
         var index = 0
-        for (element in this) {
+        foreach { element ->
             array[index++] = element
         }
         return array
@@ -78,16 +76,16 @@ public interface MutableFloatCollection : FloatCollection, MutableFloatTraversab
 
     public fun addAll(elements: FloatCollection): Boolean {
         var modified = false
-        for (e in elements) {
-            modified = add(e) or modified
+        elements.foreach { element ->
+            modified = add(element) or modified
         }
         return modified
     }
 
     public fun addAll(elements: Collection<Float>): Boolean {
         var modified = false
-        for (e in elements) {
-            modified = add(e) or modified
+        for (element in elements) {
+            modified = add(element) or modified
         }
         return modified
     }

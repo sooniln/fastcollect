@@ -47,7 +47,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         ensureCapacity(capacity)
     }
 
-    override fun isDefaultValue(value: V?): Boolean = value equalsBoxed defaultValue
+    override fun isDefaultValue(value: V?): Boolean = value equalsRaw defaultValue
 
     /**
      * Ensures that the map can hold at least given number of key/value pairs without any further resizing of the
@@ -75,7 +75,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         val keysArr = keysArr
         val valuesArr = valuesArr
         for (slot in keysArr.indices) {
-            if (valuesArr[slot] equalsBoxed value && keysArr[slot] != emptyKey) return true
+            if (valuesArr[slot] equalsRaw value && keysArr[slot] != emptyKey) return true
         }
         return false
     }
@@ -99,7 +99,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         return returnValue
     }
 
-    public fun putIfAbsent(key: Int, value: V): V? {
+    override fun putIfAbsent(key: Int, value: V): V? {
         set(key, { value }, { slot -> return valuesArr[slot] })
         return defaultValue
     }
@@ -109,15 +109,14 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
     }
 
     override fun replace(key: Int, value: V): V {
-        var returnValue = defaultValue
-        set(key, {
+        return findSlot(key, { slot ->
+            val oldValue = valuesArr[slot]
+            valuesArr[slot] = value
+            @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+            oldValue as V
+        }, {
             throw NoSuchElementException()
-        }, { slot ->
-            returnValue = valuesArr[slot]
-            value
         })
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        return returnValue as V
     }
 
     override fun remove(key: Int): V? {
@@ -148,7 +147,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
                 key,
                 { slot ->
                     val oldValue = valuesArr[slot]
-                    if (oldValue equalsBoxed value) {
+                    if (oldValue equalsRaw value) {
                         removeSlot(slot)
                         true
                     } else {
@@ -185,7 +184,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             do {
                 if (currKey == emptyKey) {
                     return onFail()
-                } else if (currKey equalsBoxed key) {
+                } else if (currKey equalsRaw key) {
                     return onFind(slot)
                 }
 
@@ -211,7 +210,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         var distance = 0
         while (true) {
             val currKey = keysArr[slot]
-            if (currKey equalsBoxed key) {
+            if (currKey equalsRaw key) {
                 valuesArr[slot] = onReplace(slot)
                 return
             } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {
@@ -334,7 +333,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
     private var _keys: IntSet? = null
     override val keys: IntSet get() {
         return _keys ?:
-            object : IntSet {
+            object : AbstractIntSet() {
                 override val size: Int get() = this@Int2AnyHashMap.size
                 override fun contains(element: Int): Boolean = containsKey(element)
                 override fun iterator(): IntIterator = KeyIterator()
@@ -487,13 +486,6 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         fun value(): V = valuesArr[previousSlot] as V
 
-        fun updateValue(newValue: V) {
-            check(previousSlot != -1)
-            if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
-
-            valuesArr[previousSlot] = newValue
-        }
-
         fun remove() {
             check(previousSlot != -1)
             if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
@@ -514,7 +506,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         }
     }
 
-    private inner class KeyIterator : MutableIntIterator() {
+    private inner class KeyIterator : IntIterator() {
         private val it = SlotIterator()
 
         override fun hasNext(): Boolean = it.hasNext()
@@ -523,12 +515,10 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             it.nextSlot()
             return it.key()
         }
-
-        override fun remove() = it.remove()
     }
 
 
-    private inner class ValueIterator : MutableIterator<V> {
+    private inner class ValueIterator : Iterator<V> {
 
         private val it = SlotIterator()
 
@@ -540,18 +530,16 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             it.nextSlot()
             return it.value()
         }
-
-        override fun remove() = it.remove()
     }
 
     private inner class EntryIterator: SlotIterator(), MutableIterator<MutableInt2AnyMap.MutableEntry<V>> {
         override fun next(): MutableInt2AnyMap.MutableEntry<V> {
             nextSlot()
             return object: MutableInt2AnyMap.AbstractMutableEntry<V>() {
-                override val key = key()
+                override val key: Int = key()
                 override var value: V = value()
                     set(value) {
-                        if (get(key) != field) throw IllegalStateException()
+                        if (get(key) notEqualsRaw field) throw ConcurrentModificationException()
                         set(key, value)
                         field = value
                     }
@@ -570,23 +558,22 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         private var _key = emptyKey
 
         override val key: Int get() {
-            if (_key == emptyKey) throw NoSuchElementException()
+            check(_key != emptyKey)
             return _key
         }
         override var value: V
             get() {
-                if (_key == emptyKey) throw NoSuchElementException()
+                check(_key != emptyKey)
                 @Suppress("UNCHECKED_CAST", "USELESS_CAST")
                 return valuesArr[slot] as V
             }
             set(value) {
-                if (_key == emptyKey) throw NoSuchElementException()
+                check(_key != emptyKey)
                 valuesArr[slot] = value
             }
 
         override fun forward(): Boolean {
-            if (slotsLeft == 0) {
-                _key = emptyKey
+            if (slotsLeft <= 0) {
                 return false
             }
             if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
@@ -602,7 +589,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         }
 
         override fun remove() {
-            check(key != emptyKey)
+            check(_key != emptyKey)
             if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
 
             removeSlot(slot)

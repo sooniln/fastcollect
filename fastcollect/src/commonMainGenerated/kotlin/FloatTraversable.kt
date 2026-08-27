@@ -1,8 +1,7 @@
 /**
- * Methods for dealing with Traversables.
+ * Methods for dealing with FloatTraversables.
  */
-@file:JvmName("Traversables")
-@file:JvmMultifileClass
+@file:JvmName("FloatTraversables")
 
 package io.github.sooniln.fastcollect
 
@@ -10,7 +9,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -101,6 +99,7 @@ public inline fun FloatTraversable.reduce(operation: (accumulated: Float, Float)
 
 
 
+@JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun FloatTraversable.sumOf(selector: (Float) -> Int): Int {
@@ -113,6 +112,7 @@ public inline fun FloatTraversable.sumOf(selector: (Float) -> Int): Int {
 
 
 
+@JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun FloatTraversable.sumOf(selector: (Float) -> Long): Long {
@@ -128,6 +128,7 @@ public inline fun FloatTraversable.sumOf(selector: (Float) -> Long): Long {
 public fun FloatTraversable.sum(): Double = sumOf { it.toDouble() }
 
 
+@JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun FloatTraversable.sumOf(selector: (Float) -> Double): Double {

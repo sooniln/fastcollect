@@ -1,16 +1,15 @@
 /**
- * Methods for dealing with primitive ArrayDeques.
+ * Methods for dealing with ByteArrayDeques.
  */
-@file:JvmName("ArrayDeques")
-@file:JvmMultifileClass
+@file:JvmName("ByteArrayDeques")
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
 
@@ -32,9 +31,10 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
     override var size: Int = size
         private set
 
+    @JvmOverloads
     public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else ByteArray(capacity), 0)
 
-    public constructor(elements: ByteCollection) : this(if (elements is ByteList) elements.toByteArray() else elements.toByteArray())
+    public constructor(elements: ByteCollection) : this(elements.toByteArray())
 
     public constructor(elements: Collection<Byte>) : this(if (elements is ByteList) elements.toByteArray() else elements.toByteArray())
 
@@ -46,7 +46,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
     private fun grow(capacity: Int) {
         val oldCapacity = ring.size
-        val newCapacity = if (oldCapacity > 0 || ring !== EMPTY_ARRAY) {
+        val newCapacity = if (oldCapacity > 0) {
             growArraySize(oldCapacity, capacity - oldCapacity)
         } else {
             max(DEFAULT_CAPACITY, capacity)
@@ -80,11 +80,11 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
     }
 
     override fun get(index: Int): Byte {
-        return ring[ring.position(head, rangeCheck(index))]
+        return ring[ring.position(head, indexCheck(index))]
     }
 
     override fun set(index: Int, element: Byte) {
-        ring[ring.position(head, rangeCheck(index))] = element
+        ring[ring.position(head, indexCheck(index))] = element
     }
 
     override fun addFirst(element: Byte) {
@@ -104,54 +104,62 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
     }
 
     override fun add(index: Int, element: Byte) {
-        rangeCheckInclusive(index)
+        indexCheckInclusive(index)
         when (index) {
             size -> addLast(element)
             0 -> addFirst(element)
-            else -> addInternal(ring.position(head, index), element)
+            else -> addMiddle(index, element)
         }
     }
 
-    // returns 1 if the back half was shifted right and 0 if the front half was shifted left
-    private fun addInternal(position: Int, element: Byte): Int {
+    private fun addMiddle(index: Int, element: Byte) {
         val newSize = size + 1
         ensureCapacity(newSize)
 
-        // attempt to shift a minimal number of elements depending on where position falls within the array
-        if (ring.index(head, position) < newSize shr 1) {
-            // shift elements before position
-            val actualPosition = ring.decrementPosition(position)
-            val newHead = ring.decrementPosition(head)
-            if (actualPosition >= head) {
-                // head before position
-                ring[newHead] = ring[head]  // first element could possibly roll over to the back of the array
-                ring.copyInto(ring, head, head + 1, position)
-            } else {
-                // head after position
-                ring.copyInto(ring, newHead, head, ring.size) // head can't be zero
-                ring[ring.size - 1] = ring[0]
-                ring.copyInto(ring, 0, 1, position)
-            }
-            ring[actualPosition] = element
-            head = newHead
-            size = newSize
-            return 0
+        // attempt to shift a minimal number of elements depending on where index falls within the deque
+        if (index < newSize shr 1) {
+            // retreat head, then shift [1, index + 1) down onto [0, index)
+            head = ring.decrementPosition(head)
+            moveWithinRing(1, 0, index)
         } else {
-            // shift elements after position
-            val tail = ring.position(head, size)
-            if (position < tail) {
-                // position before tail
-                ring.copyInto(ring, position + 1, position, tail)
-            } else {
-                // position after tail
-                val lastIndex = ring.size - 1
-                ring.copyInto(ring, 1, 0, tail)
-                ring[0] = ring[lastIndex]
-                ring.copyInto(ring, ring.incrementPosition(position), position, lastIndex)
+            // shift [index, size) up onto [index + 1, size + 1)
+            moveWithinRing(index, index + 1, size - index)
+        }
+        ring[ring.position(head, index)] = element
+        size = newSize
+    }
+
+    private fun moveWithinRing(srcIndex: Int, dstIndex: Int, count: Int) {
+        if (count == 0) return
+
+        if (dstIndex < srcIndex) {
+            // copy front to back
+            var src = ring.position(head, srcIndex)
+            var dst = ring.position(head, dstIndex)
+            var remaining = count
+            while (remaining > 0) {
+                val chunk = min(remaining, min(ring.size - src, ring.size - dst))
+                ring.copyInto(ring, dst, src, src + chunk)
+                remaining -= chunk
+                src = ring.positiveMod(src + chunk)
+                dst = ring.positiveMod(dst + chunk)
             }
-            ring[position] = element
-            size = newSize
-            return 1
+        } else {
+            // copy back to front. positions are exclusive ends, so the end of the array is ring.size not 0.
+            var srcEnd = head + srcIndex + count
+            if (srcEnd > ring.size) srcEnd -= ring.size
+            var dstEnd = head + dstIndex + count
+            if (dstEnd > ring.size) dstEnd -= ring.size
+            var remaining = count
+            while (remaining > 0) {
+                val chunk = min(remaining, min(srcEnd, dstEnd))
+                srcEnd -= chunk
+                dstEnd -= chunk
+                ring.copyInto(ring, dstEnd, srcEnd, srcEnd + chunk)
+                remaining -= chunk
+                if (srcEnd == 0) srcEnd = ring.size
+                if (dstEnd == 0) dstEnd = ring.size
+            }
         }
     }
 
@@ -169,7 +177,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
     }
 
     override fun removeAt(index: Int): Byte {
-        rangeCheck(index)
+        indexCheck(index)
         return when (index) {
             lastIndex -> removeLast()
             0 -> removeFirst()
@@ -184,59 +192,38 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
     // returns -1 if the back half was shifted left and 0 if the front half was shifted right
     private fun removeAtInternal(position: Int): Int {
-        // attempt to shift a minimal number of elements depending on where position falls within the array
-        if (ring.index(head, position) < size shr 1) {
-            // shift front half right, then advance head
-            if (position > head) {
-                ring.copyInto(ring, head + 1, head, position)
-            } else if (position < head) {
-                // wrapped: position is in the lower part of the ring
-                ring.copyInto(ring, 1, 0, position)
-                ring[0] = ring[ring.size - 1]
-                ring.copyInto(ring, head + 1, head, ring.size - 1)
-            }
-            // else: position == head (first element), no copy needed
+        val index = ring.index(head, position)
+        // attempt to shift a minimal number of elements depending on where index falls within the deque
+        return if (index < size shr 1) {
+            // shift [0, index) up onto [1, index + 1), then advance head
+            moveWithinRing(0, 1, index)
             head = ring.incrementPosition(head)
             --size
-            return 0
+            0
         } else {
-            // shift back half left
-            val tail = ring.position(head, size - 1)
-            if (position < tail) {
-                ring.copyInto(ring, position, position + 1, tail + 1)
-            } else if (position > tail) {
-                // wrapped: position is in the upper part of the ring
-                ring.copyInto(ring, position, position + 1, ring.size)
-                ring[ring.size - 1] = ring[0]
-                ring.copyInto(ring, 0, 1, tail + 1)
-            }
-            // else: position == tail (last element), no copy needed
+            // shift [index + 1, size) down onto [index, size - 1)
+            moveWithinRing(index + 1, index, size - index - 1)
             --size
-            return -1
+            -1
         }
     }
 
     override fun removeRange(fromIndex: Int, toIndex: Int) {
-        // TODO: would array copy operations be more efficient?
-        require(fromIndex <= toIndex)
-        rangeCheckInclusive(fromIndex)
-        rangeCheckInclusive(toIndex)
-        if (fromIndex == toIndex) return
+        rangeCheck(fromIndex, toIndex)
 
-        val removed = toIndex - fromIndex
+        val sizeDelta = toIndex - fromIndex
+        if (sizeDelta == 0) return
+
+        // attempt to shift a minimal number of elements depending on where the range falls within the deque
         if (fromIndex <= size - toIndex) {
-            // Shift [0, fromIndex) right by `removed`, then advance head.
-            for (i in fromIndex - 1 downTo 0) {
-                ring[ring.position(head, i + removed)] = ring[ring.position(head, i)]
-            }
-            head = ring.positiveMod(head + removed)
+            // shift [0, fromIndex) up onto [sizeDelta, toIndex), then advance head
+            moveWithinRing(0, sizeDelta, fromIndex)
+            head = ring.position(head, sizeDelta)
         } else {
-            // Shift [toIndex, size) left by `removed`.
-            for (i in toIndex until size) {
-                ring[ring.position(head, i - removed)] = ring[ring.position(head, i)]
-            }
+            // shift [toIndex, size) down onto [fromIndex, fromIndex + remaining)
+            moveWithinRing(toIndex, fromIndex, size - toIndex)
         }
-        size -= removed
+        size -= sizeDelta
     }
 
     override fun clear() {
@@ -251,17 +238,17 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
     private fun indexOfContinuous(tail: Int, element: Byte): Int {
         for (i in head..<tail) {
-            if (ring[i] equalsBoxed element) return i - head
+            if (ring[i] equalsRaw element) return i - head
         }
         return -1
     }
 
     private fun indexOfDiscrete(tail: Int, element: Byte): Int {
         for (i in head..<ring.size) {
-            if (ring[i] equalsBoxed element) return i - head
+            if (ring[i] equalsRaw element) return i - head
         }
         for (i in 0..<tail-ring.size) {
-            if (ring[i] equalsBoxed element) return i + ring.size - head
+            if (ring[i] equalsRaw element) return i + ring.size - head
         }
         return -1
     }
@@ -280,7 +267,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         val head = head
         var i = tail
         while (i >= head) {
-            if (ring[i] equalsBoxed element) return i - head
+            if (ring[i] equalsRaw element) return i - head
             --i
         }
         return -1
@@ -291,12 +278,12 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         val head = head
         var i = tail - ring.size
         while (i >= 0) {
-            if (ring[i] equalsBoxed element) return i + ring.size - head
+            if (ring[i] equalsRaw element) return i + ring.size - head
             --i
         }
         i = ring.size - 1
         while (i >= head) {
-            if (ring[i] equalsBoxed element) return i - head
+            if (ring[i] equalsRaw element) return i - head
             --i
         }
         return -1
@@ -338,7 +325,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        for (element in elements) {
+        elements.foreach { element ->
             addLast(element)
         }
         return true
@@ -354,8 +341,16 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         return true
     }
 
+    public override fun removeAll(elements: ByteCollection): Boolean {
+        return filterInPlace { e -> elements.contains(e) }
+    }
+
     public override fun removeAll(elements: Collection<Byte>): Boolean {
         return filterInPlace { e -> elements.contains(e) }
+    }
+
+    public override fun retainAll(elements: ByteCollection): Boolean {
+        return filterInPlace { e -> !elements.contains(e) }
     }
 
     public override fun retainAll(elements: Collection<Byte>): Boolean {
@@ -456,7 +451,15 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    override fun traverser(): MutableByteTraverser = ListTraverser(0)
+    override fun traverser(): MutableByteTraverser {
+        val tail = head + size
+        return if (tail > ring.size) {
+            DiscreteTraverser()
+        } else {
+            ContinuousTraverser(tail)
+        }
+    }
+
     override fun traverser(position: Int): MutableByteListTraverser = ListTraverser(position)
 
     override fun equals(other: Any?): Boolean {
@@ -466,13 +469,13 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         if (size != other.size) return false
         if (other is RandomAccess) {
             for (i in indices) {
-                if (!(ring[ring.position(head, i)] equalsBoxed other[i])) return false
+                if (!(ring[ring.position(head, i)] equalsRaw other[i])) return false
             }
         } else {
             val it = other.iterator()
             var i = 0
             while (it.hasNext()) {
-                if (!(it.nextByte() equalsBoxed this[i++])) return false
+                if (!(it.nextByte() equalsRaw this[i++])) return false
             }
         }
         return true
@@ -551,12 +554,81 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
     }
 
-    private inner class ListTraverser(position: Int) : MutableByteListTraverser {
-        private val ring = this@ByteArrayDeque.ring
-        private var head: Int = this@ByteArrayDeque.head
+    private inner class ContinuousTraverser(tail: Int) : MutableByteTraverser {
+         private val ring = this@ByteArrayDeque.ring
 
+         init {
+             check(tail <= ring.size)
+         }
+
+         private var last = tail - 1
+         private var cursor = head - 1
+         private var position = -1
+
+         override val value: Byte get() {
+             check(position >= 0)
+             return ring[position]
+         }
+
+         override fun forward(): Boolean {
+             if (cursor == last) {
+                 return false
+             }
+
+             if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
+             position = ++cursor
+             return true
+         }
+
+         override fun remove() {
+             check(position >= 0)
+             if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
+
+             val d = removeAtInternal(position)
+             last = ring.negativeMod(last + d)
+             cursor = ring.negativeMod(cursor + d)
+             position = -1
+         }
+     }
+
+     private inner class DiscreteTraverser : MutableByteTraverser {
+         private val ring = this@ByteArrayDeque.ring
+
+         private var remaining = size
+         private var cursor = head - 1
+         private var position = -1
+
+         override val value: Byte get() {
+             check(position >= 0)
+             return ring[position]
+         }
+
+         override fun forward(): Boolean {
+             if (remaining <= 0) {
+                 return false
+             }
+
+             if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
+             --remaining
+             cursor = ring.incrementPosition(cursor)
+             position = cursor
+             return true
+         }
+
+         override fun remove() {
+             check(position >= 0)
+             if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
+
+             val d = removeAtInternal(position)
+             cursor = ring.negativeMod(cursor + d)
+             position = -1
+         }
+     }
+
+    // TODO: detect and throw ConcurrentModificationException
+    private inner class ListTraverser(position: Int) : MutableByteListTraverser {
         init {
-            check(position in 0..size)
+            indexCheckInclusive(position)
         }
 
         private var cursor = if (position == 0) head - 1 else ring.position(head, position - 1)
@@ -575,7 +647,6 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
                 return false
             }
 
-            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
             cursor = ring.incrementPosition(cursor)
             ringPosition = cursor
             ++position
@@ -587,7 +658,6 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
                 return false
             }
 
-            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
             ringPosition = cursor
             cursor = ring.decrementPosition(cursor)
             --position
@@ -596,14 +666,12 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
         override fun remove() {
             check(ringPosition >= 0)
-            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
 
             val index = ring.index(head, ringPosition)
             val d = removeAtInternal(ringPosition)
-            head = ring.positiveMod(head + d + 1)
             position = index
+            cursor = ring.negativeMod(ringPosition + d)
             ringPosition = -1
-            cursor = if (index == 0) head - 1 else ring.position(head, index - 1)
         }
 
         override fun set(value: Byte) {
@@ -612,10 +680,9 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
 
         override fun insert(value: Byte) {
-            val d = addInternal(ring.position(head, position), value)
-            head = ring.negativeMod(head + d - 1)
+            add(position, value)
             cursor = ring.position(head, position++)
-            ringPosition = cursor
+            ringPosition = -1
         }
     }
 
@@ -637,8 +704,6 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         }
 
         private fun ByteArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
-
-        fun wrap(array: ByteArray): ByteArrayDeque = ByteArrayDeque(array)
     }
 }
 

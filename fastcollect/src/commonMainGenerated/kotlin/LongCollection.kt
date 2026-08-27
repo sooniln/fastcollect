@@ -1,15 +1,13 @@
 /**
- * Methods for dealing with primitive Collections.
+ * Methods for dealing with LongCollections.
  */
-@file:JvmName("Collections")
-@file:JvmMultifileClass
+@file:JvmName("LongCollections")
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
 /**
@@ -26,15 +24,15 @@ public interface LongCollection : LongTraversable {
     public operator fun iterator(): LongIterator
 
     public fun contains(element: Long): Boolean {
-        for (e in this) {
-            if (e equalsBoxed element) return true
+        foreach { e ->
+            if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: LongCollection): Boolean {
-        for (e in elements) {
-            if (!contains(e)) {
+        elements.foreach { element ->
+            if (!contains(element)) {
                 return false
             }
         }
@@ -53,7 +51,7 @@ public interface LongCollection : LongTraversable {
     public fun toLongArray(): LongArray {
         val array = LongArray(size)
         var index = 0
-        for (element in this) {
+        foreach { element ->
             array[index++] = element
         }
         return array
@@ -78,16 +76,16 @@ public interface MutableLongCollection : LongCollection, MutableLongTraversable 
 
     public fun addAll(elements: LongCollection): Boolean {
         var modified = false
-        for (e in elements) {
-            modified = add(e) or modified
+        elements.foreach { element ->
+            modified = add(element) or modified
         }
         return modified
     }
 
     public fun addAll(elements: Collection<Long>): Boolean {
         var modified = false
-        for (e in elements) {
-            modified = add(e) or modified
+        for (element in elements) {
+            modified = add(element) or modified
         }
         return modified
     }

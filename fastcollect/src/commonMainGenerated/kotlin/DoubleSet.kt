@@ -8,8 +8,8 @@ package io.github.sooniln.fastcollect
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 public fun emptyDoubleSet(): DoubleSet = EmptyDoubleSet
 
@@ -21,7 +21,8 @@ public fun mutableDoubleSetOf(): MutableDoubleSet = DoubleHashSet()
 public fun mutableDoubleSetOf(element: Double): MutableDoubleSet = DoubleHashSet(1).apply { add(element) }
 public fun mutableDoubleSetOf(vararg elements: Double): MutableDoubleSet = DoubleHashSet(elements.asDoubleList())
 
-@OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
 public inline fun buildDoubleSet(expectedSize: Int = 0, builderAction: MutableDoubleSet.() -> Unit): DoubleSet {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
     val set = DoubleHashSet(expectedSize)
@@ -34,8 +35,8 @@ public inline fun buildDoubleSet(expectedSize: Int = 0, builderAction: MutableDo
  */
 public interface DoubleSet : DoubleCollection {
     override fun contains(element: Double): Boolean {
-        for (e in this) {
-            if (e equalsBoxed element) return true
+        foreach { e ->
+            if (e equalsRaw element) return true
         }
         return false
     }
@@ -46,10 +47,10 @@ public fun DoubleSet.asSet(): Set<Double> = DoubleSetWrapper(this)
 public infix fun DoubleSet.union(other: DoubleSet): DoubleSet = DoubleHashSet(this).apply { addAll(other) }
 
 public infix fun DoubleSet.intersect(other: DoubleSet): DoubleSet {
-    if (other.size < size) return other.intersect(this)
+    if (other.size > size) return other.intersect(this)
 
-    val set = DoubleHashSet(size)
-    for (element in other) {
+    val set = DoubleHashSet(other.size)
+    other.foreach { element ->
         if (contains(element)) set.add(element)
     }
     return set
@@ -57,7 +58,7 @@ public infix fun DoubleSet.intersect(other: DoubleSet): DoubleSet {
 
 public infix fun DoubleSet.subtract(other: DoubleSet): DoubleSet {
     val set = DoubleHashSet(size)
-    for (element in this) {
+    foreach { element ->
         if (!other.contains(element)) set.add(element)
     }
     return set
@@ -81,7 +82,7 @@ public abstract class AbstractDoubleSet : AbstractDoubleCollection(), DoubleSet 
 
     override fun hashCode(): Int {
         var hashCode = 0
-        for (element in this) {
+        foreach { element ->
             hashCode += element.hashCode()
         }
         return hashCode
@@ -93,9 +94,9 @@ public abstract class AbstractMutableDoubleSet : AbstractDoubleSet(), MutableDou
     override fun retainAll(elements: Collection<Double>): Boolean = super<MutableDoubleSet>.retainAll(elements)
 }
 
-public fun MutableDoubleSet.asMutableSet(): MutableSet<Double> = MutableDoubleSetWrapper(this)
+public fun MutableDoubleSet.asSet(): MutableSet<Double> = MutableDoubleSetWrapper(this)
 
-private object EmptyDoubleSet : DoubleSet {
+private object EmptyDoubleSet : AbstractDoubleSet() {
     override val size: Int get() = 0
 
     override fun isEmpty(): Boolean = true
@@ -107,11 +108,11 @@ private object EmptyDoubleSet : DoubleSet {
     override fun traverser(): DoubleTraverser = emptyDoubleTraverser()
 }
 
-private class SingletonDoubleSet(private val value: Double) : DoubleSet {
+private class SingletonDoubleSet(private val value: Double) : AbstractDoubleSet() {
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
-    override fun contains(element: Double): Boolean = value equalsBoxed element
+    override fun contains(element: Double): Boolean = value equalsRaw element
 
     override fun iterator(): DoubleIterator = object : DoubleIterator() {
         private var complete = false
@@ -143,6 +144,7 @@ private class DoubleSetWrapper(private val set: DoubleSet) : AbstractSet<Double>
 private class MutableDoubleSetWrapper(private val set: MutableDoubleSet) : AbstractMutableSet<Double>() {
     override val size: Int get() = set.size
     override fun contains(element: Double) = set.contains(element)
+    override fun containsAll(elements: Collection<Double>): Boolean = set.containsAll(elements)
     override fun iterator() = set.iterator()
 
     override fun add(element: Double) = set.add(element)
@@ -150,4 +152,6 @@ private class MutableDoubleSetWrapper(private val set: MutableDoubleSet) : Abstr
     override fun clear() = set.clear()
 
     override fun addAll(elements: Collection<Double>): Boolean = set.addAll(elements)
+    override fun removeAll(elements: Collection<Double>): Boolean = set.removeAll(elements)
+    override fun retainAll(elements: Collection<Double>): Boolean = set.retainAll(elements)
 }

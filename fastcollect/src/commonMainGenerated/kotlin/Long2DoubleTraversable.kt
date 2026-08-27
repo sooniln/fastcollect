@@ -1,8 +1,7 @@
 /**
- * Methods for dealing with Traversables.
+ * Methods for dealing with Long2DoubleTraversables.
  */
-@file:JvmName("Traversables")
-@file:JvmMultifileClass
+@file:JvmName("Long2DoubleTraversables")
 
 package io.github.sooniln.fastcollect
 
@@ -10,7 +9,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -26,7 +24,7 @@ public interface Long2DoubleTraversable: Traversable<Long2DoubleMap.Entry> {
 /**
  * A primitively typed [MutableTraversable] of Long to Double tuples.
  */
-public interface MutableLong2DoubleTraversable: MutableTraversable<Long2DoubleMap.Entry> {
+public interface MutableLong2DoubleTraversable: MutableTraversable<Long2DoubleMap.Entry>, Long2DoubleTraversable {
     override fun traverser(): MutableLong2DoubleTraverser
 }
 
@@ -133,6 +131,7 @@ public inline fun <R> Long2DoubleTraversable.fold(initial: R, operation: (accumu
     return accumulated
 }
 
+@JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Int): Int {
@@ -143,6 +142,7 @@ public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Int)
     return sum
 }
 
+@JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Long): Long {
@@ -153,6 +153,7 @@ public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Long
     return sum
 }
 
+@JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
 public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Double): Double {

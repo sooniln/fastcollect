@@ -42,7 +42,7 @@ class ByteListGuavaTest {
         fun suite(): TestSuite = ListTestSuiteBuilder
             .using(object : TestByteListGenerator() {
                 override fun createList(elements: ByteArray): MutableList<Byte> =
-                    mutableByteListOf(*elements).asMutableList()
+                    mutableByteListOf(*elements).asList()
             })
             .named("ByteList")
             .withFeatures(*LIST_FEATURES)
@@ -73,7 +73,7 @@ class IntListGuavaTest {
         fun suite(): TestSuite = ListTestSuiteBuilder
             .using(object : TestIntListGenerator() {
                 override fun createList(elements: IntArray): MutableList<Int> =
-                    mutableIntListOf(*elements).asMutableList()
+                    mutableIntListOf(*elements).asList()
             })
             .named("IntList")
             .withFeatures(*LIST_FEATURES)
@@ -104,7 +104,7 @@ class LongListGuavaTest {
         fun suite(): TestSuite = ListTestSuiteBuilder
             .using(object : TestLongListGenerator() {
                 override fun createList(elements: LongArray): MutableList<Long> =
-                    mutableLongListOf(*elements).asMutableList()
+                    mutableLongListOf(*elements).asList()
             })
             .named("LongList")
             .withFeatures(*LIST_FEATURES)
@@ -135,7 +135,7 @@ class FloatListGuavaTest {
         fun suite(): TestSuite = ListTestSuiteBuilder
             .using(object : TestFloatListGenerator() {
                 override fun createList(elements: FloatArray): MutableList<Float> =
-                    mutableFloatListOf(*elements).asMutableList()
+                    mutableFloatListOf(*elements).asList()
             })
             .named("FloatList")
             .withFeatures(*LIST_FEATURES)
@@ -166,7 +166,7 @@ class DoubleListGuavaTest {
         fun suite(): TestSuite = ListTestSuiteBuilder
             .using(object : TestDoubleListGenerator() {
                 override fun createList(elements: DoubleArray): MutableList<Double> =
-                    mutableDoubleListOf(*elements).asMutableList()
+                    mutableDoubleListOf(*elements).asList()
             })
             .named("DoubleList")
             .withFeatures(*LIST_FEATURES)

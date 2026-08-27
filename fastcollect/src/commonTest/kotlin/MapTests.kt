@@ -1254,7 +1254,7 @@ class Int2FloatMapTest {
         assertTrue(view.entries.contains(mapOf(1 to Float.NaN).entries.first()))
 
         // updating an entry whose stored value is NaN must not report concurrent modification
-        val mutableView = mutableInt2FloatMapOf(1 to Float.NaN).asMutableMap()
+        val mutableView = mutableInt2FloatMapOf(1 to Float.NaN).asMap()
         val entry = mutableView.entries.iterator().next()
         assertTrue(entry.setValue(5f).isNaN())
         assertEquals(5f, mutableView[1])
@@ -1627,7 +1627,7 @@ class Int2DoubleMapTest {
         assertTrue(view.entries.contains(mapOf(1 to Double.NaN).entries.first()))
 
         // updating an entry whose stored value is NaN must not report concurrent modification
-        val mutableView = mutableInt2DoubleMapOf(1 to Double.NaN).asMutableMap()
+        val mutableView = mutableInt2DoubleMapOf(1 to Double.NaN).asMap()
         val entry = mutableView.entries.iterator().next()
         assertTrue(entry.setValue(5.0).isNaN())
         assertEquals(5.0, mutableView[1])
@@ -3411,7 +3411,7 @@ class Long2FloatMapTest {
         assertTrue(view.entries.contains(mapOf(1L to Float.NaN).entries.first()))
 
         // updating an entry whose stored value is NaN must not report concurrent modification
-        val mutableView = mutableLong2FloatMapOf(1L to Float.NaN).asMutableMap()
+        val mutableView = mutableLong2FloatMapOf(1L to Float.NaN).asMap()
         val entry = mutableView.entries.iterator().next()
         assertTrue(entry.setValue(5f).isNaN())
         assertEquals(5f, mutableView[1L])
@@ -3784,7 +3784,7 @@ class Long2DoubleMapTest {
         assertTrue(view.entries.contains(mapOf(1L to Double.NaN).entries.first()))
 
         // updating an entry whose stored value is NaN must not report concurrent modification
-        val mutableView = mutableLong2DoubleMapOf(1L to Double.NaN).asMutableMap()
+        val mutableView = mutableLong2DoubleMapOf(1L to Double.NaN).asMap()
         val entry = mutableView.entries.iterator().next()
         assertTrue(entry.setValue(5.0).isNaN())
         assertEquals(5.0, mutableView[1L])

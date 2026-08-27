@@ -55,6 +55,7 @@ internal fun minPowerOfTwo(cap: Int): Int {
 
 @JvmOverloads
 public fun BooleanArray.sort(fromIndex: Int = 0, toIndex: Int = size) {
+    require(fromIndex in 0..toIndex && toIndex <= size)
     var index = fromIndex
     var falseIndex = index
     while (index < toIndex) {
@@ -73,6 +74,7 @@ public fun BooleanArray.sort(fromIndex: Int = 0, toIndex: Int = size) {
 
 @JvmOverloads
 public fun BooleanArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size) {
+    require(fromIndex in 0..toIndex && toIndex <= size)
     var index = fromIndex
     var trueIndex = index
     while (index < toIndex) {

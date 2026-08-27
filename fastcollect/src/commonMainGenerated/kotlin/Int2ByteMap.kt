@@ -9,6 +9,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
 public fun  emptyInt2ByteMap(): Int2ByteMap = EmptyInt2ByteMap as Int2ByteMap
@@ -22,6 +23,7 @@ public fun  mutableInt2ByteMapOf(): MutableInt2ByteMap = Int2ByteHashMap()
 public fun  mutableInt2ByteMapOf(entry: Pair<Int, Byte>): MutableInt2ByteMap = Int2ByteHashMap(1).apply { set(entry.first, entry.second) }
 public fun  mutableInt2ByteMapOf(vararg entries: Pair<Int, Byte>): MutableInt2ByteMap = Int2ByteHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  buildInt2ByteMap(expectedSize: Int = 0, builderAction: MutableInt2ByteMap.() -> Unit): Int2ByteMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
@@ -68,15 +70,15 @@ public interface Int2ByteMap : Int2ByteTraversable {
     public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance Byte): Byte = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
-        for (k in keys) {
-            if (k equalsBoxed key) return true
+        foreachKey { k ->
+            if (k equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance Byte): Boolean {
-        for (v in values) {
-            if (v equalsBoxed value) return true
+        foreach { _, v ->
+            if (v equalsRaw value) return true
         }
         return false
     }
@@ -102,13 +104,15 @@ public interface Int2ByteMap : Int2ByteTraversable {
 
     /** An implementation of [Entry] with correct equals/hashCode/toString. */
     public abstract class AbstractEntry : Entry {
-        final override fun equals(other: Any?): Boolean = other is Entry && other.key equalsBoxed key && other.value equalsBoxed value
+        final override fun equals(other: Any?): Boolean = other is Entry && other.key equalsRaw key && other.value equalsRaw value
         final override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         final override fun toString(): String = "$key=$value"
     }
 }
 
 public fun  Int2ByteMap.asMap(): Map<Int, Byte> = Int2ByteMapWrapper(this)
+
+public fun  Int2ByteMap.Entry.asEntry(): Map.Entry<Int, Byte> = Int2ByteMapEntryWrapper(this)
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2ByteMap.getOrElse(key: Int, defaultValue: () -> Byte): Byte {
@@ -125,6 +129,14 @@ public inline fun  Int2ByteMap.getOrElse(key: Int, defaultValue: () -> Byte): By
 public interface MutableInt2ByteMap : Int2ByteMap, MutableInt2ByteTraversable {
 
     public fun put(key: Int, value: Byte): Byte
+
+    public fun putIfAbsent(key: Int, value: Byte): Byte {
+        val oldValue = get(key)
+        if (isDefaultValue(oldValue) && !containsKey(key)) {
+            return put(key, value)
+        }
+        return oldValue
+    }
 
     public operator fun set(key: Int, value: Byte) {
         put(key, value)
@@ -143,9 +155,6 @@ public interface MutableInt2ByteMap : Int2ByteMap, MutableInt2ByteTraversable {
     public fun remove(key: Int, value: Byte): Boolean
 
     public fun clear()
-
-    override val keys: IntSet
-    override val values: ByteCollection
 
     public fun putAll(from: Int2ByteMap) {
         from.foreach { key, value ->
@@ -170,7 +179,9 @@ public interface MutableInt2ByteMap : Int2ByteMap, MutableInt2ByteTraversable {
     public abstract class AbstractMutableEntry : Int2ByteMap.AbstractEntry(), MutableEntry
 }
 
-public fun  MutableInt2ByteMap.asMutableMap(): MutableMap<Int, Byte> = MutableInt2ByteMapWrapper(this)
+public fun  MutableInt2ByteMap.asMap(): MutableMap<Int, Byte> = MutableInt2ByteMapWrapper(this)
+
+public fun  MutableInt2ByteMap.MutableEntry.asEntry(): MutableMap.MutableEntry<Int, Byte> = MutableInt2ByteMapEntryWrapper(this)
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2ByteMap.merge(key: Int, value: Byte, merge: (oldValue: Byte, value: Byte) -> Byte): Byte {
@@ -180,7 +191,7 @@ public inline fun  MutableInt2ByteMap.merge(key: Int, value: Byte, merge: (oldVa
     val absent = isDefaultValue(oldValue) && !containsKey(key)
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     val newValue = if (absent) value else merge(oldValue as Byte, value)
-    if (absent || !(newValue equalsBoxed oldValue)) {
+    if (absent || !(newValue equalsRaw oldValue)) {
         set(key, newValue)
     }
     return newValue
@@ -234,8 +245,8 @@ public abstract class AbstractInt2ByteMap : Int2ByteMap {
         if (other is Int2ByteMap) {
             if (other.size != size) return false
 
-            for (entry in this) {
-                if (!(other[entry.key] equalsBoxed entry.value)) return false
+            foreach { key, value ->
+                if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
             }
 
             return true
@@ -246,21 +257,21 @@ public abstract class AbstractInt2ByteMap : Int2ByteMap {
 
     override fun hashCode(): Int {
         var result = 0
-        for (entry in this) {
-            result += entry.key.hashCode() xor entry.value.hashCode()
+        foreach { key, value ->
+            result += key.hashCode() xor value.hashCode()
         }
         return result
     }
 
     override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
-    public class SimpleEntry(override val key: Int, override val value: Byte) : Int2ByteMap.Entry
+    public class SimpleEntry(override val key: Int, override val value: Byte) : Int2ByteMap.AbstractEntry()
 }
 
 public abstract class AbstractMutableInt2ByteMap : AbstractInt2ByteMap(), MutableInt2ByteMap
 
 
-private object EmptyInt2ByteMap : Int2ByteMap {
+private object EmptyInt2ByteMap : AbstractInt2ByteMap() {
 
 
     override fun isDefaultValue(value: Byte): Boolean = true
@@ -286,19 +297,22 @@ private object EmptyInt2ByteMap : Int2ByteMap {
 
 }
 
-private class SingletonInt2ByteMap(private val key: Int, private val value: Byte) : Int2ByteMap {
-    override fun isDefaultValue(value: Byte): Boolean = value equalsBoxed Byte.MIN_VALUE
+private class SingletonInt2ByteMap(
+    private val key: Int,
+    private val value: Byte
+) : AbstractInt2ByteMap() {
+    override fun isDefaultValue(value: Byte): Boolean = value equalsRaw Byte.MIN_VALUE
 
     override val size: Int get() = 1
     override fun isEmpty(): Boolean = false
 
-    override fun containsKey(key: Int): Boolean = key equalsBoxed this.key
-    override fun containsValue(value: Byte): Boolean = value equalsBoxed this.value
-    override fun get(key: Int): Byte = if (key equalsBoxed this.key) value else Byte.MIN_VALUE
+    override fun containsKey(key: Int): Boolean = key equalsRaw this.key
+    override fun containsValue(value: Byte): Boolean = value equalsRaw this.value
+    override fun get(key: Int): Byte = if (key equalsRaw this.key) value else Byte.MIN_VALUE
 
-    override val keys: IntSet by lazy { intSetOf(key) }
+    override val keys: IntSet get() = intSetOf(key)
 
-    override val values: ByteCollection by lazy { byteListOf(value) }
+    override val values: ByteCollection get() = byteListOf(value)
 
     override fun iterator() = object : Iterator<Int2ByteMap.Entry> {
         private var complete: Boolean = false
@@ -307,7 +321,7 @@ private class SingletonInt2ByteMap(private val key: Int, private val value: Byte
         override fun next(): Int2ByteMap.Entry {
             if (complete) throw NoSuchElementException()
             complete = true
-            return AbstractInt2ByteMap.SimpleEntry(key, value)
+            return SimpleEntry(key, value)
         }
     }
 
@@ -340,22 +354,25 @@ private class Int2ByteMapWrapper(private val map: Int2ByteMap) : AbstractMap<Int
 
         override fun contains(element: Map.Entry<Int, Byte>): Boolean {
             val value = map[element.key]
-            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsRaw element.value
         }
 
         override fun iterator(): Iterator<Map.Entry<Int, Byte>> = object : Iterator<Map.Entry<Int, Byte>> {
             private val it = map.iterator()
-
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): Map.Entry<Int, Byte> {
-                val entry = it.next()
-                return object : Map.Entry<Int, Byte> {
-                    override val key = entry.key
-                    override val value = entry.value
-                }
-            }
+            override fun next(): Map.Entry<Int, Byte> = it.next().asEntry()
         }
     }
+}
+
+private class Int2ByteMapEntryWrapper(
+    private val entry: Int2ByteMap.Entry
+) : Map.Entry<Int, Byte> {
+    override val key: Int get() = entry.key
+    override val value: Byte get() = entry.value
+    override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+    override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+    override fun toString(): String = "$key=$value"
 }
 
 private class MutableInt2ByteMapWrapper(private val map: MutableInt2ByteMap) : AbstractMutableMap<Int, Byte>() {
@@ -387,7 +404,7 @@ private class MutableInt2ByteMapWrapper(private val map: MutableInt2ByteMap) : A
 
         override fun contains(element: MutableMap.MutableEntry<Int, Byte>): Boolean {
             val value = map[element.key]
-            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsRaw element.value
         }
 
         override fun add(element: MutableMap.MutableEntry<Int, Byte>): Boolean = throw UnsupportedOperationException()
@@ -396,28 +413,27 @@ private class MutableInt2ByteMapWrapper(private val map: MutableInt2ByteMap) : A
             private val it = map.iterator()
 
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): MutableMap.MutableEntry<Int, Byte> = it.next().let { e -> Entry(e.key, e.value) }
+            override fun next(): MutableMap.MutableEntry<Int, Byte> = it.next().asEntry()
             override fun remove() = it.remove()
-        }
-
-        private inner class Entry(override val key: Int, value: Byte) : MutableMap.MutableEntry<Int, Byte> {
-            override var value = value
-                private set
-
-            override fun setValue(newValue: Byte): Byte {
-                val oldValue = value
-                if (!(map.put(key, newValue) equalsBoxed oldValue)) throw ConcurrentModificationException()
-                value = newValue
-                return oldValue
-            }
-
-            override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
-            override fun hashCode(): Int = key.hashCode() xor value.hashCode()
-            override fun toString(): String = "$key=$value"
         }
     }
 
     override fun putAll(from: Map<out Int, Byte>): Unit = map.putAll(from)
+}
+
+private class MutableInt2ByteMapEntryWrapper(
+    private val entry: MutableInt2ByteMap.MutableEntry
+) : MutableMap.MutableEntry<Int, Byte> {
+    override val key: Int get() = entry.key
+    override val value: Byte get() = entry.value
+    override fun setValue(newValue: Byte): Byte {
+        val oldValue = entry.value
+        entry.value = newValue
+        return oldValue
+    }
+    override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+    override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+    override fun toString(): String = "$key=$value"
 }
 
 

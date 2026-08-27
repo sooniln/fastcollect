@@ -9,6 +9,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
 public fun  emptyInt2DoubleMap(): Int2DoubleMap = EmptyInt2DoubleMap as Int2DoubleMap
@@ -22,6 +23,7 @@ public fun  mutableInt2DoubleMapOf(): MutableInt2DoubleMap = Int2DoubleHashMap()
 public fun  mutableInt2DoubleMapOf(entry: Pair<Int, Double>): MutableInt2DoubleMap = Int2DoubleHashMap(1).apply { set(entry.first, entry.second) }
 public fun  mutableInt2DoubleMapOf(vararg entries: Pair<Int, Double>): MutableInt2DoubleMap = Int2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  buildInt2DoubleMap(expectedSize: Int = 0, builderAction: MutableInt2DoubleMap.() -> Unit): Int2DoubleMap {
     contract { callsInPlace(builderAction, InvocationKind.EXACTLY_ONCE) }
@@ -68,15 +70,15 @@ public interface Int2DoubleMap : Int2DoubleTraversable {
     public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance Double): Double = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
-        for (k in keys) {
-            if (k equalsBoxed key) return true
+        foreachKey { k ->
+            if (k equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance Double): Boolean {
-        for (v in values) {
-            if (v equalsBoxed value) return true
+        foreach { _, v ->
+            if (v equalsRaw value) return true
         }
         return false
     }
@@ -102,13 +104,15 @@ public interface Int2DoubleMap : Int2DoubleTraversable {
 
     /** An implementation of [Entry] with correct equals/hashCode/toString. */
     public abstract class AbstractEntry : Entry {
-        final override fun equals(other: Any?): Boolean = other is Entry && other.key equalsBoxed key && other.value equalsBoxed value
+        final override fun equals(other: Any?): Boolean = other is Entry && other.key equalsRaw key && other.value equalsRaw value
         final override fun hashCode(): Int = key.hashCode() xor value.hashCode()
         final override fun toString(): String = "$key=$value"
     }
 }
 
 public fun  Int2DoubleMap.asMap(): Map<Int, Double> = Int2DoubleMapWrapper(this)
+
+public fun  Int2DoubleMap.Entry.asEntry(): Map.Entry<Int, Double> = Int2DoubleMapEntryWrapper(this)
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double): Double {
@@ -125,6 +129,14 @@ public inline fun  Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double)
 public interface MutableInt2DoubleMap : Int2DoubleMap, MutableInt2DoubleTraversable {
 
     public fun put(key: Int, value: Double): Double
+
+    public fun putIfAbsent(key: Int, value: Double): Double {
+        val oldValue = get(key)
+        if (isDefaultValue(oldValue) && !containsKey(key)) {
+            return put(key, value)
+        }
+        return oldValue
+    }
 
     public operator fun set(key: Int, value: Double) {
         put(key, value)
@@ -143,9 +155,6 @@ public interface MutableInt2DoubleMap : Int2DoubleMap, MutableInt2DoubleTraversa
     public fun remove(key: Int, value: Double): Boolean
 
     public fun clear()
-
-    override val keys: IntSet
-    override val values: DoubleCollection
 
     public fun putAll(from: Int2DoubleMap) {
         from.foreach { key, value ->
@@ -170,7 +179,9 @@ public interface MutableInt2DoubleMap : Int2DoubleMap, MutableInt2DoubleTraversa
     public abstract class AbstractMutableEntry : Int2DoubleMap.AbstractEntry(), MutableEntry
 }
 
-public fun  MutableInt2DoubleMap.asMutableMap(): MutableMap<Int, Double> = MutableInt2DoubleMapWrapper(this)
+public fun  MutableInt2DoubleMap.asMap(): MutableMap<Int, Double> = MutableInt2DoubleMapWrapper(this)
+
+public fun  MutableInt2DoubleMap.MutableEntry.asEntry(): MutableMap.MutableEntry<Int, Double> = MutableInt2DoubleMapEntryWrapper(this)
 
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2DoubleMap.merge(key: Int, value: Double, merge: (oldValue: Double, value: Double) -> Double): Double {
@@ -180,7 +191,7 @@ public inline fun  MutableInt2DoubleMap.merge(key: Int, value: Double, merge: (o
     val absent = isDefaultValue(oldValue) && !containsKey(key)
     @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     val newValue = if (absent) value else merge(oldValue as Double, value)
-    if (absent || !(newValue equalsBoxed oldValue)) {
+    if (absent || !(newValue equalsRaw oldValue)) {
         set(key, newValue)
     }
     return newValue
@@ -234,8 +245,8 @@ public abstract class AbstractInt2DoubleMap : Int2DoubleMap {
         if (other is Int2DoubleMap) {
             if (other.size != size) return false
 
-            for (entry in this) {
-                if (!(other[entry.key] equalsBoxed entry.value)) return false
+            foreach { key, value ->
+                if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
             }
 
             return true
@@ -246,21 +257,21 @@ public abstract class AbstractInt2DoubleMap : Int2DoubleMap {
 
     override fun hashCode(): Int {
         var result = 0
-        for (entry in this) {
-            result += entry.key.hashCode() xor entry.value.hashCode()
+        foreach { key, value ->
+            result += key.hashCode() xor value.hashCode()
         }
         return result
     }
 
     override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
 
-    public class SimpleEntry(override val key: Int, override val value: Double) : Int2DoubleMap.Entry
+    public class SimpleEntry(override val key: Int, override val value: Double) : Int2DoubleMap.AbstractEntry()
 }
 
 public abstract class AbstractMutableInt2DoubleMap : AbstractInt2DoubleMap(), MutableInt2DoubleMap
 
 
-private object EmptyInt2DoubleMap : Int2DoubleMap {
+private object EmptyInt2DoubleMap : AbstractInt2DoubleMap() {
 
 
     override fun isDefaultValue(value: Double): Boolean = true
@@ -286,19 +297,22 @@ private object EmptyInt2DoubleMap : Int2DoubleMap {
 
 }
 
-private class SingletonInt2DoubleMap(private val key: Int, private val value: Double) : Int2DoubleMap {
-    override fun isDefaultValue(value: Double): Boolean = value equalsBoxed Double.NaN
+private class SingletonInt2DoubleMap(
+    private val key: Int,
+    private val value: Double
+) : AbstractInt2DoubleMap() {
+    override fun isDefaultValue(value: Double): Boolean = value equalsRaw Double.NaN
 
     override val size: Int get() = 1
     override fun isEmpty(): Boolean = false
 
-    override fun containsKey(key: Int): Boolean = key equalsBoxed this.key
-    override fun containsValue(value: Double): Boolean = value equalsBoxed this.value
-    override fun get(key: Int): Double = if (key equalsBoxed this.key) value else Double.NaN
+    override fun containsKey(key: Int): Boolean = key equalsRaw this.key
+    override fun containsValue(value: Double): Boolean = value equalsRaw this.value
+    override fun get(key: Int): Double = if (key equalsRaw this.key) value else Double.NaN
 
-    override val keys: IntSet by lazy { intSetOf(key) }
+    override val keys: IntSet get() = intSetOf(key)
 
-    override val values: DoubleCollection by lazy { doubleListOf(value) }
+    override val values: DoubleCollection get() = doubleListOf(value)
 
     override fun iterator() = object : Iterator<Int2DoubleMap.Entry> {
         private var complete: Boolean = false
@@ -307,7 +321,7 @@ private class SingletonInt2DoubleMap(private val key: Int, private val value: Do
         override fun next(): Int2DoubleMap.Entry {
             if (complete) throw NoSuchElementException()
             complete = true
-            return AbstractInt2DoubleMap.SimpleEntry(key, value)
+            return SimpleEntry(key, value)
         }
     }
 
@@ -340,22 +354,25 @@ private class Int2DoubleMapWrapper(private val map: Int2DoubleMap) : AbstractMap
 
         override fun contains(element: Map.Entry<Int, Double>): Boolean {
             val value = map[element.key]
-            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsRaw element.value
         }
 
         override fun iterator(): Iterator<Map.Entry<Int, Double>> = object : Iterator<Map.Entry<Int, Double>> {
             private val it = map.iterator()
-
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): Map.Entry<Int, Double> {
-                val entry = it.next()
-                return object : Map.Entry<Int, Double> {
-                    override val key = entry.key
-                    override val value = entry.value
-                }
-            }
+            override fun next(): Map.Entry<Int, Double> = it.next().asEntry()
         }
     }
+}
+
+private class Int2DoubleMapEntryWrapper(
+    private val entry: Int2DoubleMap.Entry
+) : Map.Entry<Int, Double> {
+    override val key: Int get() = entry.key
+    override val value: Double get() = entry.value
+    override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+    override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+    override fun toString(): String = "$key=$value"
 }
 
 private class MutableInt2DoubleMapWrapper(private val map: MutableInt2DoubleMap) : AbstractMutableMap<Int, Double>() {
@@ -387,7 +404,7 @@ private class MutableInt2DoubleMapWrapper(private val map: MutableInt2DoubleMap)
 
         override fun contains(element: MutableMap.MutableEntry<Int, Double>): Boolean {
             val value = map[element.key]
-            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsBoxed element.value
+            return (!map.isDefaultValue(value) || containsKey(element.key)) && value equalsRaw element.value
         }
 
         override fun add(element: MutableMap.MutableEntry<Int, Double>): Boolean = throw UnsupportedOperationException()
@@ -396,28 +413,27 @@ private class MutableInt2DoubleMapWrapper(private val map: MutableInt2DoubleMap)
             private val it = map.iterator()
 
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): MutableMap.MutableEntry<Int, Double> = it.next().let { e -> Entry(e.key, e.value) }
+            override fun next(): MutableMap.MutableEntry<Int, Double> = it.next().asEntry()
             override fun remove() = it.remove()
-        }
-
-        private inner class Entry(override val key: Int, value: Double) : MutableMap.MutableEntry<Int, Double> {
-            override var value = value
-                private set
-
-            override fun setValue(newValue: Double): Double {
-                val oldValue = value
-                if (!(map.put(key, newValue) equalsBoxed oldValue)) throw ConcurrentModificationException()
-                value = newValue
-                return oldValue
-            }
-
-            override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
-            override fun hashCode(): Int = key.hashCode() xor value.hashCode()
-            override fun toString(): String = "$key=$value"
         }
     }
 
     override fun putAll(from: Map<out Int, Double>): Unit = map.putAll(from)
+}
+
+private class MutableInt2DoubleMapEntryWrapper(
+    private val entry: MutableInt2DoubleMap.MutableEntry
+) : MutableMap.MutableEntry<Int, Double> {
+    override val key: Int get() = entry.key
+    override val value: Double get() = entry.value
+    override fun setValue(newValue: Double): Double {
+        val oldValue = entry.value
+        entry.value = newValue
+        return oldValue
+    }
+    override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
+    override fun hashCode(): Int = key.hashCode() xor value.hashCode()
+    override fun toString(): String = "$key=$value"
 }
 
 

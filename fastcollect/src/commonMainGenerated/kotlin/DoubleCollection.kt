@@ -1,15 +1,13 @@
 /**
- * Methods for dealing with primitive Collections.
+ * Methods for dealing with DoubleCollections.
  */
-@file:JvmName("Collections")
-@file:JvmMultifileClass
+@file:JvmName("DoubleCollections")
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
-import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
 /**
@@ -26,15 +24,15 @@ public interface DoubleCollection : DoubleTraversable {
     public operator fun iterator(): DoubleIterator
 
     public fun contains(element: Double): Boolean {
-        for (e in this) {
-            if (e equalsBoxed element) return true
+        foreach { e ->
+            if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: DoubleCollection): Boolean {
-        for (e in elements) {
-            if (!contains(e)) {
+        elements.foreach { element ->
+            if (!contains(element)) {
                 return false
             }
         }
@@ -53,7 +51,7 @@ public interface DoubleCollection : DoubleTraversable {
     public fun toDoubleArray(): DoubleArray {
         val array = DoubleArray(size)
         var index = 0
-        for (element in this) {
+        foreach { element ->
             array[index++] = element
         }
         return array
@@ -78,16 +76,16 @@ public interface MutableDoubleCollection : DoubleCollection, MutableDoubleTraver
 
     public fun addAll(elements: DoubleCollection): Boolean {
         var modified = false
-        for (e in elements) {
-            modified = add(e) or modified
+        elements.foreach { element ->
+            modified = add(element) or modified
         }
         return modified
     }
 
     public fun addAll(elements: Collection<Double>): Boolean {
         var modified = false
-        for (e in elements) {
-            modified = add(e) or modified
+        for (element in elements) {
+            modified = add(element) or modified
         }
         return modified
     }
