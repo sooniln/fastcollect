@@ -131,6 +131,27 @@ public interface ${Type}List : ${Type}Collection, ${Type}ListTraversable {
     }
 
     public fun subList(fromIndex: Int, toIndex: Int): ${Type}List
+
+    override fun copyInto(destination: ${Type}Array, destinationOffset: Int): ${Type}Array {
+        return copyInto(destination, destinationOffset, 0, size)
+    }
+
+    /**
+     * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
+     * [destinationOffset], and returns [destination].
+     */
+    public fun copyInto(destination: ${Type}Array, destinationOffset: Int = 0, fromIndex: Int, toIndex: Int): ${Type}Array {
+        rangeCheck(fromIndex, toIndex)
+        val destinationToIndex = destinationOffset + toIndex - fromIndex
+        destination.rangeCheck(destinationOffset, destinationToIndex)
+
+        val traverser = traverser(fromIndex)
+        for (index in destinationOffset..destinationToIndex) {
+            check(traverser.forward())
+            destination[index] = traverser.value
+        }
+        return destination
+    }
 }
 
 public val ${Type}List.indices: IntRange @JvmSynthetic inline get() = 0..<size
@@ -143,7 +164,7 @@ public fun ${Type}List.first(): ${Type} = if (isEmpty()) throw NoSuchElementExce
 @JvmSynthetic
 public fun ${Type}List.last(): ${Type} = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
-public fun ${Type}List.indexCheck(index: Int, size: Int = this.size): Int {
+public fun ${Type}List.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=\$index, size=\$size")
     return index
 }
@@ -153,7 +174,7 @@ public fun ${Type}List.indexCheckInclusive(index: Int): Int {
     return index
 }
 
-public fun ${Type}List.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+public fun ${Type}List.rangeCheck(fromIndex: Int, toIndex: Int) {
     require(fromIndex <= toIndex)
     if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=\$fromIndex")
     if (toIndex > size) throw IndexOutOfBoundsException("toIndex=\$toIndex, size=\$size")
@@ -259,7 +280,7 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, Mut
     }
 
     public fun sort() {
-        val sorted = to${Type}Array().also { it.sort() }
+        val sorted = copyInto(${Type}Array(size)).also { it.sort() }
         if (this is RandomAccess) {
             for (index in 0..<sorted.size) {
                 set(index, sorted[index])
@@ -274,7 +295,7 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, Mut
     }
 
     public fun sortDescending() {
-        val sorted = to${Type}Array().also { it.sortDescending() }
+        val sorted = copyInto(${Type}Array(size)).also { it.sortDescending() }
         if (this is RandomAccess) {
             for (index in 0..<sorted.size) {
                 set(index, sorted[index])
@@ -432,7 +453,7 @@ public abstract class Abstract${Type}List : Abstract${Type}Collection(), ${Type}
     private open class ${Type}SubList(private val list: ${Type}List, fromIndex: Int, toIndex: Int) : Abstract${Type}List() {
 
         init {
-            rangeCheck(fromIndex, toIndex, list.size)
+            list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
@@ -442,6 +463,11 @@ public abstract class Abstract${Type}List : Abstract${Type}Collection(), ${Type}
         override fun get(index: Int): ${Type} {
             indexCheck(index)
             return list[index + offset]
+        }
+
+        override fun copyInto(destination: ${Type}Array, destinationOffset: Int, fromIndex: Int, toIndex: Int): ${Type}Array {
+            rangeCheck(fromIndex, toIndex)
+            return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
 
@@ -545,7 +571,7 @@ public abstract class AbstractMutable${Type}List : Abstract${Type}List(), Mutabl
     private open class ${Type}SubList(private val list: Mutable${Type}List, fromIndex: Int, toIndex: Int) : AbstractMutable${Type}List() {
 
         init {
-            rangeCheck(fromIndex, toIndex, list.size)
+            list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
@@ -585,6 +611,11 @@ public abstract class AbstractMutable${Type}List : Abstract${Type}List(), Mutabl
         override fun addAll(index: Int, elements: Collection<${Type}>) {
             list.addAll(offset + indexCheckInclusive(index), elements)
             size += elements.size
+        }
+
+        override fun copyInto(destination: ${Type}Array, destinationOffset: Int, fromIndex: Int, toIndex: Int): ${Type}Array {
+            rangeCheck(fromIndex, toIndex)
+            return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
 
@@ -642,6 +673,12 @@ private class Singleton${Type}List(private val value: ${Type}) : Abstract${Type}
 private class ${Type}ArrayListWrapper(private val array: ${Type}Array): Abstract${Type}List(), RandomAccess {
     override val size: Int get() = array.size
     override fun get(index: Int): ${Type} = array[index]
+
+    override fun copyInto(destination: ${Type}Array, destinationOffset: Int, fromIndex: Int, toIndex: Int): ${Type}Array {
+        rangeCheck(fromIndex, toIndex)
+        destination.rangeCheck(destinationOffset, destinationOffset + toIndex - fromIndex)
+        return array.copyInto(destination, destinationOffset, fromIndex, toIndex)
+    }
 }
 
 private class ${Type}ListWrapper(private val list: ${Type}List) : AbstractList<${Type}>() {

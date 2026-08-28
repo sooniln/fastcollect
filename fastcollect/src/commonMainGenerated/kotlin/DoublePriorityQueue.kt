@@ -94,15 +94,16 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
     /**
      * Invoked whenever [element] is stored at [index] in the backing heap. Subclasses can use this to store element ⟷
      * index mappings, and in turn use the index to interact with [updatePriority]. The heap is not in a consistent
-     * state when this method is invoked, and it should not further interact with the heap as this could damage the heap
-     * property.
+     * state when this method is invoked - you cannot trust heap properties such as [size], nor are you allowed to
+     * interact with the heap at all.
      */
     protected open fun onIndexChanged(element: Double, index: Int) {}
 
     /**
      * Invoked after [element] is removed from the heap, where [index] is where it was stored prior to remove.
      * Subclasses can use this to maintain element ⟷ index mappings. The heap is not in a consistent state when this
-     * method is invoked, and it should not further interact with the heap as this could damage the heap property.
+     * method is invoked - you cannot trust heap properties such as [size], nor are you allowed to interact with the
+     * heap at all.
      */
     protected open fun onRemoved(element: Double, index: Int) {}
 
@@ -122,19 +123,22 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
         if (isEmpty()) throw NoSuchElementException()
         val result = heap[0]
         onRemoved(result, 0)
-        --size
-        if (size > 0) {
-            setHeap(0, heap[size])
-            siftDown(0)
+        var index = --size
+        if (index > 0) {
+            val element = heap[index]
+            heap[0] = element
+            index = siftDown(0)
+            onIndexChanged(element, index)
         }
         return result
     }
 
     public fun add(element: Double) {
         ensureCapacity(size + 1)
-        setHeap(size, element)
-        siftUp(size)
-        ++size
+        var index = size++
+        heap[index] = element
+        index = siftUp(index)
+        onIndexChanged(element, index)
     }
 
     public fun remove(element: Double): Boolean {
@@ -165,19 +169,22 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
 
     @JvmOverloads
     public fun addAll(array: DoubleArray, fromIndex: Int = 0, toIndex: Int = array.size) {
-        val additionalSize = toIndex - fromIndex
-        ensureCapacity(size + additionalSize)
+        val newSize = size + toIndex - fromIndex
+        if (newSize == size) return
+
+        ensureCapacity(newSize)
         array.copyInto(heap, size, fromIndex, toIndex)
-        val oldSize = size
-        size += additionalSize
-        for (i in oldSize..<size) onIndexChanged(heap[i], i)
+        for (i in size..<newSize) onIndexChanged(heap[i], i)
+        size = newSize
         heapify()
     }
 
     public fun addAll(elements: DoubleCollection) {
         ensureCapacity(size + elements.size)
         elements.foreach { element ->
-            setHeap(size++, element)
+            heap[size] = element
+            onIndexChanged(element, size)
+            ++size
         }
         heapify()
     }
@@ -185,7 +192,9 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
     public fun addAll(elements: Collection<Double>) {
         ensureCapacity(size + elements.size)
         for (element in elements) {
-            setHeap(size++, element)
+            heap[size] = element
+            onIndexChanged(element, size)
+            ++size
         }
         heapify()
     }
@@ -206,9 +215,12 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
         while (true) {
             if (index == size) {
                 return false
-            } else if (removePredicate(heap[index])) {
-                onRemoved(heap[index], index)
-                break
+            } else {
+                val element = heap[index]
+                if (removePredicate(element)) {
+                    onRemoved(element, index)
+                    break
+                }
             }
             ++index
         }
@@ -217,7 +229,9 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
         while (index < size) {
             val element = heap[index]
             if (!removePredicate(element)) {
-                setHeap(newSize++, element)
+                heap[newSize] = element
+                onIndexChanged(element, newSize)
+                ++newSize
             } else {
                 onRemoved(element, index)
             }
@@ -227,6 +241,11 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
         size = newSize
         heapify()
         return true
+    }
+
+    final override fun copyInto(destination: DoubleArray, destinationOffset: Int): DoubleArray {
+        destination.rangeCheck(destinationOffset, destinationOffset + size)
+        return heap.copyInto(destination, destinationOffset, 0, size)
     }
 
     final override fun iterator(): DoubleIterator = object : DoubleIterator() {
@@ -261,7 +280,18 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
      * Re-establishes the heap invariant if the priority for the element at [index] has changed.
      */
     protected fun updatePriority(index: Int) {
-        if (siftDown(index) == index) siftUp(index)
+        val finalIndex = updatePriorityInternal(index)
+        if (finalIndex != index) {
+            onIndexChanged(heap[finalIndex], finalIndex)
+        }
+    }
+
+    private fun updatePriorityInternal(index: Int): Int {
+        var finalIndex = siftDown(index)
+        if (finalIndex == index) {
+            finalIndex = siftUp(index)
+        }
+        return finalIndex
     }
 
     /**
@@ -270,23 +300,22 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
     protected fun removeAt(index: Int) {
         onRemoved(heap[index], index)
         if (--size != index) {
-            setHeap(index, heap[size])
-            updatePriority(index)
+            val element = heap[size]
+            heap[index] = element
+            onIndexChanged(element, updatePriorityInternal(index))
         }
     }
 
     protected fun heapify() {
         for (i in size / 2 - 1 downTo 0) {
-            siftDown(i)
+            val index = siftDown(i)
+            if (index != i) {
+                onIndexChanged(heap[index], index)
+            }
         }
     }
 
     final override fun toString(): String = Iterable { iterator() }.joinToString(", ", "[", "]")
-
-    private fun setHeap(index: Int, element: Double) {
-        heap[index] = element
-        onIndexChanged(element, index)
-    }
 
     private fun siftUp(index: Int): Int {
         var i = index
@@ -295,10 +324,11 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
             val parentIndex = (i - 1) / 2
             val parentElement = heap[parentIndex]
             if (!isHigherPriority(element, parentElement)) break
-            setHeap(i, parentElement)
+            heap[i] = parentElement
+            onIndexChanged(parentElement, i)
             i = parentIndex
         }
-        setHeap(i, element)
+        heap[i] = element
         return i
     }
 
@@ -315,10 +345,11 @@ public abstract class AbstractDoublePriorityQueue(initialCapacity: Int): DoubleC
                 childElement = heap[rightIndex]
             }
             if (!isHigherPriority(childElement, element)) break
-            setHeap(i, childElement)
+            heap[i] = childElement
+            onIndexChanged(childElement, i)
             i = childIndex
         }
-        setHeap(i, element)
+        heap[i] = element
         return i
     }
 

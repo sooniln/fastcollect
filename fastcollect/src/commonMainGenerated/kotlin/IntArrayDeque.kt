@@ -34,7 +34,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
 
     public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else IntArray(capacity), 0)
 
-    public constructor(elements: IntCollection) : this(elements.toIntArray(), size = elements.size)
+    public constructor(elements: IntCollection) : this(elements.copyInto(IntArray(elements.size)), size = elements.size)
 
     public constructor(elements: Collection<Int>) : this(elements.toIntArray(), size = elements.size)
 
@@ -55,26 +55,14 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         if (head == 0) {
             ring = ring.copyOf(newCapacity)
         } else {
-            ring = copyFromRing(IntArray(newCapacity))
+            ring = copyIntoInternal(IntArray(newCapacity))
             head = 0
         }
     }
 
-    private fun copyFromRing(dest: IntArray): IntArray {
-        check(dest.size >= size)
-        val tail = head + size
-        if (tail <= ring.size) {
-            ring.copyInto(dest, 0, head, tail)
-        } else {
-            ring.copyInto(dest, 0, head, ring.size)
-            ring.copyInto(dest, ring.size - head, 0, tail - ring.size)
-        }
-        return dest
-    }
-
     public fun trimToSize() {
         if (size < ring.size) {
-            ring = if (isEmpty()) EMPTY_ARRAY else copyFromRing(IntArray(size))
+            ring = if (isEmpty()) EMPTY_ARRAY else copyIntoInternal(IntArray(size))
             head = 0
         }
     }
@@ -194,17 +182,17 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
     private fun removeAtInternal(position: Int): Int {
         val index = ring.index(head, position)
         // attempt to shift a minimal number of elements depending on where index falls within the deque
-        return if (index < size shr 1) {
+        if (index < size shr 1) {
             // shift [0, index) up onto [1, index + 1), then advance head
             moveWithinRing(0, 1, index)
             head = ring.incrementPosition(head)
             --size
-            0
+            return 0
         } else {
             // shift [index + 1, size) down onto [index, size - 1)
             moveWithinRing(index + 1, index, size - index - 1)
             --size
-            -1
+            return -1
         }
     }
 
@@ -290,34 +278,24 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
     }
 
     public fun addAll(elements: IntArrayDeque): Boolean {
-        if (elements.isEmpty()) return false
+        val count = elements.size
+        if (count == 0) return false
 
-        ensureCapacity(size + elements.size)
-        val elementsTail = elements.head + elements.size
-        if (elementsTail <= elements.ring.size) {
-            addToRing(elements.ring, elements.head, elementsTail)
+        val newSize = size + count
+        ensureCapacity(newSize)
+
+        // the free space starting at the tail is contiguous until the end of the ring
+        val start = ring.position(head, size)
+        val firstRun = ring.size - start
+        if (count <= firstRun) {
+            elements.copyIntoInternal(ring, start, 0, count)
         } else {
-            addToRing(elements.ring, elements.head, elements.ring.size)
-            addToRing(elements.ring, 0, elementsTail - elements.ring.size)
+            elements.copyIntoInternal(ring, start, 0, firstRun)
+            elements.copyIntoInternal(ring, 0, firstRun, count)
         }
+        size = newSize
+
         return true
-    }
-
-    private fun addToRing(src: IntArray, fromIndex: Int, toIndex: Int) {
-        val srcLength = toIndex - fromIndex
-        check(srcLength >= 0 && srcLength <= ring.size - size)
-
-        val tail = head + size
-        if (tail <= ring.size) {
-            val intermediateIndex = min(toIndex, fromIndex + ring.size - tail)
-            src.copyInto(ring, tail, fromIndex, intermediateIndex)
-            if (intermediateIndex != toIndex) {
-                src.copyInto(ring, 0, intermediateIndex, toIndex)
-            }
-        } else {
-            src.copyInto(ring, tail - ring.size, fromIndex, toIndex)
-        }
-        size += srcLength
     }
 
     override fun addAll(elements: IntCollection): Boolean {
@@ -438,8 +416,25 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         }
     }
 
-    override fun toIntArray(): IntArray {
-        return copyFromRing(IntArray(size))
+    override fun copyInto(destination: IntArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): IntArray {
+        rangeCheck(fromIndex, toIndex)
+        destination.rangeCheck(destinationOffset, destinationOffset + toIndex - fromIndex)
+        return copyIntoInternal(destination, destinationOffset, fromIndex, toIndex)
+    }
+
+    private fun copyIntoInternal(dest: IntArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = size): IntArray {
+        if (toIndex == fromIndex) return dest
+
+        val length = toIndex - fromIndex
+        val start = ring.position(head, fromIndex)
+        val end = ring.size - start
+        if (length <= end) {
+            ring.copyInto(dest, destinationOffset, start, start + length)
+        } else {
+            ring.copyInto(dest, destinationOffset, start, ring.size)
+            ring.copyInto(dest, destinationOffset + end, 0, length - end)
+        }
+        return dest
     }
 
     override fun iterator(): MutableIntIterator {

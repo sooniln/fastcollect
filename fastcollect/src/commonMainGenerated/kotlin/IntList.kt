@@ -131,6 +131,27 @@ public interface IntList : IntCollection, IntListTraversable {
     }
 
     public fun subList(fromIndex: Int, toIndex: Int): IntList
+
+    override fun copyInto(destination: IntArray, destinationOffset: Int): IntArray {
+        return copyInto(destination, destinationOffset, 0, size)
+    }
+
+    /**
+     * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
+     * [destinationOffset], and returns [destination].
+     */
+    public fun copyInto(destination: IntArray, destinationOffset: Int = 0, fromIndex: Int, toIndex: Int): IntArray {
+        rangeCheck(fromIndex, toIndex)
+        val destinationToIndex = destinationOffset + toIndex - fromIndex
+        destination.rangeCheck(destinationOffset, destinationToIndex)
+
+        val traverser = traverser(fromIndex)
+        for (index in destinationOffset..destinationToIndex) {
+            check(traverser.forward())
+            destination[index] = traverser.value
+        }
+        return destination
+    }
 }
 
 public val IntList.indices: IntRange @JvmSynthetic inline get() = 0..<size
@@ -143,7 +164,7 @@ public fun IntList.first(): Int = if (isEmpty()) throw NoSuchElementException() 
 @JvmSynthetic
 public fun IntList.last(): Int = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
-public fun IntList.indexCheck(index: Int, size: Int = this.size): Int {
+public fun IntList.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
     return index
 }
@@ -153,7 +174,7 @@ public fun IntList.indexCheckInclusive(index: Int): Int {
     return index
 }
 
-public fun IntList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+public fun IntList.rangeCheck(fromIndex: Int, toIndex: Int) {
     require(fromIndex <= toIndex)
     if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
     if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
@@ -259,7 +280,7 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableIntListT
     }
 
     public fun sort() {
-        val sorted = toIntArray().also { it.sort() }
+        val sorted = copyInto(IntArray(size)).also { it.sort() }
         if (this is RandomAccess) {
             for (index in 0..<sorted.size) {
                 set(index, sorted[index])
@@ -274,7 +295,7 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableIntListT
     }
 
     public fun sortDescending() {
-        val sorted = toIntArray().also { it.sortDescending() }
+        val sorted = copyInto(IntArray(size)).also { it.sortDescending() }
         if (this is RandomAccess) {
             for (index in 0..<sorted.size) {
                 set(index, sorted[index])
@@ -432,7 +453,7 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
     private open class IntSubList(private val list: IntList, fromIndex: Int, toIndex: Int) : AbstractIntList() {
 
         init {
-            rangeCheck(fromIndex, toIndex, list.size)
+            list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
@@ -442,6 +463,11 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
         override fun get(index: Int): Int {
             indexCheck(index)
             return list[index + offset]
+        }
+
+        override fun copyInto(destination: IntArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): IntArray {
+            rangeCheck(fromIndex, toIndex)
+            return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
 
@@ -545,7 +571,7 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
     private open class IntSubList(private val list: MutableIntList, fromIndex: Int, toIndex: Int) : AbstractMutableIntList() {
 
         init {
-            rangeCheck(fromIndex, toIndex, list.size)
+            list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
@@ -585,6 +611,11 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
         override fun addAll(index: Int, elements: Collection<Int>) {
             list.addAll(offset + indexCheckInclusive(index), elements)
             size += elements.size
+        }
+
+        override fun copyInto(destination: IntArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): IntArray {
+            rangeCheck(fromIndex, toIndex)
+            return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
 
@@ -642,6 +673,12 @@ private class SingletonIntList(private val value: Int) : AbstractIntList(), Rand
 private class IntArrayListWrapper(private val array: IntArray): AbstractIntList(), RandomAccess {
     override val size: Int get() = array.size
     override fun get(index: Int): Int = array[index]
+
+    override fun copyInto(destination: IntArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): IntArray {
+        rangeCheck(fromIndex, toIndex)
+        destination.rangeCheck(destinationOffset, destinationOffset + toIndex - fromIndex)
+        return array.copyInto(destination, destinationOffset, fromIndex, toIndex)
+    }
 }
 
 private class IntListWrapper(private val list: IntList) : AbstractList<Int>() {

@@ -90,3 +90,15 @@ public fun BooleanArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size) 
         set(trueIndex++, false)
     }
 }
+
+public fun ByteArray.rangeCheck(fromIndex: Int, toIndex: Int): Unit = rangeCheck(fromIndex, toIndex, size)
+public fun IntArray.rangeCheck(fromIndex: Int, toIndex: Int): Unit = rangeCheck(fromIndex, toIndex, size)
+public fun LongArray.rangeCheck(fromIndex: Int, toIndex: Int): Unit = rangeCheck(fromIndex, toIndex, size)
+public fun FloatArray.rangeCheck(fromIndex: Int, toIndex: Int): Unit = rangeCheck(fromIndex, toIndex, size)
+public fun DoubleArray.rangeCheck(fromIndex: Int, toIndex: Int): Unit = rangeCheck(fromIndex, toIndex, size)
+
+private fun rangeCheck(fromIndex: Int, toIndex: Int, size: Int) {
+    require(fromIndex <= toIndex)
+    if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
+    if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
+}

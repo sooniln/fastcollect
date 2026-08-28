@@ -48,13 +48,15 @@ public interface FloatCollection : FloatTraversable {
         return true
     }
 
-    public fun toFloatArray(): FloatArray {
-        val array = FloatArray(size)
-        var index = 0
-        foreach { element ->
-            array[index++] = element
-        }
-        return array
+    /**
+     * Copies all of the elements of this collection into [destination], starting at [destinationOffset], and returns
+     * [destination].
+     */
+    public fun copyInto(destination: FloatArray, destinationOffset: Int = 0): FloatArray {
+        destination.rangeCheck(destinationOffset, destinationOffset + size)
+        var index = destinationOffset
+        foreach { element -> destination[index++] = element }
+        return destination
     }
 }
 

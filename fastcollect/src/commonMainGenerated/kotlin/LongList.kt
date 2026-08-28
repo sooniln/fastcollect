@@ -131,6 +131,27 @@ public interface LongList : LongCollection, LongListTraversable {
     }
 
     public fun subList(fromIndex: Int, toIndex: Int): LongList
+
+    override fun copyInto(destination: LongArray, destinationOffset: Int): LongArray {
+        return copyInto(destination, destinationOffset, 0, size)
+    }
+
+    /**
+     * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
+     * [destinationOffset], and returns [destination].
+     */
+    public fun copyInto(destination: LongArray, destinationOffset: Int = 0, fromIndex: Int, toIndex: Int): LongArray {
+        rangeCheck(fromIndex, toIndex)
+        val destinationToIndex = destinationOffset + toIndex - fromIndex
+        destination.rangeCheck(destinationOffset, destinationToIndex)
+
+        val traverser = traverser(fromIndex)
+        for (index in destinationOffset..destinationToIndex) {
+            check(traverser.forward())
+            destination[index] = traverser.value
+        }
+        return destination
+    }
 }
 
 public val LongList.indices: IntRange @JvmSynthetic inline get() = 0..<size
@@ -143,7 +164,7 @@ public fun LongList.first(): Long = if (isEmpty()) throw NoSuchElementException(
 @JvmSynthetic
 public fun LongList.last(): Long = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
-public fun LongList.indexCheck(index: Int, size: Int = this.size): Int {
+public fun LongList.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
     return index
 }
@@ -153,7 +174,7 @@ public fun LongList.indexCheckInclusive(index: Int): Int {
     return index
 }
 
-public fun LongList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+public fun LongList.rangeCheck(fromIndex: Int, toIndex: Int) {
     require(fromIndex <= toIndex)
     if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
     if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
@@ -259,7 +280,7 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableLongL
     }
 
     public fun sort() {
-        val sorted = toLongArray().also { it.sort() }
+        val sorted = copyInto(LongArray(size)).also { it.sort() }
         if (this is RandomAccess) {
             for (index in 0..<sorted.size) {
                 set(index, sorted[index])
@@ -274,7 +295,7 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableLongL
     }
 
     public fun sortDescending() {
-        val sorted = toLongArray().also { it.sortDescending() }
+        val sorted = copyInto(LongArray(size)).also { it.sortDescending() }
         if (this is RandomAccess) {
             for (index in 0..<sorted.size) {
                 set(index, sorted[index])
@@ -432,7 +453,7 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
     private open class LongSubList(private val list: LongList, fromIndex: Int, toIndex: Int) : AbstractLongList() {
 
         init {
-            rangeCheck(fromIndex, toIndex, list.size)
+            list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
@@ -442,6 +463,11 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
         override fun get(index: Int): Long {
             indexCheck(index)
             return list[index + offset]
+        }
+
+        override fun copyInto(destination: LongArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): LongArray {
+            rangeCheck(fromIndex, toIndex)
+            return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
 
@@ -545,7 +571,7 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
     private open class LongSubList(private val list: MutableLongList, fromIndex: Int, toIndex: Int) : AbstractMutableLongList() {
 
         init {
-            rangeCheck(fromIndex, toIndex, list.size)
+            list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
@@ -585,6 +611,11 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
         override fun addAll(index: Int, elements: Collection<Long>) {
             list.addAll(offset + indexCheckInclusive(index), elements)
             size += elements.size
+        }
+
+        override fun copyInto(destination: LongArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): LongArray {
+            rangeCheck(fromIndex, toIndex)
+            return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
 
@@ -642,6 +673,12 @@ private class SingletonLongList(private val value: Long) : AbstractLongList(), R
 private class LongArrayListWrapper(private val array: LongArray): AbstractLongList(), RandomAccess {
     override val size: Int get() = array.size
     override fun get(index: Int): Long = array[index]
+
+    override fun copyInto(destination: LongArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): LongArray {
+        rangeCheck(fromIndex, toIndex)
+        destination.rangeCheck(destinationOffset, destinationOffset + toIndex - fromIndex)
+        return array.copyInto(destination, destinationOffset, fromIndex, toIndex)
+    }
 }
 
 private class LongListWrapper(private val list: LongList) : AbstractList<Long>() {

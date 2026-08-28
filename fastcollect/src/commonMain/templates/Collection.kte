@@ -48,13 +48,15 @@ public interface ${Type}Collection : ${Type}Traversable {
         return true
     }
 
-    public fun to${Type}Array(): ${Type}Array {
-        val array = ${Type}Array(size)
-        var index = 0
-        foreach { element ->
-            array[index++] = element
-        }
-        return array
+    /**
+     * Copies all of the elements of this collection into [destination], starting at [destinationOffset], and returns
+     * [destination].
+     */
+    public fun copyInto(destination: ${Type}Array, destinationOffset: Int = 0): ${Type}Array {
+        destination.rangeCheck(destinationOffset, destinationOffset + size)
+        var index = destinationOffset
+        foreach { element -> destination[index++] = element }
+        return destination
     }
 }
 

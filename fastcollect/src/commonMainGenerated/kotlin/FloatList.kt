@@ -131,6 +131,27 @@ public interface FloatList : FloatCollection, FloatListTraversable {
     }
 
     public fun subList(fromIndex: Int, toIndex: Int): FloatList
+
+    override fun copyInto(destination: FloatArray, destinationOffset: Int): FloatArray {
+        return copyInto(destination, destinationOffset, 0, size)
+    }
+
+    /**
+     * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
+     * [destinationOffset], and returns [destination].
+     */
+    public fun copyInto(destination: FloatArray, destinationOffset: Int = 0, fromIndex: Int, toIndex: Int): FloatArray {
+        rangeCheck(fromIndex, toIndex)
+        val destinationToIndex = destinationOffset + toIndex - fromIndex
+        destination.rangeCheck(destinationOffset, destinationToIndex)
+
+        val traverser = traverser(fromIndex)
+        for (index in destinationOffset..destinationToIndex) {
+            check(traverser.forward())
+            destination[index] = traverser.value
+        }
+        return destination
+    }
 }
 
 public val FloatList.indices: IntRange @JvmSynthetic inline get() = 0..<size
@@ -143,7 +164,7 @@ public fun FloatList.first(): Float = if (isEmpty()) throw NoSuchElementExceptio
 @JvmSynthetic
 public fun FloatList.last(): Float = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
-public fun FloatList.indexCheck(index: Int, size: Int = this.size): Int {
+public fun FloatList.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
     return index
 }
@@ -153,7 +174,7 @@ public fun FloatList.indexCheckInclusive(index: Int): Int {
     return index
 }
 
-public fun FloatList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+public fun FloatList.rangeCheck(fromIndex: Int, toIndex: Int) {
     require(fromIndex <= toIndex)
     if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
     if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
@@ -259,7 +280,7 @@ public interface MutableFloatList : FloatList, MutableFloatCollection, MutableFl
     }
 
     public fun sort() {
-        val sorted = toFloatArray().also { it.sort() }
+        val sorted = copyInto(FloatArray(size)).also { it.sort() }
         if (this is RandomAccess) {
             for (index in 0..<sorted.size) {
                 set(index, sorted[index])
@@ -274,7 +295,7 @@ public interface MutableFloatList : FloatList, MutableFloatCollection, MutableFl
     }
 
     public fun sortDescending() {
-        val sorted = toFloatArray().also { it.sortDescending() }
+        val sorted = copyInto(FloatArray(size)).also { it.sortDescending() }
         if (this is RandomAccess) {
             for (index in 0..<sorted.size) {
                 set(index, sorted[index])
@@ -432,7 +453,7 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
     private open class FloatSubList(private val list: FloatList, fromIndex: Int, toIndex: Int) : AbstractFloatList() {
 
         init {
-            rangeCheck(fromIndex, toIndex, list.size)
+            list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
@@ -442,6 +463,11 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
         override fun get(index: Int): Float {
             indexCheck(index)
             return list[index + offset]
+        }
+
+        override fun copyInto(destination: FloatArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): FloatArray {
+            rangeCheck(fromIndex, toIndex)
+            return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
 
@@ -545,7 +571,7 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
     private open class FloatSubList(private val list: MutableFloatList, fromIndex: Int, toIndex: Int) : AbstractMutableFloatList() {
 
         init {
-            rangeCheck(fromIndex, toIndex, list.size)
+            list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
@@ -585,6 +611,11 @@ public abstract class AbstractMutableFloatList : AbstractFloatList(), MutableFlo
         override fun addAll(index: Int, elements: Collection<Float>) {
             list.addAll(offset + indexCheckInclusive(index), elements)
             size += elements.size
+        }
+
+        override fun copyInto(destination: FloatArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): FloatArray {
+            rangeCheck(fromIndex, toIndex)
+            return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
 
@@ -642,6 +673,12 @@ private class SingletonFloatList(private val value: Float) : AbstractFloatList()
 private class FloatArrayListWrapper(private val array: FloatArray): AbstractFloatList(), RandomAccess {
     override val size: Int get() = array.size
     override fun get(index: Int): Float = array[index]
+
+    override fun copyInto(destination: FloatArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): FloatArray {
+        rangeCheck(fromIndex, toIndex)
+        destination.rangeCheck(destinationOffset, destinationOffset + toIndex - fromIndex)
+        return array.copyInto(destination, destinationOffset, fromIndex, toIndex)
+    }
 }
 
 private class FloatListWrapper(private val list: FloatList) : AbstractList<Float>() {

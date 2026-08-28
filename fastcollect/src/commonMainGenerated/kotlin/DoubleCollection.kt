@@ -48,13 +48,15 @@ public interface DoubleCollection : DoubleTraversable {
         return true
     }
 
-    public fun toDoubleArray(): DoubleArray {
-        val array = DoubleArray(size)
-        var index = 0
-        foreach { element ->
-            array[index++] = element
-        }
-        return array
+    /**
+     * Copies all of the elements of this collection into [destination], starting at [destinationOffset], and returns
+     * [destination].
+     */
+    public fun copyInto(destination: DoubleArray, destinationOffset: Int = 0): DoubleArray {
+        destination.rangeCheck(destinationOffset, destinationOffset + size)
+        var index = destinationOffset
+        foreach { element -> destination[index++] = element }
+        return destination
     }
 }
 

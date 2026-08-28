@@ -131,6 +131,27 @@ public interface DoubleList : DoubleCollection, DoubleListTraversable {
     }
 
     public fun subList(fromIndex: Int, toIndex: Int): DoubleList
+
+    override fun copyInto(destination: DoubleArray, destinationOffset: Int): DoubleArray {
+        return copyInto(destination, destinationOffset, 0, size)
+    }
+
+    /**
+     * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
+     * [destinationOffset], and returns [destination].
+     */
+    public fun copyInto(destination: DoubleArray, destinationOffset: Int = 0, fromIndex: Int, toIndex: Int): DoubleArray {
+        rangeCheck(fromIndex, toIndex)
+        val destinationToIndex = destinationOffset + toIndex - fromIndex
+        destination.rangeCheck(destinationOffset, destinationToIndex)
+
+        val traverser = traverser(fromIndex)
+        for (index in destinationOffset..destinationToIndex) {
+            check(traverser.forward())
+            destination[index] = traverser.value
+        }
+        return destination
+    }
 }
 
 public val DoubleList.indices: IntRange @JvmSynthetic inline get() = 0..<size
@@ -143,7 +164,7 @@ public fun DoubleList.first(): Double = if (isEmpty()) throw NoSuchElementExcept
 @JvmSynthetic
 public fun DoubleList.last(): Double = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
-public fun DoubleList.indexCheck(index: Int, size: Int = this.size): Int {
+public fun DoubleList.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
     return index
 }
@@ -153,7 +174,7 @@ public fun DoubleList.indexCheckInclusive(index: Int): Int {
     return index
 }
 
-public fun DoubleList.rangeCheck(fromIndex: Int, toIndex: Int, size: Int = this.size) {
+public fun DoubleList.rangeCheck(fromIndex: Int, toIndex: Int) {
     require(fromIndex <= toIndex)
     if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex=$fromIndex")
     if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
@@ -259,7 +280,7 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
     }
 
     public fun sort() {
-        val sorted = toDoubleArray().also { it.sort() }
+        val sorted = copyInto(DoubleArray(size)).also { it.sort() }
         if (this is RandomAccess) {
             for (index in 0..<sorted.size) {
                 set(index, sorted[index])
@@ -274,7 +295,7 @@ public interface MutableDoubleList : DoubleList, MutableDoubleCollection, Mutabl
     }
 
     public fun sortDescending() {
-        val sorted = toDoubleArray().also { it.sortDescending() }
+        val sorted = copyInto(DoubleArray(size)).also { it.sortDescending() }
         if (this is RandomAccess) {
             for (index in 0..<sorted.size) {
                 set(index, sorted[index])
@@ -432,7 +453,7 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
     private open class DoubleSubList(private val list: DoubleList, fromIndex: Int, toIndex: Int) : AbstractDoubleList() {
 
         init {
-            rangeCheck(fromIndex, toIndex, list.size)
+            list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
@@ -442,6 +463,11 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
         override fun get(index: Int): Double {
             indexCheck(index)
             return list[index + offset]
+        }
+
+        override fun copyInto(destination: DoubleArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): DoubleArray {
+            rangeCheck(fromIndex, toIndex)
+            return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
 
@@ -545,7 +571,7 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
     private open class DoubleSubList(private val list: MutableDoubleList, fromIndex: Int, toIndex: Int) : AbstractMutableDoubleList() {
 
         init {
-            rangeCheck(fromIndex, toIndex, list.size)
+            list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
@@ -585,6 +611,11 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
         override fun addAll(index: Int, elements: Collection<Double>) {
             list.addAll(offset + indexCheckInclusive(index), elements)
             size += elements.size
+        }
+
+        override fun copyInto(destination: DoubleArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): DoubleArray {
+            rangeCheck(fromIndex, toIndex)
+            return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
 
@@ -642,6 +673,12 @@ private class SingletonDoubleList(private val value: Double) : AbstractDoubleLis
 private class DoubleArrayListWrapper(private val array: DoubleArray): AbstractDoubleList(), RandomAccess {
     override val size: Int get() = array.size
     override fun get(index: Int): Double = array[index]
+
+    override fun copyInto(destination: DoubleArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): DoubleArray {
+        rangeCheck(fromIndex, toIndex)
+        destination.rangeCheck(destinationOffset, destinationOffset + toIndex - fromIndex)
+        return array.copyInto(destination, destinationOffset, fromIndex, toIndex)
+    }
 }
 
 private class DoubleListWrapper(private val list: DoubleList) : AbstractList<Double>() {

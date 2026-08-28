@@ -48,13 +48,15 @@ public interface LongCollection : LongTraversable {
         return true
     }
 
-    public fun toLongArray(): LongArray {
-        val array = LongArray(size)
-        var index = 0
-        foreach { element ->
-            array[index++] = element
-        }
-        return array
+    /**
+     * Copies all of the elements of this collection into [destination], starting at [destinationOffset], and returns
+     * [destination].
+     */
+    public fun copyInto(destination: LongArray, destinationOffset: Int = 0): LongArray {
+        destination.rangeCheck(destinationOffset, destinationOffset + size)
+        var index = destinationOffset
+        foreach { element -> destination[index++] = element }
+        return destination
     }
 }
 

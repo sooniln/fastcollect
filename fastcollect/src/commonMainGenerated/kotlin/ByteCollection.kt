@@ -48,13 +48,15 @@ public interface ByteCollection : ByteTraversable {
         return true
     }
 
-    public fun toByteArray(): ByteArray {
-        val array = ByteArray(size)
-        var index = 0
-        foreach { element ->
-            array[index++] = element
-        }
-        return array
+    /**
+     * Copies all of the elements of this collection into [destination], starting at [destinationOffset], and returns
+     * [destination].
+     */
+    public fun copyInto(destination: ByteArray, destinationOffset: Int = 0): ByteArray {
+        destination.rangeCheck(destinationOffset, destinationOffset + size)
+        var index = destinationOffset
+        foreach { element -> destination[index++] = element }
+        return destination
     }
 }
 

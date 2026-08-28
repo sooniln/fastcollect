@@ -32,6 +32,7 @@ public abstract class io/github/sooniln/fastcollect/AbstractBytePriorityQueue : 
 	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/AbstractBytePriorityQueue;[BIIILjava/lang/Object;)V
 	public final fun clear ()V
 	public final fun contains (B)Z
+	public final fun copyInto ([BI)[B
 	public final fun ensureCapacity (I)V
 	public final fun first ()B
 	public final fun getSize ()I
@@ -88,6 +89,7 @@ public abstract class io/github/sooniln/fastcollect/AbstractDoublePriorityQueue 
 	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/AbstractDoublePriorityQueue;[DIIILjava/lang/Object;)V
 	public final fun clear ()V
 	public final fun contains (D)Z
+	public final fun copyInto ([DI)[D
 	public final fun ensureCapacity (I)V
 	public final fun first ()D
 	public final fun getSize ()I
@@ -150,6 +152,7 @@ public abstract class io/github/sooniln/fastcollect/AbstractFloatPriorityQueue :
 	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/AbstractFloatPriorityQueue;[FIIILjava/lang/Object;)V
 	public final fun clear ()V
 	public final fun contains (F)Z
+	public final fun copyInto ([FI)[F
 	public final fun ensureCapacity (I)V
 	public final fun first ()F
 	public final fun getSize ()I
@@ -290,6 +293,7 @@ public abstract class io/github/sooniln/fastcollect/AbstractIntPriorityQueue : i
 	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/AbstractIntPriorityQueue;[IIIILjava/lang/Object;)V
 	public final fun clear ()V
 	public final fun contains (I)Z
+	public final fun copyInto ([II)[I
 	public final fun ensureCapacity (I)V
 	public final fun first ()I
 	public final fun getSize ()I
@@ -430,6 +434,7 @@ public abstract class io/github/sooniln/fastcollect/AbstractLongPriorityQueue : 
 	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/AbstractLongPriorityQueue;[JIIILjava/lang/Object;)V
 	public final fun clear ()V
 	public final fun contains (J)Z
+	public final fun copyInto ([JI)[J
 	public final fun ensureCapacity (I)V
 	public final fun first ()J
 	public final fun getSize ()I
@@ -598,6 +603,11 @@ public abstract class io/github/sooniln/fastcollect/AbstractMutableLongSet : io/
 }
 
 public final class io/github/sooniln/fastcollect/ArrayUtils {
+	public static final fun rangeCheck ([BII)V
+	public static final fun rangeCheck ([DII)V
+	public static final fun rangeCheck ([FII)V
+	public static final fun rangeCheck ([III)V
+	public static final fun rangeCheck ([JII)V
 	public static final fun sort ([Z)V
 	public static final fun sort ([ZI)V
 	public static final fun sort ([ZII)V
@@ -622,6 +632,7 @@ public final class io/github/sooniln/fastcollect/ByteArrayDeque : io/github/soon
 	public fun addFirst (B)V
 	public fun addLast (B)V
 	public fun clear ()V
+	public fun copyInto ([BIII)[B
 	public final fun ensureCapacity (I)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun fill (B)V
@@ -644,7 +655,6 @@ public final class io/github/sooniln/fastcollect/ByteArrayDeque : io/github/soon
 	public fun set (IB)V
 	public fun sort ()V
 	public fun sortDescending ()V
-	public fun toByteArray ()[B
 	public synthetic fun traverser ()Lio/github/sooniln/fastcollect/ByteTraverser;
 	public fun traverser ()Lio/github/sooniln/fastcollect/MutableByteTraverser;
 	public synthetic fun traverser ()Lio/github/sooniln/fastcollect/MutableTraverser;
@@ -663,10 +673,11 @@ public abstract interface class io/github/sooniln/fastcollect/ByteCollection : i
 	public fun contains (B)Z
 	public fun containsAll (Lio/github/sooniln/fastcollect/ByteCollection;)Z
 	public fun containsAll (Ljava/util/Collection;)Z
+	public fun copyInto ([BI)[B
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/ByteCollection;[BIILjava/lang/Object;)[B
 	public abstract fun getSize ()I
 	public fun isEmpty ()Z
 	public abstract fun iterator ()Lkotlin/collections/ByteIterator;
-	public fun toByteArray ()[B
 }
 
 public abstract interface class io/github/sooniln/fastcollect/ByteConsumer {
@@ -675,6 +686,9 @@ public abstract interface class io/github/sooniln/fastcollect/ByteConsumer {
 
 public abstract interface class io/github/sooniln/fastcollect/ByteList : io/github/sooniln/fastcollect/ByteCollection, io/github/sooniln/fastcollect/ByteListTraversable {
 	public fun contains (B)Z
+	public fun copyInto ([BI)[B
+	public fun copyInto ([BIII)[B
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/ByteList;[BIIIILjava/lang/Object;)[B
 	public abstract fun get (I)B
 	public fun indexOf (B)I
 	public fun lastIndexOf (B)I
@@ -709,15 +723,13 @@ public final class io/github/sooniln/fastcollect/ByteLists {
 	public static final fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/ByteList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/ByteList;)I
-	public static final fun indexCheck (Lio/github/sooniln/fastcollect/ByteList;II)I
-	public static synthetic fun indexCheck$default (Lio/github/sooniln/fastcollect/ByteList;IIILjava/lang/Object;)I
+	public static final fun indexCheck (Lio/github/sooniln/fastcollect/ByteList;I)I
 	public static final fun indexCheckInclusive (Lio/github/sooniln/fastcollect/ByteList;I)I
 	public static final synthetic fun last (Lio/github/sooniln/fastcollect/ByteList;)B
 	public static final fun mutableByteListOf ()Lio/github/sooniln/fastcollect/MutableByteList;
 	public static final fun mutableByteListOf (B)Lio/github/sooniln/fastcollect/MutableByteList;
 	public static final fun mutableByteListOf ([B)Lio/github/sooniln/fastcollect/MutableByteList;
-	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ByteList;III)V
-	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/ByteList;IIIILjava/lang/Object;)V
+	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ByteList;II)V
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function2;)B
 	public static final fun shuffle (Lio/github/sooniln/fastcollect/MutableByteList;)V
 }
@@ -810,6 +822,7 @@ public final class io/github/sooniln/fastcollect/DoubleArrayDeque : io/github/so
 	public fun addFirst (D)V
 	public fun addLast (D)V
 	public fun clear ()V
+	public fun copyInto ([DIII)[D
 	public final fun ensureCapacity (I)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun fill (D)V
@@ -832,7 +845,6 @@ public final class io/github/sooniln/fastcollect/DoubleArrayDeque : io/github/so
 	public fun set (ID)V
 	public fun sort ()V
 	public fun sortDescending ()V
-	public fun toDoubleArray ()[D
 	public synthetic fun traverser ()Lio/github/sooniln/fastcollect/DoubleTraverser;
 	public fun traverser ()Lio/github/sooniln/fastcollect/MutableDoubleTraverser;
 	public synthetic fun traverser ()Lio/github/sooniln/fastcollect/MutableTraverser;
@@ -851,10 +863,11 @@ public abstract interface class io/github/sooniln/fastcollect/DoubleCollection :
 	public fun contains (D)Z
 	public fun containsAll (Lio/github/sooniln/fastcollect/DoubleCollection;)Z
 	public fun containsAll (Ljava/util/Collection;)Z
+	public fun copyInto ([DI)[D
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/DoubleCollection;[DIILjava/lang/Object;)[D
 	public abstract fun getSize ()I
 	public fun isEmpty ()Z
 	public abstract fun iterator ()Lkotlin/collections/DoubleIterator;
-	public fun toDoubleArray ()[D
 }
 
 public abstract interface class io/github/sooniln/fastcollect/DoubleConsumer {
@@ -886,6 +899,9 @@ public final class io/github/sooniln/fastcollect/DoubleHashSet : io/github/sooni
 
 public abstract interface class io/github/sooniln/fastcollect/DoubleList : io/github/sooniln/fastcollect/DoubleCollection, io/github/sooniln/fastcollect/DoubleListTraversable {
 	public fun contains (D)Z
+	public fun copyInto ([DI)[D
+	public fun copyInto ([DIII)[D
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/DoubleList;[DIIIILjava/lang/Object;)[D
 	public abstract fun get (I)D
 	public fun indexOf (D)I
 	public fun lastIndexOf (D)I
@@ -920,15 +936,13 @@ public final class io/github/sooniln/fastcollect/DoubleLists {
 	public static final fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/DoubleList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/DoubleList;)I
-	public static final fun indexCheck (Lio/github/sooniln/fastcollect/DoubleList;II)I
-	public static synthetic fun indexCheck$default (Lio/github/sooniln/fastcollect/DoubleList;IIILjava/lang/Object;)I
+	public static final fun indexCheck (Lio/github/sooniln/fastcollect/DoubleList;I)I
 	public static final fun indexCheckInclusive (Lio/github/sooniln/fastcollect/DoubleList;I)I
 	public static final synthetic fun last (Lio/github/sooniln/fastcollect/DoubleList;)D
 	public static final fun mutableDoubleListOf ()Lio/github/sooniln/fastcollect/MutableDoubleList;
 	public static final fun mutableDoubleListOf (D)Lio/github/sooniln/fastcollect/MutableDoubleList;
 	public static final fun mutableDoubleListOf ([D)Lio/github/sooniln/fastcollect/MutableDoubleList;
-	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/DoubleList;III)V
-	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/DoubleList;IIIILjava/lang/Object;)V
+	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/DoubleList;II)V
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function2;)D
 	public static final fun shuffle (Lio/github/sooniln/fastcollect/MutableDoubleList;)V
 }
@@ -1026,6 +1040,7 @@ public final class io/github/sooniln/fastcollect/FloatArrayDeque : io/github/soo
 	public fun addFirst (F)V
 	public fun addLast (F)V
 	public fun clear ()V
+	public fun copyInto ([FIII)[F
 	public final fun ensureCapacity (I)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun fill (F)V
@@ -1048,7 +1063,6 @@ public final class io/github/sooniln/fastcollect/FloatArrayDeque : io/github/soo
 	public fun set (IF)V
 	public fun sort ()V
 	public fun sortDescending ()V
-	public fun toFloatArray ()[F
 	public synthetic fun traverser ()Lio/github/sooniln/fastcollect/FloatTraverser;
 	public fun traverser ()Lio/github/sooniln/fastcollect/MutableFloatTraverser;
 	public synthetic fun traverser ()Lio/github/sooniln/fastcollect/MutableTraverser;
@@ -1067,10 +1081,11 @@ public abstract interface class io/github/sooniln/fastcollect/FloatCollection : 
 	public fun contains (F)Z
 	public fun containsAll (Lio/github/sooniln/fastcollect/FloatCollection;)Z
 	public fun containsAll (Ljava/util/Collection;)Z
+	public fun copyInto ([FI)[F
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/FloatCollection;[FIILjava/lang/Object;)[F
 	public abstract fun getSize ()I
 	public fun isEmpty ()Z
 	public abstract fun iterator ()Lkotlin/collections/FloatIterator;
-	public fun toFloatArray ()[F
 }
 
 public abstract interface class io/github/sooniln/fastcollect/FloatConsumer {
@@ -1102,6 +1117,9 @@ public final class io/github/sooniln/fastcollect/FloatHashSet : io/github/soonil
 
 public abstract interface class io/github/sooniln/fastcollect/FloatList : io/github/sooniln/fastcollect/FloatCollection, io/github/sooniln/fastcollect/FloatListTraversable {
 	public fun contains (F)Z
+	public fun copyInto ([FI)[F
+	public fun copyInto ([FIII)[F
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/FloatList;[FIIIILjava/lang/Object;)[F
 	public abstract fun get (I)F
 	public fun indexOf (F)I
 	public fun lastIndexOf (F)I
@@ -1136,15 +1154,13 @@ public final class io/github/sooniln/fastcollect/FloatLists {
 	public static final fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/FloatList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/FloatList;)I
-	public static final fun indexCheck (Lio/github/sooniln/fastcollect/FloatList;II)I
-	public static synthetic fun indexCheck$default (Lio/github/sooniln/fastcollect/FloatList;IIILjava/lang/Object;)I
+	public static final fun indexCheck (Lio/github/sooniln/fastcollect/FloatList;I)I
 	public static final fun indexCheckInclusive (Lio/github/sooniln/fastcollect/FloatList;I)I
 	public static final synthetic fun last (Lio/github/sooniln/fastcollect/FloatList;)F
 	public static final fun mutableFloatListOf ()Lio/github/sooniln/fastcollect/MutableFloatList;
 	public static final fun mutableFloatListOf (F)Lio/github/sooniln/fastcollect/MutableFloatList;
 	public static final fun mutableFloatListOf ([F)Lio/github/sooniln/fastcollect/MutableFloatList;
-	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/FloatList;III)V
-	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/FloatList;IIIILjava/lang/Object;)V
+	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/FloatList;II)V
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function2;)F
 	public static final fun shuffle (Lio/github/sooniln/fastcollect/MutableFloatList;)V
 }
@@ -1934,6 +1950,7 @@ public final class io/github/sooniln/fastcollect/IntArrayDeque : io/github/sooni
 	public fun addFirst (I)V
 	public fun addLast (I)V
 	public fun clear ()V
+	public fun copyInto ([IIII)[I
 	public final fun ensureCapacity (I)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun fill (I)V
@@ -1956,7 +1973,6 @@ public final class io/github/sooniln/fastcollect/IntArrayDeque : io/github/sooni
 	public fun set (II)V
 	public fun sort ()V
 	public fun sortDescending ()V
-	public fun toIntArray ()[I
 	public synthetic fun traverser ()Lio/github/sooniln/fastcollect/IntTraverser;
 	public fun traverser ()Lio/github/sooniln/fastcollect/MutableIntTraverser;
 	public synthetic fun traverser ()Lio/github/sooniln/fastcollect/MutableTraverser;
@@ -1979,10 +1995,11 @@ public abstract interface class io/github/sooniln/fastcollect/IntCollection : io
 	public fun contains (I)Z
 	public fun containsAll (Lio/github/sooniln/fastcollect/IntCollection;)Z
 	public fun containsAll (Ljava/util/Collection;)Z
+	public fun copyInto ([II)[I
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/IntCollection;[IIILjava/lang/Object;)[I
 	public abstract fun getSize ()I
 	public fun isEmpty ()Z
 	public abstract fun iterator ()Lkotlin/collections/IntIterator;
-	public fun toIntArray ()[I
 }
 
 public abstract interface class io/github/sooniln/fastcollect/IntConsumer {
@@ -2026,6 +2043,9 @@ public abstract interface class io/github/sooniln/fastcollect/IntIntConsumer {
 
 public abstract interface class io/github/sooniln/fastcollect/IntList : io/github/sooniln/fastcollect/IntCollection, io/github/sooniln/fastcollect/IntListTraversable {
 	public fun contains (I)Z
+	public fun copyInto ([II)[I
+	public fun copyInto ([IIII)[I
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/IntList;[IIIIILjava/lang/Object;)[I
 	public abstract fun get (I)I
 	public fun indexOf (I)I
 	public fun lastIndexOf (I)I
@@ -2057,8 +2077,7 @@ public final class io/github/sooniln/fastcollect/IntLists {
 	public static final fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/IntList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/IntList;)I
-	public static final fun indexCheck (Lio/github/sooniln/fastcollect/IntList;II)I
-	public static synthetic fun indexCheck$default (Lio/github/sooniln/fastcollect/IntList;IIILjava/lang/Object;)I
+	public static final fun indexCheck (Lio/github/sooniln/fastcollect/IntList;I)I
 	public static final fun indexCheckInclusive (Lio/github/sooniln/fastcollect/IntList;I)I
 	public static final fun intListOf ()Lio/github/sooniln/fastcollect/IntList;
 	public static final fun intListOf (I)Lio/github/sooniln/fastcollect/IntList;
@@ -2067,8 +2086,7 @@ public final class io/github/sooniln/fastcollect/IntLists {
 	public static final fun mutableIntListOf ()Lio/github/sooniln/fastcollect/MutableIntList;
 	public static final fun mutableIntListOf (I)Lio/github/sooniln/fastcollect/MutableIntList;
 	public static final fun mutableIntListOf ([I)Lio/github/sooniln/fastcollect/MutableIntList;
-	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/IntList;III)V
-	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/IntList;IIIILjava/lang/Object;)V
+	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/IntList;II)V
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function2;)I
 	public static final fun shuffle (Lio/github/sooniln/fastcollect/MutableIntList;)V
 }
@@ -2870,6 +2888,7 @@ public final class io/github/sooniln/fastcollect/LongArrayDeque : io/github/soon
 	public fun addFirst (J)V
 	public fun addLast (J)V
 	public fun clear ()V
+	public fun copyInto ([JIII)[J
 	public final fun ensureCapacity (I)V
 	public fun equals (Ljava/lang/Object;)Z
 	public fun fill (J)V
@@ -2892,7 +2911,6 @@ public final class io/github/sooniln/fastcollect/LongArrayDeque : io/github/soon
 	public fun set (IJ)V
 	public fun sort ()V
 	public fun sortDescending ()V
-	public fun toLongArray ()[J
 	public synthetic fun traverser ()Lio/github/sooniln/fastcollect/LongTraverser;
 	public fun traverser ()Lio/github/sooniln/fastcollect/MutableLongTraverser;
 	public synthetic fun traverser ()Lio/github/sooniln/fastcollect/MutableTraverser;
@@ -2915,10 +2933,11 @@ public abstract interface class io/github/sooniln/fastcollect/LongCollection : i
 	public fun contains (J)Z
 	public fun containsAll (Lio/github/sooniln/fastcollect/LongCollection;)Z
 	public fun containsAll (Ljava/util/Collection;)Z
+	public fun copyInto ([JI)[J
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/LongCollection;[JIILjava/lang/Object;)[J
 	public abstract fun getSize ()I
 	public fun isEmpty ()Z
 	public abstract fun iterator ()Lkotlin/collections/LongIterator;
-	public fun toLongArray ()[J
 }
 
 public abstract interface class io/github/sooniln/fastcollect/LongConsumer {
@@ -2962,6 +2981,9 @@ public abstract interface class io/github/sooniln/fastcollect/LongIntConsumer {
 
 public abstract interface class io/github/sooniln/fastcollect/LongList : io/github/sooniln/fastcollect/LongCollection, io/github/sooniln/fastcollect/LongListTraversable {
 	public fun contains (J)Z
+	public fun copyInto ([JI)[J
+	public fun copyInto ([JIII)[J
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/LongList;[JIIIILjava/lang/Object;)[J
 	public abstract fun get (I)J
 	public fun indexOf (J)I
 	public fun lastIndexOf (J)I
@@ -2993,8 +3015,7 @@ public final class io/github/sooniln/fastcollect/LongLists {
 	public static final fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/LongList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/LongList;)I
-	public static final fun indexCheck (Lio/github/sooniln/fastcollect/LongList;II)I
-	public static synthetic fun indexCheck$default (Lio/github/sooniln/fastcollect/LongList;IIILjava/lang/Object;)I
+	public static final fun indexCheck (Lio/github/sooniln/fastcollect/LongList;I)I
 	public static final fun indexCheckInclusive (Lio/github/sooniln/fastcollect/LongList;I)I
 	public static final synthetic fun last (Lio/github/sooniln/fastcollect/LongList;)J
 	public static final fun longListOf ()Lio/github/sooniln/fastcollect/LongList;
@@ -3003,8 +3024,7 @@ public final class io/github/sooniln/fastcollect/LongLists {
 	public static final fun mutableLongListOf ()Lio/github/sooniln/fastcollect/MutableLongList;
 	public static final fun mutableLongListOf (J)Lio/github/sooniln/fastcollect/MutableLongList;
 	public static final fun mutableLongListOf ([J)Lio/github/sooniln/fastcollect/MutableLongList;
-	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/LongList;III)V
-	public static synthetic fun rangeCheck$default (Lio/github/sooniln/fastcollect/LongList;IIIILjava/lang/Object;)V
+	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/LongList;II)V
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function2;)J
 	public static final fun shuffle (Lio/github/sooniln/fastcollect/MutableLongList;)V
 }

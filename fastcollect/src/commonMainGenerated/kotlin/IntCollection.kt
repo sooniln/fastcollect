@@ -48,13 +48,15 @@ public interface IntCollection : IntTraversable {
         return true
     }
 
-    public fun toIntArray(): IntArray {
-        val array = IntArray(size)
-        var index = 0
-        foreach { element ->
-            array[index++] = element
-        }
-        return array
+    /**
+     * Copies all of the elements of this collection into [destination], starting at [destinationOffset], and returns
+     * [destination].
+     */
+    public fun copyInto(destination: IntArray, destinationOffset: Int = 0): IntArray {
+        destination.rangeCheck(destinationOffset, destinationOffset + size)
+        var index = destinationOffset
+        foreach { element -> destination[index++] = element }
+        return destination
     }
 }
 
