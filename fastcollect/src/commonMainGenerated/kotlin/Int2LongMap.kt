@@ -14,7 +14,6 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun  emptyInt2LongMap(): Int2LongMap = EmptyInt2LongMap as Int2LongMap
 
-@Suppress("UNCHECKED_CAST")
 public fun  int2LongMapOf(): Int2LongMap = EmptyInt2LongMap as Int2LongMap
 public fun  int2LongMapOf(entry: Pair<Int, Long>): Int2LongMap = SingletonInt2LongMap(entry.first, entry.second)
 public fun  int2LongMapOf(vararg entries: Pair<Int, Long>): Int2LongMap = Int2LongHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }

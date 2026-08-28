@@ -246,20 +246,18 @@ public class LongHashSet @JvmOverloads constructor(
             if (keysArr !== EMPTY_ARRAY) {
                 keysArr = EMPTY_ARRAY
                 emptyKey = ZERO
-                threshold = MIN_INITIAL_CAPACITY.inv()
             }
+            threshold = MIN_INITIAL_CAPACITY.inv()
             return
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
-
-        val newLength = arraySize(capacity, actualLoadFactor)
+        val newLength = arraySize(capacity, loadFactor(capacity))
         if (keysArr.size == newLength) return
 
         val newKeysArr = LongArray(newLength)
         if (emptyKey notEqualsRaw ZERO) newKeysArr.fill(emptyKey)
-        val newMask = newKeysArr.size - 1
+        val newMask = newLength - 1
 
         for (slot in keysArr.indices) {
             val key = keysArr[slot]
@@ -269,7 +267,7 @@ public class LongHashSet @JvmOverloads constructor(
         keysArr = newKeysArr
 
         // threshold must always maintain the invariant of at least 1 slot being open
-        threshold = min((newKeysArr.size * actualLoadFactor).toInt(), newKeysArr.size - 1) - size
+        threshold = min((newLength * loadFactor(newLength)).toInt(), newLength - 1) - size
     }
 
     // we can assume key doesn't exist in array and that we never insert zero
@@ -420,6 +418,8 @@ public class LongHashSet @JvmOverloads constructor(
 
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX: Int = 2 * CACHE_LINE_SIZE
+
+        private fun loadFactor(size: Int): Double = if (size <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
 
         private fun arraySize(capacity: Int, loadFactor: Double): Int {
             check(capacity >= 0)

@@ -24,9 +24,9 @@ public class Int2IntHashMap @JvmOverloads constructor(
     private val defaultValue: Int = Int.MIN_VALUE,
 ) : AbstractMutableInt2IntMap() {
 
-    public constructor(map: Int2IntMap): this() { putAll(map) }
+    public constructor(map: Int2IntMap, defaultValue: Int = Int.MIN_VALUE): this(defaultValue = defaultValue) { putAll(map) }
 
-    public constructor(map: Map<Int, Int>): this() { putAll(map) }
+    public constructor(map: Map<Int, Int>, defaultValue: Int = Int.MIN_VALUE): this(defaultValue = defaultValue) { putAll(map) }
 
     private var kvArr = EMPTY_ARRAY
 
@@ -150,8 +150,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     override fun clear() {
         if (kvArr !== EMPTY_ARRAY) {
-            threshold += size
             kvArr.fill(emptyEntry)
+            threshold += size
         }
         size = 0
     }
@@ -342,15 +342,13 @@ public class Int2IntHashMap @JvmOverloads constructor(
             if (kvArr !== EMPTY_ARRAY) {
                 kvArr = EMPTY_ARRAY
                 emptyEntry = ZERO_ENTRY
-                threshold = MIN_INITIAL_CAPACITY.inv()
             }
+            threshold = MIN_INITIAL_CAPACITY.inv()
             return
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
-
-        val newLength = arraySize(capacity, actualLoadFactor)
+        val newLength = arraySize(capacity, loadFactor(capacity))
         if (kvArr.size == newLength) return
 
         val newKvArr = LongArray(newLength)
@@ -365,7 +363,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         kvArr = newKvArr
 
         // threshold must always maintain the invariant of at least 1 slot being open
-        threshold = min((newLength * actualLoadFactor).toInt(), newMask) - size
+        threshold = min((newLength * loadFactor(newLength)).toInt(), newMask) - size
     }
 
     // we can assume key doesn't exist in array and that we never insert emptyEntry
@@ -576,6 +574,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
         private fun Long.key(): Int = toInt()
         private fun Long.value(): Int = (this shr (8 * Int.SIZE_BYTES)).toInt()
         private fun arrayEntry(key: Int, value: Int): Long = (value.toLong() shl (8 * Int.SIZE_BYTES)) or (key.toUInt().toLong())
+
+        private fun loadFactor(size: Int): Double = if (size <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
 
         private fun arraySize(capacity: Int, loadFactor: Double): Int {
             check(capacity >= 0)

@@ -32,7 +32,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int = ar
 
     public constructor() : this(EMPTY_ARRAY, size = 0)
 
-    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else LongArray(capacity), 0)
+    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else { require(capacity > 0); LongArray(capacity) }, 0)
 
     public constructor(elements: LongCollection) : this(elements.copyInto(LongArray(elements.size)), size = elements.size)
 

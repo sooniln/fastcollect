@@ -48,24 +48,13 @@ public interface Long2ByteTraverser: Traverser<Long2ByteMap.Entry> {
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: Long2ByteMap.Entry get() = object: Long2ByteMap.AbstractEntry() {
-        override val key: Long get() = this@Long2ByteTraverser.key
-        override val value: Byte get() = this@Long2ByteTraverser.value
-    }
+    override val element: Long2ByteMap.Entry get() = AbstractLong2ByteMap.SimpleEntry(key, value)
 }
 /**
  * A primitively typed [MutableTraverser] of Long to Byte tuples.
  */
 public interface MutableLong2ByteTraverser : Long2ByteTraverser, MutableTraverser<Long2ByteMap.Entry> {
     override var value: Byte
-
-    /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
-    @get:JvmSynthetic
-    override val element: Long2ByteMap.Entry get() = object: Long2ByteMap.AbstractEntry() {
-        override val key: Long = this@MutableLong2ByteTraverser.key
-        override val value: Byte = this@MutableLong2ByteTraverser.value
-    }
 }
 
 public fun  Long2ByteTraverser.asKeyTraverser(): LongTraverser {

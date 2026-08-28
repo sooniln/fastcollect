@@ -14,7 +14,6 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun  emptyInt2ByteMap(): Int2ByteMap = EmptyInt2ByteMap as Int2ByteMap
 
-@Suppress("UNCHECKED_CAST")
 public fun  int2ByteMapOf(): Int2ByteMap = EmptyInt2ByteMap as Int2ByteMap
 public fun  int2ByteMapOf(entry: Pair<Int, Byte>): Int2ByteMap = SingletonInt2ByteMap(entry.first, entry.second)
 public fun  int2ByteMapOf(vararg entries: Pair<Int, Byte>): Int2ByteMap = Int2ByteHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }

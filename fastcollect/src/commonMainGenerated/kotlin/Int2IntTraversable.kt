@@ -48,24 +48,13 @@ public interface Int2IntTraverser: Traverser<Int2IntMap.Entry> {
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: Int2IntMap.Entry get() = object: Int2IntMap.AbstractEntry() {
-        override val key: Int get() = this@Int2IntTraverser.key
-        override val value: Int get() = this@Int2IntTraverser.value
-    }
+    override val element: Int2IntMap.Entry get() = AbstractInt2IntMap.SimpleEntry(key, value)
 }
 /**
  * A primitively typed [MutableTraverser] of Int to Int tuples.
  */
 public interface MutableInt2IntTraverser : Int2IntTraverser, MutableTraverser<Int2IntMap.Entry> {
     override var value: Int
-
-    /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
-    @get:JvmSynthetic
-    override val element: Int2IntMap.Entry get() = object: Int2IntMap.AbstractEntry() {
-        override val key: Int = this@MutableInt2IntTraverser.key
-        override val value: Int = this@MutableInt2IntTraverser.value
-    }
 }
 
 public fun  Int2IntTraverser.asKeyTraverser(): IntTraverser {

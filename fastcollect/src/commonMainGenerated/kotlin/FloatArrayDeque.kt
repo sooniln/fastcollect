@@ -32,7 +32,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
 
     public constructor() : this(EMPTY_ARRAY, size = 0)
 
-    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else FloatArray(capacity), 0)
+    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else { require(capacity > 0); FloatArray(capacity) }, 0)
 
     public constructor(elements: FloatCollection) : this(elements.copyInto(FloatArray(elements.size)), size = elements.size)
 

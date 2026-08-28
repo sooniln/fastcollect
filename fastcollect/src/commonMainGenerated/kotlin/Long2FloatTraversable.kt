@@ -48,24 +48,13 @@ public interface Long2FloatTraverser: Traverser<Long2FloatMap.Entry> {
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: Long2FloatMap.Entry get() = object: Long2FloatMap.AbstractEntry() {
-        override val key: Long get() = this@Long2FloatTraverser.key
-        override val value: Float get() = this@Long2FloatTraverser.value
-    }
+    override val element: Long2FloatMap.Entry get() = AbstractLong2FloatMap.SimpleEntry(key, value)
 }
 /**
  * A primitively typed [MutableTraverser] of Long to Float tuples.
  */
 public interface MutableLong2FloatTraverser : Long2FloatTraverser, MutableTraverser<Long2FloatMap.Entry> {
     override var value: Float
-
-    /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
-    @get:JvmSynthetic
-    override val element: Long2FloatMap.Entry get() = object: Long2FloatMap.AbstractEntry() {
-        override val key: Long = this@MutableLong2FloatTraverser.key
-        override val value: Float = this@MutableLong2FloatTraverser.value
-    }
 }
 
 public fun  Long2FloatTraverser.asKeyTraverser(): LongTraverser {

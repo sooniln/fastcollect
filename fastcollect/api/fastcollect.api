@@ -688,7 +688,6 @@ public abstract interface class io/github/sooniln/fastcollect/ByteList : io/gith
 	public fun contains (B)Z
 	public fun copyInto ([BI)[B
 	public fun copyInto ([BIII)[B
-	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/ByteList;[BIIIILjava/lang/Object;)[B
 	public abstract fun get (I)B
 	public fun indexOf (B)I
 	public fun lastIndexOf (B)I
@@ -715,12 +714,14 @@ public final class io/github/sooniln/fastcollect/ByteLists {
 	public static final fun byteListOf ()Lio/github/sooniln/fastcollect/ByteList;
 	public static final fun byteListOf (B)Lio/github/sooniln/fastcollect/ByteList;
 	public static final fun byteListOf ([B)Lio/github/sooniln/fastcollect/ByteList;
+	public static final synthetic fun copyInto (Lio/github/sooniln/fastcollect/ByteList;[BIII)[B
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/ByteList;[BIIIILjava/lang/Object;)[B
 	public static final fun emptyByteList ()Lio/github/sooniln/fastcollect/ByteList;
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/ByteList;)B
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/ByteList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final fun foreachIndexed (Lio/github/sooniln/fastcollect/ByteListTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachReverse (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function1;)V
-	public static final fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun foreachIndexed (Lio/github/sooniln/fastcollect/ByteListTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun foreachReverse (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function1;)V
+	public static final synthetic fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/ByteList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/ByteList;)I
 	public static final fun indexCheck (Lio/github/sooniln/fastcollect/ByteList;I)I
@@ -901,7 +902,6 @@ public abstract interface class io/github/sooniln/fastcollect/DoubleList : io/gi
 	public fun contains (D)Z
 	public fun copyInto ([DI)[D
 	public fun copyInto ([DIII)[D
-	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/DoubleList;[DIIIILjava/lang/Object;)[D
 	public abstract fun get (I)D
 	public fun indexOf (D)I
 	public fun lastIndexOf (D)I
@@ -925,15 +925,17 @@ public final class io/github/sooniln/fastcollect/DoubleLists {
 	public static final fun asList (Lio/github/sooniln/fastcollect/MutableDoubleList;)Ljava/util/List;
 	public static final synthetic fun buildDoubleList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/DoubleList;
 	public static synthetic fun buildDoubleList$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/DoubleList;
+	public static final synthetic fun copyInto (Lio/github/sooniln/fastcollect/DoubleList;[DIII)[D
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/DoubleList;[DIIIILjava/lang/Object;)[D
 	public static final fun doubleListOf ()Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun doubleListOf (D)Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun doubleListOf ([D)Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun emptyDoubleList ()Lio/github/sooniln/fastcollect/DoubleList;
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/DoubleList;)D
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/DoubleList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final fun foreachIndexed (Lio/github/sooniln/fastcollect/DoubleListTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachReverse (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function1;)V
-	public static final fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun foreachIndexed (Lio/github/sooniln/fastcollect/DoubleListTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun foreachReverse (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function1;)V
+	public static final synthetic fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/DoubleList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/DoubleList;)I
 	public static final fun indexCheck (Lio/github/sooniln/fastcollect/DoubleList;I)I
@@ -1119,7 +1121,6 @@ public abstract interface class io/github/sooniln/fastcollect/FloatList : io/git
 	public fun contains (F)Z
 	public fun copyInto ([FI)[F
 	public fun copyInto ([FIII)[F
-	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/FloatList;[FIIIILjava/lang/Object;)[F
 	public abstract fun get (I)F
 	public fun indexOf (F)I
 	public fun lastIndexOf (F)I
@@ -1143,15 +1144,17 @@ public final class io/github/sooniln/fastcollect/FloatLists {
 	public static final fun asList (Lio/github/sooniln/fastcollect/MutableFloatList;)Ljava/util/List;
 	public static final synthetic fun buildFloatList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/FloatList;
 	public static synthetic fun buildFloatList$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/FloatList;
+	public static final synthetic fun copyInto (Lio/github/sooniln/fastcollect/FloatList;[FIII)[F
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/FloatList;[FIIIILjava/lang/Object;)[F
 	public static final fun emptyFloatList ()Lio/github/sooniln/fastcollect/FloatList;
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/FloatList;)F
 	public static final fun floatListOf ()Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun floatListOf (F)Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun floatListOf ([F)Lio/github/sooniln/fastcollect/FloatList;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/FloatList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final fun foreachIndexed (Lio/github/sooniln/fastcollect/FloatListTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachReverse (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function1;)V
-	public static final fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun foreachIndexed (Lio/github/sooniln/fastcollect/FloatListTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun foreachReverse (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function1;)V
+	public static final synthetic fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/FloatList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/FloatList;)I
 	public static final fun indexCheck (Lio/github/sooniln/fastcollect/FloatList;I)I
@@ -1368,7 +1371,11 @@ public final class io/github/sooniln/fastcollect/Int2ByteHashMap : io/github/soo
 	public fun <init> (IB)V
 	public synthetic fun <init> (IBILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Int2ByteMap;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Int2ByteMap;B)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Int2ByteMap;BILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;B)V
+	public synthetic fun <init> (Ljava/util/Map;BILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public fun containsKey (I)Z
 	public fun containsValue (B)Z
@@ -1482,7 +1489,11 @@ public final class io/github/sooniln/fastcollect/Int2DoubleHashMap : io/github/s
 	public fun <init> (ID)V
 	public synthetic fun <init> (IDILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Int2DoubleMap;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Int2DoubleMap;D)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Int2DoubleMap;DILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;D)V
+	public synthetic fun <init> (Ljava/util/Map;DILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public fun containsKey (I)Z
 	public fun containsValue (D)Z
@@ -1596,7 +1607,11 @@ public final class io/github/sooniln/fastcollect/Int2FloatHashMap : io/github/so
 	public fun <init> (IF)V
 	public synthetic fun <init> (IFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Int2FloatMap;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Int2FloatMap;F)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Int2FloatMap;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;F)V
+	public synthetic fun <init> (Ljava/util/Map;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public fun containsKey (I)Z
 	public fun containsValue (F)Z
@@ -1709,8 +1724,10 @@ public final class io/github/sooniln/fastcollect/Int2IntHashMap : io/github/soon
 	public fun <init> (I)V
 	public fun <init> (II)V
 	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Lio/github/sooniln/fastcollect/Int2IntMap;)V
-	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Int2IntMap;I)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Int2IntMap;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/Map;I)V
+	public synthetic fun <init> (Ljava/util/Map;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public fun containsKey (I)Z
 	public fun containsValue (I)Z
@@ -1824,7 +1841,11 @@ public final class io/github/sooniln/fastcollect/Int2LongHashMap : io/github/soo
 	public fun <init> (IJ)V
 	public synthetic fun <init> (IJILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Int2LongMap;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Int2LongMap;J)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Int2LongMap;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;J)V
+	public synthetic fun <init> (Ljava/util/Map;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public fun containsKey (I)Z
 	public fun containsValue (J)Z
@@ -2045,7 +2066,6 @@ public abstract interface class io/github/sooniln/fastcollect/IntList : io/githu
 	public fun contains (I)Z
 	public fun copyInto ([II)[I
 	public fun copyInto ([IIII)[I
-	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/IntList;[IIIIILjava/lang/Object;)[I
 	public abstract fun get (I)I
 	public fun indexOf (I)I
 	public fun lastIndexOf (I)I
@@ -2069,12 +2089,14 @@ public final class io/github/sooniln/fastcollect/IntLists {
 	public static final fun asList (Lio/github/sooniln/fastcollect/MutableIntList;)Ljava/util/List;
 	public static final synthetic fun buildIntList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/IntList;
 	public static synthetic fun buildIntList$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/IntList;
+	public static final synthetic fun copyInto (Lio/github/sooniln/fastcollect/IntList;[IIII)[I
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/IntList;[IIIIILjava/lang/Object;)[I
 	public static final fun emptyIntList ()Lio/github/sooniln/fastcollect/IntList;
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/IntList;)I
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/IntList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final fun foreachIndexed (Lio/github/sooniln/fastcollect/IntListTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachReverse (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function1;)V
-	public static final fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun foreachIndexed (Lio/github/sooniln/fastcollect/IntListTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun foreachReverse (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function1;)V
+	public static final synthetic fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/IntList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/IntList;)I
 	public static final fun indexCheck (Lio/github/sooniln/fastcollect/IntList;I)I
@@ -2306,7 +2328,11 @@ public final class io/github/sooniln/fastcollect/Long2ByteHashMap : io/github/so
 	public fun <init> (IB)V
 	public synthetic fun <init> (IBILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Long2ByteMap;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Long2ByteMap;B)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Long2ByteMap;BILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;B)V
+	public synthetic fun <init> (Ljava/util/Map;BILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public fun containsKey (J)Z
 	public fun containsValue (B)Z
@@ -2420,7 +2446,11 @@ public final class io/github/sooniln/fastcollect/Long2DoubleHashMap : io/github/
 	public fun <init> (ID)V
 	public synthetic fun <init> (IDILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Long2DoubleMap;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Long2DoubleMap;D)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Long2DoubleMap;DILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;D)V
+	public synthetic fun <init> (Ljava/util/Map;DILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public fun containsKey (J)Z
 	public fun containsValue (D)Z
@@ -2534,7 +2564,11 @@ public final class io/github/sooniln/fastcollect/Long2FloatHashMap : io/github/s
 	public fun <init> (IF)V
 	public synthetic fun <init> (IFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Long2FloatMap;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Long2FloatMap;F)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Long2FloatMap;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;F)V
+	public synthetic fun <init> (Ljava/util/Map;FILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public fun containsKey (J)Z
 	public fun containsValue (F)Z
@@ -2648,7 +2682,11 @@ public final class io/github/sooniln/fastcollect/Long2IntHashMap : io/github/soo
 	public fun <init> (II)V
 	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Long2IntMap;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Long2IntMap;I)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Long2IntMap;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;I)V
+	public synthetic fun <init> (Ljava/util/Map;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public fun containsKey (J)Z
 	public fun containsValue (I)Z
@@ -2762,7 +2800,11 @@ public final class io/github/sooniln/fastcollect/Long2LongHashMap : io/github/so
 	public fun <init> (IJ)V
 	public synthetic fun <init> (IJILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Long2LongMap;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Long2LongMap;J)V
+	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Long2LongMap;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/Map;)V
+	public fun <init> (Ljava/util/Map;J)V
+	public synthetic fun <init> (Ljava/util/Map;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public fun containsKey (J)Z
 	public fun containsValue (J)Z
@@ -2983,7 +3025,6 @@ public abstract interface class io/github/sooniln/fastcollect/LongList : io/gith
 	public fun contains (J)Z
 	public fun copyInto ([JI)[J
 	public fun copyInto ([JIII)[J
-	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/LongList;[JIIIILjava/lang/Object;)[J
 	public abstract fun get (I)J
 	public fun indexOf (J)I
 	public fun lastIndexOf (J)I
@@ -3007,12 +3048,14 @@ public final class io/github/sooniln/fastcollect/LongLists {
 	public static final fun asLongList ([J)Lio/github/sooniln/fastcollect/LongList;
 	public static final synthetic fun buildLongList (ILkotlin/jvm/functions/Function1;)Lio/github/sooniln/fastcollect/LongList;
 	public static synthetic fun buildLongList$default (ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/sooniln/fastcollect/LongList;
+	public static final synthetic fun copyInto (Lio/github/sooniln/fastcollect/LongList;[JIII)[J
+	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/LongList;[JIIIILjava/lang/Object;)[J
 	public static final fun emptyLongList ()Lio/github/sooniln/fastcollect/LongList;
 	public static final synthetic fun first (Lio/github/sooniln/fastcollect/LongList;)J
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/LongList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final fun foreachIndexed (Lio/github/sooniln/fastcollect/LongListTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachReverse (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function1;)V
-	public static final fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun foreachIndexed (Lio/github/sooniln/fastcollect/LongListTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun foreachReverse (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function1;)V
+	public static final synthetic fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/LongList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/LongList;)I
 	public static final fun indexCheck (Lio/github/sooniln/fastcollect/LongList;I)I
@@ -3362,8 +3405,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2AnyTrav
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableInt2AnyTraverser : io/github/sooniln/fastcollect/Int2AnyTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Int2AnyMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()Ljava/lang/Object;
 	public abstract fun setValue (Ljava/lang/Object;)V
 }
@@ -3399,8 +3440,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2ByteTra
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableInt2ByteTraverser : io/github/sooniln/fastcollect/Int2ByteTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Int2ByteMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()B
 	public abstract fun setValue (B)V
 }
@@ -3436,8 +3475,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2DoubleT
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableInt2DoubleTraverser : io/github/sooniln/fastcollect/Int2DoubleTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Int2DoubleMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()D
 	public abstract fun setValue (D)V
 }
@@ -3473,8 +3510,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2FloatTr
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableInt2FloatTraverser : io/github/sooniln/fastcollect/Int2FloatTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Int2FloatMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()F
 	public abstract fun setValue (F)V
 }
@@ -3510,8 +3545,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2IntTrav
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableInt2IntTraverser : io/github/sooniln/fastcollect/Int2IntTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Int2IntMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()I
 	public abstract fun setValue (I)V
 }
@@ -3547,8 +3580,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableInt2LongTra
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableInt2LongTraverser : io/github/sooniln/fastcollect/Int2LongTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Int2LongMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()J
 	public abstract fun setValue (J)V
 }
@@ -3658,8 +3689,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2AnyTra
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableLong2AnyTraverser : io/github/sooniln/fastcollect/Long2AnyTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Long2AnyMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()Ljava/lang/Object;
 	public abstract fun setValue (Ljava/lang/Object;)V
 }
@@ -3695,8 +3724,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2ByteTr
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableLong2ByteTraverser : io/github/sooniln/fastcollect/Long2ByteTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Long2ByteMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()B
 	public abstract fun setValue (B)V
 }
@@ -3732,8 +3759,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2Double
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableLong2DoubleTraverser : io/github/sooniln/fastcollect/Long2DoubleTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Long2DoubleMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()D
 	public abstract fun setValue (D)V
 }
@@ -3769,8 +3794,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2FloatT
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableLong2FloatTraverser : io/github/sooniln/fastcollect/Long2FloatTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Long2FloatMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()F
 	public abstract fun setValue (F)V
 }
@@ -3806,8 +3829,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2IntTra
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableLong2IntTraverser : io/github/sooniln/fastcollect/Long2IntTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Long2IntMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()I
 	public abstract fun setValue (I)V
 }
@@ -3843,8 +3864,6 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLong2LongTr
 }
 
 public abstract interface class io/github/sooniln/fastcollect/MutableLong2LongTraverser : io/github/sooniln/fastcollect/Long2LongTraverser, io/github/sooniln/fastcollect/MutableTraverser {
-	public synthetic fun getElement ()Lio/github/sooniln/fastcollect/Long2LongMap$Entry;
-	public synthetic fun getElement ()Ljava/lang/Object;
 	public abstract fun getValue ()J
 	public abstract fun setValue (J)V
 }

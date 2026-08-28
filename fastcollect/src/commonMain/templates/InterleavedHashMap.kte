@@ -24,9 +24,9 @@ public class ${Name}HashMap @JvmOverloads constructor(
     private val defaultValue: ${KVType} = ${DefaultValue},
 ) : AbstractMutable${Name}Map() {
 
-    public constructor(map: ${Name}Map): this() { putAll(map) }
+    public constructor(map: ${Name}Map, defaultValue: ${KVType} = ${DefaultValue}): this(defaultValue = defaultValue) { putAll(map) }
 
-    public constructor(map: Map<${KVType}, ${KVType}>): this() { putAll(map) }
+    public constructor(map: Map<${KVType}, ${KVType}>, defaultValue: ${KVType} = ${DefaultValue}): this(defaultValue = defaultValue) { putAll(map) }
 
     private var kvArr = EMPTY_ARRAY
 
@@ -150,8 +150,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
     override fun clear() {
         if (kvArr !== EMPTY_ARRAY) {
-            threshold += size
             kvArr.fill(emptyEntry)
+            threshold += size
         }
         size = 0
     }
@@ -342,15 +342,13 @@ public class ${Name}HashMap @JvmOverloads constructor(
             if (kvArr !== EMPTY_ARRAY) {
                 kvArr = EMPTY_ARRAY
                 emptyEntry = ZERO_ENTRY
-                threshold = MIN_INITIAL_CAPACITY.inv()
             }
+            threshold = MIN_INITIAL_CAPACITY.inv()
             return
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
-
-        val newLength = arraySize(capacity, actualLoadFactor)
+        val newLength = arraySize(capacity, loadFactor(capacity))
         if (kvArr.size == newLength) return
 
         val newKvArr = ${ArrayType}Array(newLength)
@@ -365,7 +363,7 @@ public class ${Name}HashMap @JvmOverloads constructor(
         kvArr = newKvArr
 
         // threshold must always maintain the invariant of at least 1 slot being open
-        threshold = min((newLength * actualLoadFactor).toInt(), newMask) - size
+        threshold = min((newLength * loadFactor(newLength)).toInt(), newMask) - size
     }
 
     // we can assume key doesn't exist in array and that we never insert emptyEntry
@@ -576,6 +574,8 @@ public class ${Name}HashMap @JvmOverloads constructor(
         private fun ${ArrayType}.key(): ${KVType} = to${KVType}()
         private fun ${ArrayType}.value(): ${KVType} = (this shr (8 * ${KVType}.SIZE_BYTES)).to${KVType}()
         private fun arrayEntry(key: ${KVType}, value: ${KVType}): ${ArrayType} = (value.to${ArrayType}() shl (8 * ${KVType}.SIZE_BYTES)) or (key.toU${KVType}().to${ArrayType}())
+
+        private fun loadFactor(size: Int): Double = if (size <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
 
         private fun arraySize(capacity: Int, loadFactor: Double): Int {
             check(capacity >= 0)

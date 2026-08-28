@@ -14,7 +14,6 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun  emptyLong2ByteMap(): Long2ByteMap = EmptyLong2ByteMap as Long2ByteMap
 
-@Suppress("UNCHECKED_CAST")
 public fun  long2ByteMapOf(): Long2ByteMap = EmptyLong2ByteMap as Long2ByteMap
 public fun  long2ByteMapOf(entry: Pair<Long, Byte>): Long2ByteMap = SingletonLong2ByteMap(entry.first, entry.second)
 public fun  long2ByteMapOf(vararg entries: Pair<Long, Byte>): Long2ByteMap = Long2ByteHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }

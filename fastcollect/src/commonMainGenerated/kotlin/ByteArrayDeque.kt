@@ -32,7 +32,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
     public constructor() : this(EMPTY_ARRAY, size = 0)
 
-    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else ByteArray(capacity), 0)
+    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else { require(capacity > 0); ByteArray(capacity) }, 0)
 
     public constructor(elements: ByteCollection) : this(elements.copyInto(ByteArray(elements.size)), size = elements.size)
 

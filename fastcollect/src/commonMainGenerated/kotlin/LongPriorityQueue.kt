@@ -43,7 +43,7 @@ public inline fun buildLongPriorityQueue(
  * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
  * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
-public abstract class AbstractLongPriorityQueue(initialCapacity: Int): LongCollection {
+public abstract class AbstractLongPriorityQueue(capacity: Int): LongCollection {
 
     public constructor() : this(0)
 
@@ -60,7 +60,11 @@ public abstract class AbstractLongPriorityQueue(initialCapacity: Int): LongColle
         addAll(elements)
     }
 
-    private var heap: LongArray = if (initialCapacity == 0) EMPTY_ARRAY else LongArray(initialCapacity)
+    init {
+        require(capacity >= 0)
+    }
+
+    private var heap: LongArray = if (capacity == 0) EMPTY_ARRAY else LongArray(capacity)
     final override var size: Int = 0
         private set
 
@@ -169,6 +173,7 @@ public abstract class AbstractLongPriorityQueue(initialCapacity: Int): LongColle
 
     @JvmOverloads
     public fun addAll(array: LongArray, fromIndex: Int = 0, toIndex: Int = array.size) {
+        array.rangeCheck(fromIndex, toIndex)
         val newSize = size + toIndex - fromIndex
         if (newSize == size) return
 
@@ -340,9 +345,12 @@ public abstract class AbstractLongPriorityQueue(initialCapacity: Int): LongColle
             var childIndex = 2 * i + 1
             var childElement = heap[childIndex]
             val rightIndex = childIndex + 1
-            if (rightIndex < size && isHigherPriority(heap[rightIndex], childElement)) {
-                childIndex = rightIndex
-                childElement = heap[rightIndex]
+            if (rightIndex < size) {
+                val rightElement = heap[rightIndex]
+                if (isHigherPriority(rightElement, childElement)) {
+                    childIndex = rightIndex
+                    childElement = rightElement
+                }
             }
             if (!isHigherPriority(childElement, element)) break
             heap[i] = childElement
@@ -378,8 +386,8 @@ public class LongPriorityQueue(private val descending: Boolean) : AbstractLongPr
     public constructor() : this(false)
 
     @JvmOverloads
-    public constructor(initialCapacity: Int, descending: Boolean = false) : this(descending) {
-        ensureCapacity(initialCapacity)
+    public constructor(capacity: Int, descending: Boolean = false) : this(descending) {
+        ensureCapacity(capacity)
     }
 
     @JvmOverloads
@@ -408,10 +416,10 @@ public class LongPriorityQueue(private val descending: Boolean) : AbstractLongPr
  */
 @JvmSynthetic
 public inline fun LongPriorityQueue(
-    initialCapacity: Int = 0,
+    capacity: Int = 0,
     crossinline isHigherPriority: (Long, Long) -> Boolean,
 ): AbstractLongPriorityQueue {
-    return object : AbstractLongPriorityQueue(initialCapacity) {
+    return object : AbstractLongPriorityQueue(capacity) {
         override fun isHigherPriority(element1: Long, element2: Long): Boolean {
             return isHigherPriority(element1, element2)
         }

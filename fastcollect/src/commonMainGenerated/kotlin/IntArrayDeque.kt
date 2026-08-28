@@ -32,7 +32,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
 
     public constructor() : this(EMPTY_ARRAY, size = 0)
 
-    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else IntArray(capacity), 0)
+    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else { require(capacity > 0); IntArray(capacity) }, 0)
 
     public constructor(elements: IntCollection) : this(elements.copyInto(IntArray(elements.size)), size = elements.size)
 

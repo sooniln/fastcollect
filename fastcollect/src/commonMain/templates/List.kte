@@ -69,6 +69,7 @@ public interface Mutable${Type}ListTraverser : ${Type}ListTraverser, Mutable${Ty
     public fun insert(value: ${Type})
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}List.foreachReverse(action: (${Type}) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -79,6 +80,7 @@ public inline fun ${Type}List.foreachReverse(action: (${Type}) -> Unit) {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}ListTraversable.foreachIndexed(action: (Int, ${Type}) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -90,6 +92,7 @@ public inline fun ${Type}ListTraversable.foreachIndexed(action: (Int, ${Type}) -
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Type}List.foreachReverseIndexed(action: (Int, ${Type}) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -140,13 +143,13 @@ public interface ${Type}List : ${Type}Collection, ${Type}ListTraversable {
      * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
      * [destinationOffset], and returns [destination].
      */
-    public fun copyInto(destination: ${Type}Array, destinationOffset: Int = 0, fromIndex: Int, toIndex: Int): ${Type}Array {
+    public fun copyInto(destination: ${Type}Array, destinationOffset: Int, fromIndex: Int, toIndex: Int): ${Type}Array {
         rangeCheck(fromIndex, toIndex)
         val destinationToIndex = destinationOffset + toIndex - fromIndex
         destination.rangeCheck(destinationOffset, destinationToIndex)
 
         val traverser = traverser(fromIndex)
-        for (index in destinationOffset..destinationToIndex) {
+        for (index in destinationOffset..<destinationToIndex) {
             check(traverser.forward())
             destination[index] = traverser.value
         }
@@ -163,6 +166,11 @@ public fun ${Type}List.first(): ${Type} = if (isEmpty()) throw NoSuchElementExce
 
 @JvmSynthetic
 public fun ${Type}List.last(): ${Type} = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
+
+@JvmSynthetic
+public fun ${Type}List.copyInto(destination: ${Type}Array, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): ${Type}Array {
+    return copyInto(destination, destinationOffset, fromIndex, toIndex)
+}
 
 public fun ${Type}List.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=\$index, size=\$size")
@@ -649,7 +657,7 @@ private object Empty${Type}List : Abstract${Type}List(), RandomAccess {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): ${Type}List {
-        if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()
+        rangeCheck(fromIndex, toIndex)
         return Empty${Type}List
     }
 }
@@ -673,6 +681,28 @@ private class Singleton${Type}List(private val value: ${Type}) : Abstract${Type}
 private class ${Type}ArrayListWrapper(private val array: ${Type}Array): Abstract${Type}List(), RandomAccess {
     override val size: Int get() = array.size
     override fun get(index: Int): ${Type} = array[index]
+
+    override fun iterator(): ${Type}Iterator = object : ${Type}Iterator() {
+        private var index = 0
+        override fun hasNext(): Boolean = index < array.size
+        override fun next${Type}(): ${Type} {
+            if (index >= array.size) throw NoSuchElementException()
+            return array[index++]
+        }
+    }
+
+    override fun traverser(): ${Type}Traverser = object : ${Type}Traverser {
+        private var index = -1
+        override val value: ${Type} get() {
+            check(index >= 0)
+            return array[index]
+        }
+        override fun forward(): Boolean {
+            if (index >= array.lastIndex) return false
+            ++index
+            return true
+        }
+    }
 
     override fun copyInto(destination: ${Type}Array, destinationOffset: Int, fromIndex: Int, toIndex: Int): ${Type}Array {
         rangeCheck(fromIndex, toIndex)

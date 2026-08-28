@@ -48,24 +48,13 @@ public interface Long2AnyTraverser<out V>: Traverser<Long2AnyMap.Entry<V>> {
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: Long2AnyMap.Entry<V> get() = object: Long2AnyMap.AbstractEntry<V>() {
-        override val key: Long get() = this@Long2AnyTraverser.key
-        override val value: V get() = this@Long2AnyTraverser.value
-    }
+    override val element: Long2AnyMap.Entry<V> get() = AbstractLong2AnyMap.SimpleEntry<V>(key, value)
 }
 /**
  * A primitively typed [MutableTraverser] of Long to V tuples.
  */
 public interface MutableLong2AnyTraverser<V> : Long2AnyTraverser<V>, MutableTraverser<Long2AnyMap.Entry<V>> {
     override var value: V
-
-    /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
-    @get:JvmSynthetic
-    override val element: Long2AnyMap.Entry<V> get() = object: Long2AnyMap.AbstractEntry<V>() {
-        override val key: Long = this@MutableLong2AnyTraverser.key
-        override val value: V = this@MutableLong2AnyTraverser.value
-    }
 }
 
 public fun <V> Long2AnyTraverser<V>.asKeyTraverser(): LongTraverser {

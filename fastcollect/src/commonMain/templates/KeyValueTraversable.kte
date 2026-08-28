@@ -48,24 +48,13 @@ public interface ${Name}Traverser${OutGenerics}: Traverser<${Name}Map.Entry${Gen
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: ${Name}Map.Entry${Generics} get() = object: ${Name}Map.AbstractEntry${Generics}() {
-        override val key: ${KeyType} get() = this@${Name}Traverser.key
-        override val value: ${ValueType} get() = this@${Name}Traverser.value
-    }
+    override val element: ${Name}Map.Entry${Generics} get() = Abstract${Name}Map.SimpleEntry${Generics}(key, value)
 }
 /**
  * A primitively typed [MutableTraverser] of ${KeyType} to ${ValueType} tuples.
  */
 public interface Mutable${Name}Traverser${Generics} : ${Name}Traverser${Generics}, MutableTraverser<${Name}Map.Entry${Generics}> {
     override var value: ${ValueType}
-
-    /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
-    @get:JvmSynthetic
-    override val element: ${Name}Map.Entry${Generics} get() = object: ${Name}Map.AbstractEntry${Generics}() {
-        override val key: ${KeyType} = this@Mutable${Name}Traverser.key
-        override val value: ${ValueType} = this@Mutable${Name}Traverser.value
-    }
 }
 
 public fun ${Generics} ${Name}Traverser${Generics}.asKeyTraverser(): ${KeyType}Traverser {

@@ -26,8 +26,12 @@ public class Long2IntHashMap @JvmOverloads constructor(
 
 ) : AbstractMutableLong2IntMap() {
 
-    public constructor(map: Long2IntMap): this() { putAll(map) }
-    public constructor(map: Map<Long, Int>): this() { putAll(map) }
+
+    @JvmOverloads
+    public constructor(map: Long2IntMap, defaultValue: Int = Int.MIN_VALUE): this(defaultValue = defaultValue) { putAll(map) }
+    @JvmOverloads
+    public constructor(map: Map<Long, Int>, defaultValue: Int = Int.MIN_VALUE): this(defaultValue = defaultValue) { putAll(map) }
+
 
     private var keysArr = EMPTY_KEY_ARRAY
 
@@ -373,15 +377,13 @@ public class Long2IntHashMap @JvmOverloads constructor(
                 valuesArr = EMPTY_VALUE_ARRAY
 
                 emptyKey = ZERO
-                threshold = MIN_INITIAL_CAPACITY.inv()
             }
+            threshold = MIN_INITIAL_CAPACITY.inv()
             return
         }
 
         // for small capacities we force loadFactor to 1.0 to save memory (small array scans are likely to be fast)
-        val actualLoadFactor = if (capacity <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
-
-        val newLength = arraySize(capacity, actualLoadFactor)
+        val newLength = arraySize(capacity, loadFactor(capacity))
         if (keysArr.size == newLength) return
 
         val newKeysArr = LongArray(newLength)
@@ -400,7 +402,7 @@ public class Long2IntHashMap @JvmOverloads constructor(
         valuesArr = newValuesArr
 
         // threshold must always maintain the invariant of at least 1 slot being open
-        threshold = min((newLength * actualLoadFactor).toInt(), newMask) - size
+        threshold = min((newLength * loadFactor(newLength)).toInt(), newMask) - size
     }
 
     // we can assume key doesn't exist in array and that we never insert emptyKey
@@ -618,6 +620,8 @@ public class Long2IntHashMap @JvmOverloads constructor(
 
         // we force the load factor to 1.0 up to the size of two cache lines
         private const val FORCE_LOAD_FACTOR_MAX = 2 * CACHE_LINE_SIZE
+
+        private fun loadFactor(size: Int): Double = if (size <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
 
         private fun arraySize(capacity: Int, loadFactor: Double): Int {
             check(capacity >= 0)

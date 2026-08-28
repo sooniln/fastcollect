@@ -69,6 +69,7 @@ public interface MutableFloatListTraverser : FloatListTraverser, MutableFloatTra
     public fun insert(value: Float)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun FloatList.foreachReverse(action: (Float) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -79,6 +80,7 @@ public inline fun FloatList.foreachReverse(action: (Float) -> Unit) {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun FloatListTraversable.foreachIndexed(action: (Int, Float) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -90,6 +92,7 @@ public inline fun FloatListTraversable.foreachIndexed(action: (Int, Float) -> Un
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun FloatList.foreachReverseIndexed(action: (Int, Float) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -140,13 +143,13 @@ public interface FloatList : FloatCollection, FloatListTraversable {
      * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
      * [destinationOffset], and returns [destination].
      */
-    public fun copyInto(destination: FloatArray, destinationOffset: Int = 0, fromIndex: Int, toIndex: Int): FloatArray {
+    public fun copyInto(destination: FloatArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): FloatArray {
         rangeCheck(fromIndex, toIndex)
         val destinationToIndex = destinationOffset + toIndex - fromIndex
         destination.rangeCheck(destinationOffset, destinationToIndex)
 
         val traverser = traverser(fromIndex)
-        for (index in destinationOffset..destinationToIndex) {
+        for (index in destinationOffset..<destinationToIndex) {
             check(traverser.forward())
             destination[index] = traverser.value
         }
@@ -163,6 +166,11 @@ public fun FloatList.first(): Float = if (isEmpty()) throw NoSuchElementExceptio
 
 @JvmSynthetic
 public fun FloatList.last(): Float = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
+
+@JvmSynthetic
+public fun FloatList.copyInto(destination: FloatArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): FloatArray {
+    return copyInto(destination, destinationOffset, fromIndex, toIndex)
+}
 
 public fun FloatList.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
@@ -649,7 +657,7 @@ private object EmptyFloatList : AbstractFloatList(), RandomAccess {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): FloatList {
-        if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()
+        rangeCheck(fromIndex, toIndex)
         return EmptyFloatList
     }
 }
@@ -673,6 +681,28 @@ private class SingletonFloatList(private val value: Float) : AbstractFloatList()
 private class FloatArrayListWrapper(private val array: FloatArray): AbstractFloatList(), RandomAccess {
     override val size: Int get() = array.size
     override fun get(index: Int): Float = array[index]
+
+    override fun iterator(): FloatIterator = object : FloatIterator() {
+        private var index = 0
+        override fun hasNext(): Boolean = index < array.size
+        override fun nextFloat(): Float {
+            if (index >= array.size) throw NoSuchElementException()
+            return array[index++]
+        }
+    }
+
+    override fun traverser(): FloatTraverser = object : FloatTraverser {
+        private var index = -1
+        override val value: Float get() {
+            check(index >= 0)
+            return array[index]
+        }
+        override fun forward(): Boolean {
+            if (index >= array.lastIndex) return false
+            ++index
+            return true
+        }
+    }
 
     override fun copyInto(destination: FloatArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): FloatArray {
         rangeCheck(fromIndex, toIndex)

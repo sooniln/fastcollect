@@ -69,6 +69,7 @@ public interface MutableIntListTraverser : IntListTraverser, MutableIntTraverser
     public fun insert(value: Int)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun IntList.foreachReverse(action: (Int) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -79,6 +80,7 @@ public inline fun IntList.foreachReverse(action: (Int) -> Unit) {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun IntListTraversable.foreachIndexed(action: (Int, Int) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -90,6 +92,7 @@ public inline fun IntListTraversable.foreachIndexed(action: (Int, Int) -> Unit) 
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun IntList.foreachReverseIndexed(action: (Int, Int) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -140,13 +143,13 @@ public interface IntList : IntCollection, IntListTraversable {
      * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
      * [destinationOffset], and returns [destination].
      */
-    public fun copyInto(destination: IntArray, destinationOffset: Int = 0, fromIndex: Int, toIndex: Int): IntArray {
+    public fun copyInto(destination: IntArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): IntArray {
         rangeCheck(fromIndex, toIndex)
         val destinationToIndex = destinationOffset + toIndex - fromIndex
         destination.rangeCheck(destinationOffset, destinationToIndex)
 
         val traverser = traverser(fromIndex)
-        for (index in destinationOffset..destinationToIndex) {
+        for (index in destinationOffset..<destinationToIndex) {
             check(traverser.forward())
             destination[index] = traverser.value
         }
@@ -163,6 +166,11 @@ public fun IntList.first(): Int = if (isEmpty()) throw NoSuchElementException() 
 
 @JvmSynthetic
 public fun IntList.last(): Int = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
+
+@JvmSynthetic
+public fun IntList.copyInto(destination: IntArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): IntArray {
+    return copyInto(destination, destinationOffset, fromIndex, toIndex)
+}
 
 public fun IntList.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
@@ -649,7 +657,7 @@ private object EmptyIntList : AbstractIntList(), RandomAccess {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): IntList {
-        if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()
+        rangeCheck(fromIndex, toIndex)
         return EmptyIntList
     }
 }
@@ -673,6 +681,28 @@ private class SingletonIntList(private val value: Int) : AbstractIntList(), Rand
 private class IntArrayListWrapper(private val array: IntArray): AbstractIntList(), RandomAccess {
     override val size: Int get() = array.size
     override fun get(index: Int): Int = array[index]
+
+    override fun iterator(): IntIterator = object : IntIterator() {
+        private var index = 0
+        override fun hasNext(): Boolean = index < array.size
+        override fun nextInt(): Int {
+            if (index >= array.size) throw NoSuchElementException()
+            return array[index++]
+        }
+    }
+
+    override fun traverser(): IntTraverser = object : IntTraverser {
+        private var index = -1
+        override val value: Int get() {
+            check(index >= 0)
+            return array[index]
+        }
+        override fun forward(): Boolean {
+            if (index >= array.lastIndex) return false
+            ++index
+            return true
+        }
+    }
 
     override fun copyInto(destination: IntArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): IntArray {
         rangeCheck(fromIndex, toIndex)

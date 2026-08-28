@@ -69,6 +69,7 @@ public interface MutableByteListTraverser : ByteListTraverser, MutableByteTraver
     public fun insert(value: Byte)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ByteList.foreachReverse(action: (Byte) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -79,6 +80,7 @@ public inline fun ByteList.foreachReverse(action: (Byte) -> Unit) {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ByteListTraversable.foreachIndexed(action: (Int, Byte) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -90,6 +92,7 @@ public inline fun ByteListTraversable.foreachIndexed(action: (Int, Byte) -> Unit
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ByteList.foreachReverseIndexed(action: (Int, Byte) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -140,13 +143,13 @@ public interface ByteList : ByteCollection, ByteListTraversable {
      * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
      * [destinationOffset], and returns [destination].
      */
-    public fun copyInto(destination: ByteArray, destinationOffset: Int = 0, fromIndex: Int, toIndex: Int): ByteArray {
+    public fun copyInto(destination: ByteArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): ByteArray {
         rangeCheck(fromIndex, toIndex)
         val destinationToIndex = destinationOffset + toIndex - fromIndex
         destination.rangeCheck(destinationOffset, destinationToIndex)
 
         val traverser = traverser(fromIndex)
-        for (index in destinationOffset..destinationToIndex) {
+        for (index in destinationOffset..<destinationToIndex) {
             check(traverser.forward())
             destination[index] = traverser.value
         }
@@ -163,6 +166,11 @@ public fun ByteList.first(): Byte = if (isEmpty()) throw NoSuchElementException(
 
 @JvmSynthetic
 public fun ByteList.last(): Byte = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
+
+@JvmSynthetic
+public fun ByteList.copyInto(destination: ByteArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): ByteArray {
+    return copyInto(destination, destinationOffset, fromIndex, toIndex)
+}
 
 public fun ByteList.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
@@ -649,7 +657,7 @@ private object EmptyByteList : AbstractByteList(), RandomAccess {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): ByteList {
-        if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()
+        rangeCheck(fromIndex, toIndex)
         return EmptyByteList
     }
 }
@@ -673,6 +681,28 @@ private class SingletonByteList(private val value: Byte) : AbstractByteList(), R
 private class ByteArrayListWrapper(private val array: ByteArray): AbstractByteList(), RandomAccess {
     override val size: Int get() = array.size
     override fun get(index: Int): Byte = array[index]
+
+    override fun iterator(): ByteIterator = object : ByteIterator() {
+        private var index = 0
+        override fun hasNext(): Boolean = index < array.size
+        override fun nextByte(): Byte {
+            if (index >= array.size) throw NoSuchElementException()
+            return array[index++]
+        }
+    }
+
+    override fun traverser(): ByteTraverser = object : ByteTraverser {
+        private var index = -1
+        override val value: Byte get() {
+            check(index >= 0)
+            return array[index]
+        }
+        override fun forward(): Boolean {
+            if (index >= array.lastIndex) return false
+            ++index
+            return true
+        }
+    }
 
     override fun copyInto(destination: ByteArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): ByteArray {
         rangeCheck(fromIndex, toIndex)

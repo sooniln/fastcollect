@@ -14,9 +14,8 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun ${Generics} empty${Name}Map(): ${Name}Map${Generics} = Empty${Name}Map as ${Name}Map${Generics}
 
-@Suppress("UNCHECKED_CAST")
 public fun ${Generics} ${lowerName}MapOf(): ${Name}Map${Generics} = Empty${Name}Map as ${Name}Map${Generics}
-public fun ${Generics} ${lowerName}MapOf(entry: Pair<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = Singleton${Name}Map${Generics}(entry.first, entry.second)
+public fun ${Generics} ${lowerName}MapOf(entry: Pair<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = Singleton${Name}Map(entry.first, entry.second)
 public fun ${Generics} ${lowerName}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = ${Name}HashMap${Generics}(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 public fun ${Generics} mutable${Name}MapOf(): Mutable${Name}Map${Generics} = ${Name}HashMap()

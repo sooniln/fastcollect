@@ -32,7 +32,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
 
     public constructor() : this(EMPTY_ARRAY, size = 0)
 
-    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else DoubleArray(capacity), 0)
+    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else { require(capacity > 0); DoubleArray(capacity) }, 0)
 
     public constructor(elements: DoubleCollection) : this(elements.copyInto(DoubleArray(elements.size)), size = elements.size)
 

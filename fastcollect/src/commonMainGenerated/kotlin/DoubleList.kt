@@ -69,6 +69,7 @@ public interface MutableDoubleListTraverser : DoubleListTraverser, MutableDouble
     public fun insert(value: Double)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun DoubleList.foreachReverse(action: (Double) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -79,6 +80,7 @@ public inline fun DoubleList.foreachReverse(action: (Double) -> Unit) {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun DoubleListTraversable.foreachIndexed(action: (Int, Double) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -90,6 +92,7 @@ public inline fun DoubleListTraversable.foreachIndexed(action: (Int, Double) -> 
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun DoubleList.foreachReverseIndexed(action: (Int, Double) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -140,13 +143,13 @@ public interface DoubleList : DoubleCollection, DoubleListTraversable {
      * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
      * [destinationOffset], and returns [destination].
      */
-    public fun copyInto(destination: DoubleArray, destinationOffset: Int = 0, fromIndex: Int, toIndex: Int): DoubleArray {
+    public fun copyInto(destination: DoubleArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): DoubleArray {
         rangeCheck(fromIndex, toIndex)
         val destinationToIndex = destinationOffset + toIndex - fromIndex
         destination.rangeCheck(destinationOffset, destinationToIndex)
 
         val traverser = traverser(fromIndex)
-        for (index in destinationOffset..destinationToIndex) {
+        for (index in destinationOffset..<destinationToIndex) {
             check(traverser.forward())
             destination[index] = traverser.value
         }
@@ -163,6 +166,11 @@ public fun DoubleList.first(): Double = if (isEmpty()) throw NoSuchElementExcept
 
 @JvmSynthetic
 public fun DoubleList.last(): Double = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
+
+@JvmSynthetic
+public fun DoubleList.copyInto(destination: DoubleArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): DoubleArray {
+    return copyInto(destination, destinationOffset, fromIndex, toIndex)
+}
 
 public fun DoubleList.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
@@ -649,7 +657,7 @@ private object EmptyDoubleList : AbstractDoubleList(), RandomAccess {
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): DoubleList {
-        if (fromIndex != 0 || toIndex != 0) throw IndexOutOfBoundsException()
+        rangeCheck(fromIndex, toIndex)
         return EmptyDoubleList
     }
 }
@@ -673,6 +681,28 @@ private class SingletonDoubleList(private val value: Double) : AbstractDoubleLis
 private class DoubleArrayListWrapper(private val array: DoubleArray): AbstractDoubleList(), RandomAccess {
     override val size: Int get() = array.size
     override fun get(index: Int): Double = array[index]
+
+    override fun iterator(): DoubleIterator = object : DoubleIterator() {
+        private var index = 0
+        override fun hasNext(): Boolean = index < array.size
+        override fun nextDouble(): Double {
+            if (index >= array.size) throw NoSuchElementException()
+            return array[index++]
+        }
+    }
+
+    override fun traverser(): DoubleTraverser = object : DoubleTraverser {
+        private var index = -1
+        override val value: Double get() {
+            check(index >= 0)
+            return array[index]
+        }
+        override fun forward(): Boolean {
+            if (index >= array.lastIndex) return false
+            ++index
+            return true
+        }
+    }
 
     override fun copyInto(destination: DoubleArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): DoubleArray {
         rangeCheck(fromIndex, toIndex)

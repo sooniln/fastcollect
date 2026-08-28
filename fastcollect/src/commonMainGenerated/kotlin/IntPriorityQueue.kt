@@ -43,7 +43,7 @@ public inline fun buildIntPriorityQueue(
  * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
  * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
-public abstract class AbstractIntPriorityQueue(initialCapacity: Int): IntCollection {
+public abstract class AbstractIntPriorityQueue(capacity: Int): IntCollection {
 
     public constructor() : this(0)
 
@@ -60,7 +60,11 @@ public abstract class AbstractIntPriorityQueue(initialCapacity: Int): IntCollect
         addAll(elements)
     }
 
-    private var heap: IntArray = if (initialCapacity == 0) EMPTY_ARRAY else IntArray(initialCapacity)
+    init {
+        require(capacity >= 0)
+    }
+
+    private var heap: IntArray = if (capacity == 0) EMPTY_ARRAY else IntArray(capacity)
     final override var size: Int = 0
         private set
 
@@ -169,6 +173,7 @@ public abstract class AbstractIntPriorityQueue(initialCapacity: Int): IntCollect
 
     @JvmOverloads
     public fun addAll(array: IntArray, fromIndex: Int = 0, toIndex: Int = array.size) {
+        array.rangeCheck(fromIndex, toIndex)
         val newSize = size + toIndex - fromIndex
         if (newSize == size) return
 
@@ -340,9 +345,12 @@ public abstract class AbstractIntPriorityQueue(initialCapacity: Int): IntCollect
             var childIndex = 2 * i + 1
             var childElement = heap[childIndex]
             val rightIndex = childIndex + 1
-            if (rightIndex < size && isHigherPriority(heap[rightIndex], childElement)) {
-                childIndex = rightIndex
-                childElement = heap[rightIndex]
+            if (rightIndex < size) {
+                val rightElement = heap[rightIndex]
+                if (isHigherPriority(rightElement, childElement)) {
+                    childIndex = rightIndex
+                    childElement = rightElement
+                }
             }
             if (!isHigherPriority(childElement, element)) break
             heap[i] = childElement
@@ -378,8 +386,8 @@ public class IntPriorityQueue(private val descending: Boolean) : AbstractIntPrio
     public constructor() : this(false)
 
     @JvmOverloads
-    public constructor(initialCapacity: Int, descending: Boolean = false) : this(descending) {
-        ensureCapacity(initialCapacity)
+    public constructor(capacity: Int, descending: Boolean = false) : this(descending) {
+        ensureCapacity(capacity)
     }
 
     @JvmOverloads
@@ -408,10 +416,10 @@ public class IntPriorityQueue(private val descending: Boolean) : AbstractIntPrio
  */
 @JvmSynthetic
 public inline fun IntPriorityQueue(
-    initialCapacity: Int = 0,
+    capacity: Int = 0,
     crossinline isHigherPriority: (Int, Int) -> Boolean,
 ): AbstractIntPriorityQueue {
-    return object : AbstractIntPriorityQueue(initialCapacity) {
+    return object : AbstractIntPriorityQueue(capacity) {
         override fun isHigherPriority(element1: Int, element2: Int): Boolean {
             return isHigherPriority(element1, element2)
         }
