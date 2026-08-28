@@ -12,7 +12,7 @@ import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
-@Suppress("UNCHECKED_CAST", "UNNECESSARY_CAST")
+@Suppress("UNCHECKED_CAST")
 public fun  emptyLong2IntTraverser(): MutableLong2IntTraverser = EmptyLong2IntTraverser as MutableLong2IntTraverser
 
 /**
@@ -174,7 +174,7 @@ public inline fun  Long2IntTraversable.sumOf(selector: (Long, Int) -> Double): D
 private object EmptyLong2IntTraverser : MutableLong2IntTraverser {
 
     override fun forward(): Boolean = false
-    override val key: Nothing get() = throw IllegalStateException()
+    override val key: Long get() = throw IllegalStateException()
 
     override var value: Int
 

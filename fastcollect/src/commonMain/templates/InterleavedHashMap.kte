@@ -24,8 +24,10 @@ public class ${Name}HashMap @JvmOverloads constructor(
     private val defaultValue: ${KVType} = ${DefaultValue},
 ) : AbstractMutable${Name}Map() {
 
+    @JvmOverloads
     public constructor(map: ${Name}Map, defaultValue: ${KVType} = ${DefaultValue}): this(defaultValue = defaultValue) { putAll(map) }
 
+    @JvmOverloads
     public constructor(map: Map<${KVType}, ${KVType}>, defaultValue: ${KVType} = ${DefaultValue}): this(defaultValue = defaultValue) { putAll(map) }
 
     private var kvArr = EMPTY_ARRAY

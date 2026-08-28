@@ -69,6 +69,7 @@ public abstract class Abstract${Type}PriorityQueue(capacity: Int): ${Type}Collec
         private set
 
     public fun ensureCapacity(capacity: Int) {
+        require(capacity >= 0)
         if (capacity > heap.size) grow(capacity)
     }
 

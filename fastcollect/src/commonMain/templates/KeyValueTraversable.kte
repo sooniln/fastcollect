@@ -12,7 +12,7 @@ import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
-@Suppress("UNCHECKED_CAST", "UNNECESSARY_CAST")
+@Suppress("UNCHECKED_CAST")
 public fun ${Generics} empty${Name}Traverser(): Mutable${Name}Traverser${Generics} = Empty${Name}Traverser as Mutable${Name}Traverser${Generics}
 
 /**
@@ -48,7 +48,7 @@ public interface ${Name}Traverser${OutGenerics}: Traverser<${Name}Map.Entry${Gen
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: ${Name}Map.Entry${Generics} get() = Abstract${Name}Map.SimpleEntry${Generics}(key, value)
+    override val element: ${Name}Map.Entry${Generics} get() = Abstract${Name}Map.SimpleEntry(key, value)
 }
 /**
  * A primitively typed [MutableTraverser] of ${KeyType} to ${ValueType} tuples.
@@ -180,14 +180,14 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${K
 }
 
 <% if (isReferenceValue) { %>
-private object Empty${Name}Traverser : Mutable${Name}Traverser<Nothing> {
+private object Empty${Name}Traverser : Mutable${Name}Traverser<Any?> {
 <% } else { %>
 private object Empty${Name}Traverser : Mutable${Name}Traverser {
 <% } %>
     override fun forward(): Boolean = false
-    override val key: Nothing get() = throw IllegalStateException()
+    override val key: ${KeyType} get() = throw IllegalStateException()
 <% if (isReferenceValue) { %>
-    override var value: Nothing
+    override var value: Any?
 <% } else { %>
     override var value: ${ValueType}
 <% } %>

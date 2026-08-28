@@ -14,6 +14,7 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun <V> emptyLong2AnyMap(): Long2AnyMap<V> = EmptyLong2AnyMap as Long2AnyMap<V>
 
+@Suppress("UNCHECKED_CAST")
 public fun <V> long2AnyMapOf(): Long2AnyMap<V> = EmptyLong2AnyMap as Long2AnyMap<V>
 public fun <V> long2AnyMapOf(entry: Pair<Long, V>): Long2AnyMap<V> = SingletonLong2AnyMap(entry.first, entry.second)
 public fun <V> long2AnyMapOf(vararg entries: Pair<Long, V>): Long2AnyMap<V> = Long2AnyHashMap<V>(entries.size).apply { entries.forEach { set(it.first, it.second) } }
@@ -270,29 +271,22 @@ public abstract class AbstractLong2AnyMap<V> : Long2AnyMap<V> {
 public abstract class AbstractMutableLong2AnyMap<V> : AbstractLong2AnyMap<V>(), MutableLong2AnyMap<V>
 
 
-private object EmptyLong2AnyMap : AbstractLong2AnyMap<Nothing>() {
-
-
-    override fun isDefaultValue(value: Nothing?): Boolean = true
+private object EmptyLong2AnyMap : AbstractLong2AnyMap<Any?>() {
 
 
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Long): Boolean = false
-
-    override fun containsValue(value: Nothing): Boolean = false
-    override fun get(key: Long): Nothing? = null
-
-
     override val keys: LongSet get() = emptyLongSet()
 
-    override val values: Collection<Nothing> get() = emptyList()
-    override fun iterator(): Iterator<Long2AnyMap.Entry<Nothing>> = emptyList<Long2AnyMap.Entry<Nothing>>().iterator()
 
-
-
-    override fun traverser(): Long2AnyTraverser<Nothing>  = emptyLong2AnyTraverser()
+    override fun isDefaultValue(value: Any?): Boolean = true
+    override fun containsValue(value: Any?): Boolean = false
+    override fun get(key: Long): Any? = null
+    override val values: Collection<Any?> get() = emptyList()
+    override fun iterator(): Iterator<Long2AnyMap.Entry<Any?>> = emptyList<Long2AnyMap.Entry<Any?>>().iterator()
+    override fun traverser(): Long2AnyTraverser<Any?>  = emptyLong2AnyTraverser()
 
 }
 

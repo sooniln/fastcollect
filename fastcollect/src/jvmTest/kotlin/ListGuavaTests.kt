@@ -18,6 +18,16 @@ private val LIST_FEATURES = arrayOf<Feature<*>>(
     ListFeature.GENERAL_PURPOSE,
 )
 
+// <type>ListOf() and <type>Array.as<Type>List() both hand back read-only implementations - EmptyIntList,
+// SingletonIntList, a defensively copied deque, or the array wrapper - so they only claim the read half of the
+// contract. (The array wrapper reflects later writes to the array it was handed, but exposes no mutators of its
+// own; IntListDefaultsTests covers that aliasing.)
+private val READ_ONLY_LIST_FEATURES = arrayOf<Feature<*>>(
+    CollectionSize.ANY,
+    CollectionFeature.ALLOWS_NULL_QUERIES,
+)
+
+
 // ============================= Byte =============================
 
 private abstract class TestByteListGenerator : TestListGenerator<Byte> {
@@ -170,6 +180,40 @@ class DoubleListGuavaTest {
             })
             .named("DoubleList")
             .withFeatures(*LIST_FEATURES)
+            .createTestSuite()
+    }
+}
+
+// ================= the other IntList implementations =================
+
+// The suites above all run over <type>ArrayDeque. These two reach the immutable and array-backed implementations,
+// which are otherwise never checked against the java.util.List contract. Int is enough: what differs here is the
+// implementation, not the element type.
+
+@RunWith(AllTests::class)
+class ReadOnlyIntListGuavaTest {
+    companion object {
+        @JvmStatic
+        fun suite(): TestSuite = ListTestSuiteBuilder
+            .using(object : TestIntListGenerator() {
+                override fun createList(elements: IntArray): List<Int> = intListOf(*elements).asList()
+            })
+            .named("IntList[read-only]")
+            .withFeatures(*READ_ONLY_LIST_FEATURES)
+            .createTestSuite()
+    }
+}
+
+@RunWith(AllTests::class)
+class ArrayBackedIntListGuavaTest {
+    companion object {
+        @JvmStatic
+        fun suite(): TestSuite = ListTestSuiteBuilder
+            .using(object : TestIntListGenerator() {
+                override fun createList(elements: IntArray): List<Int> = elements.asIntList().asList()
+            })
+            .named("IntList[array-backed]")
+            .withFeatures(*READ_ONLY_LIST_FEATURES)
             .createTestSuite()
     }
 }

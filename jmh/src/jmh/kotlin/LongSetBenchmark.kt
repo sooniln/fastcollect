@@ -1,6 +1,5 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.longs.LongHashSet
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Fork
@@ -139,7 +138,7 @@ open class LongSetBenchmark {
     @Benchmark
     fun naiveCopy(state: RandomState): LongHashSet {
         val copy = LongHashSet()
-        state.set.forEach { key ->
+        state.set.foreach { key ->
             copy.add(key)
         }
         return copy

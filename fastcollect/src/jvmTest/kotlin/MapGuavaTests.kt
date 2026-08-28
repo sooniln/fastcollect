@@ -19,8 +19,9 @@ private val MAP_FEATURES = arrayOf<Feature<*>>(
     MapFeature.GENERAL_PURPOSE,
 )
 
-// Primitive-value maps don't support null as a getOrDefault default value.
-private val SUPPRESSED_MAP_TESTS = listOf(
+// Primitive-value maps can't represent null, so they cannot accept it as a getOrDefault default. The two
+// reference-valued suites deliberately do not suppress these - null is a perfectly good default there.
+private val SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS = listOf(
     MapGetOrDefaultTester::class.java.getMethod("testGetOrDefault_absentNullDefault"),
     MapGetOrDefaultTester::class.java.getMethod("testGetOrDefault_presentNullDefault"),
 )
@@ -69,7 +70,7 @@ class Int2ByteMapGuavaTest {
             })
             .named("Int2ByteMap")
             .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
+            .suppressing(SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS)
             .createTestSuite()
     }
 }
@@ -118,7 +119,7 @@ class Int2IntMapGuavaTest {
             })
             .named("Int2IntMap")
             .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
+            .suppressing(SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS)
             .createTestSuite()
     }
 }
@@ -167,7 +168,7 @@ class Int2LongMapGuavaTest {
             })
             .named("Int2LongMap")
             .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
+            .suppressing(SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS)
             .createTestSuite()
     }
 }
@@ -216,7 +217,7 @@ class Int2FloatMapGuavaTest {
             })
             .named("Int2FloatMap")
             .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
+            .suppressing(SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS)
             .createTestSuite()
     }
 }
@@ -265,7 +266,7 @@ class Int2DoubleMapGuavaTest {
             })
             .named("Int2DoubleMap")
             .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
+            .suppressing(SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS)
             .createTestSuite()
     }
 }
@@ -360,7 +361,7 @@ class Long2ByteMapGuavaTest {
             })
             .named("Long2ByteMap")
             .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
+            .suppressing(SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS)
             .createTestSuite()
     }
 }
@@ -409,7 +410,7 @@ class Long2IntMapGuavaTest {
             })
             .named("Long2IntMap")
             .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
+            .suppressing(SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS)
             .createTestSuite()
     }
 }
@@ -458,7 +459,7 @@ class Long2LongMapGuavaTest {
             })
             .named("Long2LongMap")
             .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
+            .suppressing(SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS)
             .createTestSuite()
     }
 }
@@ -507,7 +508,7 @@ class Long2FloatMapGuavaTest {
             })
             .named("Long2FloatMap")
             .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
+            .suppressing(SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS)
             .createTestSuite()
     }
 }
@@ -556,7 +557,7 @@ class Long2DoubleMapGuavaTest {
             })
             .named("Long2DoubleMap")
             .withFeatures(*MAP_FEATURES)
-            .suppressing(SUPPRESSED_MAP_TESTS)
+            .suppressing(SUPPRESSED_PRIMITIVE_VALUE_MAP_TESTS)
             .createTestSuite()
     }
 }
@@ -604,7 +605,7 @@ class Long2AnyMapGuavaTest {
                     mutableLong2AnyMapOf(*entries.map { it.key to it.value }.toTypedArray()).asMap()
             })
             .named("Long2AnyMap")
-        .withFeatures(*MAP_FEATURES, MapFeature.ALLOWS_NULL_VALUES)
-        .createTestSuite()
+            .withFeatures(*MAP_FEATURES, MapFeature.ALLOWS_NULL_VALUES)
+            .createTestSuite()
     }
 }

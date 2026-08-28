@@ -69,6 +69,7 @@ public abstract class AbstractFloatPriorityQueue(capacity: Int): FloatCollection
         private set
 
     public fun ensureCapacity(capacity: Int) {
+        require(capacity >= 0)
         if (capacity > heap.size) grow(capacity)
     }
 

@@ -14,6 +14,7 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun  emptyLong2DoubleMap(): Long2DoubleMap = EmptyLong2DoubleMap as Long2DoubleMap
 
+@Suppress("UNCHECKED_CAST")
 public fun  long2DoubleMapOf(): Long2DoubleMap = EmptyLong2DoubleMap as Long2DoubleMap
 public fun  long2DoubleMapOf(entry: Pair<Long, Double>): Long2DoubleMap = SingletonLong2DoubleMap(entry.first, entry.second)
 public fun  long2DoubleMapOf(vararg entries: Pair<Long, Double>): Long2DoubleMap = Long2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
@@ -273,25 +274,18 @@ public abstract class AbstractMutableLong2DoubleMap : AbstractLong2DoubleMap(), 
 private object EmptyLong2DoubleMap : AbstractLong2DoubleMap() {
 
 
-    override fun isDefaultValue(value: Double): Boolean = true
-
-
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Long): Boolean = false
-
-    override fun containsValue(value: Double): Boolean = false
-    override fun get(key: Long): Double = Double.NaN
-
-
     override val keys: LongSet get() = emptyLongSet()
 
+
+    override fun isDefaultValue(value: Double): Boolean = true
+    override fun containsValue(value: Double): Boolean = false
+    override fun get(key: Long): Double = Double.NaN
     override val values: DoubleCollection get() = emptyDoubleList()
     override fun iterator(): Iterator<Long2DoubleMap.Entry> = emptyList<Long2DoubleMap.Entry>().iterator()
-
-
-
     override fun traverser(): Long2DoubleTraverser = emptyLong2DoubleTraverser()
 
 }

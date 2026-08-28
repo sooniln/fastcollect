@@ -1,7 +1,5 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.ints.IntHashSet
-import io.github.sooniln.fastcollect.longs.LongHashSet
 import kotlin.random.Random
 
 object KeyGenerators{

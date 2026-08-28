@@ -24,8 +24,10 @@ public class Int2IntHashMap @JvmOverloads constructor(
     private val defaultValue: Int = Int.MIN_VALUE,
 ) : AbstractMutableInt2IntMap() {
 
+    @JvmOverloads
     public constructor(map: Int2IntMap, defaultValue: Int = Int.MIN_VALUE): this(defaultValue = defaultValue) { putAll(map) }
 
+    @JvmOverloads
     public constructor(map: Map<Int, Int>, defaultValue: Int = Int.MIN_VALUE): this(defaultValue = defaultValue) { putAll(map) }
 
     private var kvArr = EMPTY_ARRAY

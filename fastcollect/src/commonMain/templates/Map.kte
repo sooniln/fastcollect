@@ -14,6 +14,7 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun ${Generics} empty${Name}Map(): ${Name}Map${Generics} = Empty${Name}Map as ${Name}Map${Generics}
 
+@Suppress("UNCHECKED_CAST")
 public fun ${Generics} ${lowerName}MapOf(): ${Name}Map${Generics} = Empty${Name}Map as ${Name}Map${Generics}
 public fun ${Generics} ${lowerName}MapOf(entry: Pair<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = Singleton${Name}Map(entry.first, entry.second)
 public fun ${Generics} ${lowerName}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = ${Name}HashMap${Generics}(entries.size).apply { entries.forEach { set(it.first, it.second) } }
@@ -269,42 +270,32 @@ public abstract class Abstract${Name}Map${Generics} : ${Name}Map${Generics} {
 
 public abstract class AbstractMutable${Name}Map${Generics} : Abstract${Name}Map${Generics}(), Mutable${Name}Map${Generics}
 
-<% if (!isReferenceValue) { %>
-private object Empty${Name}Map : Abstract${Name}Map${Generics}() {
+<% if (isReferenceValue) { %>
+private object Empty${Name}Map : Abstract${Name}Map<Any?>() {
 <% } else { %>
-private object Empty${Name}Map : Abstract${Name}Map<Nothing>() {
-<% } %>
-<% if (!isReferenceValue) { %>
-    override fun isDefaultValue(value: ${ValueType}): Boolean = true
-<% } else { %>
-    override fun isDefaultValue(value: Nothing${Nullable}): Boolean = true
+private object Empty${Name}Map : Abstract${Name}Map() {
 <% } %>
 
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: ${KeyType}): Boolean = false
-<% if (!isReferenceValue) { %>
+    override val keys: ${KeyType}Set get() = empty${KeyType}Set()
+
+<% if (isReferenceValue) { %>
+    override fun isDefaultValue(value: Any?): Boolean = true
+    override fun containsValue(value: Any?): Boolean = false
+    override fun get(key: ${KeyType}): Any? = ${DefaultValue}
+    override val values: ${ValueCollectionType}<Any?> get() = emptyList()
+    override fun iterator(): Iterator<${Name}Map.Entry<Any?>> = emptyList<${Name}Map.Entry<Any?>>().iterator()
+    override fun traverser(): ${Name}Traverser<Any?>  = empty${Name}Traverser()
+<% } else { %>
+    override fun isDefaultValue(value: ${ValueType}): Boolean = true
     override fun containsValue(value: ${ValueType}): Boolean = false
     override fun get(key: ${KeyType}): ${ValueType}${Nullable} = ${DefaultValue}
-<% } else { %>
-    override fun containsValue(value: Nothing): Boolean = false
-    override fun get(key: ${KeyType}): Nothing${Nullable} = ${DefaultValue}
-<% } %>
-
-    override val keys: ${KeyType}Set get() = empty${KeyType}Set()
-<% if (!isReferenceValue) { %>
     override val values: ${ValueCollectionType}${Generics} get() = empty${ValueType}List()
     override fun iterator(): Iterator<${Name}Map.Entry> = emptyList<${Name}Map.Entry>().iterator()
-<% } else { %>
-    override val values: ${ValueCollectionType}<Nothing> get() = emptyList()
-    override fun iterator(): Iterator<${Name}Map.Entry<Nothing>> = emptyList<${Name}Map.Entry<Nothing>>().iterator()
-<% } %>
-
-<% if (!isReferenceValue) { %>
     override fun traverser(): ${Name}Traverser = empty${Name}Traverser()
-<% } else { %>
-    override fun traverser(): ${Name}Traverser<Nothing>  = empty${Name}Traverser()
 <% } %>
 }
 

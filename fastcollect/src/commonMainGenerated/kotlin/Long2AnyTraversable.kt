@@ -12,7 +12,7 @@ import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
-@Suppress("UNCHECKED_CAST", "UNNECESSARY_CAST")
+@Suppress("UNCHECKED_CAST")
 public fun <V> emptyLong2AnyTraverser(): MutableLong2AnyTraverser<V> = EmptyLong2AnyTraverser as MutableLong2AnyTraverser<V>
 
 /**
@@ -48,7 +48,7 @@ public interface Long2AnyTraverser<out V>: Traverser<Long2AnyMap.Entry<V>> {
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: Long2AnyMap.Entry<V> get() = AbstractLong2AnyMap.SimpleEntry<V>(key, value)
+    override val element: Long2AnyMap.Entry<V> get() = AbstractLong2AnyMap.SimpleEntry(key, value)
 }
 /**
  * A primitively typed [MutableTraverser] of Long to V tuples.
@@ -171,12 +171,12 @@ public inline fun <V> Long2AnyTraversable<V>.sumOf(selector: (Long, V) -> Double
 }
 
 
-private object EmptyLong2AnyTraverser : MutableLong2AnyTraverser<Nothing> {
+private object EmptyLong2AnyTraverser : MutableLong2AnyTraverser<Any?> {
 
     override fun forward(): Boolean = false
-    override val key: Nothing get() = throw IllegalStateException()
+    override val key: Long get() = throw IllegalStateException()
 
-    override var value: Nothing
+    override var value: Any?
 
         get() = throw IllegalStateException()
         set(_) = throw IllegalStateException()

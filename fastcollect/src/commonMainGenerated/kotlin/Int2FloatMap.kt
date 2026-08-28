@@ -14,6 +14,7 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun  emptyInt2FloatMap(): Int2FloatMap = EmptyInt2FloatMap as Int2FloatMap
 
+@Suppress("UNCHECKED_CAST")
 public fun  int2FloatMapOf(): Int2FloatMap = EmptyInt2FloatMap as Int2FloatMap
 public fun  int2FloatMapOf(entry: Pair<Int, Float>): Int2FloatMap = SingletonInt2FloatMap(entry.first, entry.second)
 public fun  int2FloatMapOf(vararg entries: Pair<Int, Float>): Int2FloatMap = Int2FloatHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
@@ -273,25 +274,18 @@ public abstract class AbstractMutableInt2FloatMap : AbstractInt2FloatMap(), Muta
 private object EmptyInt2FloatMap : AbstractInt2FloatMap() {
 
 
-    override fun isDefaultValue(value: Float): Boolean = true
-
-
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Int): Boolean = false
-
-    override fun containsValue(value: Float): Boolean = false
-    override fun get(key: Int): Float = Float.NaN
-
-
     override val keys: IntSet get() = emptyIntSet()
 
+
+    override fun isDefaultValue(value: Float): Boolean = true
+    override fun containsValue(value: Float): Boolean = false
+    override fun get(key: Int): Float = Float.NaN
     override val values: FloatCollection get() = emptyFloatList()
     override fun iterator(): Iterator<Int2FloatMap.Entry> = emptyList<Int2FloatMap.Entry>().iterator()
-
-
-
     override fun traverser(): Int2FloatTraverser = emptyInt2FloatTraverser()
 
 }

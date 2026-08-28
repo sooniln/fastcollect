@@ -14,6 +14,7 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun  emptyInt2IntMap(): Int2IntMap = EmptyInt2IntMap as Int2IntMap
 
+@Suppress("UNCHECKED_CAST")
 public fun  int2IntMapOf(): Int2IntMap = EmptyInt2IntMap as Int2IntMap
 public fun  int2IntMapOf(entry: Pair<Int, Int>): Int2IntMap = SingletonInt2IntMap(entry.first, entry.second)
 public fun  int2IntMapOf(vararg entries: Pair<Int, Int>): Int2IntMap = Int2IntHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
@@ -273,25 +274,18 @@ public abstract class AbstractMutableInt2IntMap : AbstractInt2IntMap(), MutableI
 private object EmptyInt2IntMap : AbstractInt2IntMap() {
 
 
-    override fun isDefaultValue(value: Int): Boolean = true
-
-
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Int): Boolean = false
-
-    override fun containsValue(value: Int): Boolean = false
-    override fun get(key: Int): Int = Int.MIN_VALUE
-
-
     override val keys: IntSet get() = emptyIntSet()
 
+
+    override fun isDefaultValue(value: Int): Boolean = true
+    override fun containsValue(value: Int): Boolean = false
+    override fun get(key: Int): Int = Int.MIN_VALUE
     override val values: IntCollection get() = emptyIntList()
     override fun iterator(): Iterator<Int2IntMap.Entry> = emptyList<Int2IntMap.Entry>().iterator()
-
-
-
     override fun traverser(): Int2IntTraverser = emptyInt2IntTraverser()
 
 }

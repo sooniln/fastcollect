@@ -14,6 +14,7 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun  emptyLong2ByteMap(): Long2ByteMap = EmptyLong2ByteMap as Long2ByteMap
 
+@Suppress("UNCHECKED_CAST")
 public fun  long2ByteMapOf(): Long2ByteMap = EmptyLong2ByteMap as Long2ByteMap
 public fun  long2ByteMapOf(entry: Pair<Long, Byte>): Long2ByteMap = SingletonLong2ByteMap(entry.first, entry.second)
 public fun  long2ByteMapOf(vararg entries: Pair<Long, Byte>): Long2ByteMap = Long2ByteHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
@@ -273,25 +274,18 @@ public abstract class AbstractMutableLong2ByteMap : AbstractLong2ByteMap(), Muta
 private object EmptyLong2ByteMap : AbstractLong2ByteMap() {
 
 
-    override fun isDefaultValue(value: Byte): Boolean = true
-
-
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Long): Boolean = false
-
-    override fun containsValue(value: Byte): Boolean = false
-    override fun get(key: Long): Byte = Byte.MIN_VALUE
-
-
     override val keys: LongSet get() = emptyLongSet()
 
+
+    override fun isDefaultValue(value: Byte): Boolean = true
+    override fun containsValue(value: Byte): Boolean = false
+    override fun get(key: Long): Byte = Byte.MIN_VALUE
     override val values: ByteCollection get() = emptyByteList()
     override fun iterator(): Iterator<Long2ByteMap.Entry> = emptyList<Long2ByteMap.Entry>().iterator()
-
-
-
     override fun traverser(): Long2ByteTraverser = emptyLong2ByteTraverser()
 
 }

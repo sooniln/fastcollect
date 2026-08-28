@@ -14,6 +14,7 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun  emptyInt2ByteMap(): Int2ByteMap = EmptyInt2ByteMap as Int2ByteMap
 
+@Suppress("UNCHECKED_CAST")
 public fun  int2ByteMapOf(): Int2ByteMap = EmptyInt2ByteMap as Int2ByteMap
 public fun  int2ByteMapOf(entry: Pair<Int, Byte>): Int2ByteMap = SingletonInt2ByteMap(entry.first, entry.second)
 public fun  int2ByteMapOf(vararg entries: Pair<Int, Byte>): Int2ByteMap = Int2ByteHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
@@ -273,25 +274,18 @@ public abstract class AbstractMutableInt2ByteMap : AbstractInt2ByteMap(), Mutabl
 private object EmptyInt2ByteMap : AbstractInt2ByteMap() {
 
 
-    override fun isDefaultValue(value: Byte): Boolean = true
-
-
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Int): Boolean = false
-
-    override fun containsValue(value: Byte): Boolean = false
-    override fun get(key: Int): Byte = Byte.MIN_VALUE
-
-
     override val keys: IntSet get() = emptyIntSet()
 
+
+    override fun isDefaultValue(value: Byte): Boolean = true
+    override fun containsValue(value: Byte): Boolean = false
+    override fun get(key: Int): Byte = Byte.MIN_VALUE
     override val values: ByteCollection get() = emptyByteList()
     override fun iterator(): Iterator<Int2ByteMap.Entry> = emptyList<Int2ByteMap.Entry>().iterator()
-
-
-
     override fun traverser(): Int2ByteTraverser = emptyInt2ByteTraverser()
 
 }

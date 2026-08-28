@@ -14,6 +14,7 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun  emptyLong2IntMap(): Long2IntMap = EmptyLong2IntMap as Long2IntMap
 
+@Suppress("UNCHECKED_CAST")
 public fun  long2IntMapOf(): Long2IntMap = EmptyLong2IntMap as Long2IntMap
 public fun  long2IntMapOf(entry: Pair<Long, Int>): Long2IntMap = SingletonLong2IntMap(entry.first, entry.second)
 public fun  long2IntMapOf(vararg entries: Pair<Long, Int>): Long2IntMap = Long2IntHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
@@ -273,25 +274,18 @@ public abstract class AbstractMutableLong2IntMap : AbstractLong2IntMap(), Mutabl
 private object EmptyLong2IntMap : AbstractLong2IntMap() {
 
 
-    override fun isDefaultValue(value: Int): Boolean = true
-
-
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Long): Boolean = false
-
-    override fun containsValue(value: Int): Boolean = false
-    override fun get(key: Long): Int = Int.MIN_VALUE
-
-
     override val keys: LongSet get() = emptyLongSet()
 
+
+    override fun isDefaultValue(value: Int): Boolean = true
+    override fun containsValue(value: Int): Boolean = false
+    override fun get(key: Long): Int = Int.MIN_VALUE
     override val values: IntCollection get() = emptyIntList()
     override fun iterator(): Iterator<Long2IntMap.Entry> = emptyList<Long2IntMap.Entry>().iterator()
-
-
-
     override fun traverser(): Long2IntTraverser = emptyLong2IntTraverser()
 
 }

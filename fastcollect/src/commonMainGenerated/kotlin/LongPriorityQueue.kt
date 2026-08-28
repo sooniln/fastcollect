@@ -69,6 +69,7 @@ public abstract class AbstractLongPriorityQueue(capacity: Int): LongCollection {
         private set
 
     public fun ensureCapacity(capacity: Int) {
+        require(capacity >= 0)
         if (capacity > heap.size) grow(capacity)
     }
 

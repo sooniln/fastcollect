@@ -1,6 +1,5 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.longs.LongArrayList
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Fork
@@ -85,7 +84,7 @@ open class LongListBenchmark {
     @Benchmark
     fun naiveCopy(state: BaseState): LongArrayList {
         val copy = LongArrayList()
-        state.list.forEach { key -> copy.add(key) }
+        state.list.foreach { key -> copy.add(key) }
         return copy
     }
 

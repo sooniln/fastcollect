@@ -1,6 +1,5 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.ints.IntArrayList
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Fork
@@ -85,7 +84,7 @@ open class IntListBenchmark {
     @Benchmark
     fun naiveCopy(state: BaseState): IntArrayList {
         val copy = IntArrayList()
-        state.list.forEach { key -> copy.add(key) }
+        state.list.foreach { key -> copy.add(key) }
         return copy
     }
 

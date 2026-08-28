@@ -1724,8 +1724,10 @@ public final class io/github/sooniln/fastcollect/Int2IntHashMap : io/github/soon
 	public fun <init> (I)V
 	public fun <init> (II)V
 	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/github/sooniln/fastcollect/Int2IntMap;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/Int2IntMap;I)V
 	public synthetic fun <init> (Lio/github/sooniln/fastcollect/Int2IntMap;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/Map;)V
 	public fun <init> (Ljava/util/Map;I)V
 	public synthetic fun <init> (Ljava/util/Map;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V

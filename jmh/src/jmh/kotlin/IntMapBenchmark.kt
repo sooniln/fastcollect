@@ -1,6 +1,5 @@
 package io.github.sooniln.fastcollect
 
-import io.github.sooniln.fastcollect.ints.Int2IntHashMap
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Fork
@@ -139,7 +138,7 @@ open class IntMapBenchmark {
     @Benchmark
     fun naiveCopy(state: RandomState): Int2IntHashMap {
         val copy = Int2IntHashMap()
-        for ((key, value) in state.map) {
+        state.map.foreach{ key, value ->
             copy[key] = value
         }
         return copy

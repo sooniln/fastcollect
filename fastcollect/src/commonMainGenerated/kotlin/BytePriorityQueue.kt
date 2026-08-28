@@ -69,6 +69,7 @@ public abstract class AbstractBytePriorityQueue(capacity: Int): ByteCollection {
         private set
 
     public fun ensureCapacity(capacity: Int) {
+        require(capacity >= 0)
         if (capacity > heap.size) grow(capacity)
     }
 

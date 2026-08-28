@@ -14,6 +14,7 @@ import kotlin.jvm.JvmSynthetic
 @Suppress("UNCHECKED_CAST")
 public fun  emptyLong2FloatMap(): Long2FloatMap = EmptyLong2FloatMap as Long2FloatMap
 
+@Suppress("UNCHECKED_CAST")
 public fun  long2FloatMapOf(): Long2FloatMap = EmptyLong2FloatMap as Long2FloatMap
 public fun  long2FloatMapOf(entry: Pair<Long, Float>): Long2FloatMap = SingletonLong2FloatMap(entry.first, entry.second)
 public fun  long2FloatMapOf(vararg entries: Pair<Long, Float>): Long2FloatMap = Long2FloatHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
@@ -273,25 +274,18 @@ public abstract class AbstractMutableLong2FloatMap : AbstractLong2FloatMap(), Mu
 private object EmptyLong2FloatMap : AbstractLong2FloatMap() {
 
 
-    override fun isDefaultValue(value: Float): Boolean = true
-
-
     override val size: Int get() = 0
     override fun isEmpty(): Boolean = true
 
     override fun containsKey(key: Long): Boolean = false
-
-    override fun containsValue(value: Float): Boolean = false
-    override fun get(key: Long): Float = Float.NaN
-
-
     override val keys: LongSet get() = emptyLongSet()
 
+
+    override fun isDefaultValue(value: Float): Boolean = true
+    override fun containsValue(value: Float): Boolean = false
+    override fun get(key: Long): Float = Float.NaN
     override val values: FloatCollection get() = emptyFloatList()
     override fun iterator(): Iterator<Long2FloatMap.Entry> = emptyList<Long2FloatMap.Entry>().iterator()
-
-
-
     override fun traverser(): Long2FloatTraverser = emptyLong2FloatTraverser()
 
 }
