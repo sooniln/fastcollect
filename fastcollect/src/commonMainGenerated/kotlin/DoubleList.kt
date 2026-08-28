@@ -401,7 +401,7 @@ public abstract class AbstractDoubleList : AbstractDoubleCollection(), DoubleLis
 
     private inner class ListTraverserImpl(position: Int) : DoubleListTraverser {
         init {
-            require(position in 0..this@AbstractDoubleList.size)
+            indexCheckInclusive(position)
         }
 
         private val size = this@AbstractDoubleList.size
@@ -494,7 +494,7 @@ public abstract class AbstractMutableDoubleList : AbstractDoubleList(), MutableD
 
     private inner class ListTraverserImpl(position: Int) : MutableDoubleListTraverser {
         init {
-            require(position in 0..this@AbstractMutableDoubleList.size)
+            indexCheckInclusive(position)
         }
 
         private var size = this@AbstractMutableDoubleList.size
@@ -613,7 +613,7 @@ private object EmptyDoubleList : AbstractDoubleList(), RandomAccess {
     override fun iterator(): DoubleIterator = emptyDoubleIterator()
     override fun traverser(): DoubleTraverser = EmptyDoubleListTraverser
     override fun traverser(position: Int): DoubleListTraverser {
-        require(position == 0)
+        indexCheckInclusive(position)
         return EmptyDoubleListTraverser
     }
 

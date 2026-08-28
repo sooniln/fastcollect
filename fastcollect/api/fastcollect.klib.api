@@ -124,7 +124,7 @@ abstract interface <#A: kotlin/Any?> io.github.sooniln.fastcollect/MutableInt2An
 
 abstract interface <#A: kotlin/Any?> io.github.sooniln.fastcollect/MutableInt2AnyTraverser : io.github.sooniln.fastcollect/Int2AnyTraverser<#A>, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Int2AnyMap.Entry<#A>> { // io.github.sooniln.fastcollect/MutableInt2AnyTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableInt2AnyTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableInt2AnyMap.MutableEntry<#A> // io.github.sooniln.fastcollect/MutableInt2AnyTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Int2AnyMap.Entry<#A> // io.github.sooniln.fastcollect/MutableInt2AnyTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableInt2AnyTraverser.value|{}value[0]
         abstract fun <get-value>(): #A // io.github.sooniln.fastcollect/MutableInt2AnyTraverser.value.<get-value>|<get-value>(){}[0]
@@ -161,7 +161,7 @@ abstract interface <#A: kotlin/Any?> io.github.sooniln.fastcollect/MutableLong2A
 
 abstract interface <#A: kotlin/Any?> io.github.sooniln.fastcollect/MutableLong2AnyTraverser : io.github.sooniln.fastcollect/Long2AnyTraverser<#A>, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Long2AnyMap.Entry<#A>> { // io.github.sooniln.fastcollect/MutableLong2AnyTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableLong2AnyTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableLong2AnyMap.MutableEntry<#A> // io.github.sooniln.fastcollect/MutableLong2AnyTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Long2AnyMap.Entry<#A> // io.github.sooniln.fastcollect/MutableLong2AnyTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableLong2AnyTraverser.value|{}value[0]
         abstract fun <get-value>(): #A // io.github.sooniln.fastcollect/MutableLong2AnyTraverser.value.<get-value>|<get-value>(){}[0]
@@ -366,9 +366,7 @@ abstract interface io.github.sooniln.fastcollect/DoubleListTraverser : io.github
     abstract fun backward(): kotlin/Boolean // io.github.sooniln.fastcollect/DoubleListTraverser.backward|backward(){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/DoubleSet : io.github.sooniln.fastcollect/DoubleCollection { // io.github.sooniln.fastcollect/DoubleSet|null[0]
-    open fun contains(kotlin/Double): kotlin/Boolean // io.github.sooniln.fastcollect/DoubleSet.contains|contains(kotlin.Double){}[0]
-}
+abstract interface io.github.sooniln.fastcollect/DoubleSet : io.github.sooniln.fastcollect/DoubleCollection // io.github.sooniln.fastcollect/DoubleSet|null[0]
 
 abstract interface io.github.sooniln.fastcollect/DoubleTraversable : io.github.sooniln.fastcollect/Traversable<kotlin/Double> { // io.github.sooniln.fastcollect/DoubleTraversable|null[0]
     abstract fun traverser(): io.github.sooniln.fastcollect/DoubleTraverser // io.github.sooniln.fastcollect/DoubleTraversable.traverser|traverser(){}[0]
@@ -412,9 +410,7 @@ abstract interface io.github.sooniln.fastcollect/FloatListTraverser : io.github.
     abstract fun backward(): kotlin/Boolean // io.github.sooniln.fastcollect/FloatListTraverser.backward|backward(){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/FloatSet : io.github.sooniln.fastcollect/FloatCollection { // io.github.sooniln.fastcollect/FloatSet|null[0]
-    open fun contains(kotlin/Float): kotlin/Boolean // io.github.sooniln.fastcollect/FloatSet.contains|contains(kotlin.Float){}[0]
-}
+abstract interface io.github.sooniln.fastcollect/FloatSet : io.github.sooniln.fastcollect/FloatCollection // io.github.sooniln.fastcollect/FloatSet|null[0]
 
 abstract interface io.github.sooniln.fastcollect/FloatTraversable : io.github.sooniln.fastcollect/Traversable<kotlin/Float> { // io.github.sooniln.fastcollect/FloatTraversable|null[0]
     abstract fun traverser(): io.github.sooniln.fastcollect/FloatTraverser // io.github.sooniln.fastcollect/FloatTraversable.traverser|traverser(){}[0]
@@ -718,9 +714,7 @@ abstract interface io.github.sooniln.fastcollect/IntListTraverser : io.github.so
     abstract fun backward(): kotlin/Boolean // io.github.sooniln.fastcollect/IntListTraverser.backward|backward(){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/IntSet : io.github.sooniln.fastcollect/IntCollection { // io.github.sooniln.fastcollect/IntSet|null[0]
-    open fun contains(kotlin/Int): kotlin/Boolean // io.github.sooniln.fastcollect/IntSet.contains|contains(kotlin.Int){}[0]
-}
+abstract interface io.github.sooniln.fastcollect/IntSet : io.github.sooniln.fastcollect/IntCollection // io.github.sooniln.fastcollect/IntSet|null[0]
 
 abstract interface io.github.sooniln.fastcollect/IntTraversable : io.github.sooniln.fastcollect/Traversable<kotlin/Int> { // io.github.sooniln.fastcollect/IntTraversable|null[0]
     abstract fun traverser(): io.github.sooniln.fastcollect/IntTraverser // io.github.sooniln.fastcollect/IntTraversable.traverser|traverser(){}[0]
@@ -1024,9 +1018,7 @@ abstract interface io.github.sooniln.fastcollect/LongListTraverser : io.github.s
     abstract fun backward(): kotlin/Boolean // io.github.sooniln.fastcollect/LongListTraverser.backward|backward(){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/LongSet : io.github.sooniln.fastcollect/LongCollection { // io.github.sooniln.fastcollect/LongSet|null[0]
-    open fun contains(kotlin/Long): kotlin/Boolean // io.github.sooniln.fastcollect/LongSet.contains|contains(kotlin.Long){}[0]
-}
+abstract interface io.github.sooniln.fastcollect/LongSet : io.github.sooniln.fastcollect/LongCollection // io.github.sooniln.fastcollect/LongSet|null[0]
 
 abstract interface io.github.sooniln.fastcollect/LongTraversable : io.github.sooniln.fastcollect/Traversable<kotlin/Long> { // io.github.sooniln.fastcollect/LongTraversable|null[0]
     abstract fun traverser(): io.github.sooniln.fastcollect/LongTraverser // io.github.sooniln.fastcollect/LongTraversable.traverser|traverser(){}[0]
@@ -1253,7 +1245,7 @@ abstract interface io.github.sooniln.fastcollect/MutableInt2ByteTraversable : io
 
 abstract interface io.github.sooniln.fastcollect/MutableInt2ByteTraverser : io.github.sooniln.fastcollect/Int2ByteTraverser, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Int2ByteMap.Entry> { // io.github.sooniln.fastcollect/MutableInt2ByteTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableInt2ByteTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableInt2ByteMap.MutableEntry // io.github.sooniln.fastcollect/MutableInt2ByteTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Int2ByteMap.Entry // io.github.sooniln.fastcollect/MutableInt2ByteTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableInt2ByteTraverser.value|{}value[0]
         abstract fun <get-value>(): kotlin/Byte // io.github.sooniln.fastcollect/MutableInt2ByteTraverser.value.<get-value>|<get-value>(){}[0]
@@ -1290,7 +1282,7 @@ abstract interface io.github.sooniln.fastcollect/MutableInt2DoubleTraversable : 
 
 abstract interface io.github.sooniln.fastcollect/MutableInt2DoubleTraverser : io.github.sooniln.fastcollect/Int2DoubleTraverser, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Int2DoubleMap.Entry> { // io.github.sooniln.fastcollect/MutableInt2DoubleTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableInt2DoubleTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableInt2DoubleMap.MutableEntry // io.github.sooniln.fastcollect/MutableInt2DoubleTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Int2DoubleMap.Entry // io.github.sooniln.fastcollect/MutableInt2DoubleTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableInt2DoubleTraverser.value|{}value[0]
         abstract fun <get-value>(): kotlin/Double // io.github.sooniln.fastcollect/MutableInt2DoubleTraverser.value.<get-value>|<get-value>(){}[0]
@@ -1327,7 +1319,7 @@ abstract interface io.github.sooniln.fastcollect/MutableInt2FloatTraversable : i
 
 abstract interface io.github.sooniln.fastcollect/MutableInt2FloatTraverser : io.github.sooniln.fastcollect/Int2FloatTraverser, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Int2FloatMap.Entry> { // io.github.sooniln.fastcollect/MutableInt2FloatTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableInt2FloatTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableInt2FloatMap.MutableEntry // io.github.sooniln.fastcollect/MutableInt2FloatTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Int2FloatMap.Entry // io.github.sooniln.fastcollect/MutableInt2FloatTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableInt2FloatTraverser.value|{}value[0]
         abstract fun <get-value>(): kotlin/Float // io.github.sooniln.fastcollect/MutableInt2FloatTraverser.value.<get-value>|<get-value>(){}[0]
@@ -1364,7 +1356,7 @@ abstract interface io.github.sooniln.fastcollect/MutableInt2IntTraversable : io.
 
 abstract interface io.github.sooniln.fastcollect/MutableInt2IntTraverser : io.github.sooniln.fastcollect/Int2IntTraverser, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Int2IntMap.Entry> { // io.github.sooniln.fastcollect/MutableInt2IntTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableInt2IntTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableInt2IntMap.MutableEntry // io.github.sooniln.fastcollect/MutableInt2IntTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Int2IntMap.Entry // io.github.sooniln.fastcollect/MutableInt2IntTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableInt2IntTraverser.value|{}value[0]
         abstract fun <get-value>(): kotlin/Int // io.github.sooniln.fastcollect/MutableInt2IntTraverser.value.<get-value>|<get-value>(){}[0]
@@ -1401,7 +1393,7 @@ abstract interface io.github.sooniln.fastcollect/MutableInt2LongTraversable : io
 
 abstract interface io.github.sooniln.fastcollect/MutableInt2LongTraverser : io.github.sooniln.fastcollect/Int2LongTraverser, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Int2LongMap.Entry> { // io.github.sooniln.fastcollect/MutableInt2LongTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableInt2LongTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableInt2LongMap.MutableEntry // io.github.sooniln.fastcollect/MutableInt2LongTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Int2LongMap.Entry // io.github.sooniln.fastcollect/MutableInt2LongTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableInt2LongTraverser.value|{}value[0]
         abstract fun <get-value>(): kotlin/Long // io.github.sooniln.fastcollect/MutableInt2LongTraverser.value.<get-value>|<get-value>(){}[0]
@@ -1500,7 +1492,7 @@ abstract interface io.github.sooniln.fastcollect/MutableLong2ByteTraversable : i
 
 abstract interface io.github.sooniln.fastcollect/MutableLong2ByteTraverser : io.github.sooniln.fastcollect/Long2ByteTraverser, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Long2ByteMap.Entry> { // io.github.sooniln.fastcollect/MutableLong2ByteTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableLong2ByteTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableLong2ByteMap.MutableEntry // io.github.sooniln.fastcollect/MutableLong2ByteTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Long2ByteMap.Entry // io.github.sooniln.fastcollect/MutableLong2ByteTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableLong2ByteTraverser.value|{}value[0]
         abstract fun <get-value>(): kotlin/Byte // io.github.sooniln.fastcollect/MutableLong2ByteTraverser.value.<get-value>|<get-value>(){}[0]
@@ -1537,7 +1529,7 @@ abstract interface io.github.sooniln.fastcollect/MutableLong2DoubleTraversable :
 
 abstract interface io.github.sooniln.fastcollect/MutableLong2DoubleTraverser : io.github.sooniln.fastcollect/Long2DoubleTraverser, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Long2DoubleMap.Entry> { // io.github.sooniln.fastcollect/MutableLong2DoubleTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableLong2DoubleTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableLong2DoubleMap.MutableEntry // io.github.sooniln.fastcollect/MutableLong2DoubleTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Long2DoubleMap.Entry // io.github.sooniln.fastcollect/MutableLong2DoubleTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableLong2DoubleTraverser.value|{}value[0]
         abstract fun <get-value>(): kotlin/Double // io.github.sooniln.fastcollect/MutableLong2DoubleTraverser.value.<get-value>|<get-value>(){}[0]
@@ -1574,7 +1566,7 @@ abstract interface io.github.sooniln.fastcollect/MutableLong2FloatTraversable : 
 
 abstract interface io.github.sooniln.fastcollect/MutableLong2FloatTraverser : io.github.sooniln.fastcollect/Long2FloatTraverser, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Long2FloatMap.Entry> { // io.github.sooniln.fastcollect/MutableLong2FloatTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableLong2FloatTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableLong2FloatMap.MutableEntry // io.github.sooniln.fastcollect/MutableLong2FloatTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Long2FloatMap.Entry // io.github.sooniln.fastcollect/MutableLong2FloatTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableLong2FloatTraverser.value|{}value[0]
         abstract fun <get-value>(): kotlin/Float // io.github.sooniln.fastcollect/MutableLong2FloatTraverser.value.<get-value>|<get-value>(){}[0]
@@ -1611,7 +1603,7 @@ abstract interface io.github.sooniln.fastcollect/MutableLong2IntTraversable : io
 
 abstract interface io.github.sooniln.fastcollect/MutableLong2IntTraverser : io.github.sooniln.fastcollect/Long2IntTraverser, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Long2IntMap.Entry> { // io.github.sooniln.fastcollect/MutableLong2IntTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableLong2IntTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableLong2IntMap.MutableEntry // io.github.sooniln.fastcollect/MutableLong2IntTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Long2IntMap.Entry // io.github.sooniln.fastcollect/MutableLong2IntTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableLong2IntTraverser.value|{}value[0]
         abstract fun <get-value>(): kotlin/Int // io.github.sooniln.fastcollect/MutableLong2IntTraverser.value.<get-value>|<get-value>(){}[0]
@@ -1648,7 +1640,7 @@ abstract interface io.github.sooniln.fastcollect/MutableLong2LongTraversable : i
 
 abstract interface io.github.sooniln.fastcollect/MutableLong2LongTraverser : io.github.sooniln.fastcollect/Long2LongTraverser, io.github.sooniln.fastcollect/MutableTraverser<io.github.sooniln.fastcollect/Long2LongMap.Entry> { // io.github.sooniln.fastcollect/MutableLong2LongTraverser|null[0]
     open val element // io.github.sooniln.fastcollect/MutableLong2LongTraverser.element|{}element[0]
-        open fun <get-element>(): io.github.sooniln.fastcollect/MutableLong2LongMap.MutableEntry // io.github.sooniln.fastcollect/MutableLong2LongTraverser.element.<get-element>|<get-element>(){}[0]
+        open fun <get-element>(): io.github.sooniln.fastcollect/Long2LongMap.Entry // io.github.sooniln.fastcollect/MutableLong2LongTraverser.element.<get-element>|<get-element>(){}[0]
 
     abstract var value // io.github.sooniln.fastcollect/MutableLong2LongTraverser.value|{}value[0]
         abstract fun <get-value>(): kotlin/Long // io.github.sooniln.fastcollect/MutableLong2LongTraverser.value.<get-value>|<get-value>(){}[0]
@@ -1777,10 +1769,11 @@ abstract class io.github.sooniln.fastcollect/AbstractByteList : io.github.soonil
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractBytePriorityQueue : io.github.sooniln.fastcollect/ByteCollection { // io.github.sooniln.fastcollect/AbstractBytePriorityQueue|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/AbstractBytePriorityQueue.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/ByteCollection) // io.github.sooniln.fastcollect/AbstractBytePriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.ByteCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Byte>) // io.github.sooniln.fastcollect/AbstractBytePriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Byte>){}[0]
     constructor <init>(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractBytePriorityQueue.<init>|<init>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractBytePriorityQueue.<init>|<init>(kotlin.Int){}[0]
+    constructor <init>(kotlin/Int) // io.github.sooniln.fastcollect/AbstractBytePriorityQueue.<init>|<init>(kotlin.Int){}[0]
 
     final var size // io.github.sooniln.fastcollect/AbstractBytePriorityQueue.size|{}size[0]
         final fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/AbstractBytePriorityQueue.size.<get-size>|<get-size>(){}[0]
@@ -1829,10 +1822,11 @@ abstract class io.github.sooniln.fastcollect/AbstractDoubleList : io.github.soon
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractDoublePriorityQueue : io.github.sooniln.fastcollect/DoubleCollection { // io.github.sooniln.fastcollect/AbstractDoublePriorityQueue|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/AbstractDoublePriorityQueue.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/DoubleCollection) // io.github.sooniln.fastcollect/AbstractDoublePriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.DoubleCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Double>) // io.github.sooniln.fastcollect/AbstractDoublePriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Double>){}[0]
     constructor <init>(kotlin/DoubleArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractDoublePriorityQueue.<init>|<init>(kotlin.DoubleArray;kotlin.Int;kotlin.Int){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractDoublePriorityQueue.<init>|<init>(kotlin.Int){}[0]
+    constructor <init>(kotlin/Int) // io.github.sooniln.fastcollect/AbstractDoublePriorityQueue.<init>|<init>(kotlin.Int){}[0]
 
     final var size // io.github.sooniln.fastcollect/AbstractDoublePriorityQueue.size|{}size[0]
         final fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/AbstractDoublePriorityQueue.size.<get-size>|<get-size>(){}[0]
@@ -1888,10 +1882,11 @@ abstract class io.github.sooniln.fastcollect/AbstractFloatList : io.github.sooni
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractFloatPriorityQueue : io.github.sooniln.fastcollect/FloatCollection { // io.github.sooniln.fastcollect/AbstractFloatPriorityQueue|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/AbstractFloatPriorityQueue.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/FloatCollection) // io.github.sooniln.fastcollect/AbstractFloatPriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.FloatCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Float>) // io.github.sooniln.fastcollect/AbstractFloatPriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Float>){}[0]
     constructor <init>(kotlin/FloatArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractFloatPriorityQueue.<init>|<init>(kotlin.FloatArray;kotlin.Int;kotlin.Int){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractFloatPriorityQueue.<init>|<init>(kotlin.Int){}[0]
+    constructor <init>(kotlin/Int) // io.github.sooniln.fastcollect/AbstractFloatPriorityQueue.<init>|<init>(kotlin.Int){}[0]
 
     final var size // io.github.sooniln.fastcollect/AbstractFloatPriorityQueue.size|{}size[0]
         final fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/AbstractFloatPriorityQueue.size.<get-size>|<get-size>(){}[0]
@@ -2032,9 +2027,10 @@ abstract class io.github.sooniln.fastcollect/AbstractIntList : io.github.sooniln
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractIntPriorityQueue : io.github.sooniln.fastcollect/IntCollection { // io.github.sooniln.fastcollect/AbstractIntPriorityQueue|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/AbstractIntPriorityQueue.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/IntCollection) // io.github.sooniln.fastcollect/AbstractIntPriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.IntCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Int>) // io.github.sooniln.fastcollect/AbstractIntPriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Int>){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractIntPriorityQueue.<init>|<init>(kotlin.Int){}[0]
+    constructor <init>(kotlin/Int) // io.github.sooniln.fastcollect/AbstractIntPriorityQueue.<init>|<init>(kotlin.Int){}[0]
     constructor <init>(kotlin/IntArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractIntPriorityQueue.<init>|<init>(kotlin.IntArray;kotlin.Int;kotlin.Int){}[0]
 
     final var size // io.github.sooniln.fastcollect/AbstractIntPriorityQueue.size|{}size[0]
@@ -2176,9 +2172,10 @@ abstract class io.github.sooniln.fastcollect/AbstractLongList : io.github.soonil
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractLongPriorityQueue : io.github.sooniln.fastcollect/LongCollection { // io.github.sooniln.fastcollect/AbstractLongPriorityQueue|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/AbstractLongPriorityQueue.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/LongCollection) // io.github.sooniln.fastcollect/AbstractLongPriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.LongCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Long>) // io.github.sooniln.fastcollect/AbstractLongPriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Long>){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractLongPriorityQueue.<init>|<init>(kotlin.Int){}[0]
+    constructor <init>(kotlin/Int) // io.github.sooniln.fastcollect/AbstractLongPriorityQueue.<init>|<init>(kotlin.Int){}[0]
     constructor <init>(kotlin/LongArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/AbstractLongPriorityQueue.<init>|<init>(kotlin.LongArray;kotlin.Int;kotlin.Int){}[0]
 
     final var size // io.github.sooniln.fastcollect/AbstractLongPriorityQueue.size|{}size[0]
@@ -2239,9 +2236,6 @@ abstract class io.github.sooniln.fastcollect/AbstractMutableDoubleList : io.gith
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableDoubleSet : io.github.sooniln.fastcollect/AbstractDoubleSet, io.github.sooniln.fastcollect/MutableDoubleSet { // io.github.sooniln.fastcollect/AbstractMutableDoubleSet|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableDoubleSet.<init>|<init>(){}[0]
-
-    open fun removeAll(kotlin.collections/Collection<kotlin/Double>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableDoubleSet.removeAll|removeAll(kotlin.collections.Collection<kotlin.Double>){}[0]
-    open fun retainAll(kotlin.collections/Collection<kotlin/Double>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableDoubleSet.retainAll|retainAll(kotlin.collections.Collection<kotlin.Double>){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableFloatList : io.github.sooniln.fastcollect/AbstractFloatList, io.github.sooniln.fastcollect/MutableFloatList { // io.github.sooniln.fastcollect/AbstractMutableFloatList|null[0]
@@ -2256,9 +2250,6 @@ abstract class io.github.sooniln.fastcollect/AbstractMutableFloatList : io.githu
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableFloatSet : io.github.sooniln.fastcollect/AbstractFloatSet, io.github.sooniln.fastcollect/MutableFloatSet { // io.github.sooniln.fastcollect/AbstractMutableFloatSet|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableFloatSet.<init>|<init>(){}[0]
-
-    open fun removeAll(kotlin.collections/Collection<kotlin/Float>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableFloatSet.removeAll|removeAll(kotlin.collections.Collection<kotlin.Float>){}[0]
-    open fun retainAll(kotlin.collections/Collection<kotlin/Float>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableFloatSet.retainAll|retainAll(kotlin.collections.Collection<kotlin.Float>){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableInt2ByteMap : io.github.sooniln.fastcollect/AbstractInt2ByteMap, io.github.sooniln.fastcollect/MutableInt2ByteMap { // io.github.sooniln.fastcollect/AbstractMutableInt2ByteMap|null[0]
@@ -2293,9 +2284,6 @@ abstract class io.github.sooniln.fastcollect/AbstractMutableIntList : io.github.
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableIntSet : io.github.sooniln.fastcollect/AbstractIntSet, io.github.sooniln.fastcollect/MutableIntSet { // io.github.sooniln.fastcollect/AbstractMutableIntSet|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableIntSet.<init>|<init>(){}[0]
-
-    open fun removeAll(kotlin.collections/Collection<kotlin/Int>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableIntSet.removeAll|removeAll(kotlin.collections.Collection<kotlin.Int>){}[0]
-    open fun retainAll(kotlin.collections/Collection<kotlin/Int>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableIntSet.retainAll|retainAll(kotlin.collections.Collection<kotlin.Int>){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableLong2ByteMap : io.github.sooniln.fastcollect/AbstractLong2ByteMap, io.github.sooniln.fastcollect/MutableLong2ByteMap { // io.github.sooniln.fastcollect/AbstractMutableLong2ByteMap|null[0]
@@ -2330,9 +2318,6 @@ abstract class io.github.sooniln.fastcollect/AbstractMutableLongList : io.github
 
 abstract class io.github.sooniln.fastcollect/AbstractMutableLongSet : io.github.sooniln.fastcollect/AbstractLongSet, io.github.sooniln.fastcollect/MutableLongSet { // io.github.sooniln.fastcollect/AbstractMutableLongSet|null[0]
     constructor <init>() // io.github.sooniln.fastcollect/AbstractMutableLongSet.<init>|<init>(){}[0]
-
-    open fun removeAll(kotlin.collections/Collection<kotlin/Long>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongSet.removeAll|removeAll(kotlin.collections.Collection<kotlin.Long>){}[0]
-    open fun retainAll(kotlin.collections/Collection<kotlin/Long>): kotlin/Boolean // io.github.sooniln.fastcollect/AbstractMutableLongSet.retainAll|retainAll(kotlin.collections.Collection<kotlin.Long>){}[0]
 }
 
 abstract class io.github.sooniln.fastcollect/MutableByteIterator : kotlin.collections/ByteIterator, kotlin.collections/MutableIterator<kotlin/Byte> { // io.github.sooniln.fastcollect/MutableByteIterator|null[0]
@@ -2426,10 +2411,11 @@ final class <#A: kotlin/Any?> io.github.sooniln.fastcollect/Long2AnyHashMap : io
 }
 
 final class io.github.sooniln.fastcollect/ByteArrayDeque : io.github.sooniln.fastcollect/AbstractMutableByteList, kotlin.collections/RandomAccess { // io.github.sooniln.fastcollect/ByteArrayDeque|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/ByteArrayDeque.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/ByteCollection) // io.github.sooniln.fastcollect/ByteArrayDeque.<init>|<init>(io.github.sooniln.fastcollect.ByteCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Byte>) // io.github.sooniln.fastcollect/ByteArrayDeque.<init>|<init>(kotlin.collections.Collection<kotlin.Byte>){}[0]
     constructor <init>(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/ByteArrayDeque.<init>|<init>(kotlin.ByteArray;kotlin.Int;kotlin.Int){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/ByteArrayDeque.<init>|<init>(kotlin.Int){}[0]
+    constructor <init>(kotlin/Int) // io.github.sooniln.fastcollect/ByteArrayDeque.<init>|<init>(kotlin.Int){}[0]
 
     final var size // io.github.sooniln.fastcollect/ByteArrayDeque.size|{}size[0]
         final fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/ByteArrayDeque.size.<get-size>|<get-size>(){}[0]
@@ -2468,17 +2454,20 @@ final class io.github.sooniln.fastcollect/ByteArrayDeque : io.github.sooniln.fas
 }
 
 final class io.github.sooniln.fastcollect/BytePriorityQueue : io.github.sooniln.fastcollect/AbstractBytePriorityQueue { // io.github.sooniln.fastcollect/BytePriorityQueue|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/BytePriorityQueue.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/ByteCollection, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/BytePriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.ByteCollection;kotlin.Boolean){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Byte>, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/BytePriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Byte>;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean) // io.github.sooniln.fastcollect/BytePriorityQueue.<init>|<init>(kotlin.Boolean){}[0]
     constructor <init>(kotlin/ByteArray, kotlin/Int = ..., kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/BytePriorityQueue.<init>|<init>(kotlin.ByteArray;kotlin.Int;kotlin.Int;kotlin.Boolean){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/BytePriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Int, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/BytePriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
 }
 
 final class io.github.sooniln.fastcollect/DoubleArrayDeque : io.github.sooniln.fastcollect/AbstractMutableDoubleList, kotlin.collections/RandomAccess { // io.github.sooniln.fastcollect/DoubleArrayDeque|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/DoubleArrayDeque.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/DoubleCollection) // io.github.sooniln.fastcollect/DoubleArrayDeque.<init>|<init>(io.github.sooniln.fastcollect.DoubleCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Double>) // io.github.sooniln.fastcollect/DoubleArrayDeque.<init>|<init>(kotlin.collections.Collection<kotlin.Double>){}[0]
     constructor <init>(kotlin/DoubleArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/DoubleArrayDeque.<init>|<init>(kotlin.DoubleArray;kotlin.Int;kotlin.Int){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/DoubleArrayDeque.<init>|<init>(kotlin.Int){}[0]
+    constructor <init>(kotlin/Int) // io.github.sooniln.fastcollect/DoubleArrayDeque.<init>|<init>(kotlin.Int){}[0]
 
     final var size // io.github.sooniln.fastcollect/DoubleArrayDeque.size|{}size[0]
         final fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/DoubleArrayDeque.size.<get-size>|<get-size>(){}[0]
@@ -2537,17 +2526,20 @@ final class io.github.sooniln.fastcollect/DoubleHashSet : io.github.sooniln.fast
 }
 
 final class io.github.sooniln.fastcollect/DoublePriorityQueue : io.github.sooniln.fastcollect/AbstractDoublePriorityQueue { // io.github.sooniln.fastcollect/DoublePriorityQueue|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/DoublePriorityQueue.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/DoubleCollection, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/DoublePriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.DoubleCollection;kotlin.Boolean){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Double>, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/DoublePriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Double>;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean) // io.github.sooniln.fastcollect/DoublePriorityQueue.<init>|<init>(kotlin.Boolean){}[0]
     constructor <init>(kotlin/DoubleArray, kotlin/Int = ..., kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/DoublePriorityQueue.<init>|<init>(kotlin.DoubleArray;kotlin.Int;kotlin.Int;kotlin.Boolean){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/DoublePriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Int, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/DoublePriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
 }
 
 final class io.github.sooniln.fastcollect/FloatArrayDeque : io.github.sooniln.fastcollect/AbstractMutableFloatList, kotlin.collections/RandomAccess { // io.github.sooniln.fastcollect/FloatArrayDeque|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/FloatArrayDeque.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/FloatCollection) // io.github.sooniln.fastcollect/FloatArrayDeque.<init>|<init>(io.github.sooniln.fastcollect.FloatCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Float>) // io.github.sooniln.fastcollect/FloatArrayDeque.<init>|<init>(kotlin.collections.Collection<kotlin.Float>){}[0]
     constructor <init>(kotlin/FloatArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/FloatArrayDeque.<init>|<init>(kotlin.FloatArray;kotlin.Int;kotlin.Int){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/FloatArrayDeque.<init>|<init>(kotlin.Int){}[0]
+    constructor <init>(kotlin/Int) // io.github.sooniln.fastcollect/FloatArrayDeque.<init>|<init>(kotlin.Int){}[0]
 
     final var size // io.github.sooniln.fastcollect/FloatArrayDeque.size|{}size[0]
         final fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/FloatArrayDeque.size.<get-size>|<get-size>(){}[0]
@@ -2606,10 +2598,12 @@ final class io.github.sooniln.fastcollect/FloatHashSet : io.github.sooniln.fastc
 }
 
 final class io.github.sooniln.fastcollect/FloatPriorityQueue : io.github.sooniln.fastcollect/AbstractFloatPriorityQueue { // io.github.sooniln.fastcollect/FloatPriorityQueue|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/FloatPriorityQueue.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/FloatCollection, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/FloatPriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.FloatCollection;kotlin.Boolean){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Float>, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/FloatPriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Float>;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean) // io.github.sooniln.fastcollect/FloatPriorityQueue.<init>|<init>(kotlin.Boolean){}[0]
     constructor <init>(kotlin/FloatArray, kotlin/Int = ..., kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/FloatPriorityQueue.<init>|<init>(kotlin.FloatArray;kotlin.Int;kotlin.Int;kotlin.Boolean){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/FloatPriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Int, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/FloatPriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
 }
 
 final class io.github.sooniln.fastcollect/Int2ByteHashMap : io.github.sooniln.fastcollect/AbstractMutableInt2ByteMap { // io.github.sooniln.fastcollect/Int2ByteHashMap|null[0]
@@ -2788,9 +2782,10 @@ final class io.github.sooniln.fastcollect/Int2LongHashMap : io.github.sooniln.fa
 }
 
 final class io.github.sooniln.fastcollect/IntArrayDeque : io.github.sooniln.fastcollect/AbstractMutableIntList, kotlin.collections/RandomAccess { // io.github.sooniln.fastcollect/IntArrayDeque|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/IntArrayDeque.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/IntCollection) // io.github.sooniln.fastcollect/IntArrayDeque.<init>|<init>(io.github.sooniln.fastcollect.IntCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Int>) // io.github.sooniln.fastcollect/IntArrayDeque.<init>|<init>(kotlin.collections.Collection<kotlin.Int>){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/IntArrayDeque.<init>|<init>(kotlin.Int){}[0]
+    constructor <init>(kotlin/Int) // io.github.sooniln.fastcollect/IntArrayDeque.<init>|<init>(kotlin.Int){}[0]
     constructor <init>(kotlin/IntArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/IntArrayDeque.<init>|<init>(kotlin.IntArray;kotlin.Int;kotlin.Int){}[0]
 
     final var size // io.github.sooniln.fastcollect/IntArrayDeque.size|{}size[0]
@@ -2850,9 +2845,11 @@ final class io.github.sooniln.fastcollect/IntHashSet : io.github.sooniln.fastcol
 }
 
 final class io.github.sooniln.fastcollect/IntPriorityQueue : io.github.sooniln.fastcollect/AbstractIntPriorityQueue { // io.github.sooniln.fastcollect/IntPriorityQueue|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/IntPriorityQueue.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/IntCollection, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/IntPriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.IntCollection;kotlin.Boolean){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Int>, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/IntPriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Int>;kotlin.Boolean){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/IntPriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean) // io.github.sooniln.fastcollect/IntPriorityQueue.<init>|<init>(kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Int, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/IntPriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
     constructor <init>(kotlin/IntArray, kotlin/Int = ..., kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/IntPriorityQueue.<init>|<init>(kotlin.IntArray;kotlin.Int;kotlin.Int;kotlin.Boolean){}[0]
 }
 
@@ -3032,9 +3029,10 @@ final class io.github.sooniln.fastcollect/Long2LongHashMap : io.github.sooniln.f
 }
 
 final class io.github.sooniln.fastcollect/LongArrayDeque : io.github.sooniln.fastcollect/AbstractMutableLongList, kotlin.collections/RandomAccess { // io.github.sooniln.fastcollect/LongArrayDeque|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/LongArrayDeque.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/LongCollection) // io.github.sooniln.fastcollect/LongArrayDeque.<init>|<init>(io.github.sooniln.fastcollect.LongCollection){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Long>) // io.github.sooniln.fastcollect/LongArrayDeque.<init>|<init>(kotlin.collections.Collection<kotlin.Long>){}[0]
-    constructor <init>(kotlin/Int = ...) // io.github.sooniln.fastcollect/LongArrayDeque.<init>|<init>(kotlin.Int){}[0]
+    constructor <init>(kotlin/Int) // io.github.sooniln.fastcollect/LongArrayDeque.<init>|<init>(kotlin.Int){}[0]
     constructor <init>(kotlin/LongArray, kotlin/Int = ..., kotlin/Int = ...) // io.github.sooniln.fastcollect/LongArrayDeque.<init>|<init>(kotlin.LongArray;kotlin.Int;kotlin.Int){}[0]
 
     final var size // io.github.sooniln.fastcollect/LongArrayDeque.size|{}size[0]
@@ -3094,9 +3092,11 @@ final class io.github.sooniln.fastcollect/LongHashSet : io.github.sooniln.fastco
 }
 
 final class io.github.sooniln.fastcollect/LongPriorityQueue : io.github.sooniln.fastcollect/AbstractLongPriorityQueue { // io.github.sooniln.fastcollect/LongPriorityQueue|null[0]
+    constructor <init>() // io.github.sooniln.fastcollect/LongPriorityQueue.<init>|<init>(){}[0]
     constructor <init>(io.github.sooniln.fastcollect/LongCollection, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/LongPriorityQueue.<init>|<init>(io.github.sooniln.fastcollect.LongCollection;kotlin.Boolean){}[0]
     constructor <init>(kotlin.collections/Collection<kotlin/Long>, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/LongPriorityQueue.<init>|<init>(kotlin.collections.Collection<kotlin.Long>;kotlin.Boolean){}[0]
-    constructor <init>(kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/LongPriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean) // io.github.sooniln.fastcollect/LongPriorityQueue.<init>|<init>(kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Int, kotlin/Boolean = ...) // io.github.sooniln.fastcollect/LongPriorityQueue.<init>|<init>(kotlin.Int;kotlin.Boolean){}[0]
     constructor <init>(kotlin/LongArray, kotlin/Int = ..., kotlin/Int = ..., kotlin/Boolean = ...) // io.github.sooniln.fastcollect/LongPriorityQueue.<init>|<init>(kotlin.LongArray;kotlin.Int;kotlin.Int;kotlin.Boolean){}[0]
 }
 
@@ -3287,24 +3287,24 @@ final fun (kotlin/IntArray).io.github.sooniln.fastcollect/asIntList(): io.github
 final fun (kotlin/Long).io.github.sooniln.fastcollect/equalsRaw(kotlin/Long): kotlin/Boolean // io.github.sooniln.fastcollect/equalsRaw|equalsRaw@kotlin.Long(kotlin.Long){}[0]
 final fun (kotlin/Long).io.github.sooniln.fastcollect/notEqualsRaw(kotlin/Long): kotlin/Boolean // io.github.sooniln.fastcollect/notEqualsRaw|notEqualsRaw@kotlin.Long(kotlin.Long){}[0]
 final fun (kotlin/LongArray).io.github.sooniln.fastcollect/asLongList(): io.github.sooniln.fastcollect/LongList // io.github.sooniln.fastcollect/asLongList|asLongList@kotlin.LongArray(){}[0]
-final fun (kotlin/Short).io.github.sooniln.fastcollect/equalsRaw(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/equalsRaw|equalsRaw@kotlin.Short(kotlin.Short){}[0]
-final fun (kotlin/Short).io.github.sooniln.fastcollect/notEqualsRaw(kotlin/Short): kotlin/Boolean // io.github.sooniln.fastcollect/notEqualsRaw|notEqualsRaw@kotlin.Short(kotlin.Short){}[0]
 final fun <#A: kotlin/Any?, #B: kotlin.text/Appendable> (io.github.sooniln.fastcollect/Traversable<#A>).io.github.sooniln.fastcollect/joinTo(#B, kotlin/CharSequence = ..., kotlin/CharSequence = ..., kotlin/CharSequence = ..., kotlin/Int = ..., kotlin/CharSequence = ..., kotlin/Function1<#A, kotlin/CharSequence>? = ...): #B // io.github.sooniln.fastcollect/joinTo|joinTo@io.github.sooniln.fastcollect.Traversable<0:0>(0:1;kotlin.CharSequence;kotlin.CharSequence;kotlin.CharSequence;kotlin.Int;kotlin.CharSequence;kotlin.Function1<0:0,kotlin.CharSequence>?){0§<kotlin.Any?>;1§<kotlin.text.Appendable>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Int2AnyMap.Entry<#A>).io.github.sooniln.fastcollect/asEntry(): kotlin.collections/Map.Entry<kotlin/Int, #A> // io.github.sooniln.fastcollect/asEntry|asEntry@io.github.sooniln.fastcollect.Int2AnyMap.Entry<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Int2AnyMap<#A>).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Int, #A> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Int2AnyMap<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Int2AnyTraverser<#A>).io.github.sooniln.fastcollect/asKeyTraverser(): io.github.sooniln.fastcollect/IntTraverser // io.github.sooniln.fastcollect/asKeyTraverser|asKeyTraverser@io.github.sooniln.fastcollect.Int2AnyTraverser<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Int2AnyTraverser<#A>).io.github.sooniln.fastcollect/asValueTraverser(): io.github.sooniln.fastcollect/Traverser<#A> // io.github.sooniln.fastcollect/asValueTraverser|asValueTraverser@io.github.sooniln.fastcollect.Int2AnyTraverser<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Long2AnyMap.Entry<#A>).io.github.sooniln.fastcollect/asEntry(): kotlin.collections/Map.Entry<kotlin/Long, #A> // io.github.sooniln.fastcollect/asEntry|asEntry@io.github.sooniln.fastcollect.Long2AnyMap.Entry<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Long2AnyMap<#A>).io.github.sooniln.fastcollect/asMap(): kotlin.collections/Map<kotlin/Long, #A> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.Long2AnyMap<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Long2AnyTraverser<#A>).io.github.sooniln.fastcollect/asKeyTraverser(): io.github.sooniln.fastcollect/LongTraverser // io.github.sooniln.fastcollect/asKeyTraverser|asKeyTraverser@io.github.sooniln.fastcollect.Long2AnyTraverser<0:0>(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Long2AnyTraverser<#A>).io.github.sooniln.fastcollect/asValueTraverser(): io.github.sooniln.fastcollect/Traverser<#A> // io.github.sooniln.fastcollect/asValueTraverser|asValueTraverser@io.github.sooniln.fastcollect.Long2AnyTraverser<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/MutableInt2AnyMap.MutableEntry<#A>).io.github.sooniln.fastcollect/asEntry(): kotlin.collections/MutableMap.MutableEntry<kotlin/Int, #A> // io.github.sooniln.fastcollect/asEntry|asEntry@io.github.sooniln.fastcollect.MutableInt2AnyMap.MutableEntry<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/MutableInt2AnyMap<#A>).io.github.sooniln.fastcollect/asMap(): kotlin.collections/MutableMap<kotlin/Int, #A> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.MutableInt2AnyMap<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/MutableLong2AnyMap.MutableEntry<#A>).io.github.sooniln.fastcollect/asEntry(): kotlin.collections/MutableMap.MutableEntry<kotlin/Long, #A> // io.github.sooniln.fastcollect/asEntry|asEntry@io.github.sooniln.fastcollect.MutableLong2AnyMap.MutableEntry<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/MutableLong2AnyMap<#A>).io.github.sooniln.fastcollect/asMap(): kotlin.collections/MutableMap<kotlin/Long, #A> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.MutableLong2AnyMap<0:0>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/Traversable<#A>).io.github.sooniln.fastcollect/joinToString(kotlin/CharSequence = ..., kotlin/CharSequence = ..., kotlin/CharSequence = ..., kotlin/Int = ..., kotlin/CharSequence = ..., kotlin/Function1<#A, kotlin/CharSequence>? = ...): kotlin/String // io.github.sooniln.fastcollect/joinToString|joinToString@io.github.sooniln.fastcollect.Traversable<0:0>(kotlin.CharSequence;kotlin.CharSequence;kotlin.CharSequence;kotlin.Int;kotlin.CharSequence;kotlin.Function1<0:0,kotlin.CharSequence>?){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/emptyInt2AnyMap(): io.github.sooniln.fastcollect/Int2AnyMap<#A> // io.github.sooniln.fastcollect/emptyInt2AnyMap|emptyInt2AnyMap(){0§<kotlin.Any?>}[0]
-final fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/emptyInt2AnyTraverser(): io.github.sooniln.fastcollect/Int2AnyTraverser<#A> // io.github.sooniln.fastcollect/emptyInt2AnyTraverser|emptyInt2AnyTraverser(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/emptyInt2AnyTraverser(): io.github.sooniln.fastcollect/MutableInt2AnyTraverser<#A> // io.github.sooniln.fastcollect/emptyInt2AnyTraverser|emptyInt2AnyTraverser(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/emptyLong2AnyMap(): io.github.sooniln.fastcollect/Long2AnyMap<#A> // io.github.sooniln.fastcollect/emptyLong2AnyMap|emptyLong2AnyMap(){0§<kotlin.Any?>}[0]
-final fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/emptyLong2AnyTraverser(): io.github.sooniln.fastcollect/Long2AnyTraverser<#A> // io.github.sooniln.fastcollect/emptyLong2AnyTraverser|emptyLong2AnyTraverser(){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/emptyLong2AnyTraverser(): io.github.sooniln.fastcollect/MutableLong2AnyTraverser<#A> // io.github.sooniln.fastcollect/emptyLong2AnyTraverser|emptyLong2AnyTraverser(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/int2AnyMapOf(): io.github.sooniln.fastcollect/Int2AnyMap<#A> // io.github.sooniln.fastcollect/int2AnyMapOf|int2AnyMapOf(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/int2AnyMapOf(kotlin/Array<out kotlin/Pair<kotlin/Int, #A>>...): io.github.sooniln.fastcollect/Int2AnyMap<#A> // io.github.sooniln.fastcollect/int2AnyMapOf|int2AnyMapOf(kotlin.Array<out|kotlin.Pair<kotlin.Int,0:0>>...){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> io.github.sooniln.fastcollect/int2AnyMapOf(kotlin/Pair<kotlin/Int, #A>): io.github.sooniln.fastcollect/Int2AnyMap<#A> // io.github.sooniln.fastcollect/int2AnyMapOf|int2AnyMapOf(kotlin.Pair<kotlin.Int,0:0>){0§<kotlin.Any?>}[0]
@@ -3344,29 +3344,29 @@ final fun io.github.sooniln.fastcollect/emptyFloatList(): io.github.sooniln.fast
 final fun io.github.sooniln.fastcollect/emptyFloatSet(): io.github.sooniln.fastcollect/FloatSet // io.github.sooniln.fastcollect/emptyFloatSet|emptyFloatSet(){}[0]
 final fun io.github.sooniln.fastcollect/emptyFloatTraverser(): io.github.sooniln.fastcollect/MutableFloatTraverser // io.github.sooniln.fastcollect/emptyFloatTraverser|emptyFloatTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyInt2ByteMap(): io.github.sooniln.fastcollect/Int2ByteMap // io.github.sooniln.fastcollect/emptyInt2ByteMap|emptyInt2ByteMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyInt2ByteTraverser(): io.github.sooniln.fastcollect/Int2ByteTraverser // io.github.sooniln.fastcollect/emptyInt2ByteTraverser|emptyInt2ByteTraverser(){}[0]
+final fun io.github.sooniln.fastcollect/emptyInt2ByteTraverser(): io.github.sooniln.fastcollect/MutableInt2ByteTraverser // io.github.sooniln.fastcollect/emptyInt2ByteTraverser|emptyInt2ByteTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyInt2DoubleMap(): io.github.sooniln.fastcollect/Int2DoubleMap // io.github.sooniln.fastcollect/emptyInt2DoubleMap|emptyInt2DoubleMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyInt2DoubleTraverser(): io.github.sooniln.fastcollect/Int2DoubleTraverser // io.github.sooniln.fastcollect/emptyInt2DoubleTraverser|emptyInt2DoubleTraverser(){}[0]
+final fun io.github.sooniln.fastcollect/emptyInt2DoubleTraverser(): io.github.sooniln.fastcollect/MutableInt2DoubleTraverser // io.github.sooniln.fastcollect/emptyInt2DoubleTraverser|emptyInt2DoubleTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyInt2FloatMap(): io.github.sooniln.fastcollect/Int2FloatMap // io.github.sooniln.fastcollect/emptyInt2FloatMap|emptyInt2FloatMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyInt2FloatTraverser(): io.github.sooniln.fastcollect/Int2FloatTraverser // io.github.sooniln.fastcollect/emptyInt2FloatTraverser|emptyInt2FloatTraverser(){}[0]
+final fun io.github.sooniln.fastcollect/emptyInt2FloatTraverser(): io.github.sooniln.fastcollect/MutableInt2FloatTraverser // io.github.sooniln.fastcollect/emptyInt2FloatTraverser|emptyInt2FloatTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyInt2IntMap(): io.github.sooniln.fastcollect/Int2IntMap // io.github.sooniln.fastcollect/emptyInt2IntMap|emptyInt2IntMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyInt2IntTraverser(): io.github.sooniln.fastcollect/Int2IntTraverser // io.github.sooniln.fastcollect/emptyInt2IntTraverser|emptyInt2IntTraverser(){}[0]
+final fun io.github.sooniln.fastcollect/emptyInt2IntTraverser(): io.github.sooniln.fastcollect/MutableInt2IntTraverser // io.github.sooniln.fastcollect/emptyInt2IntTraverser|emptyInt2IntTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyInt2LongMap(): io.github.sooniln.fastcollect/Int2LongMap // io.github.sooniln.fastcollect/emptyInt2LongMap|emptyInt2LongMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyInt2LongTraverser(): io.github.sooniln.fastcollect/Int2LongTraverser // io.github.sooniln.fastcollect/emptyInt2LongTraverser|emptyInt2LongTraverser(){}[0]
+final fun io.github.sooniln.fastcollect/emptyInt2LongTraverser(): io.github.sooniln.fastcollect/MutableInt2LongTraverser // io.github.sooniln.fastcollect/emptyInt2LongTraverser|emptyInt2LongTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyIntIterator(): io.github.sooniln.fastcollect/MutableIntIterator // io.github.sooniln.fastcollect/emptyIntIterator|emptyIntIterator(){}[0]
 final fun io.github.sooniln.fastcollect/emptyIntList(): io.github.sooniln.fastcollect/IntList // io.github.sooniln.fastcollect/emptyIntList|emptyIntList(){}[0]
 final fun io.github.sooniln.fastcollect/emptyIntSet(): io.github.sooniln.fastcollect/IntSet // io.github.sooniln.fastcollect/emptyIntSet|emptyIntSet(){}[0]
 final fun io.github.sooniln.fastcollect/emptyIntTraverser(): io.github.sooniln.fastcollect/MutableIntTraverser // io.github.sooniln.fastcollect/emptyIntTraverser|emptyIntTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLong2ByteMap(): io.github.sooniln.fastcollect/Long2ByteMap // io.github.sooniln.fastcollect/emptyLong2ByteMap|emptyLong2ByteMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyLong2ByteTraverser(): io.github.sooniln.fastcollect/Long2ByteTraverser // io.github.sooniln.fastcollect/emptyLong2ByteTraverser|emptyLong2ByteTraverser(){}[0]
+final fun io.github.sooniln.fastcollect/emptyLong2ByteTraverser(): io.github.sooniln.fastcollect/MutableLong2ByteTraverser // io.github.sooniln.fastcollect/emptyLong2ByteTraverser|emptyLong2ByteTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLong2DoubleMap(): io.github.sooniln.fastcollect/Long2DoubleMap // io.github.sooniln.fastcollect/emptyLong2DoubleMap|emptyLong2DoubleMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyLong2DoubleTraverser(): io.github.sooniln.fastcollect/Long2DoubleTraverser // io.github.sooniln.fastcollect/emptyLong2DoubleTraverser|emptyLong2DoubleTraverser(){}[0]
+final fun io.github.sooniln.fastcollect/emptyLong2DoubleTraverser(): io.github.sooniln.fastcollect/MutableLong2DoubleTraverser // io.github.sooniln.fastcollect/emptyLong2DoubleTraverser|emptyLong2DoubleTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLong2FloatMap(): io.github.sooniln.fastcollect/Long2FloatMap // io.github.sooniln.fastcollect/emptyLong2FloatMap|emptyLong2FloatMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyLong2FloatTraverser(): io.github.sooniln.fastcollect/Long2FloatTraverser // io.github.sooniln.fastcollect/emptyLong2FloatTraverser|emptyLong2FloatTraverser(){}[0]
+final fun io.github.sooniln.fastcollect/emptyLong2FloatTraverser(): io.github.sooniln.fastcollect/MutableLong2FloatTraverser // io.github.sooniln.fastcollect/emptyLong2FloatTraverser|emptyLong2FloatTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLong2IntMap(): io.github.sooniln.fastcollect/Long2IntMap // io.github.sooniln.fastcollect/emptyLong2IntMap|emptyLong2IntMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyLong2IntTraverser(): io.github.sooniln.fastcollect/Long2IntTraverser // io.github.sooniln.fastcollect/emptyLong2IntTraverser|emptyLong2IntTraverser(){}[0]
+final fun io.github.sooniln.fastcollect/emptyLong2IntTraverser(): io.github.sooniln.fastcollect/MutableLong2IntTraverser // io.github.sooniln.fastcollect/emptyLong2IntTraverser|emptyLong2IntTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLong2LongMap(): io.github.sooniln.fastcollect/Long2LongMap // io.github.sooniln.fastcollect/emptyLong2LongMap|emptyLong2LongMap(){}[0]
-final fun io.github.sooniln.fastcollect/emptyLong2LongTraverser(): io.github.sooniln.fastcollect/Long2LongTraverser // io.github.sooniln.fastcollect/emptyLong2LongTraverser|emptyLong2LongTraverser(){}[0]
+final fun io.github.sooniln.fastcollect/emptyLong2LongTraverser(): io.github.sooniln.fastcollect/MutableLong2LongTraverser // io.github.sooniln.fastcollect/emptyLong2LongTraverser|emptyLong2LongTraverser(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLongIterator(): io.github.sooniln.fastcollect/MutableLongIterator // io.github.sooniln.fastcollect/emptyLongIterator|emptyLongIterator(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLongList(): io.github.sooniln.fastcollect/LongList // io.github.sooniln.fastcollect/emptyLongList|emptyLongList(){}[0]
 final fun io.github.sooniln.fastcollect/emptyLongSet(): io.github.sooniln.fastcollect/LongSet // io.github.sooniln.fastcollect/emptyLongSet|emptyLongSet(){}[0]
@@ -3635,12 +3635,6 @@ final inline fun (io.github.sooniln.fastcollect/LongTraversable).io.github.sooni
 final inline fun (io.github.sooniln.fastcollect/LongTraversable).io.github.sooniln.fastcollect/sumOf(kotlin/Function1<kotlin/Long, kotlin/Double>): kotlin/Double // io.github.sooniln.fastcollect/sumOf|sumOf@io.github.sooniln.fastcollect.LongTraversable(kotlin.Function1<kotlin.Long,kotlin.Double>){}[0]
 final inline fun (io.github.sooniln.fastcollect/LongTraversable).io.github.sooniln.fastcollect/sumOf(kotlin/Function1<kotlin/Long, kotlin/Int>): kotlin/Int // io.github.sooniln.fastcollect/sumOf|sumOf@io.github.sooniln.fastcollect.LongTraversable(kotlin.Function1<kotlin.Long,kotlin.Int>){}[0]
 final inline fun (io.github.sooniln.fastcollect/LongTraversable).io.github.sooniln.fastcollect/sumOf(kotlin/Function1<kotlin/Long, kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/sumOf|sumOf@io.github.sooniln.fastcollect.LongTraversable(kotlin.Function1<kotlin.Long,kotlin.Long>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableByteCollection).io.github.sooniln.fastcollect/removeAll(kotlin/Function1<kotlin/Byte, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.MutableByteCollection(kotlin.Function1<kotlin.Byte,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableByteCollection).io.github.sooniln.fastcollect/retainAll(kotlin/Function1<kotlin/Byte, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.MutableByteCollection(kotlin.Function1<kotlin.Byte,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableDoubleCollection).io.github.sooniln.fastcollect/removeAll(kotlin/Function1<kotlin/Double, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.MutableDoubleCollection(kotlin.Function1<kotlin.Double,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableDoubleCollection).io.github.sooniln.fastcollect/retainAll(kotlin/Function1<kotlin/Double, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.MutableDoubleCollection(kotlin.Function1<kotlin.Double,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableFloatCollection).io.github.sooniln.fastcollect/removeAll(kotlin/Function1<kotlin/Float, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.MutableFloatCollection(kotlin.Function1<kotlin.Float,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableFloatCollection).io.github.sooniln.fastcollect/retainAll(kotlin/Function1<kotlin/Float, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.MutableFloatCollection(kotlin.Function1<kotlin.Float,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableInt2ByteMap).io.github.sooniln.fastcollect/getOrPut(kotlin/Int, kotlin/Function0<kotlin/Byte>): kotlin/Byte // io.github.sooniln.fastcollect/getOrPut|getOrPut@io.github.sooniln.fastcollect.MutableInt2ByteMap(kotlin.Int;kotlin.Function0<kotlin.Byte>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableInt2ByteMap).io.github.sooniln.fastcollect/merge(kotlin/Int, kotlin/Byte, kotlin/Function2<kotlin/Byte, kotlin/Byte, kotlin/Byte>): kotlin/Byte // io.github.sooniln.fastcollect/merge|merge@io.github.sooniln.fastcollect.MutableInt2ByteMap(kotlin.Int;kotlin.Byte;kotlin.Function2<kotlin.Byte,kotlin.Byte,kotlin.Byte>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableInt2ByteMap).io.github.sooniln.fastcollect/removeOrElse(kotlin/Int, kotlin/Function0<kotlin/Byte>): kotlin/Byte // io.github.sooniln.fastcollect/removeOrElse|removeOrElse@io.github.sooniln.fastcollect.MutableInt2ByteMap(kotlin.Int;kotlin.Function0<kotlin.Byte>){}[0]
@@ -3661,8 +3655,6 @@ final inline fun (io.github.sooniln.fastcollect/MutableInt2LongMap).io.github.so
 final inline fun (io.github.sooniln.fastcollect/MutableInt2LongMap).io.github.sooniln.fastcollect/merge(kotlin/Int, kotlin/Long, kotlin/Function2<kotlin/Long, kotlin/Long, kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/merge|merge@io.github.sooniln.fastcollect.MutableInt2LongMap(kotlin.Int;kotlin.Long;kotlin.Function2<kotlin.Long,kotlin.Long,kotlin.Long>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableInt2LongMap).io.github.sooniln.fastcollect/removeOrElse(kotlin/Int, kotlin/Function0<kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/removeOrElse|removeOrElse@io.github.sooniln.fastcollect.MutableInt2LongMap(kotlin.Int;kotlin.Function0<kotlin.Long>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableInt2LongMap).io.github.sooniln.fastcollect/replaceOrSet(kotlin/Int, kotlin/Long, kotlin/Function0<kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/replaceOrSet|replaceOrSet@io.github.sooniln.fastcollect.MutableInt2LongMap(kotlin.Int;kotlin.Long;kotlin.Function0<kotlin.Long>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableIntCollection).io.github.sooniln.fastcollect/removeAll(kotlin/Function1<kotlin/Int, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.MutableIntCollection(kotlin.Function1<kotlin.Int,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableIntCollection).io.github.sooniln.fastcollect/retainAll(kotlin/Function1<kotlin/Int, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.MutableIntCollection(kotlin.Function1<kotlin.Int,kotlin.Boolean>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableLong2ByteMap).io.github.sooniln.fastcollect/getOrPut(kotlin/Long, kotlin/Function0<kotlin/Byte>): kotlin/Byte // io.github.sooniln.fastcollect/getOrPut|getOrPut@io.github.sooniln.fastcollect.MutableLong2ByteMap(kotlin.Long;kotlin.Function0<kotlin.Byte>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableLong2ByteMap).io.github.sooniln.fastcollect/merge(kotlin/Long, kotlin/Byte, kotlin/Function2<kotlin/Byte, kotlin/Byte, kotlin/Byte>): kotlin/Byte // io.github.sooniln.fastcollect/merge|merge@io.github.sooniln.fastcollect.MutableLong2ByteMap(kotlin.Long;kotlin.Byte;kotlin.Function2<kotlin.Byte,kotlin.Byte,kotlin.Byte>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableLong2ByteMap).io.github.sooniln.fastcollect/removeOrElse(kotlin/Long, kotlin/Function0<kotlin/Byte>): kotlin/Byte // io.github.sooniln.fastcollect/removeOrElse|removeOrElse@io.github.sooniln.fastcollect.MutableLong2ByteMap(kotlin.Long;kotlin.Function0<kotlin.Byte>){}[0]
@@ -3683,8 +3675,6 @@ final inline fun (io.github.sooniln.fastcollect/MutableLong2LongMap).io.github.s
 final inline fun (io.github.sooniln.fastcollect/MutableLong2LongMap).io.github.sooniln.fastcollect/merge(kotlin/Long, kotlin/Long, kotlin/Function2<kotlin/Long, kotlin/Long, kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/merge|merge@io.github.sooniln.fastcollect.MutableLong2LongMap(kotlin.Long;kotlin.Long;kotlin.Function2<kotlin.Long,kotlin.Long,kotlin.Long>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableLong2LongMap).io.github.sooniln.fastcollect/removeOrElse(kotlin/Long, kotlin/Function0<kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/removeOrElse|removeOrElse@io.github.sooniln.fastcollect.MutableLong2LongMap(kotlin.Long;kotlin.Function0<kotlin.Long>){}[0]
 final inline fun (io.github.sooniln.fastcollect/MutableLong2LongMap).io.github.sooniln.fastcollect/replaceOrSet(kotlin/Long, kotlin/Long, kotlin/Function0<kotlin/Long>): kotlin/Long // io.github.sooniln.fastcollect/replaceOrSet|replaceOrSet@io.github.sooniln.fastcollect.MutableLong2LongMap(kotlin.Long;kotlin.Long;kotlin.Function0<kotlin.Long>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableLongCollection).io.github.sooniln.fastcollect/removeAll(kotlin/Function1<kotlin/Long, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/removeAll|removeAll@io.github.sooniln.fastcollect.MutableLongCollection(kotlin.Function1<kotlin.Long,kotlin.Boolean>){}[0]
-final inline fun (io.github.sooniln.fastcollect/MutableLongCollection).io.github.sooniln.fastcollect/retainAll(kotlin/Function1<kotlin/Long, kotlin/Boolean>): kotlin/Boolean // io.github.sooniln.fastcollect/retainAll|retainAll@io.github.sooniln.fastcollect.MutableLongCollection(kotlin.Function1<kotlin.Long,kotlin.Boolean>){}[0]
 final inline fun <#A: kotlin/Any?, #B: kotlin/Any?> (io.github.sooniln.fastcollect/Int2AnyTraversable<#B>).io.github.sooniln.fastcollect/fold(#A, kotlin/Function3<#A, kotlin/Int, #B, #A>): #A // io.github.sooniln.fastcollect/fold|fold@io.github.sooniln.fastcollect.Int2AnyTraversable<0:1>(0:0;kotlin.Function3<0:0,kotlin.Int,0:1,0:0>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
 final inline fun <#A: kotlin/Any?, #B: kotlin/Any?> (io.github.sooniln.fastcollect/Long2AnyTraversable<#B>).io.github.sooniln.fastcollect/fold(#A, kotlin/Function3<#A, kotlin/Long, #B, #A>): #A // io.github.sooniln.fastcollect/fold|fold@io.github.sooniln.fastcollect.Long2AnyTraversable<0:1>(0:0;kotlin.Function3<0:0,kotlin.Long,0:1,0:0>){0§<kotlin.Any?>;1§<kotlin.Any?>}[0]
 final inline fun <#A: kotlin/Any?> (io.github.sooniln.fastcollect/ByteList).io.github.sooniln.fastcollect/foldRight(#A, kotlin/Function2<kotlin/Byte, #A, #A>): #A // io.github.sooniln.fastcollect/foldRight|foldRight@io.github.sooniln.fastcollect.ByteList(0:0;kotlin.Function2<kotlin.Byte,0:0,0:0>){0§<kotlin.Any?>}[0]

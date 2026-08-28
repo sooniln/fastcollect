@@ -12,7 +12,8 @@ import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
-public fun ${Generics} empty${Name}Traverser(): ${Name}Traverser${Generics} = Empty${Name}Traverser
+@Suppress("UNCHECKED_CAST", "UNNECESSARY_CAST")
+public fun ${Generics} empty${Name}Traverser(): Mutable${Name}Traverser${Generics} = Empty${Name}Traverser as Mutable${Name}Traverser${Generics}
 
 /**
  * A primitively typed [Traversable] of ${KeyType} to ${ValueType} tuples.
@@ -30,6 +31,15 @@ public interface Mutable${Name}Traversable${Generics}: MutableTraversable<${Name
 
 /**
  * A primitively typed [Traverser] of ${KeyType} to ${ValueType} tuples.
+ *
+ * How to iterate with a ${Name}Traverser:
+ *
+ * ```kotlin
+ * val traverser = ${lowerName}Map.traverse()
+ * while (traverser.forward()) {
+ *     doSomethingPrimitive(traverser.key, traverser.value)
+ * }
+ * ```
  */
 public interface ${Name}Traverser${OutGenerics}: Traverser<${Name}Map.Entry${Generics}> {
     public val key: ${KeyType}
@@ -52,11 +62,9 @@ public interface Mutable${Name}Traverser${Generics} : ${Name}Traverser${Generics
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: Mutable${Name}Map.MutableEntry${Generics} get() = object: Mutable${Name}Map.AbstractMutableEntry${Generics}() {
-        override val key: ${KeyType} get() = this@Mutable${Name}Traverser.key
-        override var value: ${ValueType}
-            get() = this@Mutable${Name}Traverser.value
-            set(value) { this@Mutable${Name}Traverser.value = value }
+    override val element: ${Name}Map.Entry${Generics} get() = object: ${Name}Map.AbstractEntry${Generics}() {
+        override val key: ${KeyType} = this@Mutable${Name}Traverser.key
+        override val value: ${ValueType} = this@Mutable${Name}Traverser.value
     }
 }
 
@@ -67,7 +75,14 @@ public fun ${Generics} ${Name}Traverser${Generics}.asKeyTraverser(): ${KeyType}T
     }
 }
 
-<% if (!isReferenceValue) { %>
+<% if (isReferenceValue) { %>
+public fun ${Generics} ${Name}Traverser${Generics}.asValueTraverser(): Traverser${Generics} {
+    return object: Traverser${Generics} {
+        override fun forward(): Boolean = this@asValueTraverser.forward()
+        override val element: ${ValueType} get() = this@asValueTraverser.value
+    }
+}
+<% } else { %>
 public fun ${Generics} ${Name}Traverser${Generics}.asValueTraverser(): ${ValueType}Traverser {
     return object: ${ValueType}Traverser {
         override fun forward(): Boolean = this@asValueTraverser.forward()
@@ -76,6 +91,7 @@ public fun ${Generics} ${Name}Traverser${Generics}.asValueTraverser(): ${ValueTy
 }
 <% } %>
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} ${Name}Traversable${Generics}.foreach(
     action: (${KeyType}, ${ValueType}) -> Unit
@@ -88,6 +104,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.foreach(
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} ${Name}Traversable${Generics}.foreachKey(
     action: (${KeyType}) -> Unit
@@ -100,6 +117,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.foreachKey(
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} ${Name}Traversable${Generics}.any(predicate: (${KeyType}, ${ValueType}) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
@@ -108,18 +126,21 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.any(predicate: (${Ke
     return false
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} ${Name}Traversable${Generics}.all(predicate: (${KeyType}, ${ValueType}) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any { key, value -> !predicate(key, value) }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} ${Name}Traversable${Generics}.none(predicate: (${KeyType}, ${ValueType}) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any(predicate)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 <% if (isReferenceValue) { %>
 public inline fun <R, V> ${Name}Traversable<V>.fold(initial: R, operation: (accumulated: R, ${KeyType}, ${ValueType}) -> R): R {
@@ -133,6 +154,7 @@ public inline fun <R> ${Name}Traversable.fold(initial: R, operation: (accumulate
     return accumulated
 }
 
+@JvmSynthetic
 @JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -144,6 +166,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${K
     return sum
 }
 
+@JvmSynthetic
 @JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -155,6 +178,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${K
     return sum
 }
 
+@JvmSynthetic
 @JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -167,11 +191,18 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${K
 }
 
 <% if (isReferenceValue) { %>
-private object Empty${Name}Traverser : ${Name}Traverser<Nothing> {
+private object Empty${Name}Traverser : Mutable${Name}Traverser<Nothing> {
 <% } else { %>
-private object Empty${Name}Traverser : ${Name}Traverser {
+private object Empty${Name}Traverser : Mutable${Name}Traverser {
 <% } %>
     override fun forward(): Boolean = false
     override val key: Nothing get() = throw IllegalStateException()
-    override val value: Nothing get() = throw IllegalStateException()
+<% if (isReferenceValue) { %>
+    override var value: Nothing
+<% } else { %>
+    override var value: ${ValueType}
+<% } %>
+        get() = throw IllegalStateException()
+        set(_) = throw IllegalStateException()
+    override fun remove() = throw IllegalStateException()
 }

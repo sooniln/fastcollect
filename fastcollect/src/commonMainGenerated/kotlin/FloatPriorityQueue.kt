@@ -43,8 +43,11 @@ public inline fun buildFloatPriorityQueue(
  * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
  * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
-public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0): FloatCollection {
+public abstract class AbstractFloatPriorityQueue(initialCapacity: Int): FloatCollection {
 
+    public constructor() : this(0)
+
+    @JvmOverloads
     public constructor(array: FloatArray, fromIndex: Int = 0, toIndex: Int = array.size) : this(0) {
         addAll(array, fromIndex, toIndex)
     }
@@ -82,7 +85,9 @@ public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0): Floa
     }
 
     /**
-     * Returns true if [element1] has higher priority (should be closer to the head of the queue) than [element2].
+     * Returns true if [element1] has higher priority (should be closer to the head of the queue) than [element2]. Be
+     * aware that certain constructors may invoke this function before subclass constructors run / subclass fields are
+     * initialized - plan accordingly.
      */
     protected abstract fun isHigherPriority(element1: Float, element2: Float): Boolean
 
@@ -158,6 +163,7 @@ public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0): Floa
         size = 0
     }
 
+    @JvmOverloads
     public fun addAll(array: FloatArray, fromIndex: Int = 0, toIndex: Int = array.size) {
         val additionalSize = toIndex - fromIndex
         ensureCapacity(size + additionalSize)
@@ -224,10 +230,12 @@ public abstract class AbstractFloatPriorityQueue(initialCapacity: Int = 0): Floa
     }
 
     final override fun iterator(): FloatIterator = object : FloatIterator() {
+        private val size = this@AbstractFloatPriorityQueue.size
         private var index = 0
         override fun hasNext(): Boolean = index < size
         override fun nextFloat(): Float {
             if (!hasNext()) throw NoSuchElementException()
+            if (size != this@AbstractFloatPriorityQueue.size) throw ConcurrentModificationException()
             return heap[index++]
         }
     }
@@ -334,10 +342,12 @@ public fun AbstractFloatPriorityQueue.retainAll(predicate: FloatPredicate): Bool
  * operations and the option to change an element's priority), one can be implemented by subclassing
  * [AbstractFloatPriorityQueue] and implementing [onIndexChanged] to store an element ⟷ index mapping.
  */
-public class FloatPriorityQueue private constructor(private val descending: Boolean) : AbstractFloatPriorityQueue() {
+public class FloatPriorityQueue(private val descending: Boolean) : AbstractFloatPriorityQueue() {
+
+    public constructor() : this(false)
 
     @JvmOverloads
-    public constructor(initialCapacity: Int = 0, descending: Boolean = false) : this(descending) {
+    public constructor(initialCapacity: Int, descending: Boolean = false) : this(descending) {
         ensureCapacity(initialCapacity)
     }
 
@@ -363,7 +373,7 @@ public class FloatPriorityQueue private constructor(private val descending: Bool
 }
 
 /**
- * Returns a priority queue of Floats, using the given comparator.
+ * Returns a priority queue of Floats using the given priority function.
  */
 @JvmSynthetic
 public inline fun FloatPriorityQueue(

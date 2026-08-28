@@ -69,9 +69,9 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     override fun containsValue(value: Int): Boolean {
         val kvArr = kvArr
+        val combined = arrayEntry(emptyEntry.key(), value)
         for (slot in kvArr.indices) {
-            val entry = kvArr[slot]
-            if (entry != emptyEntry && entry.value() equalsRaw value) return true
+            if ((kvArr[slot] xor combined) in 1..VALUE_COMPARE_MASK) return true
         }
         return false
     }
@@ -277,7 +277,6 @@ public class Int2IntHashMap @JvmOverloads constructor(
                     putIfAbsent(entry.key(), entry.value())
                 }
             }
-            trimToSize()
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
             from.foreach { key, value ->
@@ -418,7 +417,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     private open inner class SlotIterator {
         private val kvArr = this@Int2IntHashMap.kvArr
-        private var emptyEntry = this@Int2IntHashMap.emptyEntry
+        private val emptyEntry = this@Int2IntHashMap.emptyEntry
         private val mask = kvArr.size - 1
 
         private var slotsLeft = size
@@ -435,10 +434,12 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
         fun nextSlot() {
             if (slotsLeft <= 0) throw NoSuchElementException()
+            if (kvArr !== this@Int2IntHashMap.kvArr) throw ConcurrentModificationException()
             previousSlot = slot
             if (--slotsLeft > 0) decrement()
         }
 
+        fun slot(): Int = previousSlot
         fun key(): Int = kvArr[previousSlot].key()
         fun value(): Int = kvArr[previousSlot].value()
 
@@ -488,11 +489,13 @@ public class Int2IntHashMap @JvmOverloads constructor(
         override fun next(): MutableInt2IntMap.MutableEntry {
             nextSlot()
             return object: MutableInt2IntMap.AbstractMutableEntry() {
+                private val slot = slot()
                 override val key: Int = key()
                 override var value: Int = value()
                     set(value) {
-                        if (get(key) notEqualsRaw field) throw ConcurrentModificationException()
-                        set(key, value)
+                        val entry = kvArr[slot]
+                        if (entry.key() != key || entry.value() notEqualsRaw field) throw ConcurrentModificationException()
+                        kvArr[slot] = arrayEntry(entry.key(), value)
                         field = value
                     }
             }
@@ -556,6 +559,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
         private const val ZERO_ENTRY = 0.toLong()
 
         private val EMPTY_ARRAY = longArrayOf(ZERO_ENTRY)
+
+        private const val VALUE_COMPARE_MASK: Long = (-1).toLong() ushr (8 * Int.SIZE_BYTES)
 
         private const val MIN_INITIAL_CAPACITY = 7 // may not be zero
 

@@ -1,5 +1,5 @@
 /**
- * Methods for dealing with comparisons.
+ * Methods for dealing with arrays.
  */
 @file:JvmName("ArrayUtils")
 

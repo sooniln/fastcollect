@@ -12,7 +12,8 @@ import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
-public fun  emptyLong2FloatTraverser(): Long2FloatTraverser = EmptyLong2FloatTraverser
+@Suppress("UNCHECKED_CAST", "UNNECESSARY_CAST")
+public fun  emptyLong2FloatTraverser(): MutableLong2FloatTraverser = EmptyLong2FloatTraverser as MutableLong2FloatTraverser
 
 /**
  * A primitively typed [Traversable] of Long to Float tuples.
@@ -30,6 +31,15 @@ public interface MutableLong2FloatTraversable: MutableTraversable<Long2FloatMap.
 
 /**
  * A primitively typed [Traverser] of Long to Float tuples.
+ *
+ * How to iterate with a Long2FloatTraverser:
+ *
+ * ```kotlin
+ * val traverser = long2FloatMap.traverse()
+ * while (traverser.forward()) {
+ *     doSomethingPrimitive(traverser.key, traverser.value)
+ * }
+ * ```
  */
 public interface Long2FloatTraverser: Traverser<Long2FloatMap.Entry> {
     public val key: Long
@@ -52,11 +62,9 @@ public interface MutableLong2FloatTraverser : Long2FloatTraverser, MutableTraver
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: MutableLong2FloatMap.MutableEntry get() = object: MutableLong2FloatMap.AbstractMutableEntry() {
-        override val key: Long get() = this@MutableLong2FloatTraverser.key
-        override var value: Float
-            get() = this@MutableLong2FloatTraverser.value
-            set(value) { this@MutableLong2FloatTraverser.value = value }
+    override val element: Long2FloatMap.Entry get() = object: Long2FloatMap.AbstractEntry() {
+        override val key: Long = this@MutableLong2FloatTraverser.key
+        override val value: Float = this@MutableLong2FloatTraverser.value
     }
 }
 
@@ -76,6 +84,7 @@ public fun  Long2FloatTraverser.asValueTraverser(): FloatTraverser {
 }
 
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Long2FloatTraversable.foreach(
     action: (Long, Float) -> Unit
@@ -88,6 +97,7 @@ public inline fun  Long2FloatTraversable.foreach(
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Long2FloatTraversable.foreachKey(
     action: (Long) -> Unit
@@ -100,6 +110,7 @@ public inline fun  Long2FloatTraversable.foreachKey(
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Long2FloatTraversable.any(predicate: (Long, Float) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
@@ -108,18 +119,21 @@ public inline fun  Long2FloatTraversable.any(predicate: (Long, Float) -> Boolean
     return false
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Long2FloatTraversable.all(predicate: (Long, Float) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any { key, value -> !predicate(key, value) }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Long2FloatTraversable.none(predicate: (Long, Float) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any(predicate)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 
 public inline fun <R> Long2FloatTraversable.fold(initial: R, operation: (accumulated: R, Long, Float) -> R): R {
@@ -131,6 +145,7 @@ public inline fun <R> Long2FloatTraversable.fold(initial: R, operation: (accumul
     return accumulated
 }
 
+@JvmSynthetic
 @JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -142,6 +157,7 @@ public inline fun  Long2FloatTraversable.sumOf(selector: (Long, Float) -> Int): 
     return sum
 }
 
+@JvmSynthetic
 @JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -153,6 +169,7 @@ public inline fun  Long2FloatTraversable.sumOf(selector: (Long, Float) -> Long):
     return sum
 }
 
+@JvmSynthetic
 @JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -165,9 +182,14 @@ public inline fun  Long2FloatTraversable.sumOf(selector: (Long, Float) -> Double
 }
 
 
-private object EmptyLong2FloatTraverser : Long2FloatTraverser {
+private object EmptyLong2FloatTraverser : MutableLong2FloatTraverser {
 
     override fun forward(): Boolean = false
     override val key: Nothing get() = throw IllegalStateException()
-    override val value: Nothing get() = throw IllegalStateException()
+
+    override var value: Float
+
+        get() = throw IllegalStateException()
+        set(_) = throw IllegalStateException()
+    override fun remove() = throw IllegalStateException()
 }

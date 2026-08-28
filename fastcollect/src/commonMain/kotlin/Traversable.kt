@@ -52,6 +52,21 @@ public interface MutableTraversable<out T> : Traversable<T> {
  * 0..size, unlike the index which is in 0..<size). A position of 0 is before all elements (and for a sequence with
  * a finite size, the position of *size* is after all elements).
  *
+ * **ANY** change to the structure of the [Traversable] that does not occur through a Traverser invalidates that
+ * Traverser. Some effort is made to throw [ConcurrentModificationException] in these cases (see [forward]), but there
+ * is no guarantee that all possible illegal modifications will immediately result in an exception. It is the client's
+ * responsibility not to shoot themselves in the foot. If you are traversing a structure, you should be sure it will
+ * never be modified at the same time - except through the Traverser you are using.
+ *
+ * How to iterate with a Traverser:
+ *
+ * ```kotlin
+ * val traverser = collection.traverse()
+ * while (traverser.forward()) {
+ *     doSomething(traverser.element)
+ * }
+ * ```
+ *
  * NOTE: This interface extends Iterator because many JVMs special case inlining behavior for Iterator and related
  * classes in order to improve performance (see https://bugs.openjdk.org/browse/JDK-8223504). We want the same inlining
  * behavior since we're handling the exact same use cases as Iterator - this hack helps us achieve it. The actual
@@ -95,6 +110,7 @@ public interface MutableTraverser<out T> : Traverser<T> {
     public fun remove()
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun <T> Traversable<T>.foreach(action: (T) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }

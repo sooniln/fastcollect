@@ -30,6 +30,15 @@ public interface MutableByteTraversable: MutableTraversable<Byte> {
 
 /**
  * A primitively typed [Traverser] of Bytes.
+ *
+ * How to iterate with a ByteTraverser:
+ *
+ * ```kotlin
+ * val traverser = byteCollection.traverse()
+ * while (traverser.forward()) {
+ *     doSomethingPrimitive(traverser.value)
+ * }
+ * ```
  */
 public interface ByteTraverser : Traverser<Byte> {
     public val value: Byte
@@ -45,6 +54,7 @@ public interface ByteTraverser : Traverser<Byte> {
  */
 public interface MutableByteTraverser : ByteTraverser, MutableTraverser<Byte>
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ByteTraversable.foreach(action: (Byte) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -55,6 +65,7 @@ public inline fun ByteTraversable.foreach(action: (Byte) -> Unit) {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ByteTraversable.any(predicate: (Byte) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
@@ -63,18 +74,21 @@ public inline fun ByteTraversable.any(predicate: (Byte) -> Boolean): Boolean {
     return false
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ByteTraversable.all(predicate: (Byte) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any { !predicate(it) }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ByteTraversable.none(predicate: (Byte) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any(predicate)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun <R> ByteTraversable.fold(initial: R, operation: (accumulated: R, Byte) -> R): R {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -84,6 +98,7 @@ public inline fun <R> ByteTraversable.fold(initial: R, operation: (accumulated: 
     return accumulated
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ByteTraversable.reduce(operation: (accumulated: Byte, Byte) -> Byte): Byte {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -102,6 +117,7 @@ public inline fun ByteTraversable.reduce(operation: (accumulated: Byte, Byte) ->
 public fun ByteTraversable.sum(): Int = sumOf { it.toInt() }
 
 
+@JvmSynthetic
 @JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -115,6 +131,7 @@ public inline fun ByteTraversable.sumOf(selector: (Byte) -> Int): Int {
 
 
 
+@JvmSynthetic
 @JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -128,6 +145,7 @@ public inline fun ByteTraversable.sumOf(selector: (Byte) -> Long): Long {
 
 
 
+@JvmSynthetic
 @JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType

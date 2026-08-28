@@ -118,27 +118,6 @@ public interface MutableFloatCollection : FloatCollection, MutableFloatTraversab
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun MutableFloatCollection.removeAll(predicate: (Float) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-
-    var modified = false
-    val traverser = traverser()
-    while (traverser.forward()) {
-        if (predicate(traverser.value)) {
-            traverser.remove()
-            modified = true
-        }
-    }
-    return modified
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun MutableFloatCollection.retainAll(predicate: (Float) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-    return removeAll { !predicate(it) }
-}
-
-@OptIn(ExperimentalContracts::class)
 internal inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 

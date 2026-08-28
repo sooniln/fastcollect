@@ -401,7 +401,7 @@ public abstract class Abstract${Type}List : Abstract${Type}Collection(), ${Type}
 
     private inner class ListTraverserImpl(position: Int) : ${Type}ListTraverser {
         init {
-            require(position in 0..this@Abstract${Type}List.size)
+            indexCheckInclusive(position)
         }
 
         private val size = this@Abstract${Type}List.size
@@ -494,7 +494,7 @@ public abstract class AbstractMutable${Type}List : Abstract${Type}List(), Mutabl
 
     private inner class ListTraverserImpl(position: Int) : Mutable${Type}ListTraverser {
         init {
-            require(position in 0..this@AbstractMutable${Type}List.size)
+            indexCheckInclusive(position)
         }
 
         private var size = this@AbstractMutable${Type}List.size
@@ -613,7 +613,7 @@ private object Empty${Type}List : Abstract${Type}List(), RandomAccess {
     override fun iterator(): ${Type}Iterator = empty${Type}Iterator()
     override fun traverser(): ${Type}Traverser = Empty${Type}ListTraverser
     override fun traverser(position: Int): ${Type}ListTraverser {
-        require(position == 0)
+        indexCheckInclusive(position)
         return Empty${Type}ListTraverser
     }
 

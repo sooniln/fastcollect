@@ -184,7 +184,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             do {
                 if (currKey == emptyKey) {
                     return onFail()
-                } else if (currKey equalsRaw key) {
+                } else if (currKey == key) {
                     return onFind(slot)
                 }
 
@@ -210,7 +210,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         var distance = 0
         while (true) {
             val currKey = keysArr[slot]
-            if (currKey equalsRaw key) {
+            if (currKey == key) {
                 valuesArr[slot] = onReplace(slot)
                 return
             } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {
@@ -304,7 +304,6 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
                     putIfAbsent(key, oldValuesArr[slot] as V)
                 }
             }
-            trimToSize()
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
             from.foreach { key, value ->
@@ -369,13 +368,15 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
     private fun rehash(capacity: Int) {
         check(capacity >= size)
 
-        if (capacity == 0 && keysArr !== EMPTY_KEY_ARRAY) {
-            keysArr = EMPTY_KEY_ARRAY
+        if (capacity == 0) {
+            if (keysArr !== EMPTY_KEY_ARRAY) {
+                keysArr = EMPTY_KEY_ARRAY
 
-            valuesArr = EMPTY_VALUE_ARRAY as Array<V?>
+                valuesArr = EMPTY_VALUE_ARRAY as Array<V?>
 
-            emptyKey = ZERO
-            threshold = MIN_INITIAL_CAPACITY.inv()
+                emptyKey = ZERO
+                threshold = MIN_INITIAL_CAPACITY.inv()
+            }
             return
         }
 
@@ -465,7 +466,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         private val mask = keysArr.size - 1
 
         private var slotsLeft = size
-        private var slot = keysArr.size - 1
+        private var slot = keysArr.size
         private var previousSlot = -1
 
         init {
@@ -478,10 +479,12 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
 
         fun nextSlot() {
             if (slotsLeft <= 0) throw NoSuchElementException()
+            if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
             previousSlot = slot
             if (--slotsLeft > 0) decrement()
         }
 
+        fun slot(): Int = previousSlot
         fun key(): Int = keysArr[previousSlot]
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         fun value(): V = valuesArr[previousSlot] as V
@@ -536,11 +539,12 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         override fun next(): MutableInt2AnyMap.MutableEntry<V> {
             nextSlot()
             return object: MutableInt2AnyMap.AbstractMutableEntry<V>() {
+                private val slot = slot()
                 override val key: Int = key()
                 override var value: V = value()
                     set(value) {
-                        if (get(key) notEqualsRaw field) throw ConcurrentModificationException()
-                        set(key, value)
+                        if (keysArr[slot] != key || valuesArr[slot] notEqualsRaw field) throw ConcurrentModificationException()
+                        valuesArr[slot] = value
                         field = value
                     }
             }
@@ -569,13 +573,12 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             }
             set(value) {
                 check(_key != emptyKey)
+                if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
                 valuesArr[slot] = value
             }
 
         override fun forward(): Boolean {
-            if (slotsLeft <= 0) {
-                return false
-            }
+            if (slotsLeft <= 0) return false
             if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
 
             while (true) {

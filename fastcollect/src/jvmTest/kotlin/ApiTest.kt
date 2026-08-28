@@ -78,11 +78,7 @@ class ApiTest {
         assertTrue(violations.isEmpty(), violations.joinToString("\n"))
     }
 
-    val allowedJvmNameMismatches = mapOf(
-        "doubleSumOf" to "sumOf",
-        "intSumOf" to "sumOf",
-        "longSumOf" to "sumOf",
-    )
+    val allowedJvmNameMismatches = mapOf<String, String>()
 
     /**
      * JvmName annotations should match the Kotlin function name wherever possible to reduce API confusion.

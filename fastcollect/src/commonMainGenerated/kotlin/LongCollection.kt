@@ -118,27 +118,6 @@ public interface MutableLongCollection : LongCollection, MutableLongTraversable 
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun MutableLongCollection.removeAll(predicate: (Long) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-
-    var modified = false
-    val traverser = traverser()
-    while (traverser.forward()) {
-        if (predicate(traverser.value)) {
-            traverser.remove()
-            modified = true
-        }
-    }
-    return modified
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun MutableLongCollection.retainAll(predicate: (Long) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-    return removeAll { !predicate(it) }
-}
-
-@OptIn(ExperimentalContracts::class)
 internal inline fun MutableLongCollection.filterInPlace(removePredicate: (Long) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 

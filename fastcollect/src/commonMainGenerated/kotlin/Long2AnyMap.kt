@@ -326,12 +326,18 @@ private class SingletonLong2AnyMap<V>(
     }
 
     override fun traverser(): Long2AnyTraverser<V> = object : Long2AnyTraverser<V> {
-        private var consumed = false
-        override val key: Long get() = this@SingletonLong2AnyMap.key
-        override val value: V get() = this@SingletonLong2AnyMap.value
+        private var complete = false
+        override val key: Long get() {
+            check(complete)
+            return this@SingletonLong2AnyMap.key
+        }
+        override val value: V get() {
+            check(complete)
+            return this@SingletonLong2AnyMap.value
+        }
         override fun forward(): Boolean {
-            if (consumed) return false
-            consumed = true
+            if (complete) return false
+            complete = true
             return true
         }
     }

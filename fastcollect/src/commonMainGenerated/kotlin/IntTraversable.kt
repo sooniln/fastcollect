@@ -30,6 +30,15 @@ public interface MutableIntTraversable: MutableTraversable<Int> {
 
 /**
  * A primitively typed [Traverser] of Ints.
+ *
+ * How to iterate with a IntTraverser:
+ *
+ * ```kotlin
+ * val traverser = intCollection.traverse()
+ * while (traverser.forward()) {
+ *     doSomethingPrimitive(traverser.value)
+ * }
+ * ```
  */
 public interface IntTraverser : Traverser<Int> {
     public val value: Int
@@ -45,6 +54,7 @@ public interface IntTraverser : Traverser<Int> {
  */
 public interface MutableIntTraverser : IntTraverser, MutableTraverser<Int>
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun IntTraversable.foreach(action: (Int) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -55,6 +65,7 @@ public inline fun IntTraversable.foreach(action: (Int) -> Unit) {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun IntTraversable.any(predicate: (Int) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
@@ -63,18 +74,21 @@ public inline fun IntTraversable.any(predicate: (Int) -> Boolean): Boolean {
     return false
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun IntTraversable.all(predicate: (Int) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any { !predicate(it) }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun IntTraversable.none(predicate: (Int) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any(predicate)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun <R> IntTraversable.fold(initial: R, operation: (accumulated: R, Int) -> R): R {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -84,6 +98,7 @@ public inline fun <R> IntTraversable.fold(initial: R, operation: (accumulated: R
     return accumulated
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun IntTraversable.reduce(operation: (accumulated: Int, Int) -> Int): Int {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -102,6 +117,7 @@ public inline fun IntTraversable.reduce(operation: (accumulated: Int, Int) -> In
 public fun IntTraversable.sum(): Int = sumOf { it.toInt() }
 
 
+@JvmSynthetic
 @JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -115,6 +131,7 @@ public inline fun IntTraversable.sumOf(selector: (Int) -> Int): Int {
 
 
 
+@JvmSynthetic
 @JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -128,6 +145,7 @@ public inline fun IntTraversable.sumOf(selector: (Int) -> Long): Long {
 
 
 
+@JvmSynthetic
 @JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType

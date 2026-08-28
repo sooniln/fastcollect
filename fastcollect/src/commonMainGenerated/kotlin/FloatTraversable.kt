@@ -30,6 +30,15 @@ public interface MutableFloatTraversable: MutableTraversable<Float> {
 
 /**
  * A primitively typed [Traverser] of Floats.
+ *
+ * How to iterate with a FloatTraverser:
+ *
+ * ```kotlin
+ * val traverser = floatCollection.traverse()
+ * while (traverser.forward()) {
+ *     doSomethingPrimitive(traverser.value)
+ * }
+ * ```
  */
 public interface FloatTraverser : Traverser<Float> {
     public val value: Float
@@ -45,6 +54,7 @@ public interface FloatTraverser : Traverser<Float> {
  */
 public interface MutableFloatTraverser : FloatTraverser, MutableTraverser<Float>
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun FloatTraversable.foreach(action: (Float) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -55,6 +65,7 @@ public inline fun FloatTraversable.foreach(action: (Float) -> Unit) {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun FloatTraversable.any(predicate: (Float) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
@@ -63,18 +74,21 @@ public inline fun FloatTraversable.any(predicate: (Float) -> Boolean): Boolean {
     return false
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun FloatTraversable.all(predicate: (Float) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any { !predicate(it) }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun FloatTraversable.none(predicate: (Float) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any(predicate)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun <R> FloatTraversable.fold(initial: R, operation: (accumulated: R, Float) -> R): R {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -84,6 +98,7 @@ public inline fun <R> FloatTraversable.fold(initial: R, operation: (accumulated:
     return accumulated
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun FloatTraversable.reduce(operation: (accumulated: Float, Float) -> Float): Float {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -99,6 +114,7 @@ public inline fun FloatTraversable.reduce(operation: (accumulated: Float, Float)
 
 
 
+@JvmSynthetic
 @JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -112,6 +128,7 @@ public inline fun FloatTraversable.sumOf(selector: (Float) -> Int): Int {
 
 
 
+@JvmSynthetic
 @JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -128,6 +145,7 @@ public inline fun FloatTraversable.sumOf(selector: (Float) -> Long): Long {
 public fun FloatTraversable.sum(): Double = sumOf { it.toDouble() }
 
 
+@JvmSynthetic
 @JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType

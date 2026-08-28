@@ -30,6 +30,15 @@ public interface MutableLongTraversable: MutableTraversable<Long> {
 
 /**
  * A primitively typed [Traverser] of Longs.
+ *
+ * How to iterate with a LongTraverser:
+ *
+ * ```kotlin
+ * val traverser = longCollection.traverse()
+ * while (traverser.forward()) {
+ *     doSomethingPrimitive(traverser.value)
+ * }
+ * ```
  */
 public interface LongTraverser : Traverser<Long> {
     public val value: Long
@@ -45,6 +54,7 @@ public interface LongTraverser : Traverser<Long> {
  */
 public interface MutableLongTraverser : LongTraverser, MutableTraverser<Long>
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun LongTraversable.foreach(action: (Long) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -55,6 +65,7 @@ public inline fun LongTraversable.foreach(action: (Long) -> Unit) {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun LongTraversable.any(predicate: (Long) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
@@ -63,18 +74,21 @@ public inline fun LongTraversable.any(predicate: (Long) -> Boolean): Boolean {
     return false
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun LongTraversable.all(predicate: (Long) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any { !predicate(it) }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun LongTraversable.none(predicate: (Long) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any(predicate)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun <R> LongTraversable.fold(initial: R, operation: (accumulated: R, Long) -> R): R {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -84,6 +98,7 @@ public inline fun <R> LongTraversable.fold(initial: R, operation: (accumulated: 
     return accumulated
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun LongTraversable.reduce(operation: (accumulated: Long, Long) -> Long): Long {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -99,6 +114,7 @@ public inline fun LongTraversable.reduce(operation: (accumulated: Long, Long) ->
 
 
 
+@JvmSynthetic
 @JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -114,6 +130,7 @@ public inline fun LongTraversable.sumOf(selector: (Long) -> Int): Int {
 public fun LongTraversable.sum(): Long = sumOf { it }
 
 
+@JvmSynthetic
 @JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -127,6 +144,7 @@ public inline fun LongTraversable.sumOf(selector: (Long) -> Long): Long {
 
 
 
+@JvmSynthetic
 @JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType

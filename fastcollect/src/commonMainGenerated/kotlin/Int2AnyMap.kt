@@ -326,12 +326,18 @@ private class SingletonInt2AnyMap<V>(
     }
 
     override fun traverser(): Int2AnyTraverser<V> = object : Int2AnyTraverser<V> {
-        private var consumed = false
-        override val key: Int get() = this@SingletonInt2AnyMap.key
-        override val value: V get() = this@SingletonInt2AnyMap.value
+        private var complete = false
+        override val key: Int get() {
+            check(complete)
+            return this@SingletonInt2AnyMap.key
+        }
+        override val value: V get() {
+            check(complete)
+            return this@SingletonInt2AnyMap.value
+        }
         override fun forward(): Boolean {
-            if (consumed) return false
-            consumed = true
+            if (complete) return false
+            complete = true
             return true
         }
     }

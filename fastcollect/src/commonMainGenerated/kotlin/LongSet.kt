@@ -33,14 +33,7 @@ public inline fun buildLongSet(expectedSize: Int = 0, builderAction: MutableLong
 /**
  * A set of Longs.
  */
-public interface LongSet : LongCollection {
-    override fun contains(element: Long): Boolean {
-        foreach { e ->
-            if (e equalsRaw element) return true
-        }
-        return false
-    }
-}
+public interface LongSet : LongCollection
 
 public fun LongSet.asSet(): Set<Long> = LongSetWrapper(this)
 
@@ -89,10 +82,7 @@ public abstract class AbstractLongSet : AbstractLongCollection(), LongSet {
     }
 }
 
-public abstract class AbstractMutableLongSet : AbstractLongSet(), MutableLongSet {
-    override fun removeAll(elements: Collection<Long>): Boolean = super<MutableLongSet>.removeAll(elements)
-    override fun retainAll(elements: Collection<Long>): Boolean = super<MutableLongSet>.retainAll(elements)
-}
+public abstract class AbstractMutableLongSet : AbstractLongSet(), MutableLongSet
 
 public fun MutableLongSet.asSet(): MutableSet<Long> = MutableLongSetWrapper(this)
 
@@ -126,7 +116,10 @@ private class SingletonLongSet(private val value: Long) : AbstractLongSet() {
 
     override fun traverser(): LongTraverser = object : LongTraverser {
         private var complete = false
-        override val value: Long get() = this@SingletonLongSet.value
+        override val value: Long get() {
+            check(complete)
+            return this@SingletonLongSet.value
+        }
         override fun forward(): Boolean {
             if (complete) return false
             complete = true

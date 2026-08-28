@@ -401,7 +401,7 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
 
     private inner class ListTraverserImpl(position: Int) : ByteListTraverser {
         init {
-            require(position in 0..this@AbstractByteList.size)
+            indexCheckInclusive(position)
         }
 
         private val size = this@AbstractByteList.size
@@ -494,7 +494,7 @@ public abstract class AbstractMutableByteList : AbstractByteList(), MutableByteL
 
     private inner class ListTraverserImpl(position: Int) : MutableByteListTraverser {
         init {
-            require(position in 0..this@AbstractMutableByteList.size)
+            indexCheckInclusive(position)
         }
 
         private var size = this@AbstractMutableByteList.size
@@ -613,7 +613,7 @@ private object EmptyByteList : AbstractByteList(), RandomAccess {
     override fun iterator(): ByteIterator = emptyByteIterator()
     override fun traverser(): ByteTraverser = EmptyByteListTraverser
     override fun traverser(position: Int): ByteListTraverser {
-        require(position == 0)
+        indexCheckInclusive(position)
         return EmptyByteListTraverser
     }
 

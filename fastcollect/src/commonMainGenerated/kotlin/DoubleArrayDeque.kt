@@ -9,7 +9,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
-import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
 
@@ -31,14 +30,15 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
     override var size: Int = size
         private set
 
-    @JvmOverloads
-    public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else DoubleArray(capacity), 0)
+    public constructor() : this(EMPTY_ARRAY, size = 0)
 
-    public constructor(elements: DoubleCollection) : this(elements.toDoubleArray())
+    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else DoubleArray(capacity), 0)
 
-    public constructor(elements: Collection<Double>) : this(if (elements is DoubleList) elements.toDoubleArray() else elements.toDoubleArray())
+    public constructor(elements: DoubleCollection) : this(elements.toDoubleArray(), size = elements.size)
 
-    public constructor(elements: DoubleArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex))
+    public constructor(elements: Collection<Double>) : this(elements.toDoubleArray(), size = elements.size)
+
+    public constructor(elements: DoubleArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex), size = toIndex - fromIndex)
 
     public fun ensureCapacity(capacity: Int) {
         if (capacity > ring.size) grow(capacity)
@@ -664,6 +664,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
 
         override fun remove() {
             check(ringPosition >= 0)
+            if (size != this@DoubleArrayDeque.size) throw ConcurrentModificationException()
 
             val index = ring.index(head, ringPosition)
             val d = removeAtInternal(ringPosition)
@@ -675,10 +676,12 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
 
         override fun set(value: Double) {
             check(ringPosition >= 0)
+            if (size != this@DoubleArrayDeque.size) throw ConcurrentModificationException()
             ring[ringPosition] = value
         }
 
         override fun insert(value: Double) {
+            if (size != this@DoubleArrayDeque.size) throw ConcurrentModificationException()
             add(position, value)
             cursor = ring.position(head, position++)
             ringPosition = -1

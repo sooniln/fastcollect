@@ -33,14 +33,7 @@ public inline fun build${Type}Set(expectedSize: Int = 0, builderAction: Mutable$
 /**
  * A set of ${Type}s.
  */
-public interface ${Type}Set : ${Type}Collection {
-    override fun contains(element: ${Type}): Boolean {
-        foreach { e ->
-            if (e equalsRaw element) return true
-        }
-        return false
-    }
-}
+public interface ${Type}Set : ${Type}Collection
 
 public fun ${Type}Set.asSet(): Set<$Type> = ${Type}SetWrapper(this)
 
@@ -89,10 +82,7 @@ public abstract class Abstract${Type}Set : Abstract${Type}Collection(), ${Type}S
     }
 }
 
-public abstract class AbstractMutable${Type}Set : Abstract${Type}Set(), Mutable${Type}Set {
-    override fun removeAll(elements: Collection<${Type}>): Boolean = super<Mutable${Type}Set>.removeAll(elements)
-    override fun retainAll(elements: Collection<${Type}>): Boolean = super<Mutable${Type}Set>.retainAll(elements)
-}
+public abstract class AbstractMutable${Type}Set : Abstract${Type}Set(), Mutable${Type}Set
 
 public fun Mutable${Type}Set.asSet(): MutableSet<$Type> = Mutable${Type}SetWrapper(this)
 
@@ -126,7 +116,10 @@ private class Singleton${Type}Set(private val value: ${Type}) : Abstract${Type}S
 
     override fun traverser(): ${Type}Traverser = object : ${Type}Traverser {
         private var complete = false
-        override val value: ${Type} get() = this@Singleton${Type}Set.value
+        override val value: ${Type} get() {
+            check(complete)
+            return this@Singleton${Type}Set.value
+        }
         override fun forward(): Boolean {
             if (complete) return false
             complete = true

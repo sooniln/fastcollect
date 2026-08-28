@@ -189,7 +189,7 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
             do {
                 if (currKey == emptyKey) {
                     return onFail()
-                } else if (currKey equalsRaw key) {
+                } else if (currKey == key) {
                     return onFind(slot)
                 }
 
@@ -215,7 +215,7 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
         var distance = 0
         while (true) {
             val currKey = keysArr[slot]
-            if (currKey equalsRaw key) {
+            if (currKey == key) {
                 valuesArr[slot] = onReplace(slot)
                 return
             } else if (currKey == emptyKey || distance > currKey.slotDistance(slot, mask)) {
@@ -309,7 +309,6 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
                     putIfAbsent(key, oldValuesArr[slot] as ${ValueType})
                 }
             }
-            trimToSize()
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
             from.foreach { key, value ->
@@ -378,15 +377,17 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
     private fun rehash(capacity: Int) {
         check(capacity >= size)
 
-        if (capacity == 0 && keysArr !== EMPTY_KEY_ARRAY) {
-            keysArr = EMPTY_KEY_ARRAY
+        if (capacity == 0) {
+            if (keysArr !== EMPTY_KEY_ARRAY) {
+                keysArr = EMPTY_KEY_ARRAY
 <% if (!isReferenceValue) { %>
-            valuesArr = EMPTY_VALUE_ARRAY
+                valuesArr = EMPTY_VALUE_ARRAY
 <% } else { %>
-            valuesArr = EMPTY_VALUE_ARRAY as Array<${ValueType}?>
+                valuesArr = EMPTY_VALUE_ARRAY as Array<${ValueType}?>
 <% } %>
-            emptyKey = ZERO
-            threshold = MIN_INITIAL_CAPACITY.inv()
+                emptyKey = ZERO
+                threshold = MIN_INITIAL_CAPACITY.inv()
+            }
             return
         }
 
@@ -480,7 +481,7 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
         private val mask = keysArr.size - 1
 
         private var slotsLeft = size
-        private var slot = keysArr.size - 1
+        private var slot = keysArr.size
         private var previousSlot = -1
 
         init {
@@ -493,10 +494,12 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
 
         fun nextSlot() {
             if (slotsLeft <= 0) throw NoSuchElementException()
+            if (keysArr !== this@${Name}HashMap.keysArr) throw ConcurrentModificationException()
             previousSlot = slot
             if (--slotsLeft > 0) decrement()
         }
 
+        fun slot(): Int = previousSlot
         fun key(): ${KeyType} = keysArr[previousSlot]
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
         fun value(): ${ValueType} = valuesArr[previousSlot] as ${ValueType}
@@ -555,11 +558,12 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
         override fun next(): Mutable${Name}Map.MutableEntry${Generics} {
             nextSlot()
             return object: Mutable${Name}Map.AbstractMutableEntry${Generics}() {
+                private val slot = slot()
                 override val key: ${KeyType} = key()
                 override var value: ${ValueType} = value()
                     set(value) {
-                        if (get(key) notEqualsRaw field) throw ConcurrentModificationException()
-                        set(key, value)
+                        if (keysArr[slot] != key || valuesArr[slot] notEqualsRaw field) throw ConcurrentModificationException()
+                        valuesArr[slot] = value
                         field = value
                     }
             }
@@ -588,13 +592,12 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
             }
             set(value) {
                 check(_key != emptyKey)
+                if (keysArr !== this@${Name}HashMap.keysArr) throw ConcurrentModificationException()
                 valuesArr[slot] = value
             }
 
         override fun forward(): Boolean {
-            if (slotsLeft <= 0) {
-                return false
-            }
+            if (slotsLeft <= 0) return false
             if (keysArr !== this@${Name}HashMap.keysArr) throw ConcurrentModificationException()
 
             while (true) {

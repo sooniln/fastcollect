@@ -12,8 +12,6 @@ import kotlin.jvm.JvmName
 
 public infix fun Byte.equalsRaw(other: Byte): Boolean = this == other
 
-public infix fun Short.equalsRaw(other: Short): Boolean = this == other
-
 public infix fun Int.equalsRaw(other: Int): Boolean = this == other
 
 public infix fun Long.equalsRaw(other: Long): Boolean = this == other
@@ -25,8 +23,6 @@ public infix fun Double.equalsRaw(other: Double): Boolean = toRawBits() == other
 public infix fun Any?.equalsRaw(other: Any?): Boolean = this == other
 
 public infix fun Byte.notEqualsRaw(other: Byte): Boolean = this != other
-
-public infix fun Short.notEqualsRaw(other: Short): Boolean = this != other
 
 public infix fun Int.notEqualsRaw(other: Int): Boolean = this != other
 

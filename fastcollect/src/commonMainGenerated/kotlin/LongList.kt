@@ -401,7 +401,7 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
 
     private inner class ListTraverserImpl(position: Int) : LongListTraverser {
         init {
-            require(position in 0..this@AbstractLongList.size)
+            indexCheckInclusive(position)
         }
 
         private val size = this@AbstractLongList.size
@@ -494,7 +494,7 @@ public abstract class AbstractMutableLongList : AbstractLongList(), MutableLongL
 
     private inner class ListTraverserImpl(position: Int) : MutableLongListTraverser {
         init {
-            require(position in 0..this@AbstractMutableLongList.size)
+            indexCheckInclusive(position)
         }
 
         private var size = this@AbstractMutableLongList.size
@@ -613,7 +613,7 @@ private object EmptyLongList : AbstractLongList(), RandomAccess {
     override fun iterator(): LongIterator = emptyLongIterator()
     override fun traverser(): LongTraverser = EmptyLongListTraverser
     override fun traverser(position: Int): LongListTraverser {
-        require(position == 0)
+        indexCheckInclusive(position)
         return EmptyLongListTraverser
     }
 

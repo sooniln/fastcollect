@@ -33,14 +33,7 @@ public inline fun buildFloatSet(expectedSize: Int = 0, builderAction: MutableFlo
 /**
  * A set of Floats.
  */
-public interface FloatSet : FloatCollection {
-    override fun contains(element: Float): Boolean {
-        foreach { e ->
-            if (e equalsRaw element) return true
-        }
-        return false
-    }
-}
+public interface FloatSet : FloatCollection
 
 public fun FloatSet.asSet(): Set<Float> = FloatSetWrapper(this)
 
@@ -89,10 +82,7 @@ public abstract class AbstractFloatSet : AbstractFloatCollection(), FloatSet {
     }
 }
 
-public abstract class AbstractMutableFloatSet : AbstractFloatSet(), MutableFloatSet {
-    override fun removeAll(elements: Collection<Float>): Boolean = super<MutableFloatSet>.removeAll(elements)
-    override fun retainAll(elements: Collection<Float>): Boolean = super<MutableFloatSet>.retainAll(elements)
-}
+public abstract class AbstractMutableFloatSet : AbstractFloatSet(), MutableFloatSet
 
 public fun MutableFloatSet.asSet(): MutableSet<Float> = MutableFloatSetWrapper(this)
 
@@ -126,7 +116,10 @@ private class SingletonFloatSet(private val value: Float) : AbstractFloatSet() {
 
     override fun traverser(): FloatTraverser = object : FloatTraverser {
         private var complete = false
-        override val value: Float get() = this@SingletonFloatSet.value
+        override val value: Float get() {
+            check(complete)
+            return this@SingletonFloatSet.value
+        }
         override fun forward(): Boolean {
             if (complete) return false
             complete = true

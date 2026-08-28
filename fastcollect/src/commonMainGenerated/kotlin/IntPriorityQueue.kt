@@ -43,8 +43,11 @@ public inline fun buildIntPriorityQueue(
  * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
  * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
-public abstract class AbstractIntPriorityQueue(initialCapacity: Int = 0): IntCollection {
+public abstract class AbstractIntPriorityQueue(initialCapacity: Int): IntCollection {
 
+    public constructor() : this(0)
+
+    @JvmOverloads
     public constructor(array: IntArray, fromIndex: Int = 0, toIndex: Int = array.size) : this(0) {
         addAll(array, fromIndex, toIndex)
     }
@@ -82,7 +85,9 @@ public abstract class AbstractIntPriorityQueue(initialCapacity: Int = 0): IntCol
     }
 
     /**
-     * Returns true if [element1] has higher priority (should be closer to the head of the queue) than [element2].
+     * Returns true if [element1] has higher priority (should be closer to the head of the queue) than [element2]. Be
+     * aware that certain constructors may invoke this function before subclass constructors run / subclass fields are
+     * initialized - plan accordingly.
      */
     protected abstract fun isHigherPriority(element1: Int, element2: Int): Boolean
 
@@ -158,6 +163,7 @@ public abstract class AbstractIntPriorityQueue(initialCapacity: Int = 0): IntCol
         size = 0
     }
 
+    @JvmOverloads
     public fun addAll(array: IntArray, fromIndex: Int = 0, toIndex: Int = array.size) {
         val additionalSize = toIndex - fromIndex
         ensureCapacity(size + additionalSize)
@@ -224,10 +230,12 @@ public abstract class AbstractIntPriorityQueue(initialCapacity: Int = 0): IntCol
     }
 
     final override fun iterator(): IntIterator = object : IntIterator() {
+        private val size = this@AbstractIntPriorityQueue.size
         private var index = 0
         override fun hasNext(): Boolean = index < size
         override fun nextInt(): Int {
             if (!hasNext()) throw NoSuchElementException()
+            if (size != this@AbstractIntPriorityQueue.size) throw ConcurrentModificationException()
             return heap[index++]
         }
     }
@@ -334,10 +342,12 @@ public fun AbstractIntPriorityQueue.retainAll(predicate: IntPredicate): Boolean 
  * operations and the option to change an element's priority), one can be implemented by subclassing
  * [AbstractIntPriorityQueue] and implementing [onIndexChanged] to store an element ⟷ index mapping.
  */
-public class IntPriorityQueue private constructor(private val descending: Boolean) : AbstractIntPriorityQueue() {
+public class IntPriorityQueue(private val descending: Boolean) : AbstractIntPriorityQueue() {
+
+    public constructor() : this(false)
 
     @JvmOverloads
-    public constructor(initialCapacity: Int = 0, descending: Boolean = false) : this(descending) {
+    public constructor(initialCapacity: Int, descending: Boolean = false) : this(descending) {
         ensureCapacity(initialCapacity)
     }
 
@@ -363,7 +373,7 @@ public class IntPriorityQueue private constructor(private val descending: Boolea
 }
 
 /**
- * Returns a priority queue of Ints, using the given comparator.
+ * Returns a priority queue of Ints using the given priority function.
  */
 @JvmSynthetic
 public inline fun IntPriorityQueue(

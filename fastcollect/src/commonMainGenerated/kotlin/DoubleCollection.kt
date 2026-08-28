@@ -118,27 +118,6 @@ public interface MutableDoubleCollection : DoubleCollection, MutableDoubleTraver
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun MutableDoubleCollection.removeAll(predicate: (Double) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-
-    var modified = false
-    val traverser = traverser()
-    while (traverser.forward()) {
-        if (predicate(traverser.value)) {
-            traverser.remove()
-            modified = true
-        }
-    }
-    return modified
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun MutableDoubleCollection.retainAll(predicate: (Double) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-    return removeAll { !predicate(it) }
-}
-
-@OptIn(ExperimentalContracts::class)
 internal inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 

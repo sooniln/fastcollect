@@ -12,7 +12,8 @@ import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
-public fun  emptyInt2IntTraverser(): Int2IntTraverser = EmptyInt2IntTraverser
+@Suppress("UNCHECKED_CAST", "UNNECESSARY_CAST")
+public fun  emptyInt2IntTraverser(): MutableInt2IntTraverser = EmptyInt2IntTraverser as MutableInt2IntTraverser
 
 /**
  * A primitively typed [Traversable] of Int to Int tuples.
@@ -30,6 +31,15 @@ public interface MutableInt2IntTraversable: MutableTraversable<Int2IntMap.Entry>
 
 /**
  * A primitively typed [Traverser] of Int to Int tuples.
+ *
+ * How to iterate with a Int2IntTraverser:
+ *
+ * ```kotlin
+ * val traverser = int2IntMap.traverse()
+ * while (traverser.forward()) {
+ *     doSomethingPrimitive(traverser.key, traverser.value)
+ * }
+ * ```
  */
 public interface Int2IntTraverser: Traverser<Int2IntMap.Entry> {
     public val key: Int
@@ -52,11 +62,9 @@ public interface MutableInt2IntTraverser : Int2IntTraverser, MutableTraverser<In
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: MutableInt2IntMap.MutableEntry get() = object: MutableInt2IntMap.AbstractMutableEntry() {
-        override val key: Int get() = this@MutableInt2IntTraverser.key
-        override var value: Int
-            get() = this@MutableInt2IntTraverser.value
-            set(value) { this@MutableInt2IntTraverser.value = value }
+    override val element: Int2IntMap.Entry get() = object: Int2IntMap.AbstractEntry() {
+        override val key: Int = this@MutableInt2IntTraverser.key
+        override val value: Int = this@MutableInt2IntTraverser.value
     }
 }
 
@@ -76,6 +84,7 @@ public fun  Int2IntTraverser.asValueTraverser(): IntTraverser {
 }
 
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2IntTraversable.foreach(
     action: (Int, Int) -> Unit
@@ -88,6 +97,7 @@ public inline fun  Int2IntTraversable.foreach(
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2IntTraversable.foreachKey(
     action: (Int) -> Unit
@@ -100,6 +110,7 @@ public inline fun  Int2IntTraversable.foreachKey(
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2IntTraversable.any(predicate: (Int, Int) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
@@ -108,18 +119,21 @@ public inline fun  Int2IntTraversable.any(predicate: (Int, Int) -> Boolean): Boo
     return false
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2IntTraversable.all(predicate: (Int, Int) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any { key, value -> !predicate(key, value) }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2IntTraversable.none(predicate: (Int, Int) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any(predicate)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 
 public inline fun <R> Int2IntTraversable.fold(initial: R, operation: (accumulated: R, Int, Int) -> R): R {
@@ -131,6 +145,7 @@ public inline fun <R> Int2IntTraversable.fold(initial: R, operation: (accumulate
     return accumulated
 }
 
+@JvmSynthetic
 @JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -142,6 +157,7 @@ public inline fun  Int2IntTraversable.sumOf(selector: (Int, Int) -> Int): Int {
     return sum
 }
 
+@JvmSynthetic
 @JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -153,6 +169,7 @@ public inline fun  Int2IntTraversable.sumOf(selector: (Int, Int) -> Long): Long 
     return sum
 }
 
+@JvmSynthetic
 @JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -165,9 +182,14 @@ public inline fun  Int2IntTraversable.sumOf(selector: (Int, Int) -> Double): Dou
 }
 
 
-private object EmptyInt2IntTraverser : Int2IntTraverser {
+private object EmptyInt2IntTraverser : MutableInt2IntTraverser {
 
     override fun forward(): Boolean = false
     override val key: Nothing get() = throw IllegalStateException()
-    override val value: Nothing get() = throw IllegalStateException()
+
+    override var value: Int
+
+        get() = throw IllegalStateException()
+        set(_) = throw IllegalStateException()
+    override fun remove() = throw IllegalStateException()
 }

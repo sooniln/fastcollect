@@ -43,8 +43,11 @@ public inline fun buildLongPriorityQueue(
  * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
  * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
-public abstract class AbstractLongPriorityQueue(initialCapacity: Int = 0): LongCollection {
+public abstract class AbstractLongPriorityQueue(initialCapacity: Int): LongCollection {
 
+    public constructor() : this(0)
+
+    @JvmOverloads
     public constructor(array: LongArray, fromIndex: Int = 0, toIndex: Int = array.size) : this(0) {
         addAll(array, fromIndex, toIndex)
     }
@@ -82,7 +85,9 @@ public abstract class AbstractLongPriorityQueue(initialCapacity: Int = 0): LongC
     }
 
     /**
-     * Returns true if [element1] has higher priority (should be closer to the head of the queue) than [element2].
+     * Returns true if [element1] has higher priority (should be closer to the head of the queue) than [element2]. Be
+     * aware that certain constructors may invoke this function before subclass constructors run / subclass fields are
+     * initialized - plan accordingly.
      */
     protected abstract fun isHigherPriority(element1: Long, element2: Long): Boolean
 
@@ -158,6 +163,7 @@ public abstract class AbstractLongPriorityQueue(initialCapacity: Int = 0): LongC
         size = 0
     }
 
+    @JvmOverloads
     public fun addAll(array: LongArray, fromIndex: Int = 0, toIndex: Int = array.size) {
         val additionalSize = toIndex - fromIndex
         ensureCapacity(size + additionalSize)
@@ -224,10 +230,12 @@ public abstract class AbstractLongPriorityQueue(initialCapacity: Int = 0): LongC
     }
 
     final override fun iterator(): LongIterator = object : LongIterator() {
+        private val size = this@AbstractLongPriorityQueue.size
         private var index = 0
         override fun hasNext(): Boolean = index < size
         override fun nextLong(): Long {
             if (!hasNext()) throw NoSuchElementException()
+            if (size != this@AbstractLongPriorityQueue.size) throw ConcurrentModificationException()
             return heap[index++]
         }
     }
@@ -334,10 +342,12 @@ public fun AbstractLongPriorityQueue.retainAll(predicate: LongPredicate): Boolea
  * operations and the option to change an element's priority), one can be implemented by subclassing
  * [AbstractLongPriorityQueue] and implementing [onIndexChanged] to store an element ⟷ index mapping.
  */
-public class LongPriorityQueue private constructor(private val descending: Boolean) : AbstractLongPriorityQueue() {
+public class LongPriorityQueue(private val descending: Boolean) : AbstractLongPriorityQueue() {
+
+    public constructor() : this(false)
 
     @JvmOverloads
-    public constructor(initialCapacity: Int = 0, descending: Boolean = false) : this(descending) {
+    public constructor(initialCapacity: Int, descending: Boolean = false) : this(descending) {
         ensureCapacity(initialCapacity)
     }
 
@@ -363,7 +373,7 @@ public class LongPriorityQueue private constructor(private val descending: Boole
 }
 
 /**
- * Returns a priority queue of Longs, using the given comparator.
+ * Returns a priority queue of Longs using the given priority function.
  */
 @JvmSynthetic
 public inline fun LongPriorityQueue(

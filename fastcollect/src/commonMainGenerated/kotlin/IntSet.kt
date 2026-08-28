@@ -33,14 +33,7 @@ public inline fun buildIntSet(expectedSize: Int = 0, builderAction: MutableIntSe
 /**
  * A set of Ints.
  */
-public interface IntSet : IntCollection {
-    override fun contains(element: Int): Boolean {
-        foreach { e ->
-            if (e equalsRaw element) return true
-        }
-        return false
-    }
-}
+public interface IntSet : IntCollection
 
 public fun IntSet.asSet(): Set<Int> = IntSetWrapper(this)
 
@@ -89,10 +82,7 @@ public abstract class AbstractIntSet : AbstractIntCollection(), IntSet {
     }
 }
 
-public abstract class AbstractMutableIntSet : AbstractIntSet(), MutableIntSet {
-    override fun removeAll(elements: Collection<Int>): Boolean = super<MutableIntSet>.removeAll(elements)
-    override fun retainAll(elements: Collection<Int>): Boolean = super<MutableIntSet>.retainAll(elements)
-}
+public abstract class AbstractMutableIntSet : AbstractIntSet(), MutableIntSet
 
 public fun MutableIntSet.asSet(): MutableSet<Int> = MutableIntSetWrapper(this)
 
@@ -126,7 +116,10 @@ private class SingletonIntSet(private val value: Int) : AbstractIntSet() {
 
     override fun traverser(): IntTraverser = object : IntTraverser {
         private var complete = false
-        override val value: Int get() = this@SingletonIntSet.value
+        override val value: Int get() {
+            check(complete)
+            return this@SingletonIntSet.value
+        }
         override fun forward(): Boolean {
             if (complete) return false
             complete = true

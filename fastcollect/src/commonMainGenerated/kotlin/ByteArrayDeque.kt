@@ -9,7 +9,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
-import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
 
@@ -31,14 +30,15 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
     override var size: Int = size
         private set
 
-    @JvmOverloads
-    public constructor(capacity: Int = 0) : this(if (capacity == 0) EMPTY_ARRAY else ByteArray(capacity), 0)
+    public constructor() : this(EMPTY_ARRAY, size = 0)
 
-    public constructor(elements: ByteCollection) : this(elements.toByteArray())
+    public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else ByteArray(capacity), 0)
 
-    public constructor(elements: Collection<Byte>) : this(if (elements is ByteList) elements.toByteArray() else elements.toByteArray())
+    public constructor(elements: ByteCollection) : this(elements.toByteArray(), size = elements.size)
 
-    public constructor(elements: ByteArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex))
+    public constructor(elements: Collection<Byte>) : this(elements.toByteArray(), size = elements.size)
+
+    public constructor(elements: ByteArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex), size = toIndex - fromIndex)
 
     public fun ensureCapacity(capacity: Int) {
         if (capacity > ring.size) grow(capacity)
@@ -664,6 +664,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
         override fun remove() {
             check(ringPosition >= 0)
+            if (size != this@ByteArrayDeque.size) throw ConcurrentModificationException()
 
             val index = ring.index(head, ringPosition)
             val d = removeAtInternal(ringPosition)
@@ -675,10 +676,12 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
         override fun set(value: Byte) {
             check(ringPosition >= 0)
+            if (size != this@ByteArrayDeque.size) throw ConcurrentModificationException()
             ring[ringPosition] = value
         }
 
         override fun insert(value: Byte) {
+            if (size != this@ByteArrayDeque.size) throw ConcurrentModificationException()
             add(position, value)
             cursor = ring.position(head, position++)
             ringPosition = -1

@@ -326,12 +326,18 @@ private class SingletonInt2ByteMap(
     }
 
     override fun traverser(): Int2ByteTraverser = object : Int2ByteTraverser {
-        private var consumed = false
-        override val key: Int get() = this@SingletonInt2ByteMap.key
-        override val value: Byte get() = this@SingletonInt2ByteMap.value
+        private var complete = false
+        override val key: Int get() {
+            check(complete)
+            return this@SingletonInt2ByteMap.key
+        }
+        override val value: Byte get() {
+            check(complete)
+            return this@SingletonInt2ByteMap.value
+        }
         override fun forward(): Boolean {
-            if (consumed) return false
-            consumed = true
+            if (complete) return false
+            complete = true
             return true
         }
     }

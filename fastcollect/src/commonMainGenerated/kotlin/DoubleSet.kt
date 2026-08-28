@@ -33,14 +33,7 @@ public inline fun buildDoubleSet(expectedSize: Int = 0, builderAction: MutableDo
 /**
  * A set of Doubles.
  */
-public interface DoubleSet : DoubleCollection {
-    override fun contains(element: Double): Boolean {
-        foreach { e ->
-            if (e equalsRaw element) return true
-        }
-        return false
-    }
-}
+public interface DoubleSet : DoubleCollection
 
 public fun DoubleSet.asSet(): Set<Double> = DoubleSetWrapper(this)
 
@@ -89,10 +82,7 @@ public abstract class AbstractDoubleSet : AbstractDoubleCollection(), DoubleSet 
     }
 }
 
-public abstract class AbstractMutableDoubleSet : AbstractDoubleSet(), MutableDoubleSet {
-    override fun removeAll(elements: Collection<Double>): Boolean = super<MutableDoubleSet>.removeAll(elements)
-    override fun retainAll(elements: Collection<Double>): Boolean = super<MutableDoubleSet>.retainAll(elements)
-}
+public abstract class AbstractMutableDoubleSet : AbstractDoubleSet(), MutableDoubleSet
 
 public fun MutableDoubleSet.asSet(): MutableSet<Double> = MutableDoubleSetWrapper(this)
 
@@ -126,7 +116,10 @@ private class SingletonDoubleSet(private val value: Double) : AbstractDoubleSet(
 
     override fun traverser(): DoubleTraverser = object : DoubleTraverser {
         private var complete = false
-        override val value: Double get() = this@SingletonDoubleSet.value
+        override val value: Double get() {
+            check(complete)
+            return this@SingletonDoubleSet.value
+        }
         override fun forward(): Boolean {
             if (complete) return false
             complete = true

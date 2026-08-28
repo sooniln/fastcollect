@@ -12,7 +12,8 @@ import kotlin.experimental.ExperimentalTypeInference
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
-public fun  emptyInt2ByteTraverser(): Int2ByteTraverser = EmptyInt2ByteTraverser
+@Suppress("UNCHECKED_CAST", "UNNECESSARY_CAST")
+public fun  emptyInt2ByteTraverser(): MutableInt2ByteTraverser = EmptyInt2ByteTraverser as MutableInt2ByteTraverser
 
 /**
  * A primitively typed [Traversable] of Int to Byte tuples.
@@ -30,6 +31,15 @@ public interface MutableInt2ByteTraversable: MutableTraversable<Int2ByteMap.Entr
 
 /**
  * A primitively typed [Traverser] of Int to Byte tuples.
+ *
+ * How to iterate with a Int2ByteTraverser:
+ *
+ * ```kotlin
+ * val traverser = int2ByteMap.traverse()
+ * while (traverser.forward()) {
+ *     doSomethingPrimitive(traverser.key, traverser.value)
+ * }
+ * ```
  */
 public interface Int2ByteTraverser: Traverser<Int2ByteMap.Entry> {
     public val key: Int
@@ -52,11 +62,9 @@ public interface MutableInt2ByteTraverser : Int2ByteTraverser, MutableTraverser<
     /** DO NOT USE. May cause boxing. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
     @get:JvmSynthetic
-    override val element: MutableInt2ByteMap.MutableEntry get() = object: MutableInt2ByteMap.AbstractMutableEntry() {
-        override val key: Int get() = this@MutableInt2ByteTraverser.key
-        override var value: Byte
-            get() = this@MutableInt2ByteTraverser.value
-            set(value) { this@MutableInt2ByteTraverser.value = value }
+    override val element: Int2ByteMap.Entry get() = object: Int2ByteMap.AbstractEntry() {
+        override val key: Int = this@MutableInt2ByteTraverser.key
+        override val value: Byte = this@MutableInt2ByteTraverser.value
     }
 }
 
@@ -76,6 +84,7 @@ public fun  Int2ByteTraverser.asValueTraverser(): ByteTraverser {
 }
 
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2ByteTraversable.foreach(
     action: (Int, Byte) -> Unit
@@ -88,6 +97,7 @@ public inline fun  Int2ByteTraversable.foreach(
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2ByteTraversable.foreachKey(
     action: (Int) -> Unit
@@ -100,6 +110,7 @@ public inline fun  Int2ByteTraversable.foreachKey(
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2ByteTraversable.any(predicate: (Int, Byte) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
@@ -108,18 +119,21 @@ public inline fun  Int2ByteTraversable.any(predicate: (Int, Byte) -> Boolean): B
     return false
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2ByteTraversable.all(predicate: (Int, Byte) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any { key, value -> !predicate(key, value) }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2ByteTraversable.none(predicate: (Int, Byte) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any(predicate)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 
 public inline fun <R> Int2ByteTraversable.fold(initial: R, operation: (accumulated: R, Int, Byte) -> R): R {
@@ -131,6 +145,7 @@ public inline fun <R> Int2ByteTraversable.fold(initial: R, operation: (accumulat
     return accumulated
 }
 
+@JvmSynthetic
 @JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -142,6 +157,7 @@ public inline fun  Int2ByteTraversable.sumOf(selector: (Int, Byte) -> Int): Int 
     return sum
 }
 
+@JvmSynthetic
 @JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -153,6 +169,7 @@ public inline fun  Int2ByteTraversable.sumOf(selector: (Int, Byte) -> Long): Lon
     return sum
 }
 
+@JvmSynthetic
 @JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -165,9 +182,14 @@ public inline fun  Int2ByteTraversable.sumOf(selector: (Int, Byte) -> Double): D
 }
 
 
-private object EmptyInt2ByteTraverser : Int2ByteTraverser {
+private object EmptyInt2ByteTraverser : MutableInt2ByteTraverser {
 
     override fun forward(): Boolean = false
     override val key: Nothing get() = throw IllegalStateException()
-    override val value: Nothing get() = throw IllegalStateException()
+
+    override var value: Byte
+
+        get() = throw IllegalStateException()
+        set(_) = throw IllegalStateException()
+    override fun remove() = throw IllegalStateException()
 }

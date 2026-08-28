@@ -203,7 +203,6 @@ public class FloatHashSet @JvmOverloads constructor(
                     add(key)
                 }
             }
-            trimToSize()
         } else {
             ensureCapacity(max(size + (elements.size / 2), elements.size))
             elements.foreach { element ->
@@ -243,10 +242,12 @@ public class FloatHashSet @JvmOverloads constructor(
     private fun rehash(capacity: Int) {
         check(capacity >= size)
 
-        if (capacity == 0 && keysArr !== EMPTY_ARRAY) {
-            keysArr = EMPTY_ARRAY
-            emptyKey = ZERO
-            threshold = MIN_INITIAL_CAPACITY.inv()
+        if (capacity == 0) {
+            if (keysArr !== EMPTY_ARRAY) {
+                keysArr = EMPTY_ARRAY
+                emptyKey = ZERO
+                threshold = MIN_INITIAL_CAPACITY.inv()
+            }
             return
         }
 
@@ -303,7 +304,9 @@ public class FloatHashSet @JvmOverloads constructor(
     private fun changeEmptyKey() {
         var candidate = ZERO
         while (candidate equalsRaw emptyKey || contains(candidate)) {
-            candidate = Random.nextFloat()
+
+            candidate = Float.fromBits(Random.nextInt())
+
         }
 
         val keysArr = keysArr
@@ -323,7 +326,7 @@ public class FloatHashSet @JvmOverloads constructor(
         private val mask = keysArr.size - 1
 
         private var slotsLeft = size
-        private var slot = keysArr.size - 1
+        private var slot = keysArr.size
         private var previousSlot = -1
 
         init {

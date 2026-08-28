@@ -30,6 +30,15 @@ public interface MutableDoubleTraversable: MutableTraversable<Double> {
 
 /**
  * A primitively typed [Traverser] of Doubles.
+ *
+ * How to iterate with a DoubleTraverser:
+ *
+ * ```kotlin
+ * val traverser = doubleCollection.traverse()
+ * while (traverser.forward()) {
+ *     doSomethingPrimitive(traverser.value)
+ * }
+ * ```
  */
 public interface DoubleTraverser : Traverser<Double> {
     public val value: Double
@@ -45,6 +54,7 @@ public interface DoubleTraverser : Traverser<Double> {
  */
 public interface MutableDoubleTraverser : DoubleTraverser, MutableTraverser<Double>
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun DoubleTraversable.foreach(action: (Double) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -55,6 +65,7 @@ public inline fun DoubleTraversable.foreach(action: (Double) -> Unit) {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun DoubleTraversable.any(predicate: (Double) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
@@ -63,18 +74,21 @@ public inline fun DoubleTraversable.any(predicate: (Double) -> Boolean): Boolean
     return false
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun DoubleTraversable.all(predicate: (Double) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any { !predicate(it) }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun DoubleTraversable.none(predicate: (Double) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
     return !any(predicate)
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun <R> DoubleTraversable.fold(initial: R, operation: (accumulated: R, Double) -> R): R {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -84,6 +98,7 @@ public inline fun <R> DoubleTraversable.fold(initial: R, operation: (accumulated
     return accumulated
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun DoubleTraversable.reduce(operation: (accumulated: Double, Double) -> Double): Double {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
@@ -99,6 +114,7 @@ public inline fun DoubleTraversable.reduce(operation: (accumulated: Double, Doub
 
 
 
+@JvmSynthetic
 @JvmName("intSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -112,6 +128,7 @@ public inline fun DoubleTraversable.sumOf(selector: (Double) -> Int): Int {
 
 
 
+@JvmSynthetic
 @JvmName("longSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -128,6 +145,7 @@ public inline fun DoubleTraversable.sumOf(selector: (Double) -> Long): Long {
 public fun DoubleTraversable.sum(): Double = sumOf { it.toDouble() }
 
 
+@JvmSynthetic
 @JvmName("doubleSumOf")
 @OptIn(ExperimentalContracts::class, ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType

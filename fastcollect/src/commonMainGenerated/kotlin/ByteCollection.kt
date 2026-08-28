@@ -118,27 +118,6 @@ public interface MutableByteCollection : ByteCollection, MutableByteTraversable 
 }
 
 @OptIn(ExperimentalContracts::class)
-public inline fun MutableByteCollection.removeAll(predicate: (Byte) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-
-    var modified = false
-    val traverser = traverser()
-    while (traverser.forward()) {
-        if (predicate(traverser.value)) {
-            traverser.remove()
-            modified = true
-        }
-    }
-    return modified
-}
-
-@OptIn(ExperimentalContracts::class)
-public inline fun MutableByteCollection.retainAll(predicate: (Byte) -> Boolean): Boolean {
-    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
-    return removeAll { !predicate(it) }
-}
-
-@OptIn(ExperimentalContracts::class)
 internal inline fun MutableByteCollection.filterInPlace(removePredicate: (Byte) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
