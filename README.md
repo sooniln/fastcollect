@@ -3,11 +3,17 @@
 
 # FastCollect
 
-A library for high-performance primitive collections in the Kotlin ecosystem.
+A library for high-performance primitive collections in the Kotlin ecosystem. FastCollect is highly memory efficient and
+performant, and is competitive with - if not faster than - every primitive collections library in the JVM ecosystem. See
+the benchmarking section for further details. Performance is complicated and any library that claims to be the de-facto
+fastest is probably not taking performance seriously. FastCollect is quite well tested, and has rounded off many of the
+sharp edges found in some collections libraries. First-class Java support is a stated goal - while not every feature is
+as idiomatic to use from Java as it would be from Kotlin, extensive work has gone into ensuring that it is not difficult
+or non-idiomatic either.
 
-As a drop-in replacement for standard Kotlin collections, FastCollect generally reduces memory usage by 4–5× and
-improves CPU performance by 2-3×. FastCollect distinguishes itself with a much smaller dependency size (supporting
-only necessary collections), but performance comparable to or better than much larger and more complex libraries.
+As a drop-in replacement for standard JRE collections, FastCollect generally reduces memory usage by 4–5× and improves
+CPU performance by 2-3×. FastCollect distinguishes itself with a much smaller footprint (supporting only necessary and
+useful collections), but performance comparable to or better than much larger and more complex libraries.
 
 FastCollect currently supports the following major platforms (minor platforms have not been listed for brevity, the
 Gradle build files are the source of truth):
@@ -26,14 +32,11 @@ Note that performance has only been tested on JVM platforms.
 
 You can add FastCollect as a dependency in your project with:
 
-#### Gradle ####
-
+Gradle:
 ```groovy
 implementation 'io.github.sooniln:fastcollect-kotlin:4.1.0'
 ```
-
-#### Maven ####
-
+Maven:
 ```xml
 <dependency>
     <groupId>io.github.sooniln</groupId>
@@ -43,25 +46,24 @@ implementation 'io.github.sooniln:fastcollect-kotlin:4.1.0'
 ```
 
 FastCollect can be used as a replacement for Kotlin standard library collections and should provide immediate memory and
-CPU improvements without any further changes. You may need to explicitly import FastCollect extension functions where
-standard library extension functions were imported silently, and note that FastCollect currently does not provide
-extension methods that create new collections (i.e. filter(), etc...).
+CPU improvements without any further changes. As with most Kotlin libraries, you are encouraged to import the entire
+library space via `import io.github.sooniln.fastcollect.*` so that extension functions 'just work'.
 
 FastCollect can interact with normal Kotlin collections through the use of extension methods like [asList], [asSet],
 [asMap], and [asQueue], which produce a thin wrapper around the FastCollect collection which allows it to be used as a
-Kotlin collection. Beware that using these wrappers may incur boxing penalties.
+Kotlin collection, safe for use in any legacy APIs. Beware that using these wrappers may incur boxing penalties.
 
 Using FastCollect types should be quite straightforward for anyone familiar with standard Kotlin/Java collections.
 FastCollect provides ArrayList/ArrayDeque, HashSet, HashMap, and PriorityQueue analogues that can store primitives
 (and in the case of maps, primitive keys with reference or primitive values).
 
 > [!NOTE]
-> FastCollect currently only supports Int/Long keys for HashSet/HashMap (all types of values are supported). This is
-> out of a desire to reduce binary size and bloat by eliminating use cases that are unlikely to be very common or
-> useful. If you feel you have a compelling use case that is not currently supported, please file a bug, as support is
-> generally trivial to add.
+> FastCollect currently only supports Int/Long keys for HashMap (all types of values are supported). This is out of a
+> desire to reduce binary size and bloat by eliminating use cases that are unlikely to be very common or useful. If you
+> feel you have a compelling use case that is not currently supported, please file a bug, as support is generally
+> trivial to add.
 
-### Overview ###
+## Overview ##
 
 Concrete primitive collection types supported:
 * **Iterator**
@@ -83,7 +85,7 @@ Unsupported collection types:
 * **Fully immutable types** - occasionally useful, but do not currently give a sufficient benefit vs read-only types
   and effective immutability to justify inclusion.
 
-#### Floating-Point Comparisons ####
+### Floating-Point Comparisons ###
 
 On the JVM, primitive floating-point types obey IEEE floating-point comparisons (positive and negative zeros are equal,
 NaN is never equal to anything including itself). Boxed floating-point types however do not obey normal IEEE
@@ -95,6 +97,8 @@ than primitive type equality. Within the collections for example, Float.NaN == F
 be used when interacting with these collections via external lambdas, for example:
 
 ```kotlin
+import io.github.sooniln.fastcollect.*
+
 var set = mutableFloatSetOf(Float.NaN)
 // option 1 - removes NaN from the set
 set.remove(Float.NaN)
@@ -106,7 +110,7 @@ Default Kotlin equality uses IEEE conventions for primitives. For this reason, F
 methods it uses internally, as `equalsRaw()` and `notEqualsRaw()`.
 
 ```kotlin
-import io.github.sooniln.fastcollect.equalsRaw
+import io.github.sooniln.fastcollect.*
 
 var set = mutableFloatSetOf(Float.NaN)
 // option 1 - removes NaN from the set
@@ -115,23 +119,26 @@ set.remove(Float.NaN)
 set.removeAll(value -> value equalsRaw Float.NaN)
 ```
 
-#### ConcurrentModificationException ####
+### ConcurrentModificationException ###
 
 The standard JRE libraries make reasonable efforts to throw ConcurrentModificationException if they detect
 collections being modified in inappropriate ways. This already only a best effort with no guarantees made, but
 FastCollect makes even less of an effort in the interests of performance. Do not expect FastCollect to throw
 ConcurrentModificationException every time you shoot yourself in the foot, only occasionally.
 
-#### Traverser ####
+### Traverser ###
 
 FastCollect introduces a new method of iterating through collections called Traverser. Traversable/Traverser are roughly
 equivalent to Iterable/Iterator, but offer a slightly different API shape which (1) makes it easier to implement
 iteration correctly (2) offers increased opportunities for compiler optimizations in complex implementations.
-Benchmarking shows up to a 20% speed improvement using Traverser vs Iterator for complex collections such as HashMaps.
+Benchmarking shows up to a 20% speed improvement when using Traverser vs Iterator for the same operations. FastCollect
+still supports Iterator - all collection classes implement an iterator() operator function so they can be used in
+normal for loops and anywhere that expects an Iterator. Collection classes do not implement Iterable however, to
+discourage inappropriate usage and standard library extension methods.
 
 Traverser APIs offer many of the same utility extension methods as Iterable, such as:
 
-* **foreach** (note the capitalization, it's not 'forEach')
+* **foreach** (note the capitalization, it's not 'forEach' - see [KT-39091](https://youtrack.jetbrains.com/projects/KT/issues/KT-39091/Iterable.forEach-should-not-HidesMembers))
 * **any/all/none**
 * **fold/reduce**
 * **sum/sumBy**
@@ -140,7 +147,7 @@ Traverser APIs offer many of the same utility extension methods as Iterable, suc
 
 See the following examples section for further usage.
 
-### Examples ###
+## Examples ##
 
 You'll find that FastCollect collection usage is pretty much exactly like Kotlin collection usage. A few
 (non-exhaustive) examples of common APIs follow:
@@ -162,7 +169,9 @@ list.lastIndexOf(2)
 list.contains(3)
 
 // iterate over list
-list.foreach { value -> ... }
+list.foreach { value ->
+    println(value)
+}
 
 // mutate list
 list.add(5)
@@ -188,7 +197,9 @@ set = mutableIntSetOf(1, 2, 3) // directly create FastCollect set
 set.contains(3)
 
 // iterate over set
-set.foreach { value -> ... }
+set.foreach { value ->
+    println(value)
+}
 
 // mutate set
 set.add(5)
@@ -213,8 +224,12 @@ map.containsKey(1)
 map.containsValue(2)
 
 // iterate over map
-map.foreach { key, value -> ... }
-map.foreachKey { key -> ... }
+map.foreach { key, value ->
+    println("$key -> $value")
+}
+map.foreachKey { key ->
+    println(key)
+}
 
 // mutate map
 map.remove(5)
@@ -240,12 +255,48 @@ priorityQueue.first() // returns 8
 priorityQueue.removeFirst() // returns 8
 priorityQueue.clear()
 
-// iterate over priority queue
-priorityQueue.foreach { value -> ... }
+// iterate over priority queue (no ordering guarantees)
+priorityQueue.foreach { value ->
+    println(value)
+}
 
 // use the priority queue somewhere a Kotlin queue is required
 legacyApi(priorityQueue.asQueue())
 ```
+
+### Indirect Priority Queues ###
+
+In addition to standard priority queues, FastCollect's AbstractPriorityQueue also offers extension points to easily
+build an indirect priority queue:
+
+```kotlin
+class IndirectPriorityQueue(private val priorities: IntArray): AbstractIntPriorityQueue() {
+    private val elementToIndexMap = IntArray(priorities.size) { -1 }
+
+    override fun isHigherPriority(element1: Int, element2: Int): Boolean {
+        return priorities[element1] > priorities[element2]
+    }
+
+    override fun onIndexChanged(element: Int, index: Int) {
+        elementToIndexMap[element] = index
+    }
+
+    override fun onRemoved(element: Int, index: Int) {
+        elementToIndexMap[element] = -1
+    }
+
+    fun update(element: Int) {
+        val index = elementToIndexMap[element]
+        if (index == -1) {
+            add(element)
+        } else {
+            updatePriority(element)
+        }
+    }
+}
+```
+
+This is a trivial example - more complex shapes are possible as well.
 
 ## Performance and Memory Usage ##
 
@@ -263,7 +314,7 @@ FastCollect has put effort into ensuring that not only are large collections mem
 collections libraries accomplish), but also that small/empty collections are memory efficient (which some primitive
 collections are shockingly bad at).
 
-## Generated Code
+## Generated Code ##
 
 FastCollect generates most of its collection classes from templates in order to reduce the amount of copy/pasted code
 present. Contrary to common practice, this project checks the generated code directly into the repository. While this is
