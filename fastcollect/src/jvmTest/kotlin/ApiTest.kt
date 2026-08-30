@@ -1,6 +1,13 @@
 package io.github.sooniln.fastcollect
 
 import java.io.File
+import java.lang.reflect.Method
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.full.declaredMemberFunctions
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.jvm.javaGetter
+import kotlin.reflect.jvm.javaMethod
+import kotlin.reflect.jvm.javaSetter
 import kotlin.reflect.jvm.kotlinFunction
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -103,5 +110,74 @@ class ApiTest {
         }
 
         assertTrue(violations.isEmpty(), violations.joinToString("\n"))
+    }
+
+    /**
+     * A JvmName rename of a virtual method/property must be propagated to every publicly visible override, otherwise
+     * Java clients see the un-renamed name of the override rather than the name declared by the supertype.
+     */
+    @Test
+    fun overrideNameMismatch() {
+        val violations = mutableListOf<String>()
+        val abiFunctions = parseAbiFunctions()
+        val publicApi = abiFunctions.mapTo(mutableSetOf()) { it.className to it.name }
+
+        for (className in abiFunctions.map { it.className }.distinct()) {
+            val clazz = Class.forName(className.replace('/', '.'), false, javaClass.classLoader)
+            val supertypes = clazz.allSupertypes()
+
+            for ((kotlinName, method) in clazz.declaredKotlinMembers()) {
+                if (className to method.name !in publicApi) continue
+                if (method.isSynthetic || method.isBridge) continue
+                if (valueClassBoilerplateSuffixes.any { method.name.endsWith(it) }) continue
+
+                for (supertype in supertypes) {
+                    val parent = supertype.declaredKotlinMembers().firstOrNull {
+                        it.kotlinName == kotlinName &&
+                            !it.method.isSynthetic &&
+                            !it.method.isBridge &&
+                            it.method.parameterTypes.contentEquals(method.parameterTypes)
+                    } ?: continue
+
+                    if (parent.method.name != method.name) {
+                        violations += "$className.${method.name} overrides ${supertype.name}.${parent.method.name} " +
+                            "(Kotlin '$kotlinName')"
+                    }
+                }
+            }
+        }
+
+        assertTrue(violations.isEmpty(), violations.joinToString("\n"))
+    }
+
+    private fun Class<*>.allSupertypes(): Set<Class<*>> {
+        val supertypes = linkedSetOf<Class<*>>()
+        val pending = ArrayDeque(listOfNotNull(superclass) + interfaces)
+
+        while (pending.isNotEmpty()) {
+            val supertype = pending.removeFirst()
+            if (!supertypes.add(supertype)) continue
+
+            pending += listOfNotNull(supertype.superclass) + supertype.interfaces
+        }
+
+        return supertypes
+    }
+
+    private data class JvmMember(val kotlinName: String, val method: Method)
+
+    private val declaredKotlinMembers = mutableMapOf<Class<*>, List<JvmMember>>()
+
+    private fun Class<*>.declaredKotlinMembers(): List<JvmMember> = declaredKotlinMembers.getOrPut(this) {
+        if (getAnnotation(Metadata::class.java)?.kind != 1) return@getOrPut emptyList()
+
+        kotlin.declaredMemberFunctions.mapNotNull { function ->
+            function.javaMethod?.let { JvmMember(function.name, it) }
+        } + kotlin.declaredMemberProperties.flatMap { property ->
+            listOfNotNull(
+                property.javaGetter?.let { JvmMember(property.name, it) },
+                (property as? KMutableProperty1<*, *>)?.javaSetter?.let { JvmMember(property.name, it) },
+            )
+        }
     }
 }

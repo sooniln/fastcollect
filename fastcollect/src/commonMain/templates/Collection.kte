@@ -60,6 +60,10 @@ public interface ${Type}Collection : ${Type}Traversable {
     }
 }
 
+public fun ${Type}Collection.toArray(): ${Type}Array = copyInto(${Type}Array(size))
+
+public fun ${Type}Collection.isNotEmpty(): Boolean = size != 0
+
 /**
  * A mutable collection of ${Type}s.
  */
@@ -120,7 +124,7 @@ public interface Mutable${Type}Collection : ${Type}Collection, Mutable${Type}Tra
 }
 
 @OptIn(ExperimentalContracts::class)
-internal inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${Type}) -> Boolean): Boolean {
+private inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${Type}) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -136,7 +140,7 @@ internal inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${T
 
 public abstract class Abstract${Type}Collection : ${Type}Collection {
     override fun toString(): String {
-        return Iterable { iterator() }.joinToString(", ", "[", "]")
+        return joinToString(", ", "[", "]")
     }
 }
 

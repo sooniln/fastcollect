@@ -138,12 +138,13 @@ public abstract class AbstractDoublePriorityQueue(capacity: Int): DoubleCollecti
         return result
     }
 
-    public fun add(element: Double) {
+    public fun add(element: Double): Boolean {
         ensureCapacity(size + 1)
         var index = size++
         heap[index] = element
         index = siftUp(index)
         onIndexChanged(element, index)
+        return true
     }
 
     public fun remove(element: Double): Boolean {
@@ -211,6 +212,7 @@ public abstract class AbstractDoublePriorityQueue(capacity: Int): DoubleCollecti
     public fun retainAll(elements: DoubleCollection): Boolean = filterInPlace { !elements.contains(it) }
     public fun retainAll(elements: Collection<Double>): Boolean = filterInPlace { !elements.contains(it) }
 
+    @JvmSynthetic
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
         contract {
@@ -321,7 +323,7 @@ public abstract class AbstractDoublePriorityQueue(capacity: Int): DoubleCollecti
         }
     }
 
-    final override fun toString(): String = Iterable { iterator() }.joinToString(", ", "[", "]")
+    final override fun toString(): String = joinToString(", ", "[", "]")
 
     private fun siftUp(index: Int): Int {
         var i = index
@@ -409,20 +411,5 @@ public class DoublePriorityQueue(private val descending: Boolean) : AbstractDoub
     override fun isHigherPriority(element1: Double, element2: Double): Boolean {
         val d = element1.compareTo(element2)
         return if (descending) d > 0 else d < 0
-    }
-}
-
-/**
- * Returns a priority queue of Doubles using the given priority function.
- */
-@JvmSynthetic
-public inline fun DoublePriorityQueue(
-    capacity: Int = 0,
-    crossinline isHigherPriority: (Double, Double) -> Boolean,
-): AbstractDoublePriorityQueue {
-    return object : AbstractDoublePriorityQueue(capacity) {
-        override fun isHigherPriority(element1: Double, element2: Double): Boolean {
-            return isHigherPriority(element1, element2)
-        }
     }
 }

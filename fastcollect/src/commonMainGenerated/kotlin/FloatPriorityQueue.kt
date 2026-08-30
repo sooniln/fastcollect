@@ -138,12 +138,13 @@ public abstract class AbstractFloatPriorityQueue(capacity: Int): FloatCollection
         return result
     }
 
-    public fun add(element: Float) {
+    public fun add(element: Float): Boolean {
         ensureCapacity(size + 1)
         var index = size++
         heap[index] = element
         index = siftUp(index)
         onIndexChanged(element, index)
+        return true
     }
 
     public fun remove(element: Float): Boolean {
@@ -211,6 +212,7 @@ public abstract class AbstractFloatPriorityQueue(capacity: Int): FloatCollection
     public fun retainAll(elements: FloatCollection): Boolean = filterInPlace { !elements.contains(it) }
     public fun retainAll(elements: Collection<Float>): Boolean = filterInPlace { !elements.contains(it) }
 
+    @JvmSynthetic
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (Float) -> Boolean): Boolean {
         contract {
@@ -321,7 +323,7 @@ public abstract class AbstractFloatPriorityQueue(capacity: Int): FloatCollection
         }
     }
 
-    final override fun toString(): String = Iterable { iterator() }.joinToString(", ", "[", "]")
+    final override fun toString(): String = joinToString(", ", "[", "]")
 
     private fun siftUp(index: Int): Int {
         var i = index
@@ -409,20 +411,5 @@ public class FloatPriorityQueue(private val descending: Boolean) : AbstractFloat
     override fun isHigherPriority(element1: Float, element2: Float): Boolean {
         val d = element1.compareTo(element2)
         return if (descending) d > 0 else d < 0
-    }
-}
-
-/**
- * Returns a priority queue of Floats using the given priority function.
- */
-@JvmSynthetic
-public inline fun FloatPriorityQueue(
-    capacity: Int = 0,
-    crossinline isHigherPriority: (Float, Float) -> Boolean,
-): AbstractFloatPriorityQueue {
-    return object : AbstractFloatPriorityQueue(capacity) {
-        override fun isHigherPriority(element1: Float, element2: Float): Boolean {
-            return isHigherPriority(element1, element2)
-        }
     }
 }

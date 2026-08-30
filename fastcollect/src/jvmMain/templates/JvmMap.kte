@@ -1,0 +1,17 @@
+/**
+ * Methods for dealing with ${Name}Maps.
+ */
+@file:JvmName("${Name}Maps")
+@file:JvmMultifileClass
+@file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+
+package io.github.sooniln.fastcollect
+
+import java.util.Map
+import kotlin.jvm.JvmMultifileClass
+
+public fun ${Generics} ${lowerName}MapOf(entry: Map.Entry<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = ${lowerName}MapOf(entry.key, entry.value)
+public fun ${Generics} ${lowerName}MapOf(vararg entries: Map.Entry<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = ${Name}HashMap${Generics}(entries.size).apply { entries.forEach { set(it.key, it.value) } }
+
+public fun ${Generics} mutable${Name}MapOf(entry: Map.Entry<${KeyType}, ${ValueType}>): Mutable${Name}Map${Generics} = ${Name}HashMap${Generics}(1).apply { set(entry.key, entry.value) }
+public fun ${Generics} mutable${Name}MapOf(vararg entries: Map.Entry<${KeyType}, ${ValueType}>): Mutable${Name}Map${Generics} = ${Name}HashMap${Generics}(entries.size).apply { entries.forEach { set(it.key, it.value) } }

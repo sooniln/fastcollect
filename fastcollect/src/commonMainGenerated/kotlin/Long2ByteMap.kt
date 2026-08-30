@@ -2,12 +2,14 @@
  * Methods for dealing with Long2ByteMaps.
  */
 @file:JvmName("Long2ByteMaps")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -16,11 +18,16 @@ public fun  emptyLong2ByteMap(): Long2ByteMap = EmptyLong2ByteMap as Long2ByteMa
 
 @Suppress("UNCHECKED_CAST")
 public fun  long2ByteMapOf(): Long2ByteMap = EmptyLong2ByteMap as Long2ByteMap
+public fun  long2ByteMapOf(key: Long, value: Byte): Long2ByteMap = SingletonLong2ByteMap(key, value)
+@JvmSynthetic
 public fun  long2ByteMapOf(entry: Pair<Long, Byte>): Long2ByteMap = SingletonLong2ByteMap(entry.first, entry.second)
+@JvmSynthetic
 public fun  long2ByteMapOf(vararg entries: Pair<Long, Byte>): Long2ByteMap = Long2ByteHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 public fun  mutableLong2ByteMapOf(): MutableLong2ByteMap = Long2ByteHashMap()
+@JvmSynthetic
 public fun  mutableLong2ByteMapOf(entry: Pair<Long, Byte>): MutableLong2ByteMap = Long2ByteHashMap(1).apply { set(entry.first, entry.second) }
+@JvmSynthetic
 public fun  mutableLong2ByteMapOf(vararg entries: Pair<Long, Byte>): MutableLong2ByteMap = Long2ByteHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @JvmSynthetic
@@ -42,12 +49,11 @@ public inline fun  buildLong2ByteMap(expectedSize: Int = 0, builderAction: Mutab
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public interface Long2ByteMap : Long2ByteTraversable {
 
+    @get:JvmName("size")
     public val size: Int
-
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun size(): Int = size
 
     public fun isEmpty(): Boolean {
         return size == 0
@@ -83,13 +89,11 @@ public interface Long2ByteMap : Long2ByteTraversable {
         return false
     }
 
+    @get:JvmName("keys")
     public val keys: LongSet
-    public val values: ByteCollection
 
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun keys(): LongSet = keys
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun values(): ByteCollection = values
+    @get:JvmName("values")
+    public val values: ByteCollection
 
     public operator fun iterator(): Iterator<Entry>
 
@@ -110,10 +114,13 @@ public interface Long2ByteMap : Long2ByteTraversable {
     }
 }
 
+public fun  Long2ByteMap.isNotEmpty(): Boolean = size != 0
+
 public fun  Long2ByteMap.asMap(): Map<Long, Byte> = Long2ByteMapWrapper(this)
 
 public fun  Long2ByteMap.Entry.asEntry(): Map.Entry<Long, Byte> = Long2ByteMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Long2ByteMap.getOrElse(key: Long, defaultValue: () -> Byte): Byte {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -183,6 +190,7 @@ public fun  MutableLong2ByteMap.asMap(): MutableMap<Long, Byte> = MutableLong2By
 
 public fun  MutableLong2ByteMap.MutableEntry.asEntry(): MutableMap.MutableEntry<Long, Byte> = MutableLong2ByteMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableLong2ByteMap.merge(key: Long, value: Byte, merge: (oldValue: Byte, value: Byte) -> Byte): Byte {
     contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
@@ -197,6 +205,7 @@ public inline fun  MutableLong2ByteMap.merge(key: Long, value: Byte, merge: (old
     return newValue
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableLong2ByteMap.getOrPut(key: Long, defaultValue: () -> Byte): Byte {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -263,7 +272,7 @@ public abstract class AbstractLong2ByteMap : Long2ByteMap {
         return result
     }
 
-    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
+    override fun toString(): String = joinToString(", ", "{", "}")
 
     public class SimpleEntry(override val key: Long, override val value: Byte) : Long2ByteMap.AbstractEntry()
 }

@@ -138,12 +138,13 @@ public abstract class AbstractLongPriorityQueue(capacity: Int): LongCollection {
         return result
     }
 
-    public fun add(element: Long) {
+    public fun add(element: Long): Boolean {
         ensureCapacity(size + 1)
         var index = size++
         heap[index] = element
         index = siftUp(index)
         onIndexChanged(element, index)
+        return true
     }
 
     public fun remove(element: Long): Boolean {
@@ -211,6 +212,7 @@ public abstract class AbstractLongPriorityQueue(capacity: Int): LongCollection {
     public fun retainAll(elements: LongCollection): Boolean = filterInPlace { !elements.contains(it) }
     public fun retainAll(elements: Collection<Long>): Boolean = filterInPlace { !elements.contains(it) }
 
+    @JvmSynthetic
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (Long) -> Boolean): Boolean {
         contract {
@@ -321,7 +323,7 @@ public abstract class AbstractLongPriorityQueue(capacity: Int): LongCollection {
         }
     }
 
-    final override fun toString(): String = Iterable { iterator() }.joinToString(", ", "[", "]")
+    final override fun toString(): String = joinToString(", ", "[", "]")
 
     private fun siftUp(index: Int): Int {
         var i = index
@@ -409,20 +411,5 @@ public class LongPriorityQueue(private val descending: Boolean) : AbstractLongPr
     override fun isHigherPriority(element1: Long, element2: Long): Boolean {
         val d = element1.compareTo(element2)
         return if (descending) d > 0 else d < 0
-    }
-}
-
-/**
- * Returns a priority queue of Longs using the given priority function.
- */
-@JvmSynthetic
-public inline fun LongPriorityQueue(
-    capacity: Int = 0,
-    crossinline isHigherPriority: (Long, Long) -> Boolean,
-): AbstractLongPriorityQueue {
-    return object : AbstractLongPriorityQueue(capacity) {
-        override fun isHigherPriority(element1: Long, element2: Long): Boolean {
-            return isHigherPriority(element1, element2)
-        }
     }
 }

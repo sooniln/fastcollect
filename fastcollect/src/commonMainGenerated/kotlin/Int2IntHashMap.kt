@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect
 
+import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
@@ -18,6 +19,7 @@ import kotlin.random.Random
  * The extension method [asMap] produces a thin wrapper around this class which exposes it as Kotlin map which can be
  * used anywhere a Kotlin map is expected. Using this wrapper may incur boxing penalties.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public class Int2IntHashMap @JvmOverloads constructor(
     capacity: Int = 0,
     /** The default value should be the value that is ideally least likely to occur in the map. */
@@ -38,6 +40,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
     // our initial capacity)
     private var threshold = MIN_INITIAL_CAPACITY.inv()
 
+    @get:JvmName("size")
     override var size: Int = 0
         private set
 
@@ -73,7 +76,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
         val kvArr = kvArr
         val combined = arrayEntry(emptyEntry.key(), value)
         for (slot in kvArr.indices) {
-            if ((kvArr[slot] xor combined) in 1..VALUE_COMPARE_MASK) return true
+            if ((kvArr[slot] xor combined) in 1..KVTYPE_MASK) return true
         }
         return false
     }
@@ -304,6 +307,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
     }
 
     private var _keys: IntSet? = null
+
+    @get:JvmName("keys")
     override val keys: IntSet get() {
         return _keys ?:
             object : AbstractIntSet() {
@@ -316,6 +321,8 @@ public class Int2IntHashMap @JvmOverloads constructor(
     }
 
     private var _values: IntCollection? = null
+
+    @get:JvmName("values")
     override val values: IntCollection get() {
         return _values ?:
             object : AbstractIntCollection() {
@@ -560,7 +567,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
         private val EMPTY_ARRAY = longArrayOf(ZERO_ENTRY)
 
-        private const val VALUE_COMPARE_MASK: Long = (-1).toLong() ushr (8 * Int.SIZE_BYTES)
+        private const val KVTYPE_MASK: Long = (-1).toLong() ushr (8 * Int.SIZE_BYTES)
 
         private const val MIN_INITIAL_CAPACITY = 7 // may not be zero
 
@@ -575,7 +582,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
         private fun Long.key(): Int = toInt()
         private fun Long.value(): Int = (this shr (8 * Int.SIZE_BYTES)).toInt()
-        private fun arrayEntry(key: Int, value: Int): Long = (value.toLong() shl (8 * Int.SIZE_BYTES)) or (key.toUInt().toLong())
+        private fun arrayEntry(key: Int, value: Int): Long = (value.toLong() shl (8 * Int.SIZE_BYTES)) or (key.toLong() and KVTYPE_MASK)
 
         private fun loadFactor(size: Int): Double = if (size <= FORCE_LOAD_FACTOR_MAX) 1.0 else 7.0/8.0
 

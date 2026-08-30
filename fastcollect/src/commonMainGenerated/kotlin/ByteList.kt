@@ -115,6 +115,10 @@ public interface ByteList : ByteCollection, ByteListTraversable {
 
     public operator fun get(index: Int): Byte
 
+    public fun first(): Byte = if (isEmpty()) throw NoSuchElementException() else get(0)
+
+    public fun last(): Byte = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
+
     public fun indexOf(element: Byte): Int {
         foreachIndexed { index, value ->
             if (value equalsRaw element) {
@@ -160,12 +164,6 @@ public interface ByteList : ByteCollection, ByteListTraversable {
 public val ByteList.indices: IntRange @JvmSynthetic inline get() = 0..<size
 
 public val ByteList.lastIndex: Int @JvmSynthetic inline get() = size - 1
-
-@JvmSynthetic
-public fun ByteList.first(): Byte = if (isEmpty()) throw NoSuchElementException() else this[0]
-
-@JvmSynthetic
-public fun ByteList.last(): Byte = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
 @JvmSynthetic
 public fun ByteList.copyInto(destination: ByteArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): ByteArray {

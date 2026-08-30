@@ -115,6 +115,10 @@ public interface IntList : IntCollection, IntListTraversable {
 
     public operator fun get(index: Int): Int
 
+    public fun first(): Int = if (isEmpty()) throw NoSuchElementException() else get(0)
+
+    public fun last(): Int = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
+
     public fun indexOf(element: Int): Int {
         foreachIndexed { index, value ->
             if (value equalsRaw element) {
@@ -160,12 +164,6 @@ public interface IntList : IntCollection, IntListTraversable {
 public val IntList.indices: IntRange @JvmSynthetic inline get() = 0..<size
 
 public val IntList.lastIndex: Int @JvmSynthetic inline get() = size - 1
-
-@JvmSynthetic
-public fun IntList.first(): Int = if (isEmpty()) throw NoSuchElementException() else this[0]
-
-@JvmSynthetic
-public fun IntList.last(): Int = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
 @JvmSynthetic
 public fun IntList.copyInto(destination: IntArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): IntArray {

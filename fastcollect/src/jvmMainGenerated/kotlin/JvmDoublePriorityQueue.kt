@@ -9,9 +9,9 @@ package io.github.sooniln.fastcollect
 import java.util.AbstractQueue
 import java.util.Queue
 
-public fun DoublePriorityQueue.asQueue(): Queue<Double> = DoublePriorityQueueWrapper(this)
+public fun AbstractDoublePriorityQueue.asQueue(): Queue<Double> = DoublePriorityQueueWrapper(this)
 
-private class DoublePriorityQueueWrapper(private val queue: DoublePriorityQueue) : AbstractQueue<Double>() {
+private class DoublePriorityQueueWrapper(private val queue: AbstractDoublePriorityQueue) : AbstractQueue<Double>() {
     override val size: Int get() = queue.size
 
     override fun iterator(): MutableIterator<Double> {

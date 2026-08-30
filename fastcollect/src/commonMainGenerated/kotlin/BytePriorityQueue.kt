@@ -138,12 +138,13 @@ public abstract class AbstractBytePriorityQueue(capacity: Int): ByteCollection {
         return result
     }
 
-    public fun add(element: Byte) {
+    public fun add(element: Byte): Boolean {
         ensureCapacity(size + 1)
         var index = size++
         heap[index] = element
         index = siftUp(index)
         onIndexChanged(element, index)
+        return true
     }
 
     public fun remove(element: Byte): Boolean {
@@ -211,6 +212,7 @@ public abstract class AbstractBytePriorityQueue(capacity: Int): ByteCollection {
     public fun retainAll(elements: ByteCollection): Boolean = filterInPlace { !elements.contains(it) }
     public fun retainAll(elements: Collection<Byte>): Boolean = filterInPlace { !elements.contains(it) }
 
+    @JvmSynthetic
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (Byte) -> Boolean): Boolean {
         contract {
@@ -321,7 +323,7 @@ public abstract class AbstractBytePriorityQueue(capacity: Int): ByteCollection {
         }
     }
 
-    final override fun toString(): String = Iterable { iterator() }.joinToString(", ", "[", "]")
+    final override fun toString(): String = joinToString(", ", "[", "]")
 
     private fun siftUp(index: Int): Int {
         var i = index
@@ -409,20 +411,5 @@ public class BytePriorityQueue(private val descending: Boolean) : AbstractBytePr
     override fun isHigherPriority(element1: Byte, element2: Byte): Boolean {
         val d = element1.compareTo(element2)
         return if (descending) d > 0 else d < 0
-    }
-}
-
-/**
- * Returns a priority queue of Bytes using the given priority function.
- */
-@JvmSynthetic
-public inline fun BytePriorityQueue(
-    capacity: Int = 0,
-    crossinline isHigherPriority: (Byte, Byte) -> Boolean,
-): AbstractBytePriorityQueue {
-    return object : AbstractBytePriorityQueue(capacity) {
-        override fun isHigherPriority(element1: Byte, element2: Byte): Boolean {
-            return isHigherPriority(element1, element2)
-        }
     }
 }

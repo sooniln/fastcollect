@@ -60,6 +60,10 @@ public interface LongCollection : LongTraversable {
     }
 }
 
+public fun LongCollection.toArray(): LongArray = copyInto(LongArray(size))
+
+public fun LongCollection.isNotEmpty(): Boolean = size != 0
+
 /**
  * A mutable collection of Longs.
  */
@@ -120,7 +124,7 @@ public interface MutableLongCollection : LongCollection, MutableLongTraversable 
 }
 
 @OptIn(ExperimentalContracts::class)
-internal inline fun MutableLongCollection.filterInPlace(removePredicate: (Long) -> Boolean): Boolean {
+private inline fun MutableLongCollection.filterInPlace(removePredicate: (Long) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -136,7 +140,7 @@ internal inline fun MutableLongCollection.filterInPlace(removePredicate: (Long) 
 
 public abstract class AbstractLongCollection : LongCollection {
     override fun toString(): String {
-        return Iterable { iterator() }.joinToString(", ", "[", "]")
+        return joinToString(", ", "[", "]")
     }
 }
 

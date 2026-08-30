@@ -138,12 +138,13 @@ public abstract class Abstract${Type}PriorityQueue(capacity: Int): ${Type}Collec
         return result
     }
 
-    public fun add(element: ${Type}) {
+    public fun add(element: ${Type}): Boolean {
         ensureCapacity(size + 1)
         var index = size++
         heap[index] = element
         index = siftUp(index)
         onIndexChanged(element, index)
+        return true
     }
 
     public fun remove(element: ${Type}): Boolean {
@@ -211,6 +212,7 @@ public abstract class Abstract${Type}PriorityQueue(capacity: Int): ${Type}Collec
     public fun retainAll(elements: ${Type}Collection): Boolean = filterInPlace { !elements.contains(it) }
     public fun retainAll(elements: Collection<${Type}>): Boolean = filterInPlace { !elements.contains(it) }
 
+    @JvmSynthetic
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (${Type}) -> Boolean): Boolean {
         contract {
@@ -321,7 +323,7 @@ public abstract class Abstract${Type}PriorityQueue(capacity: Int): ${Type}Collec
         }
     }
 
-    final override fun toString(): String = Iterable { iterator() }.joinToString(", ", "[", "]")
+    final override fun toString(): String = joinToString(", ", "[", "]")
 
     private fun siftUp(index: Int): Int {
         var i = index
@@ -409,20 +411,5 @@ public class ${Type}PriorityQueue(private val descending: Boolean) : Abstract${T
     override fun isHigherPriority(element1: ${Type}, element2: ${Type}): Boolean {
         val d = element1.compareTo(element2)
         return if (descending) d > 0 else d < 0
-    }
-}
-
-/**
- * Returns a priority queue of ${Type}s using the given priority function.
- */
-@JvmSynthetic
-public inline fun ${Type}PriorityQueue(
-    capacity: Int = 0,
-    crossinline isHigherPriority: (${Type}, ${Type}) -> Boolean,
-): Abstract${Type}PriorityQueue {
-    return object : Abstract${Type}PriorityQueue(capacity) {
-        override fun isHigherPriority(element1: ${Type}, element2: ${Type}): Boolean {
-            return isHigherPriority(element1, element2)
-        }
     }
 }

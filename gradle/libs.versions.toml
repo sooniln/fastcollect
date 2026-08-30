@@ -2,12 +2,21 @@
 dokka = "2.2.0"
 guava = "33.4.8-jre"
 jmh = "0.7.3"
+junit = "5.11.4"
+kotlin = "2.4.0"
 mavenPublish = "0.35.0"
+shadow = "9.6.1"
 
 [libraries]
 guava-testlib = { module = "com.google.guava:guava-testlib", version.ref = "guava" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 jmh = { id = "me.champeau.jmh", version.ref = "jmh" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

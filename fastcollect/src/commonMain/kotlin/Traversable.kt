@@ -2,12 +2,14 @@
  * Methods for dealing with Traversables.
  */
 @file:JvmName("Traversables")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -121,6 +123,7 @@ public inline fun <T> Traversable<T>.foreach(action: (T) -> Unit) {
     }
 }
 
+@JvmSynthetic
 public fun <T, A : Appendable> Traversable<T>.joinTo(
     buffer: A,
     separator: CharSequence = ", ",
@@ -157,8 +160,7 @@ public fun <T> Traversable<T>.joinToString(
     prefix: CharSequence = "",
     postfix: CharSequence = "",
     limit: Int = -1,
-    truncated: CharSequence = "...",
-    transform: ((T) -> CharSequence)? = null
+    truncated: CharSequence = "..."
 ): String {
-    return joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
+    return joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated).toString()
 }

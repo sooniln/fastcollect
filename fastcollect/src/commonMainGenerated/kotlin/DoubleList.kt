@@ -115,6 +115,10 @@ public interface DoubleList : DoubleCollection, DoubleListTraversable {
 
     public operator fun get(index: Int): Double
 
+    public fun first(): Double = if (isEmpty()) throw NoSuchElementException() else get(0)
+
+    public fun last(): Double = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
+
     public fun indexOf(element: Double): Int {
         foreachIndexed { index, value ->
             if (value equalsRaw element) {
@@ -160,12 +164,6 @@ public interface DoubleList : DoubleCollection, DoubleListTraversable {
 public val DoubleList.indices: IntRange @JvmSynthetic inline get() = 0..<size
 
 public val DoubleList.lastIndex: Int @JvmSynthetic inline get() = size - 1
-
-@JvmSynthetic
-public fun DoubleList.first(): Double = if (isEmpty()) throw NoSuchElementException() else this[0]
-
-@JvmSynthetic
-public fun DoubleList.last(): Double = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
 @JvmSynthetic
 public fun DoubleList.copyInto(destination: DoubleArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): DoubleArray {

@@ -2,12 +2,14 @@
  * Methods for dealing with Long2IntMaps.
  */
 @file:JvmName("Long2IntMaps")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -16,11 +18,16 @@ public fun  emptyLong2IntMap(): Long2IntMap = EmptyLong2IntMap as Long2IntMap
 
 @Suppress("UNCHECKED_CAST")
 public fun  long2IntMapOf(): Long2IntMap = EmptyLong2IntMap as Long2IntMap
+public fun  long2IntMapOf(key: Long, value: Int): Long2IntMap = SingletonLong2IntMap(key, value)
+@JvmSynthetic
 public fun  long2IntMapOf(entry: Pair<Long, Int>): Long2IntMap = SingletonLong2IntMap(entry.first, entry.second)
+@JvmSynthetic
 public fun  long2IntMapOf(vararg entries: Pair<Long, Int>): Long2IntMap = Long2IntHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 public fun  mutableLong2IntMapOf(): MutableLong2IntMap = Long2IntHashMap()
+@JvmSynthetic
 public fun  mutableLong2IntMapOf(entry: Pair<Long, Int>): MutableLong2IntMap = Long2IntHashMap(1).apply { set(entry.first, entry.second) }
+@JvmSynthetic
 public fun  mutableLong2IntMapOf(vararg entries: Pair<Long, Int>): MutableLong2IntMap = Long2IntHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @JvmSynthetic
@@ -42,12 +49,11 @@ public inline fun  buildLong2IntMap(expectedSize: Int = 0, builderAction: Mutabl
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public interface Long2IntMap : Long2IntTraversable {
 
+    @get:JvmName("size")
     public val size: Int
-
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun size(): Int = size
 
     public fun isEmpty(): Boolean {
         return size == 0
@@ -83,13 +89,11 @@ public interface Long2IntMap : Long2IntTraversable {
         return false
     }
 
+    @get:JvmName("keys")
     public val keys: LongSet
-    public val values: IntCollection
 
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun keys(): LongSet = keys
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun values(): IntCollection = values
+    @get:JvmName("values")
+    public val values: IntCollection
 
     public operator fun iterator(): Iterator<Entry>
 
@@ -110,10 +114,13 @@ public interface Long2IntMap : Long2IntTraversable {
     }
 }
 
+public fun  Long2IntMap.isNotEmpty(): Boolean = size != 0
+
 public fun  Long2IntMap.asMap(): Map<Long, Int> = Long2IntMapWrapper(this)
 
 public fun  Long2IntMap.Entry.asEntry(): Map.Entry<Long, Int> = Long2IntMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Long2IntMap.getOrElse(key: Long, defaultValue: () -> Int): Int {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -183,6 +190,7 @@ public fun  MutableLong2IntMap.asMap(): MutableMap<Long, Int> = MutableLong2IntM
 
 public fun  MutableLong2IntMap.MutableEntry.asEntry(): MutableMap.MutableEntry<Long, Int> = MutableLong2IntMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableLong2IntMap.merge(key: Long, value: Int, merge: (oldValue: Int, value: Int) -> Int): Int {
     contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
@@ -197,6 +205,7 @@ public inline fun  MutableLong2IntMap.merge(key: Long, value: Int, merge: (oldVa
     return newValue
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableLong2IntMap.getOrPut(key: Long, defaultValue: () -> Int): Int {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -263,7 +272,7 @@ public abstract class AbstractLong2IntMap : Long2IntMap {
         return result
     }
 
-    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
+    override fun toString(): String = joinToString(", ", "{", "}")
 
     public class SimpleEntry(override val key: Long, override val value: Int) : Long2IntMap.AbstractEntry()
 }

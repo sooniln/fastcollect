@@ -2,12 +2,14 @@
  * Methods for dealing with Long2FloatMaps.
  */
 @file:JvmName("Long2FloatMaps")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -16,11 +18,16 @@ public fun  emptyLong2FloatMap(): Long2FloatMap = EmptyLong2FloatMap as Long2Flo
 
 @Suppress("UNCHECKED_CAST")
 public fun  long2FloatMapOf(): Long2FloatMap = EmptyLong2FloatMap as Long2FloatMap
+public fun  long2FloatMapOf(key: Long, value: Float): Long2FloatMap = SingletonLong2FloatMap(key, value)
+@JvmSynthetic
 public fun  long2FloatMapOf(entry: Pair<Long, Float>): Long2FloatMap = SingletonLong2FloatMap(entry.first, entry.second)
+@JvmSynthetic
 public fun  long2FloatMapOf(vararg entries: Pair<Long, Float>): Long2FloatMap = Long2FloatHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 public fun  mutableLong2FloatMapOf(): MutableLong2FloatMap = Long2FloatHashMap()
+@JvmSynthetic
 public fun  mutableLong2FloatMapOf(entry: Pair<Long, Float>): MutableLong2FloatMap = Long2FloatHashMap(1).apply { set(entry.first, entry.second) }
+@JvmSynthetic
 public fun  mutableLong2FloatMapOf(vararg entries: Pair<Long, Float>): MutableLong2FloatMap = Long2FloatHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @JvmSynthetic
@@ -42,12 +49,11 @@ public inline fun  buildLong2FloatMap(expectedSize: Int = 0, builderAction: Muta
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public interface Long2FloatMap : Long2FloatTraversable {
 
+    @get:JvmName("size")
     public val size: Int
-
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun size(): Int = size
 
     public fun isEmpty(): Boolean {
         return size == 0
@@ -83,13 +89,11 @@ public interface Long2FloatMap : Long2FloatTraversable {
         return false
     }
 
+    @get:JvmName("keys")
     public val keys: LongSet
-    public val values: FloatCollection
 
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun keys(): LongSet = keys
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun values(): FloatCollection = values
+    @get:JvmName("values")
+    public val values: FloatCollection
 
     public operator fun iterator(): Iterator<Entry>
 
@@ -110,10 +114,13 @@ public interface Long2FloatMap : Long2FloatTraversable {
     }
 }
 
+public fun  Long2FloatMap.isNotEmpty(): Boolean = size != 0
+
 public fun  Long2FloatMap.asMap(): Map<Long, Float> = Long2FloatMapWrapper(this)
 
 public fun  Long2FloatMap.Entry.asEntry(): Map.Entry<Long, Float> = Long2FloatMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Long2FloatMap.getOrElse(key: Long, defaultValue: () -> Float): Float {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -183,6 +190,7 @@ public fun  MutableLong2FloatMap.asMap(): MutableMap<Long, Float> = MutableLong2
 
 public fun  MutableLong2FloatMap.MutableEntry.asEntry(): MutableMap.MutableEntry<Long, Float> = MutableLong2FloatMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableLong2FloatMap.merge(key: Long, value: Float, merge: (oldValue: Float, value: Float) -> Float): Float {
     contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
@@ -197,6 +205,7 @@ public inline fun  MutableLong2FloatMap.merge(key: Long, value: Float, merge: (o
     return newValue
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableLong2FloatMap.getOrPut(key: Long, defaultValue: () -> Float): Float {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -263,7 +272,7 @@ public abstract class AbstractLong2FloatMap : Long2FloatMap {
         return result
     }
 
-    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
+    override fun toString(): String = joinToString(", ", "{", "}")
 
     public class SimpleEntry(override val key: Long, override val value: Float) : Long2FloatMap.AbstractEntry()
 }

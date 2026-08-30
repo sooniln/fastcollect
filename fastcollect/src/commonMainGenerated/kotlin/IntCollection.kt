@@ -60,6 +60,10 @@ public interface IntCollection : IntTraversable {
     }
 }
 
+public fun IntCollection.toArray(): IntArray = copyInto(IntArray(size))
+
+public fun IntCollection.isNotEmpty(): Boolean = size != 0
+
 /**
  * A mutable collection of Ints.
  */
@@ -120,7 +124,7 @@ public interface MutableIntCollection : IntCollection, MutableIntTraversable {
 }
 
 @OptIn(ExperimentalContracts::class)
-internal inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) -> Boolean): Boolean {
+private inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -136,7 +140,7 @@ internal inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) ->
 
 public abstract class AbstractIntCollection : IntCollection {
     override fun toString(): String {
-        return Iterable { iterator() }.joinToString(", ", "[", "]")
+        return joinToString(", ", "[", "]")
     }
 }
 

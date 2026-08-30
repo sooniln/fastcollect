@@ -36,14 +36,6 @@ class IntPriorityQueueTests {
         assertEquals(source.asList().sorted(), IntPriorityQueue(source).drain())
     }
 
-    @Test
-    fun inlineFactory_usesTheSuppliedComparator() {
-        // orders by absolute value
-        val queue = IntPriorityQueue { a, b -> (if (a < 0) -a else a) < (if (b < 0) -b else b) }
-        for (v in listOf(-5, 3, -1, 4)) queue.add(v)
-        assertEquals(listOf(-1, 3, 4, -5), queue.drain())
-    }
-
     // ---------- ordering ----------
 
     @Test

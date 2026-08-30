@@ -5,7 +5,7 @@ dealing with collections as closely as possible.
 # Code Generation
 
 This library uses code generation from templates so that it is unnecessary to maintain multiple copies of almost
-identical code. The GenerateCommonMain/GenerateJvmMain gradle tasks are responsible for taking as input the template
+identical code. The generateCommonMain/generateJvmMain gradle tasks are responsible for taking as input the template
 files within src/\[commonMain|jvmMain\]/templates and generating output into src/\[commonMainGenerated|jvmMainGenerate\]
 \- it is generally executed automatically as a dependency of other compile tasks. Changes should thus always be made to
 the template files rather than the generated output.
@@ -43,6 +43,12 @@ The @JvmSynthetic annotation is used to hide methods/properties from Java, so @J
 something annotated with @JvmSynthetic. Generally, for any public method/property marked with @JvmSynthetic, there
 should be an alternate API for a Java client to invoke the same functionality (@JvmSynthetic is often used on extension
 methods which provide syntactic sugar for Kotlin clients and are not idiomatic to use from Java for example).
+
+## Java Artifact
+
+The fastcollect-java subproject defines a new publication "fastcollect-kotlin-java" which bundles a minified
+kotlin-stdlib so that Java projects do not need to take a large dependency on the Kotlin standard simply to use this
+library.
 
 # Testing
 

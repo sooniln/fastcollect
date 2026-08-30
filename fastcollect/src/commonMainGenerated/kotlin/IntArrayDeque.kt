@@ -9,6 +9,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
 import kotlin.math.min
 
@@ -23,7 +24,7 @@ public typealias IntArrayList = IntArrayDeque
  * The extension method [asList] produces a thin wrapper around this class which exposes it as Kotlin list which can be
  * used anywhere a Kotlin list is expected. Using this wrapper may incur boxing penalties.
  */
-public class IntArrayDeque private constructor(array: IntArray, size: Int = array.size) : AbstractMutableIntList(), RandomAccess {
+public class IntArrayDeque private constructor(array: IntArray, size: Int) : AbstractMutableIntList(), RandomAccess {
 
     private var head: Int = 0
     private var ring: IntArray = array
@@ -34,11 +35,13 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
 
     public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else { require(capacity > 0); IntArray(capacity) }, 0)
 
-    public constructor(elements: IntCollection) : this(elements.copyInto(IntArray(elements.size)), size = elements.size)
+    public constructor(elements: IntCollection) : this(elements.toArray(), size = elements.size)
 
     public constructor(elements: Collection<Int>) : this(elements.toIntArray(), size = elements.size)
 
-    public constructor(elements: IntArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex), size = toIndex - fromIndex)
+    public constructor(elements: IntArray) : this(elements.copyOf(), size = elements.size)
+
+    public constructor(elements: IntArray, fromIndex:Int, toIndex: Int) : this(elements.copyOfRange(fromIndex, toIndex), size = toIndex - fromIndex)
 
     public fun ensureCapacity(capacity: Int) {
         if (capacity > ring.size) grow(capacity)
@@ -335,6 +338,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
         return filterInPlace { e -> !elements.contains(e) }
     }
 
+    @JvmSynthetic
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (Int) -> Boolean): Boolean {
         contract {
@@ -463,7 +467,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int = arra
 
         if (size != other.size) return false
         if (other is RandomAccess) {
-            for (i in indices) {
+            for (i in 0..<size) {
                 if (!(ring[ring.position(head, i)] equalsRaw other[i])) return false
             }
         } else {

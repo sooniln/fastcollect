@@ -2,12 +2,14 @@
  * Methods for dealing with Int2ByteMaps.
  */
 @file:JvmName("Int2ByteMaps")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -16,11 +18,16 @@ public fun  emptyInt2ByteMap(): Int2ByteMap = EmptyInt2ByteMap as Int2ByteMap
 
 @Suppress("UNCHECKED_CAST")
 public fun  int2ByteMapOf(): Int2ByteMap = EmptyInt2ByteMap as Int2ByteMap
+public fun  int2ByteMapOf(key: Int, value: Byte): Int2ByteMap = SingletonInt2ByteMap(key, value)
+@JvmSynthetic
 public fun  int2ByteMapOf(entry: Pair<Int, Byte>): Int2ByteMap = SingletonInt2ByteMap(entry.first, entry.second)
+@JvmSynthetic
 public fun  int2ByteMapOf(vararg entries: Pair<Int, Byte>): Int2ByteMap = Int2ByteHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 public fun  mutableInt2ByteMapOf(): MutableInt2ByteMap = Int2ByteHashMap()
+@JvmSynthetic
 public fun  mutableInt2ByteMapOf(entry: Pair<Int, Byte>): MutableInt2ByteMap = Int2ByteHashMap(1).apply { set(entry.first, entry.second) }
+@JvmSynthetic
 public fun  mutableInt2ByteMapOf(vararg entries: Pair<Int, Byte>): MutableInt2ByteMap = Int2ByteHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @JvmSynthetic
@@ -42,12 +49,11 @@ public inline fun  buildInt2ByteMap(expectedSize: Int = 0, builderAction: Mutabl
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public interface Int2ByteMap : Int2ByteTraversable {
 
+    @get:JvmName("size")
     public val size: Int
-
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun size(): Int = size
 
     public fun isEmpty(): Boolean {
         return size == 0
@@ -83,13 +89,11 @@ public interface Int2ByteMap : Int2ByteTraversable {
         return false
     }
 
+    @get:JvmName("keys")
     public val keys: IntSet
-    public val values: ByteCollection
 
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun keys(): IntSet = keys
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun values(): ByteCollection = values
+    @get:JvmName("values")
+    public val values: ByteCollection
 
     public operator fun iterator(): Iterator<Entry>
 
@@ -110,10 +114,13 @@ public interface Int2ByteMap : Int2ByteTraversable {
     }
 }
 
+public fun  Int2ByteMap.isNotEmpty(): Boolean = size != 0
+
 public fun  Int2ByteMap.asMap(): Map<Int, Byte> = Int2ByteMapWrapper(this)
 
 public fun  Int2ByteMap.Entry.asEntry(): Map.Entry<Int, Byte> = Int2ByteMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2ByteMap.getOrElse(key: Int, defaultValue: () -> Byte): Byte {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -183,6 +190,7 @@ public fun  MutableInt2ByteMap.asMap(): MutableMap<Int, Byte> = MutableInt2ByteM
 
 public fun  MutableInt2ByteMap.MutableEntry.asEntry(): MutableMap.MutableEntry<Int, Byte> = MutableInt2ByteMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2ByteMap.merge(key: Int, value: Byte, merge: (oldValue: Byte, value: Byte) -> Byte): Byte {
     contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
@@ -197,6 +205,7 @@ public inline fun  MutableInt2ByteMap.merge(key: Int, value: Byte, merge: (oldVa
     return newValue
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2ByteMap.getOrPut(key: Int, defaultValue: () -> Byte): Byte {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -263,7 +272,7 @@ public abstract class AbstractInt2ByteMap : Int2ByteMap {
         return result
     }
 
-    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
+    override fun toString(): String = joinToString(", ", "{", "}")
 
     public class SimpleEntry(override val key: Int, override val value: Byte) : Int2ByteMap.AbstractEntry()
 }

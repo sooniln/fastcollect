@@ -2,12 +2,14 @@
  * Methods for dealing with Int2AnyMaps.
  */
 @file:JvmName("Int2AnyMaps")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -16,11 +18,16 @@ public fun <V> emptyInt2AnyMap(): Int2AnyMap<V> = EmptyInt2AnyMap as Int2AnyMap<
 
 @Suppress("UNCHECKED_CAST")
 public fun <V> int2AnyMapOf(): Int2AnyMap<V> = EmptyInt2AnyMap as Int2AnyMap<V>
+public fun <V> int2AnyMapOf(key: Int, value: V): Int2AnyMap<V> = SingletonInt2AnyMap(key, value)
+@JvmSynthetic
 public fun <V> int2AnyMapOf(entry: Pair<Int, V>): Int2AnyMap<V> = SingletonInt2AnyMap(entry.first, entry.second)
+@JvmSynthetic
 public fun <V> int2AnyMapOf(vararg entries: Pair<Int, V>): Int2AnyMap<V> = Int2AnyHashMap<V>(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 public fun <V> mutableInt2AnyMapOf(): MutableInt2AnyMap<V> = Int2AnyHashMap()
+@JvmSynthetic
 public fun <V> mutableInt2AnyMapOf(entry: Pair<Int, V>): MutableInt2AnyMap<V> = Int2AnyHashMap<V>(1).apply { set(entry.first, entry.second) }
+@JvmSynthetic
 public fun <V> mutableInt2AnyMapOf(vararg entries: Pair<Int, V>): MutableInt2AnyMap<V> = Int2AnyHashMap<V>(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @JvmSynthetic
@@ -42,12 +49,11 @@ public inline fun <V> buildInt2AnyMap(expectedSize: Int = 0, builderAction: Muta
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public interface Int2AnyMap<out V> : Int2AnyTraversable<V> {
 
+    @get:JvmName("size")
     public val size: Int
-
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun size(): Int = size
 
     public fun isEmpty(): Boolean {
         return size == 0
@@ -83,13 +89,11 @@ public interface Int2AnyMap<out V> : Int2AnyTraversable<V> {
         return false
     }
 
+    @get:JvmName("keys")
     public val keys: IntSet
-    public val values: Collection<V>
 
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun keys(): IntSet = keys
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun values(): Collection<V> = values
+    @get:JvmName("values")
+    public val values: Collection<V>
 
     public operator fun iterator(): Iterator<Entry<V>>
 
@@ -110,10 +114,13 @@ public interface Int2AnyMap<out V> : Int2AnyTraversable<V> {
     }
 }
 
+public fun <V> Int2AnyMap<V>.isNotEmpty(): Boolean = size != 0
+
 public fun <V> Int2AnyMap<V>.asMap(): Map<Int, V> = Int2AnyMapWrapper(this)
 
 public fun <V> Int2AnyMap.Entry<V>.asEntry(): Map.Entry<Int, V> = Int2AnyMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun <V> Int2AnyMap<V>.getOrElse(key: Int, defaultValue: () -> V): V {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -183,6 +190,7 @@ public fun <V> MutableInt2AnyMap<V>.asMap(): MutableMap<Int, V> = MutableInt2Any
 
 public fun <V> MutableInt2AnyMap.MutableEntry<V>.asEntry(): MutableMap.MutableEntry<Int, V> = MutableInt2AnyMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun <V> MutableInt2AnyMap<V>.merge(key: Int, value: V, merge: (oldValue: V, value: V) -> V): V {
     contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
@@ -197,6 +205,7 @@ public inline fun <V> MutableInt2AnyMap<V>.merge(key: Int, value: V, merge: (old
     return newValue
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun <V> MutableInt2AnyMap<V>.getOrPut(key: Int, defaultValue: () -> V): V {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -263,7 +272,7 @@ public abstract class AbstractInt2AnyMap<V> : Int2AnyMap<V> {
         return result
     }
 
-    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
+    override fun toString(): String = joinToString(", ", "{", "}")
 
     public class SimpleEntry<V>(override val key: Int, override val value: V) : Int2AnyMap.AbstractEntry<V>()
 }

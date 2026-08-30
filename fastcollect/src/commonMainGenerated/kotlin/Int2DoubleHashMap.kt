@@ -1,5 +1,6 @@
 package io.github.sooniln.fastcollect
 
+import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
 import kotlin.math.max
 import kotlin.math.min
@@ -18,6 +19,7 @@ import kotlin.random.Random
  * The extension method [asMap] produces a thin wrapper around this class which exposes it as Kotlin map which can be
  * used anywhere a Kotlin map is expected. Using this wrapper may incur boxing penalties.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public class Int2DoubleHashMap @JvmOverloads constructor(
     capacity: Int = 0,
 
@@ -44,6 +46,7 @@ public class Int2DoubleHashMap @JvmOverloads constructor(
     // our initial capacity)
     private var threshold = MIN_INITIAL_CAPACITY.inv()
 
+    @get:JvmName("size")
     override var size: Int = 0
         private set
 
@@ -330,6 +333,8 @@ public class Int2DoubleHashMap @JvmOverloads constructor(
     }
 
     private var _keys: IntSet? = null
+
+    @get:JvmName("keys")
     override val keys: IntSet get() {
         return _keys ?:
             object : AbstractIntSet() {
@@ -342,6 +347,8 @@ public class Int2DoubleHashMap @JvmOverloads constructor(
     }
 
     private var _values: DoubleCollection? = null
+
+    @get:JvmName("values")
     override val values: DoubleCollection get() {
         return _values ?:
 

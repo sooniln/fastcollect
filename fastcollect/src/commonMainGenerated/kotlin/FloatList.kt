@@ -115,6 +115,10 @@ public interface FloatList : FloatCollection, FloatListTraversable {
 
     public operator fun get(index: Int): Float
 
+    public fun first(): Float = if (isEmpty()) throw NoSuchElementException() else get(0)
+
+    public fun last(): Float = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
+
     public fun indexOf(element: Float): Int {
         foreachIndexed { index, value ->
             if (value equalsRaw element) {
@@ -160,12 +164,6 @@ public interface FloatList : FloatCollection, FloatListTraversable {
 public val FloatList.indices: IntRange @JvmSynthetic inline get() = 0..<size
 
 public val FloatList.lastIndex: Int @JvmSynthetic inline get() = size - 1
-
-@JvmSynthetic
-public fun FloatList.first(): Float = if (isEmpty()) throw NoSuchElementException() else this[0]
-
-@JvmSynthetic
-public fun FloatList.last(): Float = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
 @JvmSynthetic
 public fun FloatList.copyInto(destination: FloatArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): FloatArray {

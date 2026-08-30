@@ -60,6 +60,10 @@ public interface ByteCollection : ByteTraversable {
     }
 }
 
+public fun ByteCollection.toArray(): ByteArray = copyInto(ByteArray(size))
+
+public fun ByteCollection.isNotEmpty(): Boolean = size != 0
+
 /**
  * A mutable collection of Bytes.
  */
@@ -120,7 +124,7 @@ public interface MutableByteCollection : ByteCollection, MutableByteTraversable 
 }
 
 @OptIn(ExperimentalContracts::class)
-internal inline fun MutableByteCollection.filterInPlace(removePredicate: (Byte) -> Boolean): Boolean {
+private inline fun MutableByteCollection.filterInPlace(removePredicate: (Byte) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -136,7 +140,7 @@ internal inline fun MutableByteCollection.filterInPlace(removePredicate: (Byte) 
 
 public abstract class AbstractByteCollection : ByteCollection {
     override fun toString(): String {
-        return Iterable { iterator() }.joinToString(", ", "[", "]")
+        return joinToString(", ", "[", "]")
     }
 }
 

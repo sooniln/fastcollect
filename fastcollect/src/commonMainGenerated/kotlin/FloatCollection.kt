@@ -60,6 +60,10 @@ public interface FloatCollection : FloatTraversable {
     }
 }
 
+public fun FloatCollection.toArray(): FloatArray = copyInto(FloatArray(size))
+
+public fun FloatCollection.isNotEmpty(): Boolean = size != 0
+
 /**
  * A mutable collection of Floats.
  */
@@ -120,7 +124,7 @@ public interface MutableFloatCollection : FloatCollection, MutableFloatTraversab
 }
 
 @OptIn(ExperimentalContracts::class)
-internal inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float) -> Boolean): Boolean {
+private inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -136,7 +140,7 @@ internal inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float
 
 public abstract class AbstractFloatCollection : FloatCollection {
     override fun toString(): String {
-        return Iterable { iterator() }.joinToString(", ", "[", "]")
+        return joinToString(", ", "[", "]")
     }
 }
 

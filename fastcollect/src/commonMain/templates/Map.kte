@@ -2,12 +2,14 @@
  * Methods for dealing with ${Name}Maps.
  */
 @file:JvmName("${Name}Maps")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -16,11 +18,16 @@ public fun ${Generics} empty${Name}Map(): ${Name}Map${Generics} = Empty${Name}Ma
 
 @Suppress("UNCHECKED_CAST")
 public fun ${Generics} ${lowerName}MapOf(): ${Name}Map${Generics} = Empty${Name}Map as ${Name}Map${Generics}
+public fun ${Generics} ${lowerName}MapOf(key: ${KeyType}, value: ${ValueType}): ${Name}Map${Generics} = Singleton${Name}Map(key, value)
+@JvmSynthetic
 public fun ${Generics} ${lowerName}MapOf(entry: Pair<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = Singleton${Name}Map(entry.first, entry.second)
+@JvmSynthetic
 public fun ${Generics} ${lowerName}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): ${Name}Map${Generics} = ${Name}HashMap${Generics}(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 public fun ${Generics} mutable${Name}MapOf(): Mutable${Name}Map${Generics} = ${Name}HashMap()
+@JvmSynthetic
 public fun ${Generics} mutable${Name}MapOf(entry: Pair<${KeyType}, ${ValueType}>): Mutable${Name}Map${Generics} = ${Name}HashMap${Generics}(1).apply { set(entry.first, entry.second) }
+@JvmSynthetic
 public fun ${Generics} mutable${Name}MapOf(vararg entries: Pair<${KeyType}, ${ValueType}>): Mutable${Name}Map${Generics} = ${Name}HashMap${Generics}(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @JvmSynthetic
@@ -42,12 +49,11 @@ public inline fun ${Generics} build${Name}Map(expectedSize: Int = 0, builderActi
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public interface ${Name}Map${OutGenerics} : ${Name}Traversable${Generics} {
 
+    @get:JvmName("size")
     public val size: Int
-
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun size(): Int = size
 
     public fun isEmpty(): Boolean {
         return size == 0
@@ -83,13 +89,11 @@ public interface ${Name}Map${OutGenerics} : ${Name}Traversable${Generics} {
         return false
     }
 
+    @get:JvmName("keys")
     public val keys: ${KeyType}Set
-    public val values: ${ValueCollectionType}${Generics}
 
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun keys(): ${KeyType}Set = keys
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun values(): ${ValueCollectionType}${Generics} = values
+    @get:JvmName("values")
+    public val values: ${ValueCollectionType}${Generics}
 
     public operator fun iterator(): Iterator<Entry${Generics}>
 
@@ -110,10 +114,13 @@ public interface ${Name}Map${OutGenerics} : ${Name}Traversable${Generics} {
     }
 }
 
+public fun ${Generics} ${Name}Map${Generics}.isNotEmpty(): Boolean = size != 0
+
 public fun ${Generics} ${Name}Map${Generics}.asMap(): Map<${KeyType}, ${ValueType}> = ${Name}MapWrapper(this)
 
 public fun ${Generics} ${Name}Map.Entry${Generics}.asEntry(): Map.Entry<${KeyType}, ${ValueType}> = ${Name}MapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} ${Name}Map${Generics}.getOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -183,6 +190,7 @@ public fun ${Generics} Mutable${Name}Map${Generics}.asMap(): MutableMap<${KeyTyp
 
 public fun ${Generics} Mutable${Name}Map.MutableEntry${Generics}.asEntry(): MutableMap.MutableEntry<${KeyType}, ${ValueType}> = Mutable${Name}MapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} Mutable${Name}Map${Generics}.merge(key: ${KeyType}, value: ${ValueType}, merge: (oldValue: ${ValueType}, value: ${ValueType}) -> ${ValueType}): ${ValueType} {
     contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
@@ -197,6 +205,7 @@ public inline fun ${Generics} Mutable${Name}Map${Generics}.merge(key: ${KeyType}
     return newValue
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} Mutable${Name}Map${Generics}.getOrPut(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -263,7 +272,7 @@ public abstract class Abstract${Name}Map${Generics} : ${Name}Map${Generics} {
         return result
     }
 
-    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
+    override fun toString(): String = joinToString(", ", "{", "}")
 
     public class SimpleEntry${Generics}(override val key: ${KeyType}, override val value: ${ValueType}) : ${Name}Map.AbstractEntry${Generics}()
 }

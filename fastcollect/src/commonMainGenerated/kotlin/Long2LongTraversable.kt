@@ -2,6 +2,7 @@
  * Methods for dealing with Long2LongTraversables.
  */
 @file:JvmName("Long2LongTraversables")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
@@ -9,6 +10,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.experimental.ExperimentalTypeInference
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 

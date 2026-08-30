@@ -9,6 +9,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
 import kotlin.math.min
 
@@ -23,7 +24,7 @@ public typealias ByteArrayList = ByteArrayDeque
  * The extension method [asList] produces a thin wrapper around this class which exposes it as Kotlin list which can be
  * used anywhere a Kotlin list is expected. Using this wrapper may incur boxing penalties.
  */
-public class ByteArrayDeque private constructor(array: ByteArray, size: Int = array.size) : AbstractMutableByteList(), RandomAccess {
+public class ByteArrayDeque private constructor(array: ByteArray, size: Int) : AbstractMutableByteList(), RandomAccess {
 
     private var head: Int = 0
     private var ring: ByteArray = array
@@ -34,11 +35,13 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
     public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else { require(capacity > 0); ByteArray(capacity) }, 0)
 
-    public constructor(elements: ByteCollection) : this(elements.copyInto(ByteArray(elements.size)), size = elements.size)
+    public constructor(elements: ByteCollection) : this(elements.toArray(), size = elements.size)
 
     public constructor(elements: Collection<Byte>) : this(elements.toByteArray(), size = elements.size)
 
-    public constructor(elements: ByteArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex), size = toIndex - fromIndex)
+    public constructor(elements: ByteArray) : this(elements.copyOf(), size = elements.size)
+
+    public constructor(elements: ByteArray, fromIndex:Int, toIndex: Int) : this(elements.copyOfRange(fromIndex, toIndex), size = toIndex - fromIndex)
 
     public fun ensureCapacity(capacity: Int) {
         if (capacity > ring.size) grow(capacity)
@@ -335,6 +338,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
         return filterInPlace { e -> !elements.contains(e) }
     }
 
+    @JvmSynthetic
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (Byte) -> Boolean): Boolean {
         contract {
@@ -463,7 +467,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int = ar
 
         if (size != other.size) return false
         if (other is RandomAccess) {
-            for (i in indices) {
+            for (i in 0..<size) {
                 if (!(ring[ring.position(head, i)] equalsRaw other[i])) return false
             }
         } else {

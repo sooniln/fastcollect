@@ -2,12 +2,14 @@
  * Methods for dealing with Int2DoubleMaps.
  */
 @file:JvmName("Int2DoubleMaps")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 
@@ -16,11 +18,16 @@ public fun  emptyInt2DoubleMap(): Int2DoubleMap = EmptyInt2DoubleMap as Int2Doub
 
 @Suppress("UNCHECKED_CAST")
 public fun  int2DoubleMapOf(): Int2DoubleMap = EmptyInt2DoubleMap as Int2DoubleMap
+public fun  int2DoubleMapOf(key: Int, value: Double): Int2DoubleMap = SingletonInt2DoubleMap(key, value)
+@JvmSynthetic
 public fun  int2DoubleMapOf(entry: Pair<Int, Double>): Int2DoubleMap = SingletonInt2DoubleMap(entry.first, entry.second)
+@JvmSynthetic
 public fun  int2DoubleMapOf(vararg entries: Pair<Int, Double>): Int2DoubleMap = Int2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 public fun  mutableInt2DoubleMapOf(): MutableInt2DoubleMap = Int2DoubleHashMap()
+@JvmSynthetic
 public fun  mutableInt2DoubleMapOf(entry: Pair<Int, Double>): MutableInt2DoubleMap = Int2DoubleHashMap(1).apply { set(entry.first, entry.second) }
+@JvmSynthetic
 public fun  mutableInt2DoubleMapOf(vararg entries: Pair<Int, Double>): MutableInt2DoubleMap = Int2DoubleHashMap(entries.size).apply { entries.forEach { set(it.first, it.second) } }
 
 @JvmSynthetic
@@ -42,12 +49,11 @@ public inline fun  buildInt2DoubleMap(expectedSize: Int = 0, builderAction: Muta
  * necessary to disambiguate). For ease of use, prefer to use APIs such as [getOrElse]/[getOrDefault] to handle these
  * cases more easily.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public interface Int2DoubleMap : Int2DoubleTraversable {
 
+    @get:JvmName("size")
     public val size: Int
-
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun size(): Int = size
 
     public fun isEmpty(): Boolean {
         return size == 0
@@ -83,13 +89,11 @@ public interface Int2DoubleMap : Int2DoubleTraversable {
         return false
     }
 
+    @get:JvmName("keys")
     public val keys: IntSet
-    public val values: DoubleCollection
 
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun keys(): IntSet = keys
-    @Deprecated("For idiomatic Java usage only", level = DeprecationLevel.HIDDEN)
-    public fun values(): DoubleCollection = values
+    @get:JvmName("values")
+    public val values: DoubleCollection
 
     public operator fun iterator(): Iterator<Entry>
 
@@ -110,10 +114,13 @@ public interface Int2DoubleMap : Int2DoubleTraversable {
     }
 }
 
+public fun  Int2DoubleMap.isNotEmpty(): Boolean = size != 0
+
 public fun  Int2DoubleMap.asMap(): Map<Int, Double> = Int2DoubleMapWrapper(this)
 
 public fun  Int2DoubleMap.Entry.asEntry(): Map.Entry<Int, Double> = Int2DoubleMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double): Double {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -183,6 +190,7 @@ public fun  MutableInt2DoubleMap.asMap(): MutableMap<Int, Double> = MutableInt2D
 
 public fun  MutableInt2DoubleMap.MutableEntry.asEntry(): MutableMap.MutableEntry<Int, Double> = MutableInt2DoubleMapEntryWrapper(this)
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2DoubleMap.merge(key: Int, value: Double, merge: (oldValue: Double, value: Double) -> Double): Double {
     contract { callsInPlace(merge, InvocationKind.AT_MOST_ONCE) }
@@ -197,6 +205,7 @@ public inline fun  MutableInt2DoubleMap.merge(key: Int, value: Double, merge: (o
     return newValue
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2DoubleMap.getOrPut(key: Int, defaultValue: () -> Double): Double {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -263,7 +272,7 @@ public abstract class AbstractInt2DoubleMap : Int2DoubleMap {
         return result
     }
 
-    override fun toString(): String = Iterable { iterator() }.joinToString(", ", "{", "}")
+    override fun toString(): String = joinToString(", ", "{", "}")
 
     public class SimpleEntry(override val key: Int, override val value: Double) : Int2DoubleMap.AbstractEntry()
 }

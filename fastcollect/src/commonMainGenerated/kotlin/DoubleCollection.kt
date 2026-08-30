@@ -60,6 +60,10 @@ public interface DoubleCollection : DoubleTraversable {
     }
 }
 
+public fun DoubleCollection.toArray(): DoubleArray = copyInto(DoubleArray(size))
+
+public fun DoubleCollection.isNotEmpty(): Boolean = size != 0
+
 /**
  * A mutable collection of Doubles.
  */
@@ -120,7 +124,7 @@ public interface MutableDoubleCollection : DoubleCollection, MutableDoubleTraver
 }
 
 @OptIn(ExperimentalContracts::class)
-internal inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
+private inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
@@ -136,7 +140,7 @@ internal inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Doub
 
 public abstract class AbstractDoubleCollection : DoubleCollection {
     override fun toString(): String {
-        return Iterable { iterator() }.joinToString(", ", "[", "]")
+        return joinToString(", ", "[", "]")
     }
 }
 

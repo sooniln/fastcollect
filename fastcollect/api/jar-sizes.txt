@@ -1,0 +1,3 @@
+fastcollect-java-5.0.0.jar 1136281
+fastcollect-jvm-5.0.0.jar 1567838
+fastcollect-metadata-5.0.0.jar 127651

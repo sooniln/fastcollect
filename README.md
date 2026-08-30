@@ -3,9 +3,9 @@
 
 # FastCollect
 
-A library for high-performance primitive collections in the Kotlin ecosystem. FastCollect is highly memory efficient and
-performant, and is competitive with - if not faster than - every primitive collections library in the JVM ecosystem. See
-the benchmarking section for further details. Performance is complicated and any library that claims to be the de-facto
+A multi-platform library for high-performance primitive collections in the Kotlin ecosystem. FastCollect is highly
+memory efficient and performant, and is competitive with - if not faster than - every primitive collections library in
+the JVM ecosystem. See the benchmarking section for further details. Performance is complicated and any library that claims to be the de-facto
 fastest is probably not taking performance seriously. FastCollect is quite well tested, and has rounded off many of the
 sharp edges found in some collections libraries. First-class Java support is a stated goal - while not every feature is
 as idiomatic to use from Java as it would be from Kotlin, extensive work has gone into ensuring that it is not difficult
@@ -15,33 +15,28 @@ As a drop-in replacement for standard JRE collections, FastCollect generally red
 CPU performance by 2-3×. FastCollect distinguishes itself with a much smaller footprint (supporting only necessary and
 useful collections), but performance comparable to or better than much larger and more complex libraries.
 
-FastCollect currently supports the following major platforms (minor platforms have not been listed for brevity, the
-Gradle build files are the source of truth):
-
-* jvm
-* ios (arm64)
-* ios (x64)
-* linux (x64)
-* linux (arm64)
-* macos (arm64)
-* mingw (x64)
-
 Note that performance has only been tested on JVM platforms.
 
 ## Quick Start ##
 
-You can add FastCollect as a dependency in your project with:
+FastCollect ships different artifacts depending on your target:
+
+1. Kotlin Multi-Platform: Use `fastcollect`
+2. Kotlin Single-Platform: Use `fastcollect-<platform>` (i.e. `fastcollect-jvm` for JVM platforms)
+3. Non-Kotlin JVM Target (Java/Scala/etc): Use `fastcollect-java` - no dependency on the Kotlin Standard Library
+
+You can add FastCollect as a dependency with:
 
 Gradle:
 ```groovy
-implementation 'io.github.sooniln:fastcollect-kotlin:4.1.0'
+implementation 'io.github.sooniln:fastcollect-jvm:5.0.0'
 ```
 Maven:
 ```xml
 <dependency>
     <groupId>io.github.sooniln</groupId>
-    <artifactId>fastcollect-kotlin</artifactId>
-    <version>4.1.0</version>
+    <artifactId>fastcollect-jvm</artifactId>
+    <version>5.0.0</version>
 </dependency>
 ```
 
@@ -106,7 +101,7 @@ set.remove(Float.NaN)
 set.removeAll(value -> value == Float.NaN)
 ```
 
-Default Kotlin equality uses IEEE conventions for primitives. For this reason, FastUtil exposes publicly the comparison
+Default JVM equality uses IEEE conventions for primitives. For this reason, FastCollect exposes publicly the comparison
 methods it uses internally, as `equalsRaw()` and `notEqualsRaw()`.
 
 ```kotlin
@@ -141,7 +136,7 @@ Traverser APIs offer many of the same utility extension methods as Iterable, suc
 * **foreach** (note the capitalization, it's not 'forEach' - see [KT-39091](https://youtrack.jetbrains.com/projects/KT/issues/KT-39091/Iterable.forEach-should-not-HidesMembers))
 * **any/all/none**
 * **fold/reduce**
-* **sum/sumBy**
+* **sum/sumOf**
 * **joinToString**
 * etc...
 
@@ -157,7 +152,7 @@ import io.github.sooniln.fastcollect.*
 
 // creating a list
 var list = IntArrayList()
-list = mutableIntList(1, 2, 3)
+list = mutableIntListOf(1, 2, 3)
 
 // get/set by index
 var i = list[1]
@@ -290,7 +285,7 @@ class IndirectPriorityQueue(private val priorities: IntArray): AbstractIntPriori
         if (index == -1) {
             add(element)
         } else {
-            updatePriority(element)
+            updatePriority(index)
         }
     }
 }

@@ -9,6 +9,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
 import kotlin.math.min
 
@@ -23,7 +24,7 @@ public typealias DoubleArrayList = DoubleArrayDeque
  * The extension method [asList] produces a thin wrapper around this class which exposes it as Kotlin list which can be
  * used anywhere a Kotlin list is expected. Using this wrapper may incur boxing penalties.
  */
-public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int = array.size) : AbstractMutableDoubleList(), RandomAccess {
+public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int) : AbstractMutableDoubleList(), RandomAccess {
 
     private var head: Int = 0
     private var ring: DoubleArray = array
@@ -34,11 +35,13 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
 
     public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else { require(capacity > 0); DoubleArray(capacity) }, 0)
 
-    public constructor(elements: DoubleCollection) : this(elements.copyInto(DoubleArray(elements.size)), size = elements.size)
+    public constructor(elements: DoubleCollection) : this(elements.toArray(), size = elements.size)
 
     public constructor(elements: Collection<Double>) : this(elements.toDoubleArray(), size = elements.size)
 
-    public constructor(elements: DoubleArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex), size = toIndex - fromIndex)
+    public constructor(elements: DoubleArray) : this(elements.copyOf(), size = elements.size)
+
+    public constructor(elements: DoubleArray, fromIndex:Int, toIndex: Int) : this(elements.copyOfRange(fromIndex, toIndex), size = toIndex - fromIndex)
 
     public fun ensureCapacity(capacity: Int) {
         if (capacity > ring.size) grow(capacity)
@@ -335,6 +338,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
         return filterInPlace { e -> !elements.contains(e) }
     }
 
+    @JvmSynthetic
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
         contract {
@@ -463,7 +467,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int 
 
         if (size != other.size) return false
         if (other is RandomAccess) {
-            for (i in indices) {
+            for (i in 0..<size) {
                 if (!(ring[ring.position(head, i)] equalsRaw other[i])) return false
             }
         } else {

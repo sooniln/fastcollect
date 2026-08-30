@@ -1,0 +1,17 @@
+/**
+ * Methods for dealing with ${Name}Traversables.
+ */
+@file:JvmName("${Name}Traversables")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
+
+import kotlin.jvm.JvmMultifileClass
+
+<% if (!isReferenceValue) { %>
+public fun ${Name}Traversable.foreach(action: ${KeyType}${ValueType}Consumer): Unit = foreach { key, value -> action.accept(key, value) }
+<% } else { %>
+public fun <V> ${Name}Traversable<V>.foreach(action: ${KeyType}AnyConsumer<V>): Unit = foreach { key, value -> action.accept(key, value) }
+<% } %>
+public fun ${Generics} ${Name}Traversable${Generics}.foreachKey(action: ${KeyType}Consumer): Unit = foreachKey { key -> action.accept(key) }
+

@@ -9,6 +9,7 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
 import kotlin.math.min
 
@@ -23,7 +24,7 @@ public typealias FloatArrayList = FloatArrayDeque
  * The extension method [asList] produces a thin wrapper around this class which exposes it as Kotlin list which can be
  * used anywhere a Kotlin list is expected. Using this wrapper may incur boxing penalties.
  */
-public class FloatArrayDeque private constructor(array: FloatArray, size: Int = array.size) : AbstractMutableFloatList(), RandomAccess {
+public class FloatArrayDeque private constructor(array: FloatArray, size: Int) : AbstractMutableFloatList(), RandomAccess {
 
     private var head: Int = 0
     private var ring: FloatArray = array
@@ -34,11 +35,13 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
 
     public constructor(capacity: Int) : this(if (capacity == 0) EMPTY_ARRAY else { require(capacity > 0); FloatArray(capacity) }, 0)
 
-    public constructor(elements: FloatCollection) : this(elements.copyInto(FloatArray(elements.size)), size = elements.size)
+    public constructor(elements: FloatCollection) : this(elements.toArray(), size = elements.size)
 
     public constructor(elements: Collection<Float>) : this(elements.toFloatArray(), size = elements.size)
 
-    public constructor(elements: FloatArray, fromIndex:Int = 0, toIndex: Int = elements.size) : this(elements.copyOfRange(fromIndex, toIndex), size = toIndex - fromIndex)
+    public constructor(elements: FloatArray) : this(elements.copyOf(), size = elements.size)
+
+    public constructor(elements: FloatArray, fromIndex:Int, toIndex: Int) : this(elements.copyOfRange(fromIndex, toIndex), size = toIndex - fromIndex)
 
     public fun ensureCapacity(capacity: Int) {
         if (capacity > ring.size) grow(capacity)
@@ -335,6 +338,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
         return filterInPlace { e -> !elements.contains(e) }
     }
 
+    @JvmSynthetic
     @OptIn(ExperimentalContracts::class)
     internal inline fun filterInPlace(removePredicate: (Float) -> Boolean): Boolean {
         contract {
@@ -463,7 +467,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int = 
 
         if (size != other.size) return false
         if (other is RandomAccess) {
-            for (i in indices) {
+            for (i in 0..<size) {
                 if (!(ring[ring.position(head, i)] equalsRaw other[i])) return false
             }
         } else {

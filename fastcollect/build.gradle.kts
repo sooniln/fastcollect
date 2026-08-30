@@ -1,26 +1,163 @@
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.KotlinMultiplatform
-import org.gradle.kotlin.dsl.kotlin
 import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.abi.BinariesSource
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
-import kotlin.text.lowercase
-import java.nio.file.Path as NioPath
 
 plugins {
-    kotlin("multiplatform")
-
+    alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.dokka)
     alias(libs.plugins.mavenPublish)
 }
 
-repositories {
-    mavenCentral()
+private val primitiveTypes = listOf("Byte", "Int", "Long", "Float", "Double")
+private val setTypes = primitiveTypes - "Byte"
+private val keyTypes = listOf("Int", "Long")
+private val valueTypes = primitiveTypes + "V"
+
+private val defaultValues = mapOf(
+    "Byte" to "Byte.MIN_VALUE",
+    "Int" to "Int.MIN_VALUE",
+    "Long" to "Long.MIN_VALUE",
+    "Float" to "Float.NaN",
+    "Double" to "Double.NaN",
+    "V" to "null",
+)
+
+private fun typeExpansions(types: List<String> = primitiveTypes): List<Map<String, Any>> =
+    types.map { mapOf("Type" to it) }
+
+private fun keyValueExpansions(): List<Map<String, Any>> = keyTypes.flatMap { keyType ->
+    valueTypes.map { valueType -> mapOf("KeyType" to keyType, "ValueType" to valueType) }
 }
 
-group = "io.github.sooniln"
-version = "5.0.0"
+tasks.register<Sync>("generateCommonMain") {
+    description = "Generates source code for primitively typed collection classes from templates."
+    group = "build"
+    into("src/commonMainGenerated/kotlin")
+
+    generate(
+        "commonMain",
+        listOf(
+            TemplateInstantiation("Predicate.kte", typeExpansions()) { "${it["Type"]}Predicate.kt" },
+            TemplateInstantiation("ValueTraversable.kte", typeExpansions()) { "${it["Type"]}Traversable.kt" },
+            TemplateInstantiation("KeyValueTraversable.kte", keyValueExpansions()) { "${it["Name"]}Traversable.kt" },
+            TemplateInstantiation("Iterator.kte", typeExpansions()) { "${it["Type"]}Iterator.kt" },
+            TemplateInstantiation("Collection.kte", typeExpansions()) { "${it["Type"]}Collection.kt" },
+            TemplateInstantiation("List.kte", typeExpansions()) { "${it["Type"]}List.kt" },
+            TemplateInstantiation("ArrayDeque.kte", typeExpansions()) { "${it["Type"]}ArrayDeque.kt" },
+            TemplateInstantiation("Set.kte", typeExpansions(setTypes)) { "${it["Type"]}Set.kt" },
+            TemplateInstantiation("HashSet.kte", typeExpansions(setTypes)) { "${it["Type"]}HashSet.kt" },
+            TemplateInstantiation("Map.kte", keyValueExpansions()) { "${it["Name"]}Map.kt" },
+            TemplateInstantiation(
+                "HashMap.kte",
+                keyValueExpansions().filterNot { it["KeyType"] == "Int" && it["ValueType"] == "Int" },
+            ) { "${it["Name"]}HashMap.kt" },
+            TemplateInstantiation(
+                "InterleavedHashMap.kte",
+                listOf(mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE")),
+            ) { "${it["Name"]}HashMap.kt" },
+            TemplateInstantiation("PriorityQueue.kte", typeExpansions()) { "${it["Type"]}PriorityQueue.kt" },
+        ),
+    )
+}
+
+tasks.register<Sync>("generateJvmMain") {
+    description = "Generates source code for primitively typed collection classes from templates."
+    group = "build"
+    into("src/jvmMainGenerated/kotlin")
+
+    generate(
+        "jvmMain",
+        listOf(
+            TemplateInstantiation("JvmValueTraversable.kte", typeExpansions()) { "Jvm${it["Type"]}Traversable.kt" },
+            TemplateInstantiation("JvmKeyValueTraversable.kte", keyValueExpansions()) { "Jvm${it["Name"]}Traversable.kt" },
+            TemplateInstantiation("JvmMap.kte", keyValueExpansions()) { "Jvm${it["Name"]}Maps.kt" },
+            TemplateInstantiation("JvmPriorityQueue.kte", typeExpansions()) { "Jvm${it["Type"]}PriorityQueue.kt" },
+        ),
+    )
+}
+
+kotlin {
+    jvmToolchain(21)
+    jvm {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_1_8
+            jvmDefault = JvmDefaultMode.NO_COMPATIBILITY
+        }
+        testRuns["test"].executionTask.configure {
+            useJUnit()
+        }
+    }
+    macosArm64()
+    iosSimulatorArm64()
+    iosArm64()
+    linuxX64()
+
+    explicitApi()
+    @OptIn(ExperimentalAbiValidation::class)
+    abiValidation {
+        binariesSource = BinariesSource.MAVEN_PUBLICATIONS
+    }
+
+    applyDefaultHierarchyTemplate()
+    sourceSets {
+        commonMain {
+            kotlin.srcDir(tasks.named<Sync>("generateCommonMain"))
+        }
+
+        jvmMain {
+            kotlin.srcDir(tasks.named<Sync>("generateJvmMain"))
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.guava.testlib)
+            implementation(kotlin("reflect"))
+        }
+    }
+}
+
+tasks.named("jvmTest") {
+    // some tests read the abi file for verifications
+    dependsOn("checkKotlinAbi")
+}
+
+dokka {
+    moduleName = "FastCollect"
+    dokkaPublications.html {
+        includes.from("README.md")
+        suppressInheritedMembers = true
+        failOnWarning = true
+    }
+
+    dokkaSourceSets.all {
+        sourceLink {
+            localDirectory = file("src/main/kotlin")
+            remoteUrl = uri("https://github.com/sooniln/fastcollect/blob/main/")
+            remoteLineSuffix = "#L"
+        }
+    }
+}
+
+mavenPublishing {
+    publishToMavenCentral()
+
+    val isLocalPublish = gradle.startParameter.taskNames.any { it.endsWith("ToMavenLocal") }
+    if (!isLocalPublish) {
+        signAllPublications()
+    }
+
+    coordinates(group.toString(), "fastcollect", version.toString())
+
+    // default values come from the POM_* properties in the root gradle.properties
+    pom {
+        name = "fastcollect"
+        description = "A library for high-performance primitive collections in the Kotlin ecosystem."
+    }
+}
 
 private data class TemplateInstantiation(
     val inputFile: String,
@@ -61,8 +198,9 @@ private fun Map<String, Any>.generateFullExpansion(): Map<String, Any> {
         }
 
         if (keyType != null && valueType != null) {
-            val isReferenceValue = map["isReferenceValue"] as Boolean? ?: false
+            val isReferenceValue = valueType == "V"
             putIfAbsent("isReferenceValue", isReferenceValue)
+            putIfAbsent("DefaultValue", defaultValues.getValue(valueType))
 
             if (isReferenceValue) {
                 putIfAbsent("Name", "${keyType}2Any")
@@ -91,290 +229,12 @@ private fun Sync.generate(sourceSet: String, templates: List<TemplateInstantiati
     templates.forEach { template ->
         template.expansions.forEach { expansion ->
             val fullExpansion = expansion.generateFullExpansion()
-            val path = NioPath.of(template.outputFile(fullExpansion))
-            val outputFolder = (path.parent ?: NioPath.of(".")).toString()
-            val outputFile = path.fileName.toString()
+            val outputFile = template.outputFile(fullExpansion)
             check(outputFile.endsWith(".kt")) { "$outputFile must end with .kt" }
-            into(outputFolder) {
-                from("src/$sourceSet/templates/${template.inputFile}")
+            from("src/$sourceSet/templates/${template.inputFile}") {
                 rename { outputFile }
-                expand(*fullExpansion.toList().toTypedArray())
+                expand(fullExpansion)
             }
-        }
-    }
-}
-
-tasks.register<Sync>("GenerateCommonMain") {
-    description = "Generates source code for primitively typed collection classes from templates."
-    group = "build"
-    into("src/commonMainGenerated/kotlin")
-
-    generate("commonMain",
-        listOf(
-            TemplateInstantiation(
-                "Predicate.kte",
-                listOf(
-                    mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Int"),
-                    mapOf("Type" to "Long"),
-                    mapOf("Type" to "Float"),
-                    mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["Type"]}Predicate.kt" },
-            TemplateInstantiation(
-                "ValueTraversable.kte",
-                listOf(
-                    mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Int"),
-                    mapOf("Type" to "Long"),
-                    mapOf("Type" to "Float"),
-                    mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["Type"]}Traversable.kt" },
-            TemplateInstantiation(
-                "Iterator.kte",
-                listOf(
-                    mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Int"),
-                    mapOf("Type" to "Long"),
-                    mapOf("Type" to "Float"),
-                    mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["Type"]}Iterator.kt" },
-            TemplateInstantiation(
-                "Collection.kte",
-                listOf(
-                    mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Int"),
-                    mapOf("Type" to "Long"),
-                    mapOf("Type" to "Float"),
-                    mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["Type"]}Collection.kt" },
-            TemplateInstantiation(
-                "List.kte",
-                listOf(
-                    mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Int"),
-                    mapOf("Type" to "Long"),
-                    mapOf("Type" to "Float"),
-                    mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["Type"]}List.kt" },
-            TemplateInstantiation(
-                "ArrayDeque.kte",
-                listOf(
-                    mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Int"),
-                    mapOf("Type" to "Long"),
-                    mapOf("Type" to "Float"),
-                    mapOf("Type" to "Double"),
-                )
-            ) { expansion -> "${expansion["Type"]}ArrayDeque.kt" },
-            TemplateInstantiation(
-                "Set.kte",
-                listOf(
-                    mapOf("Type" to "Int"),
-                    mapOf("Type" to "Long"),
-                    mapOf("Type" to "Float"),
-                    mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["Type"]}Set.kt" },
-            TemplateInstantiation(
-                "HashSet.kte",
-                listOf(
-                    mapOf("Type" to "Int"),
-                    mapOf("Type" to "Long"),
-                    mapOf("Type" to "Float"),
-                    mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["Type"]}HashSet.kt" },
-            TemplateInstantiation(
-                "KeyValueTraversable.kte",
-                listOf(
-                    mapOf("KeyType" to "Int", "ValueType" to "Byte"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Int"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Long"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Float"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Double"),
-                    mapOf("KeyType" to "Int", "ValueType" to "V", "isReferenceValue" to true),
-                    mapOf("KeyType" to "Long", "ValueType" to "Byte"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Int"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Long"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Float"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Double"),
-                    mapOf("KeyType" to "Long", "ValueType" to "V", "isReferenceValue" to true),
-                )) { expansion -> "${expansion["Name"]}Traversable.kt" },
-            TemplateInstantiation(
-                "Map.kte",
-                listOf(
-                    mapOf("KeyType" to "Int", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
-                    mapOf("KeyType" to "Int", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
-                    mapOf("KeyType" to "Long", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
-                    mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
-                )) { expansion -> "${expansion["Name"]}Map.kt" },
-            TemplateInstantiation(
-                "HashMap.kte",
-                listOf(
-                    mapOf("KeyType" to "Int", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
-                    mapOf("KeyType" to "Int", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
-                    mapOf("KeyType" to "Int", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
-                    mapOf("KeyType" to "Long", "ValueType" to "Byte", "DefaultValue" to "Byte.MIN_VALUE"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Int", "DefaultValue" to "Int.MIN_VALUE"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Long", "DefaultValue" to "Long.MIN_VALUE"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Float", "DefaultValue" to "Float.NaN"),
-                    mapOf("KeyType" to "Long", "ValueType" to "Double", "DefaultValue" to "Double.NaN"),
-                    mapOf("KeyType" to "Long", "ValueType" to "V", "DefaultValue" to "null", "isReferenceValue" to true),
-                )) { expansion -> "${expansion["Name"]}HashMap.kt" },
-            TemplateInstantiation(
-                "InterleavedHashMap.kte",
-                listOf(
-                    mapOf("KVType" to "Int", "ArrayType" to "Long", "DefaultValue" to "Int.MIN_VALUE"),
-                )) { expansion -> "${expansion["Name"]}HashMap.kt" },
-            TemplateInstantiation(
-                "PriorityQueue.kte",
-                listOf(
-                    mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Int"),
-                    mapOf("Type" to "Long"),
-                    mapOf("Type" to "Float"),
-                    mapOf("Type" to "Double"),
-                )) { expansion -> "${expansion["Type"]}PriorityQueue.kt" },
-        ))
-}
-
-tasks.register<Sync>("GenerateJvmMain") {
-    description = "Generates source code for primitively typed collection classes from templates."
-    group = "build"
-    into("src/jvmMainGenerated/kotlin")
-
-    generate("jvmMain",
-        listOf(
-            TemplateInstantiation(
-                "JvmPriorityQueue.kte",
-                listOf(
-                    mapOf("Type" to "Byte"),
-                    mapOf("Type" to "Int"),
-                    mapOf("Type" to "Long"),
-                    mapOf("Type" to "Float"),
-                    mapOf("Type" to "Double"),
-                )
-            ) { expansion -> "Jvm${expansion["Type"]}PriorityQueue.kt" },
-        ))
-}
-
-kotlin {
-    jvmToolchain(21)
-    jvm {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_1_8)
-            jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
-        }
-        testRuns["test"].executionTask.configure {
-            useJUnit()
-        }
-    }
-
-    // According to https://kotlinlang.org/docs/native-target-support.html
-    // Tier 1
-    macosArm64()
-    // Tier 2
-    linuxX64()
-    linuxArm64()
-    iosArm64()
-    // Tier 3
-    mingwX64()
-    iosX64()
-
-    explicitApi()
-    @OptIn(ExperimentalAbiValidation::class)
-    abiValidation {
-        binariesSource.set(BinariesSource.MAVEN_PUBLICATIONS)
-    }
-
-    applyDefaultHierarchyTemplate()
-    sourceSets {
-        commonMain {
-            kotlin.srcDir(tasks.named<Sync>("GenerateCommonMain"))
-        }
-
-        jvmMain {
-            kotlin.srcDir(tasks.named<Sync>("GenerateJvmMain"))
-        }
-
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-        }
-
-        jvmTest.dependencies {
-            implementation(libs.guava.testlib)
-            implementation(kotlin("reflect"))
-        }
-    }
-}
-
-tasks.named("jvmTest") {
-    // some tests read the abi file for verifications
-    dependsOn("checkKotlinAbi")
-}
-
-dokka {
-    moduleName.set("FastCollect")
-    dokkaPublications.html {
-        includes.from("README.md")
-        suppressInheritedMembers.set(true)
-        failOnWarning.set(true)
-    }
-
-    dokkaSourceSets.all {
-        sourceLink {
-            localDirectory.set(file("src/main/kotlin"))
-            remoteUrl.set(uri("https://github.com/sooniln/fastcollect/blob/main/"))
-            remoteLineSuffix.set("#L")
-        }
-    }
-}
-
-mavenPublishing {
-    publishToMavenCentral()
-
-    val isLocalPublish = gradle.startParameter.taskNames.any { it.endsWith("ToMavenLocal") }
-    if (!isLocalPublish) {
-        signAllPublications()
-    } else {
-        configure(KotlinMultiplatform(javadocJar = JavadocJar.Empty(), sourcesJar = true))
-    }
-
-    coordinates(group.toString(), "fastcollect-kotlin", version.toString())
-
-    pom {
-        name = "fastcollect"
-        description = "A library for high-performance primitive collections in the Kotlin ecosystem."
-        inceptionYear = "2026"
-        url = "https://github.com/sooniln/fastcollect"
-        licenses {
-            license {
-                name = "MIT License"
-                url = "https://github.com/sooniln/fastcollect/blob/main/LICENSE"
-                distribution = "repo"
-            }
-        }
-        developers {
-            developer {
-                id = "sooniln"
-                name = "Soonil Nagarkar"
-                email = "sooniln@gmail.com"
-                organization = "Soonil Nagarkar"
-                organizationUrl = "https://github.com/sooniln"
-            }
-        }
-        scm {
-            url = "https://github.com/sooniln/fastcollect/"
-            connection = "scm:git:git://github.com/sooniln/fastcollect.git"
-            developerConnection = "scm:git:ssh://git@github.com/sooniln/fastcollect.git"
         }
     }
 }

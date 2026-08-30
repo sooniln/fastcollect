@@ -9,9 +9,9 @@ package io.github.sooniln.fastcollect
 import java.util.AbstractQueue
 import java.util.Queue
 
-public fun FloatPriorityQueue.asQueue(): Queue<Float> = FloatPriorityQueueWrapper(this)
+public fun AbstractFloatPriorityQueue.asQueue(): Queue<Float> = FloatPriorityQueueWrapper(this)
 
-private class FloatPriorityQueueWrapper(private val queue: FloatPriorityQueue) : AbstractQueue<Float>() {
+private class FloatPriorityQueueWrapper(private val queue: AbstractFloatPriorityQueue) : AbstractQueue<Float>() {
     override val size: Int get() = queue.size
 
     override fun iterator(): MutableIterator<Float> {

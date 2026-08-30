@@ -115,6 +115,10 @@ public interface LongList : LongCollection, LongListTraversable {
 
     public operator fun get(index: Int): Long
 
+    public fun first(): Long = if (isEmpty()) throw NoSuchElementException() else get(0)
+
+    public fun last(): Long = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
+
     public fun indexOf(element: Long): Int {
         foreachIndexed { index, value ->
             if (value equalsRaw element) {
@@ -160,12 +164,6 @@ public interface LongList : LongCollection, LongListTraversable {
 public val LongList.indices: IntRange @JvmSynthetic inline get() = 0..<size
 
 public val LongList.lastIndex: Int @JvmSynthetic inline get() = size - 1
-
-@JvmSynthetic
-public fun LongList.first(): Long = if (isEmpty()) throw NoSuchElementException() else this[0]
-
-@JvmSynthetic
-public fun LongList.last(): Long = if (isEmpty()) throw NoSuchElementException() else this[lastIndex]
 
 @JvmSynthetic
 public fun LongList.copyInto(destination: LongArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): LongArray {
