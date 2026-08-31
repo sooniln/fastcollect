@@ -13,15 +13,17 @@ import kotlin.jvm.JvmName
 /**
  * A collection of Doubles.
  */
-public interface DoubleCollection : DoubleTraversable {
+@Suppress("INAPPLICABLE_JVM_NAME")
+public interface DoubleCollection : DoubleTraversable, Iterable<Double> {
 
+    @get:JvmName("size")
     public val size: Int
 
     public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    public operator fun iterator(): DoubleIterator
+    override fun iterator(): DoubleIterator
 
     public fun contains(element: Double): Boolean {
         foreach { e ->
@@ -142,8 +144,4 @@ public abstract class AbstractDoubleCollection : DoubleCollection {
     override fun toString(): String {
         return joinToString(", ", "[", "]")
     }
-}
-
-public fun interface DoubleConsumer {
-    public fun accept(value: Double)
 }

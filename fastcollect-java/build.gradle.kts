@@ -1,5 +1,7 @@
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
+import java.net.URLClassLoader
+import java.util.ServiceLoader
 
 plugins {
     `java-library`
@@ -8,9 +10,11 @@ plugins {
 }
 
 val shadowInput = configurations.create("shadowInput")
+val abiTools = configurations.create("abiTools")
 
 dependencies {
     shadowInput(project(":fastcollect"))
+    abiTools(libs.abi.tools)
 
     testImplementation(files(tasks.shadowJar))
     testImplementation(platform(libs.junit.bom))
@@ -19,7 +23,7 @@ dependencies {
 }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
 }
 
 tasks.test {
@@ -119,4 +123,82 @@ tasks.named<Jar>("sourcesJar") {
 }
 publishing.publications.withType<MavenPublication>().configureEach {
     artifact(project(":fastcollect").tasks.named<AbstractArchiveTask>("jvmDokkaJavadocJar"))
+}
+
+// The shaded jar is what Java clients actually compile against, so its ABI is checked in - this is what
+// catches changes in the set of declarations R8 keeps (including the relocated stdlib classes, which are
+// deliberately not filtered out). abi-tools is loaded in an isolated classloader so that it never has to
+// go on the buildscript classpath.
+@CacheableTask
+abstract class DumpJarAbi : DefaultTask() {
+    @get:Classpath
+    abstract val toolClasspath: ConfigurableFileCollection
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val jar: RegularFileProperty
+
+    @get:OutputFile
+    abstract val dumpFile: RegularFileProperty
+
+    @TaskAction
+    fun dump() {
+        val loader = URLClassLoader(
+            toolClasspath.map { it.toURI().toURL() }.toTypedArray(),
+            ClassLoader.getPlatformClassLoader(),
+        )
+        val factoryClass = loader.loadClass("org.jetbrains.kotlin.abi.tools.AbiToolsFactory")
+        val toolsClass = loader.loadClass("org.jetbrains.kotlin.abi.tools.AbiTools")
+        val filtersClass = loader.loadClass("org.jetbrains.kotlin.abi.tools.AbiFilters")
+
+        val factory = ServiceLoader.load(factoryClass, loader).first()
+        val tools = factoryClass.getMethod("get").invoke(factory)
+        val noFilters = filtersClass
+            .getConstructor(Set::class.java, Set::class.java, Set::class.java, Set::class.java)
+            .newInstance(emptySet<String>(), emptySet<String>(), emptySet<String>(), emptySet<String>())
+
+        val abi = StringBuilder()
+        toolsClass.getMethod("printJvmDump", Appendable::class.java, Iterable::class.java, filtersClass)
+            .invoke(tools, abi, listOf(jar.get().asFile), noFilters)
+        dumpFile.get().asFile.writeText(abi.toString())
+    }
+}
+
+private val abiFile = layout.projectDirectory.file("api/fastcollect-java.api")
+
+val dumpJavaAbi = tasks.register<DumpJarAbi>("dumpJavaAbi") {
+    description = "Dumps the ABI of the shaded jar into the build directory."
+
+    toolClasspath.from(abiTools)
+    jar = tasks.shadowJar.flatMap { it.archiveFile }
+    dumpFile = layout.buildDirectory.file("abi/fastcollect-java.api")
+}
+
+tasks.register<Copy>("updateJavaAbi") {
+    group = "verification"
+    description = "Writes the ABI of the shaded jar to $abiFile."
+
+    from(dumpJavaAbi)
+    into(abiFile.asFile.parentFile)
+}
+
+val checkJavaAbi = tasks.register("checkJavaAbi") {
+    group = "verification"
+    description = "Fails if $abiFile is out of date."
+
+    dependsOn(dumpJavaAbi)
+
+    // captured into locals so the action stays configuration-cache-safe
+    val actual = dumpJavaAbi.flatMap { it.dumpFile }
+    val expectedFile = abiFile.asFile
+    doLast {
+        val expected = if (expectedFile.exists()) expectedFile.readText() else ""
+        check(actual.get().asFile.readText() == expected) {
+            "$expectedFile is out of date; run ./gradlew updateJavaAbi to refresh it."
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(checkJavaAbi)
 }

@@ -20,12 +20,12 @@ class IntArrayDequeJavaTest {
     void constructors() {
         assertTrue(new IntArrayDeque().isEmpty());
         assertTrue(new IntArrayDeque(64).isEmpty());
-        assertEquals(3, new IntArrayDeque(IntLists.intListOf(1, 2, 3)).getSize());
-        assertEquals(3, new IntArrayDeque(Arrays.asList(1, 2, 3)).getSize());
+        assertEquals(3, new IntArrayDeque(IntLists.intListOf(1, 2, 3)).size());
+        assertEquals(3, new IntArrayDeque(Arrays.asList(1, 2, 3)).size());
 
         // there is no single-argument (int[]) constructor - the range is always explicit
         int[] source = {1, 2, 3, 4};
-        assertEquals(2, new IntArrayDeque(source, 1, 3).getSize());
+        assertEquals(2, new IntArrayDeque(source, 1, 3).size());
     }
 
     @Test
@@ -39,7 +39,7 @@ class IntArrayDequeJavaTest {
 
         assertEquals(1, deque.removeFirst());
         assertEquals(3, deque.removeLast());
-        assertEquals(1, deque.getSize());
+        assertEquals(1, deque.size());
     }
 
     @Test
@@ -56,19 +56,19 @@ class IntArrayDequeJavaTest {
         assertEquals(40, deque.get(0));
 
         deque.add(0, 5);
-        assertEquals(5, deque.getSize());
+        assertEquals(5, deque.size());
         assertEquals(5, deque.removeAt(0));
 
         deque.removeRange(0, 2);
-        assertEquals(2, deque.getSize());
+        assertEquals(2, deque.size());
 
         assertTrue(deque.addAll(IntLists.intListOf(1, 2)));
         assertTrue(deque.addAll(Arrays.asList(3, 4)));
         assertTrue(deque.removeAll(IntLists.intListOf(1, 2)));
         assertTrue(deque.retainAll(IntLists.intListOf(3, 4)));
-        assertEquals(2, deque.getSize());
+        assertEquals(2, deque.size());
 
-        assertEquals(1, deque.subList(0, 1).getSize());
+        assertEquals(1, deque.subList(0, 1).size());
     }
 
     @Test
@@ -89,7 +89,7 @@ class IntArrayDequeJavaTest {
 
         deque.ensureCapacity(128);
         deque.trimToSize();
-        assertEquals(3, deque.getSize());
+        assertEquals(3, deque.size());
 
         deque.clear();
         assertTrue(deque.isEmpty());

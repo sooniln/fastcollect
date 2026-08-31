@@ -221,6 +221,7 @@ public inline fun  MutableLong2DoubleMap.getOrPut(key: Long, defaultValue: () ->
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableLong2DoubleMap.replaceOrSet(key: Long, value: Double, oldValue: () -> Double): Double {
     contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
@@ -235,6 +236,7 @@ public inline fun  MutableLong2DoubleMap.replaceOrSet(key: Long, value: Double, 
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableLong2DoubleMap.removeOrElse(key: Long, defaultValue: () -> Double): Double {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -442,10 +444,4 @@ private class MutableLong2DoubleMapEntryWrapper(
     override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
     override fun hashCode(): Int = key.hashCode() xor value.hashCode()
     override fun toString(): String = "$key=$value"
-}
-
-
-public fun interface LongDoubleConsumer {
-
-    public fun accept(key: Long, value: Double)
 }

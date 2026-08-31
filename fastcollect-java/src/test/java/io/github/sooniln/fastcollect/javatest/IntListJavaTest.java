@@ -8,9 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.github.sooniln.fastcollect.IntList;
 import io.github.sooniln.fastcollect.IntListTraverser;
 import io.github.sooniln.fastcollect.IntLists;
+import io.github.sooniln.fastcollect.IntTraversables;
 import io.github.sooniln.fastcollect.MutableIntList;
 import io.github.sooniln.fastcollect.MutableIntListTraverser;
 import java.util.List;
+import java.util.function.IntConsumer;
 import org.junit.jupiter.api.Test;
 
 /** Smoke tests that IntList/MutableIntList and the IntLists factories are usable from Java. */
@@ -19,19 +21,19 @@ class IntListJavaTest {
     @Test
     void factories() {
         assertTrue(IntLists.emptyIntList().isEmpty());
-        assertEquals(0, IntLists.intListOf().getSize());
-        assertEquals(1, IntLists.intListOf(7).getSize());
+        assertEquals(0, IntLists.intListOf().size());
+        assertEquals(1, IntLists.intListOf(7).size());
 
         IntList list = IntLists.intListOf(1, 2, 3);
-        assertEquals(3, list.getSize());
+        assertEquals(3, list.size());
         assertEquals(2, list.get(1));
 
         MutableIntList mutable = IntLists.mutableIntListOf(1, 2, 3);
-        assertEquals(3, mutable.getSize());
-        assertEquals(0, IntLists.mutableIntListOf().getSize());
-        assertEquals(1, IntLists.mutableIntListOf(7).getSize());
+        assertEquals(3, mutable.size());
+        assertEquals(0, IntLists.mutableIntListOf().size());
+        assertEquals(1, IntLists.mutableIntListOf(7).size());
 
-        assertEquals(3, IntLists.asIntList(new int[] {4, 5, 6}).getSize());
+        assertEquals(3, IntLists.asIntList(new int[] {4, 5, 6}).size());
     }
 
     @Test
@@ -43,7 +45,7 @@ class IntListJavaTest {
         assertFalse(list.contains(99));
         assertEquals(1, list.indexOf(20));
         assertEquals(3, list.lastIndexOf(20));
-        assertEquals(2, list.subList(1, 3).getSize());
+        assertEquals(2, list.subList(1, 3).size());
         assertTrue(list.containsAll(IntLists.intListOf(10, 30)));
     }
 
@@ -76,12 +78,12 @@ class IntListJavaTest {
         assertArrayEquals(new int[] {4, 5, 6}, list.copyInto(new int[3], 0));
 
         list.addAll(0, IntLists.intListOf(1, 2, 3));
-        assertEquals(6, list.getSize());
+        assertEquals(6, list.size());
         list.removeRange(0, 3);
-        assertEquals(3, list.getSize());
+        assertEquals(3, list.size());
 
-        IntLists.shuffle(list);
-        assertEquals(3, list.getSize());
+        list.shuffle();
+        assertEquals(3, list.size());
 
         list.fill(7);
         assertArrayEquals(new int[] {7, 7, 7}, list.copyInto(new int[3], 0));
@@ -107,7 +109,7 @@ class IntListJavaTest {
         }
         assertEquals(6, sum);
 
-        IntListTraverser backwards = list.traverser(list.getSize());
+        IntListTraverser backwards = list.traverser(list.size());
         assertTrue(backwards.backward());
         assertEquals(3, backwards.getValue());
     }
@@ -122,11 +124,20 @@ class IntListJavaTest {
         assertEquals(9, list.get(0));
 
         t.insert(8);
-        assertEquals(4, list.getSize());
+        assertEquals(4, list.size());
 
         assertTrue(t.forward());
         t.remove();
-        assertEquals(3, list.getSize());
+        assertEquals(3, list.size());
+    }
+
+    @Test
+    void jdkConsumer() {
+        // fastcollect's IntConsumer is a typealias for java.util.function.IntConsumer on the JVM
+        int[] sum = {0};
+        IntConsumer consumer = value -> sum[0] += value;
+        IntTraversables.foreach(IntLists.intListOf(1, 2, 3), consumer);
+        assertEquals(6, sum[0]);
     }
 
     @Test
@@ -139,6 +150,6 @@ class IntListJavaTest {
         MutableIntList backing = IntLists.mutableIntListOf(1, 2);
         List<Integer> mutableView = IntLists.asList(backing);
         assertTrue(mutableView.add(3));
-        assertEquals(3, backing.getSize());
+        assertEquals(3, backing.size());
     }
 }

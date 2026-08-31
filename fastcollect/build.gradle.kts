@@ -38,7 +38,6 @@ tasks.register<Sync>("generateCommonMain") {
     generate(
         "commonMain",
         listOf(
-            TemplateInstantiation("Predicate.kte", typeExpansions()) { "${it["Type"]}Predicate.kt" },
             TemplateInstantiation("ValueTraversable.kte", typeExpansions()) { "${it["Type"]}Traversable.kt" },
             TemplateInstantiation("KeyValueTraversable.kte", keyValueExpansions()) { "${it["Name"]}Traversable.kt" },
             TemplateInstantiation("Iterator.kte", typeExpansions()) { "${it["Type"]}Iterator.kt" },
@@ -78,7 +77,7 @@ tasks.register<Sync>("generateJvmMain") {
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
     jvm {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_1_8
@@ -92,6 +91,10 @@ kotlin {
     iosSimulatorArm64()
     iosArm64()
     linuxX64()
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
 
     explicitApi()
     @OptIn(ExperimentalAbiValidation::class)

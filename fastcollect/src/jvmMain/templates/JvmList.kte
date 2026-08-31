@@ -1,0 +1,12 @@
+/**
+ * Methods for dealing with ${Type}Lists.
+ */
+@file:JvmName("${Type}Lists")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
+
+import java.util.Random
+import kotlin.jvm.JvmMultifileClass
+
+public fun Mutable${Type}List.shuffle(random: Random) { shuffle(random.asKotlinRandom()) }

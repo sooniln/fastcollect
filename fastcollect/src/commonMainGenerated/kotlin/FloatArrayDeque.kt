@@ -24,10 +24,13 @@ public typealias FloatArrayList = FloatArrayDeque
  * The extension method [asList] produces a thin wrapper around this class which exposes it as Kotlin list which can be
  * used anywhere a Kotlin list is expected. Using this wrapper may incur boxing penalties.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public class FloatArrayDeque private constructor(array: FloatArray, size: Int) : AbstractMutableFloatList(), RandomAccess {
 
     private var head: Int = 0
     private var ring: FloatArray = array
+
+    @get:JvmName("size")
     override var size: Int = size
         private set
 

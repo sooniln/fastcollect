@@ -221,6 +221,7 @@ public inline fun  MutableInt2IntMap.getOrPut(key: Int, defaultValue: () -> Int)
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2IntMap.replaceOrSet(key: Int, value: Int, oldValue: () -> Int): Int {
     contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
@@ -235,6 +236,7 @@ public inline fun  MutableInt2IntMap.replaceOrSet(key: Int, value: Int, oldValue
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun  MutableInt2IntMap.removeOrElse(key: Int, defaultValue: () -> Int): Int {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -442,10 +444,4 @@ private class MutableInt2IntMapEntryWrapper(
     override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
     override fun hashCode(): Int = key.hashCode() xor value.hashCode()
     override fun toString(): String = "$key=$value"
-}
-
-
-public fun interface IntIntConsumer {
-
-    public fun accept(key: Int, value: Int)
 }

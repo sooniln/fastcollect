@@ -13,15 +13,17 @@ import kotlin.jvm.JvmName
 /**
  * A collection of Bytes.
  */
-public interface ByteCollection : ByteTraversable {
+@Suppress("INAPPLICABLE_JVM_NAME")
+public interface ByteCollection : ByteTraversable, Iterable<Byte> {
 
+    @get:JvmName("size")
     public val size: Int
 
     public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    public operator fun iterator(): ByteIterator
+    override fun iterator(): ByteIterator
 
     public fun contains(element: Byte): Boolean {
         foreach { e ->
@@ -142,8 +144,4 @@ public abstract class AbstractByteCollection : ByteCollection {
     override fun toString(): String {
         return joinToString(", ", "[", "]")
     }
-}
-
-public fun interface ByteConsumer {
-    public fun accept(value: Byte)
 }

@@ -95,12 +95,10 @@ public interface Traverser<out T> : Iterator<Any?> {
 
     /** DO NOT USE. See class-level note on why iterator interface exists here at all. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "Not a real method, do not use.", replaceWith = ReplaceWith("value"))
-    @JvmSynthetic
     override fun hasNext(): Boolean = throw UnsupportedOperationException()
 
     /** DO NOT USE. See class-level note on why iterator interface exists here at all. */
     @Deprecated(level = DeprecationLevel.HIDDEN, message = "Not a real method, do not use.")
-    @JvmSynthetic
     override fun next(): Nothing = throw UnsupportedOperationException()
 }
 

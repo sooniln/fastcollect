@@ -8,6 +8,7 @@ mavenPublish = "0.35.0"
 shadow = "9.6.1"
 
 [libraries]
+abi-tools = { module = "org.jetbrains.kotlin:abi-tools", version.ref = "kotlin" }
 guava-testlib = { module = "com.google.guava:guava-testlib", version.ref = "guava" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }

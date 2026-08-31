@@ -50,6 +50,10 @@ The fastcollect-java subproject defines a new publication "fastcollect-kotlin-ja
 kotlin-stdlib so that Java projects do not need to take a large dependency on the Kotlin standard simply to use this
 library.
 
+The ABI of the shaded jar is checked in at fastcollect-java/api/fastcollect-java.api and can be updated via the
+`updateJavaAbi` Gradle task. This dump deliberately includes the relocated shaded.kotlin.** classes, so changes to
+the set of declarations R8 keeps or drops are visible in review.
+
 # Testing
 
 Prefer to run only JVM tests for speed (unless there is a good reason to run tests on other platforms).

@@ -24,10 +24,13 @@ public typealias LongArrayList = LongArrayDeque
  * The extension method [asList] produces a thin wrapper around this class which exposes it as Kotlin list which can be
  * used anywhere a Kotlin list is expected. Using this wrapper may incur boxing penalties.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public class LongArrayDeque private constructor(array: LongArray, size: Int) : AbstractMutableLongList(), RandomAccess {
 
     private var head: Int = 0
     private var ring: LongArray = array
+
+    @get:JvmName("size")
     override var size: Int = size
         private set
 

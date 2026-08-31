@@ -328,6 +328,7 @@ public interface MutableByteList : ByteList, MutableByteCollection, MutableByteL
         }
     }
 
+    @JvmSynthetic
     public fun shuffle(random: Random) {
         for (i in lastIndex downTo 1) {
             val j = random.nextInt(i + 1)
@@ -336,6 +337,8 @@ public interface MutableByteList : ByteList, MutableByteCollection, MutableByteL
             set(j, tmp)
         }
     }
+
+    public fun shuffle() { shuffle(Random) }
 
     public fun reverse() {
         val midPoint = (size / 2)
@@ -350,8 +353,6 @@ public interface MutableByteList : ByteList, MutableByteCollection, MutableByteL
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableByteList
 }
-
-public fun MutableByteList.shuffle() { shuffle(Random) }
 
 public fun MutableByteList.asList(): MutableList<Byte> = MutableByteListWrapper(this)
 

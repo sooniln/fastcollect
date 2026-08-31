@@ -27,15 +27,15 @@ class IntPriorityQueueJavaTest {
         assertTrue(new IntPriorityQueue(64, true).isEmpty());
 
         int[] source = {3, 1, 2};
-        assertEquals(3, new IntPriorityQueue(source).getSize());
-        assertEquals(2, new IntPriorityQueue(source, 1).getSize());
-        assertEquals(1, new IntPriorityQueue(source, 1, 2).getSize());
-        assertEquals(1, new IntPriorityQueue(source, 1, 2, true).getSize());
+        assertEquals(3, new IntPriorityQueue(source).size());
+        assertEquals(2, new IntPriorityQueue(source, 1).size());
+        assertEquals(1, new IntPriorityQueue(source, 1, 2).size());
+        assertEquals(1, new IntPriorityQueue(source, 1, 2, true).size());
 
-        assertEquals(3, new IntPriorityQueue(IntLists.intListOf(1, 2, 3)).getSize());
-        assertEquals(3, new IntPriorityQueue(IntLists.intListOf(1, 2, 3), true).getSize());
-        assertEquals(3, new IntPriorityQueue(Arrays.asList(1, 2, 3)).getSize());
-        assertEquals(3, new IntPriorityQueue(Arrays.asList(1, 2, 3), true).getSize());
+        assertEquals(3, new IntPriorityQueue(IntLists.intListOf(1, 2, 3)).size());
+        assertEquals(3, new IntPriorityQueue(IntLists.intListOf(1, 2, 3), true).size());
+        assertEquals(3, new IntPriorityQueue(Arrays.asList(1, 2, 3)).size());
+        assertEquals(3, new IntPriorityQueue(Arrays.asList(1, 2, 3), true).size());
     }
 
     @Test
@@ -53,7 +53,7 @@ class IntPriorityQueueJavaTest {
         queue.add(1);
         queue.add(2);
 
-        assertEquals(3, queue.getSize());
+        assertEquals(3, queue.size());
         assertFalse(queue.isEmpty());
         assertEquals(1, queue.first());
         assertTrue(queue.contains(2));
@@ -75,13 +75,13 @@ class IntPriorityQueueJavaTest {
         queue.addAll(new int[] {6, 7, 8}, 0, 2);
         queue.addAll(IntLists.intListOf(9));
         queue.addAll(List.of(10));
-        assertEquals(8, queue.getSize());
+        assertEquals(8, queue.size());
 
         assertTrue(queue.removeAll(IntLists.intListOf(1, 2)));
-        assertEquals(6, queue.getSize());
+        assertEquals(6, queue.size());
 
         assertTrue(queue.retainAll(IntLists.intListOf(3, 5)));
-        assertEquals(2, queue.getSize());
+        assertEquals(2, queue.size());
 
         queue.ensureCapacity(128);
         queue.trimToSize();
@@ -96,10 +96,10 @@ class IntPriorityQueueJavaTest {
         IntPriorityQueue queue = IntPriorityQueues.intPriorityQueueOf(1, 2, 3, 4);
 
         assertTrue(IntPriorityQueues.removeAll(queue, value -> value % 2 == 0));
-        assertEquals(2, queue.getSize());
+        assertEquals(2, queue.size());
 
         assertTrue(IntPriorityQueues.retainAll(queue, value -> value == 1));
-        assertEquals(1, queue.getSize());
+        assertEquals(1, queue.size());
     }
 
     @Test

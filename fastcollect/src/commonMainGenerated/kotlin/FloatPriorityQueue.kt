@@ -43,6 +43,7 @@ public inline fun buildFloatPriorityQueue(
  * The extension method `asQueue()` produces a thin wrapper around this class which exposes it as Kotlin queue which can
  * be used anywhere a Kotlin queue is expected. Using this wrapper may incur boxing penalties.
  */
+@Suppress("INAPPLICABLE_JVM_NAME")
 public abstract class AbstractFloatPriorityQueue(capacity: Int): FloatCollection {
 
     public constructor() : this(0)
@@ -65,6 +66,8 @@ public abstract class AbstractFloatPriorityQueue(capacity: Int): FloatCollection
     }
 
     private var heap: FloatArray = if (capacity == 0) EMPTY_ARRAY else FloatArray(capacity)
+
+    @get:JvmName("size")
     final override var size: Int = 0
         private set
 

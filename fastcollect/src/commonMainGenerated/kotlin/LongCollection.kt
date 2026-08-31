@@ -13,15 +13,17 @@ import kotlin.jvm.JvmName
 /**
  * A collection of Longs.
  */
-public interface LongCollection : LongTraversable {
+@Suppress("INAPPLICABLE_JVM_NAME")
+public interface LongCollection : LongTraversable, Iterable<Long> {
 
+    @get:JvmName("size")
     public val size: Int
 
     public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    public operator fun iterator(): LongIterator
+    override fun iterator(): LongIterator
 
     public fun contains(element: Long): Boolean {
         foreach { e ->
@@ -142,8 +144,4 @@ public abstract class AbstractLongCollection : LongCollection {
     override fun toString(): String {
         return joinToString(", ", "[", "]")
     }
-}
-
-public fun interface LongConsumer {
-    public fun accept(value: Long)
 }

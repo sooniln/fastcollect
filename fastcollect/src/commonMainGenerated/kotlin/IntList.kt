@@ -328,6 +328,7 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableIntListT
         }
     }
 
+    @JvmSynthetic
     public fun shuffle(random: Random) {
         for (i in lastIndex downTo 1) {
             val j = random.nextInt(i + 1)
@@ -336,6 +337,8 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableIntListT
             set(j, tmp)
         }
     }
+
+    public fun shuffle() { shuffle(Random) }
 
     public fun reverse() {
         val midPoint = (size / 2)
@@ -350,8 +353,6 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableIntListT
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableIntList
 }
-
-public fun MutableIntList.shuffle() { shuffle(Random) }
 
 public fun MutableIntList.asList(): MutableList<Int> = MutableIntListWrapper(this)
 

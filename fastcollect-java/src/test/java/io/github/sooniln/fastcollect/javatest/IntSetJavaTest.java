@@ -22,20 +22,20 @@ class IntSetJavaTest {
     void constructors() {
         assertTrue(new IntHashSet().isEmpty());
         assertTrue(new IntHashSet(64).isEmpty());
-        assertEquals(3, new IntHashSet(IntLists.intListOf(1, 2, 3)).getSize());
-        assertEquals(3, new IntHashSet(Arrays.asList(1, 2, 3)).getSize());
+        assertEquals(3, new IntHashSet(IntLists.intListOf(1, 2, 3)).size());
+        assertEquals(3, new IntHashSet(Arrays.asList(1, 2, 3)).size());
     }
 
     @Test
     void factories() {
         assertTrue(IntSets.emptyIntSet().isEmpty());
-        assertEquals(0, IntSets.intSetOf().getSize());
-        assertEquals(1, IntSets.intSetOf(7).getSize());
-        assertEquals(3, IntSets.intSetOf(1, 2, 3).getSize());
+        assertEquals(0, IntSets.intSetOf().size());
+        assertEquals(1, IntSets.intSetOf(7).size());
+        assertEquals(3, IntSets.intSetOf(1, 2, 3).size());
 
-        assertEquals(0, IntSets.mutableIntSetOf().getSize());
-        assertEquals(1, IntSets.mutableIntSetOf(7).getSize());
-        assertEquals(3, IntSets.mutableIntSetOf(1, 2, 3).getSize());
+        assertEquals(0, IntSets.mutableIntSetOf().size());
+        assertEquals(1, IntSets.mutableIntSetOf(7).size());
+        assertEquals(3, IntSets.mutableIntSetOf(1, 2, 3).size());
     }
 
     @Test
@@ -45,17 +45,17 @@ class IntSetJavaTest {
         assertTrue(set.add(1));
         assertFalse(set.add(1));
         assertTrue(set.contains(1));
-        assertEquals(1, set.getSize());
+        assertEquals(1, set.size());
 
         assertTrue(set.addAll(IntLists.intListOf(2, 3)));
         assertTrue(set.addAll(Arrays.asList(4, 5)));
-        assertEquals(5, set.getSize());
+        assertEquals(5, set.size());
 
         assertTrue(set.remove(1));
         assertFalse(set.remove(1));
         assertTrue(set.removeAll(IntLists.intListOf(2, 3)));
         assertTrue(set.retainAll(IntLists.intListOf(4)));
-        assertEquals(1, set.getSize());
+        assertEquals(1, set.size());
 
         set.ensureCapacity(128);
         set.trimToSize();
@@ -69,9 +69,9 @@ class IntSetJavaTest {
         IntSet a = IntSets.intSetOf(1, 2, 3);
         IntSet b = IntSets.intSetOf(3, 4);
 
-        assertEquals(4, IntSets.union(a, b).getSize());
-        assertEquals(1, IntSets.intersect(a, b).getSize());
-        assertEquals(2, IntSets.subtract(a, b).getSize());
+        assertEquals(4, IntSets.union(a, b).size());
+        assertEquals(1, IntSets.intersect(a, b).size());
+        assertEquals(2, IntSets.subtract(a, b).size());
     }
 
     @Test
@@ -106,6 +106,6 @@ class IntSetJavaTest {
         MutableIntSet backing = IntSets.mutableIntSetOf(1, 2);
         Set<Integer> mutableView = IntSets.asSet(backing);
         assertTrue(mutableView.add(3));
-        assertEquals(3, backing.getSize());
+        assertEquals(3, backing.size());
     }
 }

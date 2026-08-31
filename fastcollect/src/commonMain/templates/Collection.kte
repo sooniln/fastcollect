@@ -13,15 +13,17 @@ import kotlin.jvm.JvmName
 /**
  * A collection of ${Type}s.
  */
-public interface ${Type}Collection : ${Type}Traversable {
+@Suppress("INAPPLICABLE_JVM_NAME")
+public interface ${Type}Collection : ${Type}Traversable, Iterable<$Type> {
 
+    @get:JvmName("size")
     public val size: Int
 
     public fun isEmpty(): Boolean {
         return size == 0
     }
 
-    public operator fun iterator(): ${Type}Iterator
+    override fun iterator(): ${Type}Iterator
 
     public fun contains(element: ${Type}): Boolean {
         foreach { e ->
@@ -142,8 +144,4 @@ public abstract class Abstract${Type}Collection : ${Type}Collection {
     override fun toString(): String {
         return joinToString(", ", "[", "]")
     }
-}
-
-public fun interface ${Type}Consumer {
-    public fun accept(value: ${Type})
 }

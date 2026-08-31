@@ -281,7 +281,7 @@ abstract interface <#A: out kotlin/Any?> io.github.sooniln.fastcollect/Traverser
     open fun next(): kotlin/Nothing // io.github.sooniln.fastcollect/Traverser.next|next(){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/ByteCollection : io.github.sooniln.fastcollect/ByteTraversable { // io.github.sooniln.fastcollect/ByteCollection|null[0]
+abstract interface io.github.sooniln.fastcollect/ByteCollection : io.github.sooniln.fastcollect/ByteTraversable, kotlin.collections/Iterable<kotlin/Byte> { // io.github.sooniln.fastcollect/ByteCollection|null[0]
     abstract val size // io.github.sooniln.fastcollect/ByteCollection.size|{}size[0]
         abstract fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/ByteCollection.size.<get-size>|<get-size>(){}[0]
 
@@ -327,7 +327,7 @@ abstract interface io.github.sooniln.fastcollect/ByteTraverser : io.github.sooni
         open fun <get-element>(): kotlin/Byte // io.github.sooniln.fastcollect/ByteTraverser.element.<get-element>|<get-element>(){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/DoubleCollection : io.github.sooniln.fastcollect/DoubleTraversable { // io.github.sooniln.fastcollect/DoubleCollection|null[0]
+abstract interface io.github.sooniln.fastcollect/DoubleCollection : io.github.sooniln.fastcollect/DoubleTraversable, kotlin.collections/Iterable<kotlin/Double> { // io.github.sooniln.fastcollect/DoubleCollection|null[0]
     abstract val size // io.github.sooniln.fastcollect/DoubleCollection.size|{}size[0]
         abstract fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/DoubleCollection.size.<get-size>|<get-size>(){}[0]
 
@@ -375,7 +375,7 @@ abstract interface io.github.sooniln.fastcollect/DoubleTraverser : io.github.soo
         open fun <get-element>(): kotlin/Double // io.github.sooniln.fastcollect/DoubleTraverser.element.<get-element>|<get-element>(){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/FloatCollection : io.github.sooniln.fastcollect/FloatTraversable { // io.github.sooniln.fastcollect/FloatCollection|null[0]
+abstract interface io.github.sooniln.fastcollect/FloatCollection : io.github.sooniln.fastcollect/FloatTraversable, kotlin.collections/Iterable<kotlin/Float> { // io.github.sooniln.fastcollect/FloatCollection|null[0]
     abstract val size // io.github.sooniln.fastcollect/FloatCollection.size|{}size[0]
         abstract fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/FloatCollection.size.<get-size>|<get-size>(){}[0]
 
@@ -668,7 +668,7 @@ abstract interface io.github.sooniln.fastcollect/Int2LongTraverser : io.github.s
         open fun <get-element>(): io.github.sooniln.fastcollect/Int2LongMap.Entry // io.github.sooniln.fastcollect/Int2LongTraverser.element.<get-element>|<get-element>(){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/IntCollection : io.github.sooniln.fastcollect/IntTraversable { // io.github.sooniln.fastcollect/IntCollection|null[0]
+abstract interface io.github.sooniln.fastcollect/IntCollection : io.github.sooniln.fastcollect/IntTraversable, kotlin.collections/Iterable<kotlin/Int> { // io.github.sooniln.fastcollect/IntCollection|null[0]
     abstract val size // io.github.sooniln.fastcollect/IntCollection.size|{}size[0]
         abstract fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/IntCollection.size.<get-size>|<get-size>(){}[0]
 
@@ -961,7 +961,7 @@ abstract interface io.github.sooniln.fastcollect/Long2LongTraverser : io.github.
         open fun <get-element>(): io.github.sooniln.fastcollect/Long2LongMap.Entry // io.github.sooniln.fastcollect/Long2LongTraverser.element.<get-element>|<get-element>(){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/LongCollection : io.github.sooniln.fastcollect/LongTraversable { // io.github.sooniln.fastcollect/LongCollection|null[0]
+abstract interface io.github.sooniln.fastcollect/LongCollection : io.github.sooniln.fastcollect/LongTraversable, kotlin.collections/Iterable<kotlin/Long> { // io.github.sooniln.fastcollect/LongCollection|null[0]
     abstract val size // io.github.sooniln.fastcollect/LongCollection.size|{}size[0]
         abstract fun <get-size>(): kotlin/Int // io.github.sooniln.fastcollect/LongCollection.size.<get-size>|<get-size>(){}[0]
 
@@ -1049,6 +1049,7 @@ abstract interface io.github.sooniln.fastcollect/MutableByteList : io.github.soo
     open fun removeLast(): kotlin/Byte // io.github.sooniln.fastcollect/MutableByteList.removeLast|removeLast(){}[0]
     open fun replace(kotlin/Int, kotlin/Byte): kotlin/Byte // io.github.sooniln.fastcollect/MutableByteList.replace|replace(kotlin.Int;kotlin.Byte){}[0]
     open fun reverse() // io.github.sooniln.fastcollect/MutableByteList.reverse|reverse(){}[0]
+    open fun shuffle() // io.github.sooniln.fastcollect/MutableByteList.shuffle|shuffle(){}[0]
     open fun shuffle(kotlin.random/Random) // io.github.sooniln.fastcollect/MutableByteList.shuffle|shuffle(kotlin.random.Random){}[0]
     open fun sort() // io.github.sooniln.fastcollect/MutableByteList.sort|sort(){}[0]
     open fun sortDescending() // io.github.sooniln.fastcollect/MutableByteList.sortDescending|sortDescending(){}[0]
@@ -1109,6 +1110,7 @@ abstract interface io.github.sooniln.fastcollect/MutableDoubleList : io.github.s
     open fun removeLast(): kotlin/Double // io.github.sooniln.fastcollect/MutableDoubleList.removeLast|removeLast(){}[0]
     open fun replace(kotlin/Int, kotlin/Double): kotlin/Double // io.github.sooniln.fastcollect/MutableDoubleList.replace|replace(kotlin.Int;kotlin.Double){}[0]
     open fun reverse() // io.github.sooniln.fastcollect/MutableDoubleList.reverse|reverse(){}[0]
+    open fun shuffle() // io.github.sooniln.fastcollect/MutableDoubleList.shuffle|shuffle(){}[0]
     open fun shuffle(kotlin.random/Random) // io.github.sooniln.fastcollect/MutableDoubleList.shuffle|shuffle(kotlin.random.Random){}[0]
     open fun sort() // io.github.sooniln.fastcollect/MutableDoubleList.sort|sort(){}[0]
     open fun sortDescending() // io.github.sooniln.fastcollect/MutableDoubleList.sortDescending|sortDescending(){}[0]
@@ -1171,6 +1173,7 @@ abstract interface io.github.sooniln.fastcollect/MutableFloatList : io.github.so
     open fun removeLast(): kotlin/Float // io.github.sooniln.fastcollect/MutableFloatList.removeLast|removeLast(){}[0]
     open fun replace(kotlin/Int, kotlin/Float): kotlin/Float // io.github.sooniln.fastcollect/MutableFloatList.replace|replace(kotlin.Int;kotlin.Float){}[0]
     open fun reverse() // io.github.sooniln.fastcollect/MutableFloatList.reverse|reverse(){}[0]
+    open fun shuffle() // io.github.sooniln.fastcollect/MutableFloatList.shuffle|shuffle(){}[0]
     open fun shuffle(kotlin.random/Random) // io.github.sooniln.fastcollect/MutableFloatList.shuffle|shuffle(kotlin.random.Random){}[0]
     open fun sort() // io.github.sooniln.fastcollect/MutableFloatList.sort|sort(){}[0]
     open fun sortDescending() // io.github.sooniln.fastcollect/MutableFloatList.sortDescending|sortDescending(){}[0]
@@ -1403,6 +1406,7 @@ abstract interface io.github.sooniln.fastcollect/MutableIntList : io.github.soon
     open fun removeLast(): kotlin/Int // io.github.sooniln.fastcollect/MutableIntList.removeLast|removeLast(){}[0]
     open fun replace(kotlin/Int, kotlin/Int): kotlin/Int // io.github.sooniln.fastcollect/MutableIntList.replace|replace(kotlin.Int;kotlin.Int){}[0]
     open fun reverse() // io.github.sooniln.fastcollect/MutableIntList.reverse|reverse(){}[0]
+    open fun shuffle() // io.github.sooniln.fastcollect/MutableIntList.shuffle|shuffle(){}[0]
     open fun shuffle(kotlin.random/Random) // io.github.sooniln.fastcollect/MutableIntList.shuffle|shuffle(kotlin.random.Random){}[0]
     open fun sort() // io.github.sooniln.fastcollect/MutableIntList.sort|sort(){}[0]
     open fun sortDescending() // io.github.sooniln.fastcollect/MutableIntList.sortDescending|sortDescending(){}[0]
@@ -1635,6 +1639,7 @@ abstract interface io.github.sooniln.fastcollect/MutableLongList : io.github.soo
     open fun removeLast(): kotlin/Long // io.github.sooniln.fastcollect/MutableLongList.removeLast|removeLast(){}[0]
     open fun replace(kotlin/Int, kotlin/Long): kotlin/Long // io.github.sooniln.fastcollect/MutableLongList.replace|replace(kotlin.Int;kotlin.Long){}[0]
     open fun reverse() // io.github.sooniln.fastcollect/MutableLongList.reverse|reverse(){}[0]
+    open fun shuffle() // io.github.sooniln.fastcollect/MutableLongList.shuffle|shuffle(){}[0]
     open fun shuffle(kotlin.random/Random) // io.github.sooniln.fastcollect/MutableLongList.shuffle|shuffle(kotlin.random.Random){}[0]
     open fun sort() // io.github.sooniln.fastcollect/MutableLongList.sort|sort(){}[0]
     open fun sortDescending() // io.github.sooniln.fastcollect/MutableLongList.sortDescending|sortDescending(){}[0]
@@ -3206,12 +3211,9 @@ final fun (io.github.sooniln.fastcollect/LongSet).io.github.sooniln.fastcollect/
 final fun (io.github.sooniln.fastcollect/LongSet).io.github.sooniln.fastcollect/union(io.github.sooniln.fastcollect/LongSet): io.github.sooniln.fastcollect/LongSet // io.github.sooniln.fastcollect/union|union@io.github.sooniln.fastcollect.LongSet(io.github.sooniln.fastcollect.LongSet){}[0]
 final fun (io.github.sooniln.fastcollect/LongTraversable).io.github.sooniln.fastcollect/sum(): kotlin/Long // io.github.sooniln.fastcollect/sum|sum@io.github.sooniln.fastcollect.LongTraversable(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableByteList).io.github.sooniln.fastcollect/asList(): kotlin.collections/MutableList<kotlin/Byte> // io.github.sooniln.fastcollect/asList|asList@io.github.sooniln.fastcollect.MutableByteList(){}[0]
-final fun (io.github.sooniln.fastcollect/MutableByteList).io.github.sooniln.fastcollect/shuffle() // io.github.sooniln.fastcollect/shuffle|shuffle@io.github.sooniln.fastcollect.MutableByteList(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableDoubleList).io.github.sooniln.fastcollect/asList(): kotlin.collections/MutableList<kotlin/Double> // io.github.sooniln.fastcollect/asList|asList@io.github.sooniln.fastcollect.MutableDoubleList(){}[0]
-final fun (io.github.sooniln.fastcollect/MutableDoubleList).io.github.sooniln.fastcollect/shuffle() // io.github.sooniln.fastcollect/shuffle|shuffle@io.github.sooniln.fastcollect.MutableDoubleList(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableDoubleSet).io.github.sooniln.fastcollect/asSet(): kotlin.collections/MutableSet<kotlin/Double> // io.github.sooniln.fastcollect/asSet|asSet@io.github.sooniln.fastcollect.MutableDoubleSet(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableFloatList).io.github.sooniln.fastcollect/asList(): kotlin.collections/MutableList<kotlin/Float> // io.github.sooniln.fastcollect/asList|asList@io.github.sooniln.fastcollect.MutableFloatList(){}[0]
-final fun (io.github.sooniln.fastcollect/MutableFloatList).io.github.sooniln.fastcollect/shuffle() // io.github.sooniln.fastcollect/shuffle|shuffle@io.github.sooniln.fastcollect.MutableFloatList(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableFloatSet).io.github.sooniln.fastcollect/asSet(): kotlin.collections/MutableSet<kotlin/Float> // io.github.sooniln.fastcollect/asSet|asSet@io.github.sooniln.fastcollect.MutableFloatSet(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableInt2ByteMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/MutableMap<kotlin/Int, kotlin/Byte> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.MutableInt2ByteMap(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableInt2ByteMap.MutableEntry).io.github.sooniln.fastcollect/asEntry(): kotlin.collections/MutableMap.MutableEntry<kotlin/Int, kotlin/Byte> // io.github.sooniln.fastcollect/asEntry|asEntry@io.github.sooniln.fastcollect.MutableInt2ByteMap.MutableEntry(){}[0]
@@ -3224,7 +3226,6 @@ final fun (io.github.sooniln.fastcollect/MutableInt2IntMap.MutableEntry).io.gith
 final fun (io.github.sooniln.fastcollect/MutableInt2LongMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/MutableMap<kotlin/Int, kotlin/Long> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.MutableInt2LongMap(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableInt2LongMap.MutableEntry).io.github.sooniln.fastcollect/asEntry(): kotlin.collections/MutableMap.MutableEntry<kotlin/Int, kotlin/Long> // io.github.sooniln.fastcollect/asEntry|asEntry@io.github.sooniln.fastcollect.MutableInt2LongMap.MutableEntry(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableIntList).io.github.sooniln.fastcollect/asList(): kotlin.collections/MutableList<kotlin/Int> // io.github.sooniln.fastcollect/asList|asList@io.github.sooniln.fastcollect.MutableIntList(){}[0]
-final fun (io.github.sooniln.fastcollect/MutableIntList).io.github.sooniln.fastcollect/shuffle() // io.github.sooniln.fastcollect/shuffle|shuffle@io.github.sooniln.fastcollect.MutableIntList(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableIntSet).io.github.sooniln.fastcollect/asSet(): kotlin.collections/MutableSet<kotlin/Int> // io.github.sooniln.fastcollect/asSet|asSet@io.github.sooniln.fastcollect.MutableIntSet(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableLong2ByteMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/MutableMap<kotlin/Long, kotlin/Byte> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.MutableLong2ByteMap(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableLong2ByteMap.MutableEntry).io.github.sooniln.fastcollect/asEntry(): kotlin.collections/MutableMap.MutableEntry<kotlin/Long, kotlin/Byte> // io.github.sooniln.fastcollect/asEntry|asEntry@io.github.sooniln.fastcollect.MutableLong2ByteMap.MutableEntry(){}[0]
@@ -3237,7 +3238,6 @@ final fun (io.github.sooniln.fastcollect/MutableLong2IntMap.MutableEntry).io.git
 final fun (io.github.sooniln.fastcollect/MutableLong2LongMap).io.github.sooniln.fastcollect/asMap(): kotlin.collections/MutableMap<kotlin/Long, kotlin/Long> // io.github.sooniln.fastcollect/asMap|asMap@io.github.sooniln.fastcollect.MutableLong2LongMap(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableLong2LongMap.MutableEntry).io.github.sooniln.fastcollect/asEntry(): kotlin.collections/MutableMap.MutableEntry<kotlin/Long, kotlin/Long> // io.github.sooniln.fastcollect/asEntry|asEntry@io.github.sooniln.fastcollect.MutableLong2LongMap.MutableEntry(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableLongList).io.github.sooniln.fastcollect/asList(): kotlin.collections/MutableList<kotlin/Long> // io.github.sooniln.fastcollect/asList|asList@io.github.sooniln.fastcollect.MutableLongList(){}[0]
-final fun (io.github.sooniln.fastcollect/MutableLongList).io.github.sooniln.fastcollect/shuffle() // io.github.sooniln.fastcollect/shuffle|shuffle@io.github.sooniln.fastcollect.MutableLongList(){}[0]
 final fun (io.github.sooniln.fastcollect/MutableLongSet).io.github.sooniln.fastcollect/asSet(): kotlin.collections/MutableSet<kotlin/Long> // io.github.sooniln.fastcollect/asSet|asSet@io.github.sooniln.fastcollect.MutableLongSet(){}[0]
 final fun (kotlin/Any?).io.github.sooniln.fastcollect/equalsRaw(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/equalsRaw|equalsRaw@kotlin.Any?(kotlin.Any?){}[0]
 final fun (kotlin/Any?).io.github.sooniln.fastcollect/notEqualsRaw(kotlin/Any?): kotlin/Boolean // io.github.sooniln.fastcollect/notEqualsRaw|notEqualsRaw@kotlin.Any?(kotlin.Any?){}[0]

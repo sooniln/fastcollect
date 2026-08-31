@@ -221,6 +221,7 @@ public inline fun ${Generics} Mutable${Name}Map${Generics}.getOrPut(key: ${KeyTy
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} Mutable${Name}Map${Generics}.replaceOrSet(key: ${KeyType}, value: $ValueType, oldValue: () -> ${ValueType}): ${ValueType} {
     contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
@@ -235,6 +236,7 @@ public inline fun ${Generics} Mutable${Name}Map${Generics}.replaceOrSet(key: ${K
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
 public inline fun ${Generics} Mutable${Name}Map${Generics}.removeOrElse(key: ${KeyType}, defaultValue: () -> ${ValueType}): ${ValueType} {
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
@@ -453,12 +455,4 @@ private class Mutable${Name}MapEntryWrapper${Generics}(
     override fun equals(other: Any?): Boolean = other is Map.Entry<*, *> && other.key == key && other.value == value
     override fun hashCode(): Int = key.hashCode() xor value.hashCode()
     override fun toString(): String = "\$key=\$value"
-}
-
-<% if (!isReferenceValue) { %>
-public fun interface ${KeyType}${ValueType}Consumer {
-<% } else { %>
-public fun interface ${KeyType}AnyConsumer<in V> {
-<% } %>
-    public fun accept(key: ${KeyType}, value: ${ValueType})
 }

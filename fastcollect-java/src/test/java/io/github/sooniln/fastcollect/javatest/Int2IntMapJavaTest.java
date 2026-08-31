@@ -63,8 +63,8 @@ class Int2IntMapJavaTest {
         assertEquals(10, map.getValue(1));
         assertEquals(-1, map.getOrDefault(2, -1));
 
-        assertEquals(1, map.keys().getSize());
-        assertEquals(1, map.values().getSize());
+        assertEquals(1, map.keys().size());
+        assertEquals(1, map.values().size());
     }
 
     @Test
@@ -152,7 +152,7 @@ class Int2IntMapJavaTest {
         assertTrue(map.isDefaultValue(map.get(99)));
         assertTrue(map.containsKey(1));
         assertTrue(map.containsValue("uno"));
-        assertEquals(1, map.keys().getSize());
+        assertEquals(1, map.keys().size());
         assertEquals(1, map.values().size());
 
         assertEquals("uno", map.remove(1));
