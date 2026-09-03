@@ -3,13 +3,13 @@
 
 # FastCollect
 
-A multi-platform library for high-performance primitive collections in the Kotlin ecosystem. FastCollect is highly
+A multi-platform library for high-performance primitive collections in the JVM/Kotlin ecosystem. FastCollect is highly
 memory efficient and performant, and is competitive with - if not faster than - every primitive collections library in
-the JVM ecosystem. See the benchmarking section for further details. Performance is complicated and any library that claims to be the de-facto
-fastest is probably not taking performance seriously. FastCollect is quite well tested, and has rounded off many of the
-sharp edges found in some collections libraries. First-class Java support is a stated goal - while not every feature is
-as idiomatic to use from Java as it would be from Kotlin, extensive work has gone into ensuring that it is not difficult
-or non-idiomatic either.
+the JVM ecosystem. See the benchmarking section for further details. Performance is complicated and any library that
+claims to be the de-facto fastest is probably not taking performance seriously. FastCollect is quite well tested,
+and has rounded off many of the sharp edges found in some collections libraries. First-class Java support is a
+stated goal - while not every feature is as idiomatic to use from Java as it would be from Kotlin, extensive work
+has gone into ensuring that it is not difficult or non-idiomatic either.
 
 As a drop-in replacement for standard JRE collections, FastCollect generally reduces memory usage by 4–5× and improves
 CPU performance by 2-3×. FastCollect distinguishes itself with a much smaller footprint (supporting only necessary and
