@@ -76,14 +76,14 @@ public interface Int2FloatMap : Int2FloatTraversable {
     public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance Float): Float = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
-        foreachKey { k ->
+        traverseKeys { k ->
             if (k equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance Float): Boolean {
-        foreach { _, v ->
+        traverse { _, v ->
             if (v equalsRaw value) return true
         }
         return false
@@ -164,7 +164,7 @@ public interface MutableInt2FloatMap : Int2FloatMap, MutableInt2FloatTraversable
     public fun clear()
 
     public fun putAll(from: Int2FloatMap) {
-        from.foreach { key, value ->
+        from.traverse { key, value ->
             set(key, value)
         }
     }
@@ -256,7 +256,7 @@ public abstract class AbstractInt2FloatMap : Int2FloatMap {
         if (other is Int2FloatMap) {
             if (other.size != size) return false
 
-            foreach { key, value ->
+            traverse { key, value ->
                 if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
             }
 
@@ -268,7 +268,7 @@ public abstract class AbstractInt2FloatMap : Int2FloatMap {
 
     override fun hashCode(): Int {
         var result = 0
-        foreach { key, value ->
+        traverse { key, value ->
             result += key.hashCode() xor value.hashCode()
         }
         return result

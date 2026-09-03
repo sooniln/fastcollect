@@ -15,7 +15,7 @@ import kotlin.jvm.JvmSynthetic
 
 /**
  * Implementing this interface indicates that this object represents a sequence which can be traversed through to
- * produce a series of elements. Clients are generally encouraged to use the inline extension methods such as [foreach],
+ * produce a series of elements. Clients are generally encouraged to use the inline extension methods such as [traverse],
  * etc.
  *
  * This interface is intended as a replacement to [Iterable], to solve some of the problems with that interface:
@@ -63,7 +63,7 @@ public interface MutableTraversable<out T> : Traversable<T> {
  * How to iterate with a Traverser:
  *
  * ```kotlin
- * val traverser = collection.traverse()
+ * val traverser = collection.traverser()
  * while (traverser.forward()) {
  *     doSomething(traverser.element)
  * }
@@ -112,7 +112,7 @@ public interface MutableTraverser<out T> : Traverser<T> {
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun <T> Traversable<T>.foreach(action: (T) -> Unit) {
+public inline fun <T> Traversable<T>.traverse(action: (T) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser()

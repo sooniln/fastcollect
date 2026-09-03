@@ -191,7 +191,7 @@ public abstract class AbstractIntPriorityQueue(capacity: Int): IntCollection {
 
     public fun addAll(elements: IntCollection) {
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             heap[size] = element
             onIndexChanged(element, size)
             ++size

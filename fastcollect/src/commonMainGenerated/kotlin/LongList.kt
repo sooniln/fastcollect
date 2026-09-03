@@ -71,7 +71,7 @@ public interface MutableLongListTraverser : LongListTraverser, MutableLongTraver
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun LongList.foreachReverse(action: (Long) -> Unit) {
+public inline fun LongList.traverseReverse(action: (Long) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(size)
@@ -82,7 +82,7 @@ public inline fun LongList.foreachReverse(action: (Long) -> Unit) {
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun LongListTraversable.foreachIndexed(action: (Int, Long) -> Unit) {
+public inline fun LongListTraversable.traverseIndexed(action: (Int, Long) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(0)
@@ -94,7 +94,7 @@ public inline fun LongListTraversable.foreachIndexed(action: (Int, Long) -> Unit
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun LongList.foreachReverseIndexed(action: (Int, Long) -> Unit) {
+public inline fun LongList.traverseReverseIndexed(action: (Int, Long) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(size)
@@ -120,7 +120,7 @@ public interface LongList : LongCollection, LongListTraversable {
     public fun last(): Long = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
 
     public fun indexOf(element: Long): Int {
-        foreachIndexed { index, value ->
+        traverseIndexed { index, value ->
             if (value equalsRaw element) {
                 return index
             }
@@ -129,7 +129,7 @@ public interface LongList : LongCollection, LongListTraversable {
     }
 
     public fun lastIndexOf(element: Long): Int {
-        foreachReverseIndexed { index, value ->
+        traverseReverseIndexed { index, value ->
             if (value equalsRaw element) {
                 return index
             }
@@ -192,7 +192,7 @@ public inline fun <R> LongList.foldRight(initial: R, operation: (Long, accumulat
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreachReverse { value ->
+    traverseReverse { value ->
         accumulated = operation(value, accumulated)
     }
     return accumulated
@@ -258,7 +258,7 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableLongL
     override fun clear(): Unit = removeRange(0, size)
 
     override fun addAll(elements: LongCollection): Boolean {
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return !elements.isEmpty()
@@ -273,7 +273,7 @@ public interface MutableLongList : LongList, MutableLongCollection, MutableLongL
 
     public fun addAll(index: Int, elements: LongCollection) {
         var i = indexCheckInclusive(index)
-        elements.foreach { element ->
+        elements.traverse { element ->
             add(i++, element)
         }
     }
@@ -392,7 +392,7 @@ public abstract class AbstractLongList : AbstractLongCollection(), LongList {
 
     override fun hashCode(): Int {
         var hashCode = 1
-        foreach { element ->
+        traverse { element ->
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode

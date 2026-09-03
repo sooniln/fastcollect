@@ -26,14 +26,14 @@ public interface FloatCollection : FloatTraversable, Iterable<Float> {
     override fun iterator(): FloatIterator
 
     public fun contains(element: Float): Boolean {
-        foreach { e ->
+        traverse { e ->
             if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: FloatCollection): Boolean {
-        elements.foreach { element ->
+        elements.traverse { element ->
             if (!contains(element)) {
                 return false
             }
@@ -57,7 +57,7 @@ public interface FloatCollection : FloatTraversable, Iterable<Float> {
     public fun copyInto(destination: FloatArray, destinationOffset: Int = 0): FloatArray {
         destination.rangeCheck(destinationOffset, destinationOffset + size)
         var index = destinationOffset
-        foreach { element -> destination[index++] = element }
+        traverse { element -> destination[index++] = element }
         return destination
     }
 }
@@ -84,7 +84,7 @@ public interface MutableFloatCollection : FloatCollection, MutableFloatTraversab
 
     public fun addAll(elements: FloatCollection): Boolean {
         var modified = false
-        elements.foreach { element ->
+        elements.traverse { element ->
             modified = add(element) or modified
         }
         return modified

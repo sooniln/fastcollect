@@ -9,7 +9,7 @@ package io.github.sooniln.fastcollect
 import kotlin.jvm.JvmMultifileClass
 
 
-public fun Int2ByteTraversable.foreach(action: IntByteConsumer): Unit = foreach { key, value -> action.accept(key, value) }
+public fun Int2ByteTraversable.traverse(action: IntByteConsumer): Unit = traverse { key, value -> action.accept(key, value) }
 
-public fun  Int2ByteTraversable.foreachKey(action: IntConsumer): Unit = foreachKey { key -> action.accept(key) }
+public fun  Int2ByteTraversable.traverseKeys(action: IntConsumer): Unit = traverseKeys { key -> action.accept(key) }
 

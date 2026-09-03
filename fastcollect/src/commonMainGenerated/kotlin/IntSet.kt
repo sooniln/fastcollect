@@ -43,7 +43,7 @@ public infix fun IntSet.intersect(other: IntSet): IntSet {
     if (other.size > size) return other.intersect(this)
 
     val set = IntHashSet(other.size)
-    other.foreach { element ->
+    other.traverse { element ->
         if (contains(element)) set.add(element)
     }
     return set
@@ -51,7 +51,7 @@ public infix fun IntSet.intersect(other: IntSet): IntSet {
 
 public infix fun IntSet.subtract(other: IntSet): IntSet {
     val set = IntHashSet(size)
-    foreach { element ->
+    traverse { element ->
         if (!other.contains(element)) set.add(element)
     }
     return set
@@ -75,7 +75,7 @@ public abstract class AbstractIntSet : AbstractIntCollection(), IntSet {
 
     override fun hashCode(): Int {
         var hashCode = 0
-        foreach { element ->
+        traverse { element ->
             hashCode += element.hashCode()
         }
         return hashCode

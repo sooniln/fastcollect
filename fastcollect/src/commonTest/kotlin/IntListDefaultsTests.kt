@@ -106,7 +106,7 @@ class IntListDefaultsTests {
         assertEquals(listOf(1, 2, 3), view.toBoxedList())
 
         val collected = mutableListOf<Int>()
-        view.foreach { collected.add(it) }
+        view.traverse { collected.add(it) }
         assertEquals(listOf(1, 2, 3), collected)
 
         val traverser = view.traverser()
@@ -294,31 +294,31 @@ class IntListDefaultsTests {
     }
 
     @Test
-    fun foreachIndexed_visitsEveryIndexInOrder() {
+    fun traverseIndexed_visitsEveryIndexInOrder() {
         val seen = mutableListOf<Pair<Int, Int>>()
-        intListOf(10, 20, 30).foreachIndexed { index, value -> seen.add(index to value) }
+        intListOf(10, 20, 30).traverseIndexed { index, value -> seen.add(index to value) }
         assertEquals(listOf(0 to 10, 1 to 20, 2 to 30), seen)
 
         seen.clear()
-        intListOf().foreachIndexed { index, value -> seen.add(index to value) }
+        intListOf().traverseIndexed { index, value -> seen.add(index to value) }
         assertEquals(emptyList(), seen)
     }
 
     @Test
-    fun foreachReverse_visitsEveryElementBackwards() {
+    fun traverseReverse_visitsEveryElementBackwards() {
         val seen = mutableListOf<Int>()
-        intListOf(10, 20, 30).foreachReverse { seen.add(it) }
+        intListOf(10, 20, 30).traverseReverse { seen.add(it) }
         assertEquals(listOf(30, 20, 10), seen)
 
         seen.clear()
-        intListOf().foreachReverse { seen.add(it) }
+        intListOf().traverseReverse { seen.add(it) }
         assertEquals(emptyList(), seen)
     }
 
     @Test
-    fun foreachReverseIndexed_pairsIndicesWithElementsBackwards() {
+    fun traverseReverseIndexed_pairsIndicesWithElementsBackwards() {
         val seen = mutableListOf<Pair<Int, Int>>()
-        intListOf(10, 20, 30).foreachReverseIndexed { index, value -> seen.add(index to value) }
+        intListOf(10, 20, 30).traverseReverseIndexed { index, value -> seen.add(index to value) }
         assertEquals(listOf(2 to 30, 1 to 20, 0 to 10), seen)
     }
 

@@ -26,14 +26,14 @@ public interface LongCollection : LongTraversable, Iterable<Long> {
     override fun iterator(): LongIterator
 
     public fun contains(element: Long): Boolean {
-        foreach { e ->
+        traverse { e ->
             if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: LongCollection): Boolean {
-        elements.foreach { element ->
+        elements.traverse { element ->
             if (!contains(element)) {
                 return false
             }
@@ -57,7 +57,7 @@ public interface LongCollection : LongTraversable, Iterable<Long> {
     public fun copyInto(destination: LongArray, destinationOffset: Int = 0): LongArray {
         destination.rangeCheck(destinationOffset, destinationOffset + size)
         var index = destinationOffset
-        foreach { element -> destination[index++] = element }
+        traverse { element -> destination[index++] = element }
         return destination
     }
 }
@@ -84,7 +84,7 @@ public interface MutableLongCollection : LongCollection, MutableLongTraversable 
 
     public fun addAll(elements: LongCollection): Boolean {
         var modified = false
-        elements.foreach { element ->
+        elements.traverse { element ->
             modified = add(element) or modified
         }
         return modified

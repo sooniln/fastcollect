@@ -123,17 +123,17 @@ ConcurrentModificationException every time you shoot yourself in the foot, only 
 
 ### Traverser ###
 
-FastCollect introduces a new method of iterating through collections called Traverser. Traversable/Traverser are roughly
-equivalent to Iterable/Iterator, but offer a slightly different API shape which (1) makes it easier to implement
-iteration correctly (2) offers increased opportunities for compiler optimizations in complex implementations.
-Benchmarking shows up to a 20% speed improvement when using Traverser vs Iterator for the same operations. FastCollect
-still supports Iterator - all collection classes implement an iterator() operator function so they can be used in
-normal for loops and anywhere that expects an Iterator. Collection classes do not implement Iterable however, to
-discourage inappropriate usage and standard library extension methods.
+FastCollect introduces a new method of iterating through collections called `Traverser`. `Traversable`/`Traverser` are
+roughly equivalent to `Iterable`/`Iterator`, but offer a slightly different API shape which (1) makes it easier to
+implement iteration correctly (2) offers increased opportunities for compiler optimizations in complex implementations.
+Benchmarking shows up to a 20% speed improvement when using `Traverser` vs `Iterator` for the same operations.
+FastCollect still supports `Iterator` - all collection classes implement `Iterable` so they can be used in normal
+for-each loops and anywhere that expects an `Iterable`. There also exists `ListTraverser` as an equivalent to
+`ListIterator`.
 
 Traverser APIs offer many of the same utility extension methods as Iterable, such as:
 
-* **foreach** (note the capitalization, it's not 'forEach' - see [KT-39091](https://youtrack.jetbrains.com/projects/KT/issues/KT-39091/Iterable.forEach-should-not-HidesMembers))
+* **traverse** (the preferred method of iterating through a collection, similar to `forEach()`)
 * **any/all/none**
 * **fold/reduce**
 * **sum/sumOf**
@@ -164,7 +164,7 @@ list.lastIndexOf(2)
 list.contains(3)
 
 // iterate over list
-list.foreach { value ->
+list.traverse { value ->
     println(value)
 }
 
@@ -192,7 +192,7 @@ set = mutableIntSetOf(1, 2, 3) // directly create FastCollect set
 set.contains(3)
 
 // iterate over set
-set.foreach { value ->
+set.traverse { value ->
     println(value)
 }
 
@@ -219,10 +219,10 @@ map.containsKey(1)
 map.containsValue(2)
 
 // iterate over map
-map.foreach { key, value ->
+map.traverse { key, value ->
     println("$key -> $value")
 }
-map.foreachKey { key ->
+map.traverseKeys { key ->
     println(key)
 }
 
@@ -251,7 +251,7 @@ priorityQueue.removeFirst() // returns 8
 priorityQueue.clear()
 
 // iterate over priority queue (no ordering guarantees)
-priorityQueue.foreach { value ->
+priorityQueue.traverse { value ->
     println(value)
 }
 

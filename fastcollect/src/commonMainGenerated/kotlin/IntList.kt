@@ -71,7 +71,7 @@ public interface MutableIntListTraverser : IntListTraverser, MutableIntTraverser
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun IntList.foreachReverse(action: (Int) -> Unit) {
+public inline fun IntList.traverseReverse(action: (Int) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(size)
@@ -82,7 +82,7 @@ public inline fun IntList.foreachReverse(action: (Int) -> Unit) {
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun IntListTraversable.foreachIndexed(action: (Int, Int) -> Unit) {
+public inline fun IntListTraversable.traverseIndexed(action: (Int, Int) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(0)
@@ -94,7 +94,7 @@ public inline fun IntListTraversable.foreachIndexed(action: (Int, Int) -> Unit) 
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun IntList.foreachReverseIndexed(action: (Int, Int) -> Unit) {
+public inline fun IntList.traverseReverseIndexed(action: (Int, Int) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(size)
@@ -120,7 +120,7 @@ public interface IntList : IntCollection, IntListTraversable {
     public fun last(): Int = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
 
     public fun indexOf(element: Int): Int {
-        foreachIndexed { index, value ->
+        traverseIndexed { index, value ->
             if (value equalsRaw element) {
                 return index
             }
@@ -129,7 +129,7 @@ public interface IntList : IntCollection, IntListTraversable {
     }
 
     public fun lastIndexOf(element: Int): Int {
-        foreachReverseIndexed { index, value ->
+        traverseReverseIndexed { index, value ->
             if (value equalsRaw element) {
                 return index
             }
@@ -192,7 +192,7 @@ public inline fun <R> IntList.foldRight(initial: R, operation: (Int, accumulated
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreachReverse { value ->
+    traverseReverse { value ->
         accumulated = operation(value, accumulated)
     }
     return accumulated
@@ -258,7 +258,7 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableIntListT
     override fun clear(): Unit = removeRange(0, size)
 
     override fun addAll(elements: IntCollection): Boolean {
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return !elements.isEmpty()
@@ -273,7 +273,7 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableIntListT
 
     public fun addAll(index: Int, elements: IntCollection) {
         var i = indexCheckInclusive(index)
-        elements.foreach { element ->
+        elements.traverse { element ->
             add(i++, element)
         }
     }
@@ -392,7 +392,7 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
 
     override fun hashCode(): Int {
         var hashCode = 1
-        foreach { element ->
+        traverse { element ->
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode

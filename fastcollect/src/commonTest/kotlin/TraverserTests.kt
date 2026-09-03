@@ -139,7 +139,7 @@ class TraverserTests {
     @Test
     fun value_atANonZeroStartPosition_isTheElementToTheLeftOfTheCursor() {
         // every implementation initialises the cursor as though it had just moved forward onto the requested
-        // position, which is what makes traverser(size) + backward() (i.e. foreachReverse) work
+        // position, which is what makes traverser(size) + backward() (i.e. traverseReverse) work
         for ((name, list) in readOnlyFixtures(10, 20, 30)) {
             assertEquals(10, list.traverser(1).value, name)
             assertEquals(20, list.traverser(2).value, name)

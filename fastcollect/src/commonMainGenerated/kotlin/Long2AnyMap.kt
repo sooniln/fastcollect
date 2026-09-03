@@ -76,14 +76,14 @@ public interface Long2AnyMap<out V> : Long2AnyTraversable<V> {
     public fun getOrDefault(key: Long, defaultValue: @UnsafeVariance V): V = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Long): Boolean {
-        foreachKey { k ->
+        traverseKeys { k ->
             if (k equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance V): Boolean {
-        foreach { _, v ->
+        traverse { _, v ->
             if (v equalsRaw value) return true
         }
         return false
@@ -164,7 +164,7 @@ public interface MutableLong2AnyMap<V> : Long2AnyMap<V>, MutableLong2AnyTraversa
     public fun clear()
 
     public fun putAll(from: Long2AnyMap<V>) {
-        from.foreach { key, value ->
+        from.traverse { key, value ->
             set(key, value)
         }
     }
@@ -256,7 +256,7 @@ public abstract class AbstractLong2AnyMap<V> : Long2AnyMap<V> {
         if (other is Long2AnyMap<*>) {
             if (other.size != size) return false
 
-            foreach { key, value ->
+            traverse { key, value ->
                 if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
             }
 
@@ -268,7 +268,7 @@ public abstract class AbstractLong2AnyMap<V> : Long2AnyMap<V> {
 
     override fun hashCode(): Int {
         var result = 0
-        foreach { key, value ->
+        traverse { key, value ->
             result += key.hashCode() xor value.hashCode()
         }
         return result

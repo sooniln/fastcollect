@@ -309,7 +309,7 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int) : Abs
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return true

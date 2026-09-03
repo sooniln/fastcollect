@@ -26,14 +26,14 @@ public interface ByteCollection : ByteTraversable, Iterable<Byte> {
     override fun iterator(): ByteIterator
 
     public fun contains(element: Byte): Boolean {
-        foreach { e ->
+        traverse { e ->
             if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: ByteCollection): Boolean {
-        elements.foreach { element ->
+        elements.traverse { element ->
             if (!contains(element)) {
                 return false
             }
@@ -57,7 +57,7 @@ public interface ByteCollection : ByteTraversable, Iterable<Byte> {
     public fun copyInto(destination: ByteArray, destinationOffset: Int = 0): ByteArray {
         destination.rangeCheck(destinationOffset, destinationOffset + size)
         var index = destinationOffset
-        foreach { element -> destination[index++] = element }
+        traverse { element -> destination[index++] = element }
         return destination
     }
 }
@@ -84,7 +84,7 @@ public interface MutableByteCollection : ByteCollection, MutableByteTraversable 
 
     public fun addAll(elements: ByteCollection): Boolean {
         var modified = false
-        elements.foreach { element ->
+        elements.traverse { element ->
             modified = add(element) or modified
         }
         return modified

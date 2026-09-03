@@ -191,7 +191,7 @@ public abstract class AbstractBytePriorityQueue(capacity: Int): ByteCollection {
 
     public fun addAll(elements: ByteCollection) {
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             heap[size] = element
             onIndexChanged(element, size)
             ++size

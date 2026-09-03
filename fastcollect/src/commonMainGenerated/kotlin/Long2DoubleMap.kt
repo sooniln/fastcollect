@@ -76,14 +76,14 @@ public interface Long2DoubleMap : Long2DoubleTraversable {
     public fun getOrDefault(key: Long, defaultValue: @UnsafeVariance Double): Double = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Long): Boolean {
-        foreachKey { k ->
+        traverseKeys { k ->
             if (k equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance Double): Boolean {
-        foreach { _, v ->
+        traverse { _, v ->
             if (v equalsRaw value) return true
         }
         return false
@@ -164,7 +164,7 @@ public interface MutableLong2DoubleMap : Long2DoubleMap, MutableLong2DoubleTrave
     public fun clear()
 
     public fun putAll(from: Long2DoubleMap) {
-        from.foreach { key, value ->
+        from.traverse { key, value ->
             set(key, value)
         }
     }
@@ -256,7 +256,7 @@ public abstract class AbstractLong2DoubleMap : Long2DoubleMap {
         if (other is Long2DoubleMap) {
             if (other.size != size) return false
 
-            foreach { key, value ->
+            traverse { key, value ->
                 if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
             }
 
@@ -268,7 +268,7 @@ public abstract class AbstractLong2DoubleMap : Long2DoubleMap {
 
     override fun hashCode(): Int {
         var result = 0
-        foreach { key, value ->
+        traverse { key, value ->
             result += key.hashCode() xor value.hashCode()
         }
         return result

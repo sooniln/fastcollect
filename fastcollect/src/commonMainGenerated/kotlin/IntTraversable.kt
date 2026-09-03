@@ -36,7 +36,7 @@ public interface MutableIntTraversable: MutableTraversable<Int> {
  * How to iterate with a IntTraverser:
  *
  * ```kotlin
- * val traverser = intCollection.traverse()
+ * val traverser = intCollection.traverser()
  * while (traverser.forward()) {
  *     doSomethingPrimitive(traverser.value)
  * }
@@ -58,7 +58,7 @@ public interface MutableIntTraverser : IntTraverser, MutableTraverser<Int>
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun IntTraversable.foreach(action: (Int) -> Unit) {
+public inline fun IntTraversable.traverse(action: (Int) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser()
@@ -72,7 +72,7 @@ public inline fun IntTraversable.foreach(action: (Int) -> Unit) {
 public inline fun IntTraversable.any(predicate: (Int) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
-    foreach { if (predicate(it)) return true }
+    traverse { if (predicate(it)) return true }
     return false
 }
 
@@ -96,7 +96,7 @@ public inline fun <R> IntTraversable.fold(initial: R, operation: (accumulated: R
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreach { accumulated = operation(accumulated, it) }
+    traverse { accumulated = operation(accumulated, it) }
     return accumulated
 }
 
@@ -127,7 +127,7 @@ public inline fun IntTraversable.sumOf(selector: (Int) -> Int): Int {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 
@@ -141,7 +141,7 @@ public inline fun IntTraversable.sumOf(selector: (Int) -> Long): Long {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0L
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 
@@ -155,7 +155,7 @@ public inline fun IntTraversable.sumOf(selector: (Int) -> Double): Double {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0.0
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 

@@ -309,7 +309,7 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int) :
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return true

@@ -191,7 +191,7 @@ public abstract class AbstractLongPriorityQueue(capacity: Int): LongCollection {
 
     public fun addAll(elements: LongCollection) {
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             heap[size] = element
             onIndexChanged(element, size)
             ++size

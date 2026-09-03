@@ -747,9 +747,6 @@ public final class io/github/sooniln/fastcollect/ByteLists {
 	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/ByteList;[BIIIILjava/lang/Object;)[B
 	public static final fun emptyByteList ()Lio/github/sooniln/fastcollect/ByteList;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/ByteList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final synthetic fun foreachIndexed (Lio/github/sooniln/fastcollect/ByteListTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final synthetic fun foreachReverse (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function1;)V
-	public static final synthetic fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/ByteList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/ByteList;)I
 	public static final fun indexCheck (Lio/github/sooniln/fastcollect/ByteList;I)I
@@ -759,6 +756,9 @@ public final class io/github/sooniln/fastcollect/ByteLists {
 	public static final fun mutableByteListOf ([B)Lio/github/sooniln/fastcollect/MutableByteList;
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/ByteList;II)V
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function2;)B
+	public static final synthetic fun traverseIndexed (Lio/github/sooniln/fastcollect/ByteListTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun traverseReverse (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function1;)V
+	public static final synthetic fun traverseReverseIndexed (Lio/github/sooniln/fastcollect/ByteList;Lkotlin/jvm/functions/Function2;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/BytePredicate {
@@ -804,13 +804,13 @@ public final class io/github/sooniln/fastcollect/ByteTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/ByteTraversable;Lkotlin/jvm/functions/Function1;)D
 	public static final fun emptyByteTraverser ()Lio/github/sooniln/fastcollect/MutableByteTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/ByteTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/ByteTraversable;Lio/github/sooniln/fastcollect/ByteConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/ByteTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/ByteTraversable;Lkotlin/jvm/functions/Function1;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/ByteTraversable;Lkotlin/jvm/functions/Function1;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/ByteTraversable;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/ByteTraversable;Lkotlin/jvm/functions/Function2;)B
 	public static final fun sum (Lio/github/sooniln/fastcollect/ByteTraversable;)I
+	public static final fun traverse (Lio/github/sooniln/fastcollect/ByteTraversable;Lio/github/sooniln/fastcollect/ByteConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/ByteTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/ByteTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -963,9 +963,6 @@ public final class io/github/sooniln/fastcollect/DoubleLists {
 	public static final fun doubleListOf ([D)Lio/github/sooniln/fastcollect/DoubleList;
 	public static final fun emptyDoubleList ()Lio/github/sooniln/fastcollect/DoubleList;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/DoubleList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final synthetic fun foreachIndexed (Lio/github/sooniln/fastcollect/DoubleListTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final synthetic fun foreachReverse (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function1;)V
-	public static final synthetic fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/DoubleList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/DoubleList;)I
 	public static final fun indexCheck (Lio/github/sooniln/fastcollect/DoubleList;I)I
@@ -975,6 +972,9 @@ public final class io/github/sooniln/fastcollect/DoubleLists {
 	public static final fun mutableDoubleListOf ([D)Lio/github/sooniln/fastcollect/MutableDoubleList;
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/DoubleList;II)V
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function2;)D
+	public static final synthetic fun traverseIndexed (Lio/github/sooniln/fastcollect/DoubleListTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun traverseReverse (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function1;)V
+	public static final synthetic fun traverseReverseIndexed (Lio/github/sooniln/fastcollect/DoubleList;Lkotlin/jvm/functions/Function2;)V
 }
 
 public final class io/github/sooniln/fastcollect/DoublePriorityQueue : io/github/sooniln/fastcollect/AbstractDoublePriorityQueue {
@@ -1036,13 +1036,13 @@ public final class io/github/sooniln/fastcollect/DoubleTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/DoubleTraversable;Lkotlin/jvm/functions/Function1;)D
 	public static final fun emptyDoubleTraverser ()Lio/github/sooniln/fastcollect/MutableDoubleTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/DoubleTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/DoubleTraversable;Ljava/util/function/DoubleConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/DoubleTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/DoubleTraversable;Lkotlin/jvm/functions/Function1;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/DoubleTraversable;Lkotlin/jvm/functions/Function1;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/DoubleTraversable;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/DoubleTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun sum (Lio/github/sooniln/fastcollect/DoubleTraversable;)D
+	public static final fun traverse (Lio/github/sooniln/fastcollect/DoubleTraversable;Ljava/util/function/DoubleConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/DoubleTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/DoubleTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -1184,9 +1184,6 @@ public final class io/github/sooniln/fastcollect/FloatLists {
 	public static final fun floatListOf (F)Lio/github/sooniln/fastcollect/FloatList;
 	public static final fun floatListOf ([F)Lio/github/sooniln/fastcollect/FloatList;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/FloatList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final synthetic fun foreachIndexed (Lio/github/sooniln/fastcollect/FloatListTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final synthetic fun foreachReverse (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function1;)V
-	public static final synthetic fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/FloatList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/FloatList;)I
 	public static final fun indexCheck (Lio/github/sooniln/fastcollect/FloatList;I)I
@@ -1196,6 +1193,9 @@ public final class io/github/sooniln/fastcollect/FloatLists {
 	public static final fun mutableFloatListOf ([F)Lio/github/sooniln/fastcollect/MutableFloatList;
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/FloatList;II)V
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function2;)F
+	public static final synthetic fun traverseIndexed (Lio/github/sooniln/fastcollect/FloatListTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun traverseReverse (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function1;)V
+	public static final synthetic fun traverseReverseIndexed (Lio/github/sooniln/fastcollect/FloatList;Lkotlin/jvm/functions/Function2;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/FloatPredicate {
@@ -1261,13 +1261,13 @@ public final class io/github/sooniln/fastcollect/FloatTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/FloatTraversable;Lkotlin/jvm/functions/Function1;)D
 	public static final fun emptyFloatTraverser ()Lio/github/sooniln/fastcollect/MutableFloatTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/FloatTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/FloatTraversable;Lio/github/sooniln/fastcollect/FloatConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/FloatTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/FloatTraversable;Lkotlin/jvm/functions/Function1;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/FloatTraversable;Lkotlin/jvm/functions/Function1;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/FloatTraversable;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/FloatTraversable;Lkotlin/jvm/functions/Function2;)F
 	public static final fun sum (Lio/github/sooniln/fastcollect/FloatTraversable;)D
+	public static final fun traverse (Lio/github/sooniln/fastcollect/FloatTraversable;Lio/github/sooniln/fastcollect/FloatConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/FloatTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/FloatTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -1383,13 +1383,13 @@ public final class io/github/sooniln/fastcollect/Int2AnyTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyInt2AnyTraverser ()Lio/github/sooniln/fastcollect/MutableInt2AnyTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Lio/github/sooniln/fastcollect/IntAnyConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Ljava/util/function/IntConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Lio/github/sooniln/fastcollect/IntAnyConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Ljava/util/function/IntConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Int2AnyTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Int2AnyTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -1506,13 +1506,13 @@ public final class io/github/sooniln/fastcollect/Int2ByteTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyInt2ByteTraverser ()Lio/github/sooniln/fastcollect/MutableInt2ByteTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Lio/github/sooniln/fastcollect/IntByteConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Ljava/util/function/IntConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Lio/github/sooniln/fastcollect/IntByteConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Ljava/util/function/IntConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Int2ByteTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Int2ByteTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -1629,13 +1629,13 @@ public final class io/github/sooniln/fastcollect/Int2DoubleTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyInt2DoubleTraverser ()Lio/github/sooniln/fastcollect/MutableInt2DoubleTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Lio/github/sooniln/fastcollect/IntDoubleConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Ljava/util/function/IntConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Lio/github/sooniln/fastcollect/IntDoubleConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Ljava/util/function/IntConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Int2DoubleTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Int2DoubleTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -1752,13 +1752,13 @@ public final class io/github/sooniln/fastcollect/Int2FloatTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyInt2FloatTraverser ()Lio/github/sooniln/fastcollect/MutableInt2FloatTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Lio/github/sooniln/fastcollect/IntFloatConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Ljava/util/function/IntConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Lio/github/sooniln/fastcollect/IntFloatConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Ljava/util/function/IntConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Int2FloatTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Int2FloatTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -1875,13 +1875,13 @@ public final class io/github/sooniln/fastcollect/Int2IntTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Int2IntTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyInt2IntTraverser ()Lio/github/sooniln/fastcollect/MutableInt2IntTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Int2IntTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Int2IntTraversable;Lio/github/sooniln/fastcollect/IntIntConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Int2IntTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Int2IntTraversable;Ljava/util/function/IntConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Int2IntTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Int2IntTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Int2IntTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Int2IntTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Int2IntTraversable;Lio/github/sooniln/fastcollect/IntIntConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Int2IntTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Int2IntTraversable;Ljava/util/function/IntConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Int2IntTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Int2IntTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -1998,13 +1998,13 @@ public final class io/github/sooniln/fastcollect/Int2LongTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Int2LongTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyInt2LongTraverser ()Lio/github/sooniln/fastcollect/MutableInt2LongTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Int2LongTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Int2LongTraversable;Lio/github/sooniln/fastcollect/IntLongConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Int2LongTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Int2LongTraversable;Ljava/util/function/IntConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Int2LongTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Int2LongTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Int2LongTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Int2LongTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Int2LongTraversable;Lio/github/sooniln/fastcollect/IntLongConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Int2LongTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Int2LongTraversable;Ljava/util/function/IntConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Int2LongTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Int2LongTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -2160,9 +2160,6 @@ public final class io/github/sooniln/fastcollect/IntLists {
 	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/IntList;[IIIIILjava/lang/Object;)[I
 	public static final fun emptyIntList ()Lio/github/sooniln/fastcollect/IntList;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/IntList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final synthetic fun foreachIndexed (Lio/github/sooniln/fastcollect/IntListTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final synthetic fun foreachReverse (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function1;)V
-	public static final synthetic fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/IntList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/IntList;)I
 	public static final fun indexCheck (Lio/github/sooniln/fastcollect/IntList;I)I
@@ -2175,6 +2172,9 @@ public final class io/github/sooniln/fastcollect/IntLists {
 	public static final fun mutableIntListOf ([I)Lio/github/sooniln/fastcollect/MutableIntList;
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/IntList;II)V
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function2;)I
+	public static final synthetic fun traverseIndexed (Lio/github/sooniln/fastcollect/IntListTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun traverseReverse (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function1;)V
+	public static final synthetic fun traverseReverseIndexed (Lio/github/sooniln/fastcollect/IntList;Lkotlin/jvm/functions/Function2;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/IntLongConsumer {
@@ -2240,13 +2240,13 @@ public final class io/github/sooniln/fastcollect/IntTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/IntTraversable;Lkotlin/jvm/functions/Function1;)D
 	public static final fun emptyIntTraverser ()Lio/github/sooniln/fastcollect/MutableIntTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/IntTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/IntTraversable;Ljava/util/function/IntConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/IntTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/IntTraversable;Lkotlin/jvm/functions/Function1;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/IntTraversable;Lkotlin/jvm/functions/Function1;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/IntTraversable;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/IntTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final fun sum (Lio/github/sooniln/fastcollect/IntTraversable;)I
+	public static final fun traverse (Lio/github/sooniln/fastcollect/IntTraversable;Ljava/util/function/IntConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/IntTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/IntTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -2370,13 +2370,13 @@ public final class io/github/sooniln/fastcollect/Long2AnyTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyLong2AnyTraverser ()Lio/github/sooniln/fastcollect/MutableLong2AnyTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Lio/github/sooniln/fastcollect/LongAnyConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Ljava/util/function/LongConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Lio/github/sooniln/fastcollect/LongAnyConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Ljava/util/function/LongConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Long2AnyTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Long2AnyTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -2493,13 +2493,13 @@ public final class io/github/sooniln/fastcollect/Long2ByteTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyLong2ByteTraverser ()Lio/github/sooniln/fastcollect/MutableLong2ByteTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Lio/github/sooniln/fastcollect/LongByteConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Ljava/util/function/LongConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Lio/github/sooniln/fastcollect/LongByteConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Ljava/util/function/LongConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Long2ByteTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Long2ByteTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -2616,13 +2616,13 @@ public final class io/github/sooniln/fastcollect/Long2DoubleTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyLong2DoubleTraverser ()Lio/github/sooniln/fastcollect/MutableLong2DoubleTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Lio/github/sooniln/fastcollect/LongDoubleConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Ljava/util/function/LongConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Lio/github/sooniln/fastcollect/LongDoubleConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Ljava/util/function/LongConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Long2DoubleTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Long2DoubleTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -2739,13 +2739,13 @@ public final class io/github/sooniln/fastcollect/Long2FloatTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyLong2FloatTraverser ()Lio/github/sooniln/fastcollect/MutableLong2FloatTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Lio/github/sooniln/fastcollect/LongFloatConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Ljava/util/function/LongConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Lio/github/sooniln/fastcollect/LongFloatConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Ljava/util/function/LongConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Long2FloatTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Long2FloatTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -2862,13 +2862,13 @@ public final class io/github/sooniln/fastcollect/Long2IntTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Long2IntTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyLong2IntTraverser ()Lio/github/sooniln/fastcollect/MutableLong2IntTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Long2IntTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Long2IntTraversable;Lio/github/sooniln/fastcollect/LongIntConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Long2IntTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Long2IntTraversable;Ljava/util/function/LongConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Long2IntTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Long2IntTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Long2IntTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Long2IntTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Long2IntTraversable;Lio/github/sooniln/fastcollect/LongIntConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Long2IntTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Long2IntTraversable;Ljava/util/function/LongConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Long2IntTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Long2IntTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -2985,13 +2985,13 @@ public final class io/github/sooniln/fastcollect/Long2LongTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/Long2LongTraversable;Lkotlin/jvm/functions/Function2;)D
 	public static final fun emptyLong2LongTraverser ()Lio/github/sooniln/fastcollect/MutableLong2LongTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/Long2LongTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Long2LongTraversable;Lio/github/sooniln/fastcollect/LongLongConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Long2LongTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final fun foreachKey (Lio/github/sooniln/fastcollect/Long2LongTraversable;Ljava/util/function/LongConsumer;)V
-	public static final synthetic fun foreachKey (Lio/github/sooniln/fastcollect/Long2LongTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/Long2LongTraversable;Lkotlin/jvm/functions/Function2;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/Long2LongTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/Long2LongTraversable;Lkotlin/jvm/functions/Function2;)Z
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Long2LongTraversable;Lio/github/sooniln/fastcollect/LongLongConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Long2LongTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final fun traverseKeys (Lio/github/sooniln/fastcollect/Long2LongTraversable;Ljava/util/function/LongConsumer;)V
+	public static final synthetic fun traverseKeys (Lio/github/sooniln/fastcollect/Long2LongTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Long2LongTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -3147,9 +3147,6 @@ public final class io/github/sooniln/fastcollect/LongLists {
 	public static synthetic fun copyInto$default (Lio/github/sooniln/fastcollect/LongList;[JIIIILjava/lang/Object;)[J
 	public static final fun emptyLongList ()Lio/github/sooniln/fastcollect/LongList;
 	public static final synthetic fun foldRight (Lio/github/sooniln/fastcollect/LongList;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final synthetic fun foreachIndexed (Lio/github/sooniln/fastcollect/LongListTraversable;Lkotlin/jvm/functions/Function2;)V
-	public static final synthetic fun foreachReverse (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function1;)V
-	public static final synthetic fun foreachReverseIndexed (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function2;)V
 	public static final synthetic fun getIndices (Lio/github/sooniln/fastcollect/LongList;)Lkotlin/ranges/IntRange;
 	public static final synthetic fun getLastIndex (Lio/github/sooniln/fastcollect/LongList;)I
 	public static final fun indexCheck (Lio/github/sooniln/fastcollect/LongList;I)I
@@ -3162,6 +3159,9 @@ public final class io/github/sooniln/fastcollect/LongLists {
 	public static final fun mutableLongListOf ([J)Lio/github/sooniln/fastcollect/MutableLongList;
 	public static final fun rangeCheck (Lio/github/sooniln/fastcollect/LongList;II)V
 	public static final synthetic fun reduceRight (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function2;)J
+	public static final synthetic fun traverseIndexed (Lio/github/sooniln/fastcollect/LongListTraversable;Lkotlin/jvm/functions/Function2;)V
+	public static final synthetic fun traverseReverse (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function1;)V
+	public static final synthetic fun traverseReverseIndexed (Lio/github/sooniln/fastcollect/LongList;Lkotlin/jvm/functions/Function2;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/LongLongConsumer {
@@ -3227,13 +3227,13 @@ public final class io/github/sooniln/fastcollect/LongTraversables {
 	public static final synthetic fun doubleSumOf (Lio/github/sooniln/fastcollect/LongTraversable;Lkotlin/jvm/functions/Function1;)D
 	public static final fun emptyLongTraverser ()Lio/github/sooniln/fastcollect/MutableLongTraverser;
 	public static final synthetic fun fold (Lio/github/sooniln/fastcollect/LongTraversable;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ljava/lang/Object;
-	public static final fun foreach (Lio/github/sooniln/fastcollect/LongTraversable;Ljava/util/function/LongConsumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/LongTraversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun intSumOf (Lio/github/sooniln/fastcollect/LongTraversable;Lkotlin/jvm/functions/Function1;)I
 	public static final synthetic fun longSumOf (Lio/github/sooniln/fastcollect/LongTraversable;Lkotlin/jvm/functions/Function1;)J
 	public static final synthetic fun none (Lio/github/sooniln/fastcollect/LongTraversable;Lkotlin/jvm/functions/Function1;)Z
 	public static final synthetic fun reduce (Lio/github/sooniln/fastcollect/LongTraversable;Lkotlin/jvm/functions/Function2;)J
 	public static final fun sum (Lio/github/sooniln/fastcollect/LongTraversable;)J
+	public static final fun traverse (Lio/github/sooniln/fastcollect/LongTraversable;Ljava/util/function/LongConsumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/LongTraversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/LongTraverser : io/github/sooniln/fastcollect/Traverser {
@@ -4061,12 +4061,12 @@ public abstract interface class io/github/sooniln/fastcollect/Traversable {
 }
 
 public final class io/github/sooniln/fastcollect/Traversables {
-	public static final fun foreach (Lio/github/sooniln/fastcollect/Traversable;Ljava/util/function/Consumer;)V
-	public static final synthetic fun foreach (Lio/github/sooniln/fastcollect/Traversable;Lkotlin/jvm/functions/Function1;)V
 	public static final synthetic fun joinTo (Lio/github/sooniln/fastcollect/Traversable;Ljava/lang/Appendable;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Ljava/lang/CharSequence;ILjava/lang/CharSequence;Lkotlin/jvm/functions/Function1;)Ljava/lang/Appendable;
 	public static synthetic fun joinTo$default (Lio/github/sooniln/fastcollect/Traversable;Ljava/lang/Appendable;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Ljava/lang/CharSequence;ILjava/lang/CharSequence;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/Appendable;
 	public static final fun joinToString (Lio/github/sooniln/fastcollect/Traversable;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Ljava/lang/CharSequence;ILjava/lang/CharSequence;)Ljava/lang/String;
 	public static synthetic fun joinToString$default (Lio/github/sooniln/fastcollect/Traversable;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Ljava/lang/CharSequence;ILjava/lang/CharSequence;ILjava/lang/Object;)Ljava/lang/String;
+	public static final fun traverse (Lio/github/sooniln/fastcollect/Traversable;Ljava/util/function/Consumer;)V
+	public static final synthetic fun traverse (Lio/github/sooniln/fastcollect/Traversable;Lkotlin/jvm/functions/Function1;)V
 }
 
 public abstract interface class io/github/sooniln/fastcollect/Traverser : java/util/Iterator, kotlin/jvm/internal/markers/KMappedMarker {

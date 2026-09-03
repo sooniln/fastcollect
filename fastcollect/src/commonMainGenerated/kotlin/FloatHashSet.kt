@@ -208,7 +208,7 @@ public class FloatHashSet @JvmOverloads constructor(
             }
         } else {
             ensureCapacity(max(size + (elements.size / 2), elements.size))
-            elements.foreach { element ->
+            elements.traverse { element ->
                 add(element)
             }
         }

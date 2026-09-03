@@ -138,7 +138,7 @@ open class LongSetBenchmark {
     @Benchmark
     fun naiveCopy(state: RandomState): LongHashSet {
         val copy = LongHashSet()
-        state.set.foreach { key ->
+        state.set.traverse { key ->
             copy.add(key)
         }
         return copy
@@ -176,7 +176,7 @@ open class LongSetBenchmark {
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun foreach(state: RandomState, bh: Blackhole) {
-        state.set.foreach { key -> bh.consume(key) }
+    fun traverse(state: RandomState, bh: Blackhole) {
+        state.set.traverse { key -> bh.consume(key) }
     }
 }

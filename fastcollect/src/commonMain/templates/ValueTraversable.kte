@@ -36,7 +36,7 @@ public interface Mutable${Type}Traversable: MutableTraversable<${Type}> {
  * How to iterate with a ${Type}Traverser:
  *
  * ```kotlin
- * val traverser = ${lowerType}Collection.traverse()
+ * val traverser = ${lowerType}Collection.traverser()
  * while (traverser.forward()) {
  *     doSomethingPrimitive(traverser.value)
  * }
@@ -58,7 +58,7 @@ public interface Mutable${Type}Traverser : ${Type}Traverser, MutableTraverser<${
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun ${Type}Traversable.foreach(action: (${Type}) -> Unit) {
+public inline fun ${Type}Traversable.traverse(action: (${Type}) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser()
@@ -72,7 +72,7 @@ public inline fun ${Type}Traversable.foreach(action: (${Type}) -> Unit) {
 public inline fun ${Type}Traversable.any(predicate: (${Type}) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
-    foreach { if (predicate(it)) return true }
+    traverse { if (predicate(it)) return true }
     return false
 }
 
@@ -96,7 +96,7 @@ public inline fun <R> ${Type}Traversable.fold(initial: R, operation: (accumulate
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreach { accumulated = operation(accumulated, it) }
+    traverse { accumulated = operation(accumulated, it) }
     return accumulated
 }
 
@@ -127,7 +127,7 @@ public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Int): Int {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 
@@ -143,7 +143,7 @@ public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Long): Long {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0L
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 
@@ -160,7 +160,7 @@ public inline fun ${Type}Traversable.sumOf(selector: (${Type}) -> Double): Doubl
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0.0
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 

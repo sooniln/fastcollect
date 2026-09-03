@@ -108,25 +108,25 @@ class IntHashSetTests {
     // ---------- iteration ----------
 
     @Test
-    fun foreach_matchesIterator() {
+    fun traverse_matchesIterator() {
         val set = IntHashSet()
         for (i in 0..50) set.add(i)
 
         val fromForeach = mutableListOf<Int>()
-        set.foreach { fromForeach.add(it) }
+        set.traverse { fromForeach.add(it) }
 
         // hash iteration order is unspecified, so only the multiset is guaranteed
         assertEquals((0..50).toList(), fromForeach.sorted())
     }
 
     @Test
-    fun foreach_emptyAndSingletonSet_matchesIterator() {
+    fun traverse_emptyAndSingletonSet_matchesIterator() {
         val fromEmpty = mutableListOf<Int>()
-        IntHashSet().foreach { fromEmpty.add(it) }
+        IntHashSet().traverse { fromEmpty.add(it) }
         assertEquals(emptyList(), fromEmpty)
 
         val fromSingleton = mutableListOf<Int>()
-        IntHashSet(intListOf(42)).foreach { fromSingleton.add(it) }
+        IntHashSet(intListOf(42)).traverse { fromSingleton.add(it) }
         assertEquals(listOf(42), fromSingleton)
     }
 

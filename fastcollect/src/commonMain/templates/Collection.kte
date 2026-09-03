@@ -26,14 +26,14 @@ public interface ${Type}Collection : ${Type}Traversable, Iterable<$Type> {
     override fun iterator(): ${Type}Iterator
 
     public fun contains(element: ${Type}): Boolean {
-        foreach { e ->
+        traverse { e ->
             if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: ${Type}Collection): Boolean {
-        elements.foreach { element ->
+        elements.traverse { element ->
             if (!contains(element)) {
                 return false
             }
@@ -57,7 +57,7 @@ public interface ${Type}Collection : ${Type}Traversable, Iterable<$Type> {
     public fun copyInto(destination: ${Type}Array, destinationOffset: Int = 0): ${Type}Array {
         destination.rangeCheck(destinationOffset, destinationOffset + size)
         var index = destinationOffset
-        foreach { element -> destination[index++] = element }
+        traverse { element -> destination[index++] = element }
         return destination
     }
 }
@@ -84,7 +84,7 @@ public interface Mutable${Type}Collection : ${Type}Collection, Mutable${Type}Tra
 
     public fun addAll(elements: ${Type}Collection): Boolean {
         var modified = false
-        elements.foreach { element ->
+        elements.traverse { element ->
             modified = add(element) or modified
         }
         return modified

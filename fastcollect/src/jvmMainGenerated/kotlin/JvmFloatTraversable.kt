@@ -8,4 +8,4 @@ package io.github.sooniln.fastcollect
 
 import kotlin.jvm.JvmMultifileClass
 
-public fun FloatTraversable.foreach(action: FloatConsumer): Unit = foreach { action.accept(it) }
+public fun FloatTraversable.traverse(action: FloatConsumer): Unit = traverse { action.accept(it) }

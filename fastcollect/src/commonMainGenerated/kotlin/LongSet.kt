@@ -43,7 +43,7 @@ public infix fun LongSet.intersect(other: LongSet): LongSet {
     if (other.size > size) return other.intersect(this)
 
     val set = LongHashSet(other.size)
-    other.foreach { element ->
+    other.traverse { element ->
         if (contains(element)) set.add(element)
     }
     return set
@@ -51,7 +51,7 @@ public infix fun LongSet.intersect(other: LongSet): LongSet {
 
 public infix fun LongSet.subtract(other: LongSet): LongSet {
     val set = LongHashSet(size)
-    foreach { element ->
+    traverse { element ->
         if (!other.contains(element)) set.add(element)
     }
     return set
@@ -75,7 +75,7 @@ public abstract class AbstractLongSet : AbstractLongCollection(), LongSet {
 
     override fun hashCode(): Int {
         var hashCode = 0
-        foreach { element ->
+        traverse { element ->
             hashCode += element.hashCode()
         }
         return hashCode

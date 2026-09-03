@@ -36,7 +36,7 @@ public interface MutableLongTraversable: MutableTraversable<Long> {
  * How to iterate with a LongTraverser:
  *
  * ```kotlin
- * val traverser = longCollection.traverse()
+ * val traverser = longCollection.traverser()
  * while (traverser.forward()) {
  *     doSomethingPrimitive(traverser.value)
  * }
@@ -58,7 +58,7 @@ public interface MutableLongTraverser : LongTraverser, MutableTraverser<Long>
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun LongTraversable.foreach(action: (Long) -> Unit) {
+public inline fun LongTraversable.traverse(action: (Long) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser()
@@ -72,7 +72,7 @@ public inline fun LongTraversable.foreach(action: (Long) -> Unit) {
 public inline fun LongTraversable.any(predicate: (Long) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
-    foreach { if (predicate(it)) return true }
+    traverse { if (predicate(it)) return true }
     return false
 }
 
@@ -96,7 +96,7 @@ public inline fun <R> LongTraversable.fold(initial: R, operation: (accumulated: 
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreach { accumulated = operation(accumulated, it) }
+    traverse { accumulated = operation(accumulated, it) }
     return accumulated
 }
 
@@ -124,7 +124,7 @@ public inline fun LongTraversable.sumOf(selector: (Long) -> Int): Int {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 
@@ -140,7 +140,7 @@ public inline fun LongTraversable.sumOf(selector: (Long) -> Long): Long {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0L
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 
@@ -154,7 +154,7 @@ public inline fun LongTraversable.sumOf(selector: (Long) -> Double): Double {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0.0
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 

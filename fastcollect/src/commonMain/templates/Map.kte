@@ -76,14 +76,14 @@ public interface ${Name}Map${OutGenerics} : ${Name}Traversable${Generics} {
     public fun getOrDefault(key: ${KeyType}, defaultValue: @UnsafeVariance ${ValueType}): ${ValueType} = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: ${KeyType}): Boolean {
-        foreachKey { k ->
+        traverseKeys { k ->
             if (k equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance ${ValueType}): Boolean {
-        foreach { _, v ->
+        traverse { _, v ->
             if (v equalsRaw value) return true
         }
         return false
@@ -164,7 +164,7 @@ public interface Mutable${Name}Map${Generics} : ${Name}Map${Generics}, Mutable${
     public fun clear()
 
     public fun putAll(from: ${Name}Map${Generics}) {
-        from.foreach { key, value ->
+        from.traverse { key, value ->
             set(key, value)
         }
     }
@@ -256,7 +256,7 @@ public abstract class Abstract${Name}Map${Generics} : ${Name}Map${Generics} {
         if (other is ${Name}Map${StarGenerics}) {
             if (other.size != size) return false
 
-            foreach { key, value ->
+            traverse { key, value ->
                 if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
             }
 
@@ -268,7 +268,7 @@ public abstract class Abstract${Name}Map${Generics} : ${Name}Map${Generics} {
 
     override fun hashCode(): Int {
         var result = 0
-        foreach { key, value ->
+        traverse { key, value ->
             result += key.hashCode() xor value.hashCode()
         }
         return result

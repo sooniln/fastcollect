@@ -37,7 +37,7 @@ public interface MutableLong2DoubleTraversable: MutableTraversable<Long2DoubleMa
  * How to iterate with a Long2DoubleTraverser:
  *
  * ```kotlin
- * val traverser = long2DoubleMap.traverse()
+ * val traverser = long2DoubleMap.traverser()
  * while (traverser.forward()) {
  *     doSomethingPrimitive(traverser.key, traverser.value)
  * }
@@ -77,7 +77,7 @@ public fun  Long2DoubleTraverser.asValueTraverser(): DoubleTraverser {
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun  Long2DoubleTraversable.foreach(
+public inline fun  Long2DoubleTraversable.traverse(
     action: (Long, Double) -> Unit
 ) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -90,7 +90,7 @@ public inline fun  Long2DoubleTraversable.foreach(
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun  Long2DoubleTraversable.foreachKey(
+public inline fun  Long2DoubleTraversable.traverseKeys(
     action: (Long) -> Unit
 ) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -106,7 +106,7 @@ public inline fun  Long2DoubleTraversable.foreachKey(
 public inline fun  Long2DoubleTraversable.any(predicate: (Long, Double) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
-    foreach { key, value -> if (predicate(key, value)) return true }
+    traverse { key, value -> if (predicate(key, value)) return true }
     return false
 }
 
@@ -132,7 +132,7 @@ public inline fun <R> Long2DoubleTraversable.fold(initial: R, operation: (accumu
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreach { key, value -> accumulated = operation(accumulated, key, value) }
+    traverse { key, value -> accumulated = operation(accumulated, key, value) }
     return accumulated
 }
 
@@ -144,7 +144,7 @@ public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Int)
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0
-    foreach { key, value -> sum += selector(key, value) }
+    traverse { key, value -> sum += selector(key, value) }
     return sum
 }
 
@@ -156,7 +156,7 @@ public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Long
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0L
-    foreach { key, value -> sum += selector(key, value) }
+    traverse { key, value -> sum += selector(key, value) }
     return sum
 }
 
@@ -168,7 +168,7 @@ public inline fun  Long2DoubleTraversable.sumOf(selector: (Long, Double) -> Doub
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0.0
-    foreach { key, value -> sum += selector(key, value) }
+    traverse { key, value -> sum += selector(key, value) }
     return sum
 }
 

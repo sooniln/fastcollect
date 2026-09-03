@@ -37,7 +37,7 @@ public interface Mutable${Name}Traversable${Generics}: MutableTraversable<${Name
  * How to iterate with a ${Name}Traverser:
  *
  * ```kotlin
- * val traverser = ${lowerName}Map.traverse()
+ * val traverser = ${lowerName}Map.traverser()
  * while (traverser.forward()) {
  *     doSomethingPrimitive(traverser.key, traverser.value)
  * }
@@ -84,7 +84,7 @@ public fun ${Generics} ${Name}Traverser${Generics}.asValueTraverser(): ${ValueTy
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun ${Generics} ${Name}Traversable${Generics}.foreach(
+public inline fun ${Generics} ${Name}Traversable${Generics}.traverse(
     action: (${KeyType}, ${ValueType}) -> Unit
 ) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -97,7 +97,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.foreach(
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun ${Generics} ${Name}Traversable${Generics}.foreachKey(
+public inline fun ${Generics} ${Name}Traversable${Generics}.traverseKeys(
     action: (${KeyType}) -> Unit
 ) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
@@ -113,7 +113,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.foreachKey(
 public inline fun ${Generics} ${Name}Traversable${Generics}.any(predicate: (${KeyType}, ${ValueType}) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
-    foreach { key, value -> if (predicate(key, value)) return true }
+    traverse { key, value -> if (predicate(key, value)) return true }
     return false
 }
 
@@ -141,7 +141,7 @@ public inline fun <R> ${Name}Traversable.fold(initial: R, operation: (accumulate
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreach { key, value -> accumulated = operation(accumulated, key, value) }
+    traverse { key, value -> accumulated = operation(accumulated, key, value) }
     return accumulated
 }
 
@@ -153,7 +153,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${K
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0
-    foreach { key, value -> sum += selector(key, value) }
+    traverse { key, value -> sum += selector(key, value) }
     return sum
 }
 
@@ -165,7 +165,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${K
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0L
-    foreach { key, value -> sum += selector(key, value) }
+    traverse { key, value -> sum += selector(key, value) }
     return sum
 }
 
@@ -177,7 +177,7 @@ public inline fun ${Generics} ${Name}Traversable${Generics}.sumOf(selector: (${K
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0.0
-    foreach { key, value -> sum += selector(key, value) }
+    traverse { key, value -> sum += selector(key, value) }
     return sum
 }
 

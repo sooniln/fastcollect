@@ -36,7 +36,7 @@ public interface MutableDoubleTraversable: MutableTraversable<Double> {
  * How to iterate with a DoubleTraverser:
  *
  * ```kotlin
- * val traverser = doubleCollection.traverse()
+ * val traverser = doubleCollection.traverser()
  * while (traverser.forward()) {
  *     doSomethingPrimitive(traverser.value)
  * }
@@ -58,7 +58,7 @@ public interface MutableDoubleTraverser : DoubleTraverser, MutableTraverser<Doub
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun DoubleTraversable.foreach(action: (Double) -> Unit) {
+public inline fun DoubleTraversable.traverse(action: (Double) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser()
@@ -72,7 +72,7 @@ public inline fun DoubleTraversable.foreach(action: (Double) -> Unit) {
 public inline fun DoubleTraversable.any(predicate: (Double) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
-    foreach { if (predicate(it)) return true }
+    traverse { if (predicate(it)) return true }
     return false
 }
 
@@ -96,7 +96,7 @@ public inline fun <R> DoubleTraversable.fold(initial: R, operation: (accumulated
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreach { accumulated = operation(accumulated, it) }
+    traverse { accumulated = operation(accumulated, it) }
     return accumulated
 }
 
@@ -124,7 +124,7 @@ public inline fun DoubleTraversable.sumOf(selector: (Double) -> Int): Int {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 
@@ -138,7 +138,7 @@ public inline fun DoubleTraversable.sumOf(selector: (Double) -> Long): Long {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0L
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 
@@ -155,7 +155,7 @@ public inline fun DoubleTraversable.sumOf(selector: (Double) -> Double): Double 
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0.0
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 

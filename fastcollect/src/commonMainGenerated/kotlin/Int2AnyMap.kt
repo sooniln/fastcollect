@@ -76,14 +76,14 @@ public interface Int2AnyMap<out V> : Int2AnyTraversable<V> {
     public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance V): V = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
-        foreachKey { k ->
+        traverseKeys { k ->
             if (k equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance V): Boolean {
-        foreach { _, v ->
+        traverse { _, v ->
             if (v equalsRaw value) return true
         }
         return false
@@ -164,7 +164,7 @@ public interface MutableInt2AnyMap<V> : Int2AnyMap<V>, MutableInt2AnyTraversable
     public fun clear()
 
     public fun putAll(from: Int2AnyMap<V>) {
-        from.foreach { key, value ->
+        from.traverse { key, value ->
             set(key, value)
         }
     }
@@ -256,7 +256,7 @@ public abstract class AbstractInt2AnyMap<V> : Int2AnyMap<V> {
         if (other is Int2AnyMap<*>) {
             if (other.size != size) return false
 
-            foreach { key, value ->
+            traverse { key, value ->
                 if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
             }
 
@@ -268,7 +268,7 @@ public abstract class AbstractInt2AnyMap<V> : Int2AnyMap<V> {
 
     override fun hashCode(): Int {
         var result = 0
-        foreach { key, value ->
+        traverse { key, value ->
             result += key.hashCode() xor value.hashCode()
         }
         return result

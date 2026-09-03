@@ -8,4 +8,4 @@ package io.github.sooniln.fastcollect
 
 import java.util.function.Consumer
 
-public fun <T> Traversable<T>.foreach(action: Consumer<T>): Unit = foreach { action.accept(it) }
+public fun <T> Traversable<T>.traverse(action: Consumer<T>): Unit = traverse { action.accept(it) }

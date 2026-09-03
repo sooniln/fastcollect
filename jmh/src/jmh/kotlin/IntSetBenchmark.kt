@@ -138,7 +138,7 @@ open class IntSetBenchmark {
     @Benchmark
     fun naiveCopy(state: RandomState): IntHashSet {
         val copy = IntHashSet()
-        state.set.foreach { key ->
+        state.set.traverse { key ->
             copy.add(key)
         }
         return copy
@@ -176,7 +176,7 @@ open class IntSetBenchmark {
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun forEach(state: RandomState, bh: Blackhole) {
-        state.set.foreach { key -> bh.consume(key) }
+    fun traverse(state: RandomState, bh: Blackhole) {
+        state.set.traverse { key -> bh.consume(key) }
     }
 }

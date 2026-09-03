@@ -101,11 +101,11 @@ class Int2ByteMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Int, Byte>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Int>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Int, Byte>()
@@ -229,11 +229,11 @@ class Int2IntMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Int, Int>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Int>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Int, Int>()
@@ -357,11 +357,11 @@ class Int2LongMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Int, Long>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Int>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Int, Long>()
@@ -485,11 +485,11 @@ class Int2FloatMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Int, Float>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Int>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Int, Float>()
@@ -613,11 +613,11 @@ class Int2DoubleMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Int, Double>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Int>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Int, Double>()
@@ -741,11 +741,11 @@ class Int2AnyMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Int, String?>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Int>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Int, String?>()
@@ -869,11 +869,11 @@ class Long2ByteMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Long, Byte>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Long>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Long, Byte>()
@@ -997,11 +997,11 @@ class Long2IntMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Long, Int>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Long>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Long, Int>()
@@ -1125,11 +1125,11 @@ class Long2LongMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Long, Long>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Long>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Long, Long>()
@@ -1253,11 +1253,11 @@ class Long2FloatMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Long, Float>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Long>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Long, Float>()
@@ -1381,11 +1381,11 @@ class Long2DoubleMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Long, Double>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Long>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Long, Double>()
@@ -1509,11 +1509,11 @@ class Long2AnyMapConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableMapOf<Long, String?>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
         assertEquals(expected, fromForeach)
 
         val fromKeys = mutableListOf<Long>()
-        map.foreachKey { fromKeys.add(it) }
+        map.traverseKeys { fromKeys.add(it) }
         assertEquals(expected.keys, fromKeys.toSet())
 
         val fromTraverser = mutableMapOf<Long, String?>()

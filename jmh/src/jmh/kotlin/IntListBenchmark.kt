@@ -84,7 +84,7 @@ open class IntListBenchmark {
     @Benchmark
     fun naiveCopy(state: BaseState): IntArrayList {
         val copy = IntArrayList()
-        state.list.foreach { key -> copy.add(key) }
+        state.list.traverse { key -> copy.add(key) }
         return copy
     }
 
@@ -113,7 +113,7 @@ open class IntListBenchmark {
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun foreach(state: BaseState, bh: Blackhole) {
-        state.list.foreach { element -> bh.consume(element) }
+    fun traverse(state: BaseState, bh: Blackhole) {
+        state.list.traverse { element -> bh.consume(element) }
     }
 }

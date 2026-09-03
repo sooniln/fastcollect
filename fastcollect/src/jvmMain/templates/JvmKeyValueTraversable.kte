@@ -9,9 +9,9 @@ package io.github.sooniln.fastcollect
 import kotlin.jvm.JvmMultifileClass
 
 <% if (!isReferenceValue) { %>
-public fun ${Name}Traversable.foreach(action: ${KeyType}${ValueType}Consumer): Unit = foreach { key, value -> action.accept(key, value) }
+public fun ${Name}Traversable.traverse(action: ${KeyType}${ValueType}Consumer): Unit = traverse { key, value -> action.accept(key, value) }
 <% } else { %>
-public fun <V> ${Name}Traversable<V>.foreach(action: ${KeyType}AnyConsumer<V>): Unit = foreach { key, value -> action.accept(key, value) }
+public fun <V> ${Name}Traversable<V>.traverse(action: ${KeyType}AnyConsumer<V>): Unit = traverse { key, value -> action.accept(key, value) }
 <% } %>
-public fun ${Generics} ${Name}Traversable${Generics}.foreachKey(action: ${KeyType}Consumer): Unit = foreachKey { key -> action.accept(key) }
+public fun ${Generics} ${Name}Traversable${Generics}.traverseKeys(action: ${KeyType}Consumer): Unit = traverseKeys { key -> action.accept(key) }
 

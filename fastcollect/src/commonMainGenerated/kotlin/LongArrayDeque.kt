@@ -309,7 +309,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int) : A
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return true

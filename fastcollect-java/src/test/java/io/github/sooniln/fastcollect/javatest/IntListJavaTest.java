@@ -136,7 +136,7 @@ class IntListJavaTest {
         // fastcollect's IntConsumer is a typealias for java.util.function.IntConsumer on the JVM
         int[] sum = {0};
         IntConsumer consumer = value -> sum[0] += value;
-        IntTraversables.foreach(IntLists.intListOf(1, 2, 3), consumer);
+        IntTraversables.traverse(IntLists.intListOf(1, 2, 3), consumer);
         assertEquals(6, sum[0]);
     }
 

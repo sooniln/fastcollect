@@ -71,7 +71,7 @@ public interface Mutable${Type}ListTraverser : ${Type}ListTraverser, Mutable${Ty
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun ${Type}List.foreachReverse(action: (${Type}) -> Unit) {
+public inline fun ${Type}List.traverseReverse(action: (${Type}) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(size)
@@ -82,7 +82,7 @@ public inline fun ${Type}List.foreachReverse(action: (${Type}) -> Unit) {
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun ${Type}ListTraversable.foreachIndexed(action: (Int, ${Type}) -> Unit) {
+public inline fun ${Type}ListTraversable.traverseIndexed(action: (Int, ${Type}) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(0)
@@ -94,7 +94,7 @@ public inline fun ${Type}ListTraversable.foreachIndexed(action: (Int, ${Type}) -
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun ${Type}List.foreachReverseIndexed(action: (Int, ${Type}) -> Unit) {
+public inline fun ${Type}List.traverseReverseIndexed(action: (Int, ${Type}) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(size)
@@ -120,7 +120,7 @@ public interface ${Type}List : ${Type}Collection, ${Type}ListTraversable {
     public fun last(): ${Type} = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
 
     public fun indexOf(element: ${Type}): Int {
-        foreachIndexed { index, value ->
+        traverseIndexed { index, value ->
             if (value equalsRaw element) {
                 return index
             }
@@ -129,7 +129,7 @@ public interface ${Type}List : ${Type}Collection, ${Type}ListTraversable {
     }
 
     public fun lastIndexOf(element: ${Type}): Int {
-        foreachReverseIndexed { index, value ->
+        traverseReverseIndexed { index, value ->
             if (value equalsRaw element) {
                 return index
             }
@@ -192,7 +192,7 @@ public inline fun <R> ${Type}List.foldRight(initial: R, operation: (${Type}, acc
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreachReverse { value ->
+    traverseReverse { value ->
         accumulated = operation(value, accumulated)
     }
     return accumulated
@@ -258,7 +258,7 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, Mut
     override fun clear(): Unit = removeRange(0, size)
 
     override fun addAll(elements: ${Type}Collection): Boolean {
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return !elements.isEmpty()
@@ -273,7 +273,7 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection, Mut
 
     public fun addAll(index: Int, elements: ${Type}Collection) {
         var i = indexCheckInclusive(index)
-        elements.foreach { element ->
+        elements.traverse { element ->
             add(i++, element)
         }
     }
@@ -392,7 +392,7 @@ public abstract class Abstract${Type}List : Abstract${Type}Collection(), ${Type}
 
     override fun hashCode(): Int {
         var hashCode = 1
-        foreach { element ->
+        traverse { element ->
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode

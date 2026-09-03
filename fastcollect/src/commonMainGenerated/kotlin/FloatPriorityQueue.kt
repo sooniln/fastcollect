@@ -191,7 +191,7 @@ public abstract class AbstractFloatPriorityQueue(capacity: Int): FloatCollection
 
     public fun addAll(elements: FloatCollection) {
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             heap[size] = element
             onIndexChanged(element, size)
             ++size

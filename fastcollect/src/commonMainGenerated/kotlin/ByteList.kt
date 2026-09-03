@@ -71,7 +71,7 @@ public interface MutableByteListTraverser : ByteListTraverser, MutableByteTraver
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun ByteList.foreachReverse(action: (Byte) -> Unit) {
+public inline fun ByteList.traverseReverse(action: (Byte) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(size)
@@ -82,7 +82,7 @@ public inline fun ByteList.foreachReverse(action: (Byte) -> Unit) {
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun ByteListTraversable.foreachIndexed(action: (Int, Byte) -> Unit) {
+public inline fun ByteListTraversable.traverseIndexed(action: (Int, Byte) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(0)
@@ -94,7 +94,7 @@ public inline fun ByteListTraversable.foreachIndexed(action: (Int, Byte) -> Unit
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun ByteList.foreachReverseIndexed(action: (Int, Byte) -> Unit) {
+public inline fun ByteList.traverseReverseIndexed(action: (Int, Byte) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(size)
@@ -120,7 +120,7 @@ public interface ByteList : ByteCollection, ByteListTraversable {
     public fun last(): Byte = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
 
     public fun indexOf(element: Byte): Int {
-        foreachIndexed { index, value ->
+        traverseIndexed { index, value ->
             if (value equalsRaw element) {
                 return index
             }
@@ -129,7 +129,7 @@ public interface ByteList : ByteCollection, ByteListTraversable {
     }
 
     public fun lastIndexOf(element: Byte): Int {
-        foreachReverseIndexed { index, value ->
+        traverseReverseIndexed { index, value ->
             if (value equalsRaw element) {
                 return index
             }
@@ -192,7 +192,7 @@ public inline fun <R> ByteList.foldRight(initial: R, operation: (Byte, accumulat
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreachReverse { value ->
+    traverseReverse { value ->
         accumulated = operation(value, accumulated)
     }
     return accumulated
@@ -258,7 +258,7 @@ public interface MutableByteList : ByteList, MutableByteCollection, MutableByteL
     override fun clear(): Unit = removeRange(0, size)
 
     override fun addAll(elements: ByteCollection): Boolean {
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return !elements.isEmpty()
@@ -273,7 +273,7 @@ public interface MutableByteList : ByteList, MutableByteCollection, MutableByteL
 
     public fun addAll(index: Int, elements: ByteCollection) {
         var i = indexCheckInclusive(index)
-        elements.foreach { element ->
+        elements.traverse { element ->
             add(i++, element)
         }
     }
@@ -392,7 +392,7 @@ public abstract class AbstractByteList : AbstractByteCollection(), ByteList {
 
     override fun hashCode(): Int {
         var hashCode = 1
-        foreach { element ->
+        traverse { element ->
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode

@@ -309,7 +309,7 @@ public class ${Type}ArrayDeque private constructor(array: ${Type}Array, size: In
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return true

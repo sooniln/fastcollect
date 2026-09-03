@@ -36,7 +36,7 @@ public interface MutableFloatTraversable: MutableTraversable<Float> {
  * How to iterate with a FloatTraverser:
  *
  * ```kotlin
- * val traverser = floatCollection.traverse()
+ * val traverser = floatCollection.traverser()
  * while (traverser.forward()) {
  *     doSomethingPrimitive(traverser.value)
  * }
@@ -58,7 +58,7 @@ public interface MutableFloatTraverser : FloatTraverser, MutableTraverser<Float>
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun FloatTraversable.foreach(action: (Float) -> Unit) {
+public inline fun FloatTraversable.traverse(action: (Float) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser()
@@ -72,7 +72,7 @@ public inline fun FloatTraversable.foreach(action: (Float) -> Unit) {
 public inline fun FloatTraversable.any(predicate: (Float) -> Boolean): Boolean {
     contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
 
-    foreach { if (predicate(it)) return true }
+    traverse { if (predicate(it)) return true }
     return false
 }
 
@@ -96,7 +96,7 @@ public inline fun <R> FloatTraversable.fold(initial: R, operation: (accumulated:
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreach { accumulated = operation(accumulated, it) }
+    traverse { accumulated = operation(accumulated, it) }
     return accumulated
 }
 
@@ -124,7 +124,7 @@ public inline fun FloatTraversable.sumOf(selector: (Float) -> Int): Int {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 
@@ -138,7 +138,7 @@ public inline fun FloatTraversable.sumOf(selector: (Float) -> Long): Long {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0L
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 
@@ -155,7 +155,7 @@ public inline fun FloatTraversable.sumOf(selector: (Float) -> Double): Double {
     contract { callsInPlace(selector, InvocationKind.UNKNOWN) }
 
     var sum = 0.0
-    foreach { sum += selector(it) }
+    traverse { sum += selector(it) }
     return sum
 }
 

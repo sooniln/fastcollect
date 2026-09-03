@@ -191,7 +191,7 @@ public abstract class Abstract${Type}PriorityQueue(capacity: Int): ${Type}Collec
 
     public fun addAll(elements: ${Type}Collection) {
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             heap[size] = element
             onIndexChanged(element, size)
             ++size

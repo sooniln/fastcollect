@@ -43,7 +43,7 @@ public infix fun DoubleSet.intersect(other: DoubleSet): DoubleSet {
     if (other.size > size) return other.intersect(this)
 
     val set = DoubleHashSet(other.size)
-    other.foreach { element ->
+    other.traverse { element ->
         if (contains(element)) set.add(element)
     }
     return set
@@ -51,7 +51,7 @@ public infix fun DoubleSet.intersect(other: DoubleSet): DoubleSet {
 
 public infix fun DoubleSet.subtract(other: DoubleSet): DoubleSet {
     val set = DoubleHashSet(size)
-    foreach { element ->
+    traverse { element ->
         if (!other.contains(element)) set.add(element)
     }
     return set
@@ -75,7 +75,7 @@ public abstract class AbstractDoubleSet : AbstractDoubleCollection(), DoubleSet 
 
     override fun hashCode(): Int {
         var hashCode = 0
-        foreach { element ->
+        traverse { element ->
             hashCode += element.hashCode()
         }
         return hashCode

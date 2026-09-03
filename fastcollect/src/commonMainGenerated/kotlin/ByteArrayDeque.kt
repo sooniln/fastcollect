@@ -309,7 +309,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int) : A
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return true

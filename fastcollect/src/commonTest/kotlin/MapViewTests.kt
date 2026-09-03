@@ -52,7 +52,7 @@ class MapViewTests {
         map[0] = 0L
 
         val fromForeachKey = mutableListOf<Int>()
-        map.foreachKey { fromForeachKey.add(it) }
+        map.traverseKeys { fromForeachKey.add(it) }
 
         // hash iteration order is unspecified, so only the multiset is guaranteed
         assertEquals((0..50).toList(), fromForeachKey.sorted())
@@ -141,7 +141,7 @@ class MapViewTests {
         for (i in 1..50) map[i] = i.toLong() * 10
 
         val fromEntries = mutableListOf<Long>()
-        map.foreach { _, v -> fromEntries.add(v) }
+        map.traverse { _, v -> fromEntries.add(v) }
 
         // hash iteration order is unspecified, so only the multiset is guaranteed
         assertEquals(fromEntries.sorted(), map.values.toBoxedList().sorted())

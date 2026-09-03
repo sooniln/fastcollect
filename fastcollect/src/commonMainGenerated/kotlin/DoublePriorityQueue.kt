@@ -191,7 +191,7 @@ public abstract class AbstractDoublePriorityQueue(capacity: Int): DoubleCollecti
 
     public fun addAll(elements: DoubleCollection) {
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             heap[size] = element
             onIndexChanged(element, size)
             ++size

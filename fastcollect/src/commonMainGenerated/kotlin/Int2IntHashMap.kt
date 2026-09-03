@@ -284,7 +284,7 @@ public class Int2IntHashMap @JvmOverloads constructor(
             }
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
-            from.foreach { key, value ->
+            from.traverse { key, value ->
                 set(key, value)
             }
         }

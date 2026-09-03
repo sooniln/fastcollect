@@ -68,7 +68,7 @@ class IntSetConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Int>()
-        set.foreach { fromForeach.add(it) }
+        set.traverse { fromForeach.add(it) }
         assertEquals(expected, fromForeach.sorted())
 
         val fromTraverser = mutableListOf<Int>()
@@ -154,7 +154,7 @@ class LongSetConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Long>()
-        set.foreach { fromForeach.add(it) }
+        set.traverse { fromForeach.add(it) }
         assertEquals(expected, fromForeach.sorted())
 
         val fromTraverser = mutableListOf<Long>()
@@ -240,7 +240,7 @@ class FloatSetConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Float>()
-        set.foreach { fromForeach.add(it) }
+        set.traverse { fromForeach.add(it) }
         assertEquals(expected, fromForeach.sorted())
 
         val fromTraverser = mutableListOf<Float>()
@@ -326,7 +326,7 @@ class DoubleSetConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Double>()
-        set.foreach { fromForeach.add(it) }
+        set.traverse { fromForeach.add(it) }
         assertEquals(expected, fromForeach.sorted())
 
         val fromTraverser = mutableListOf<Double>()

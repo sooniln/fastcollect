@@ -309,7 +309,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int)
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return true

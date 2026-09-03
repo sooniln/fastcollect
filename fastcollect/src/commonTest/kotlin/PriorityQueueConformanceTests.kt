@@ -66,7 +66,7 @@ class BytePriorityQueueConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Byte>()
-        queue.foreach { fromForeach.add(it) }
+        queue.traverse { fromForeach.add(it) }
         assertEquals(expected, fromForeach.sorted())
 
         assertEquals(expected, ByteArray(4).also { queue.copyInto(it) }.sorted())
@@ -131,7 +131,7 @@ class IntPriorityQueueConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Int>()
-        queue.foreach { fromForeach.add(it) }
+        queue.traverse { fromForeach.add(it) }
         assertEquals(expected, fromForeach.sorted())
 
         assertEquals(expected, IntArray(4).also { queue.copyInto(it) }.sorted())
@@ -196,7 +196,7 @@ class LongPriorityQueueConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Long>()
-        queue.foreach { fromForeach.add(it) }
+        queue.traverse { fromForeach.add(it) }
         assertEquals(expected, fromForeach.sorted())
 
         assertEquals(expected, LongArray(4).also { queue.copyInto(it) }.sorted())
@@ -261,7 +261,7 @@ class FloatPriorityQueueConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Float>()
-        queue.foreach { fromForeach.add(it) }
+        queue.traverse { fromForeach.add(it) }
         assertEquals(expected, fromForeach.sorted())
 
         assertEquals(expected, FloatArray(4).also { queue.copyInto(it) }.sorted())
@@ -326,7 +326,7 @@ class DoublePriorityQueueConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Double>()
-        queue.foreach { fromForeach.add(it) }
+        queue.traverse { fromForeach.add(it) }
         assertEquals(expected, fromForeach.sorted())
 
         assertEquals(expected, DoubleArray(4).also { queue.copyInto(it) }.sorted())

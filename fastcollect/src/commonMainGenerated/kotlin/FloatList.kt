@@ -71,7 +71,7 @@ public interface MutableFloatListTraverser : FloatListTraverser, MutableFloatTra
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun FloatList.foreachReverse(action: (Float) -> Unit) {
+public inline fun FloatList.traverseReverse(action: (Float) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(size)
@@ -82,7 +82,7 @@ public inline fun FloatList.foreachReverse(action: (Float) -> Unit) {
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun FloatListTraversable.foreachIndexed(action: (Int, Float) -> Unit) {
+public inline fun FloatListTraversable.traverseIndexed(action: (Int, Float) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(0)
@@ -94,7 +94,7 @@ public inline fun FloatListTraversable.foreachIndexed(action: (Int, Float) -> Un
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun FloatList.foreachReverseIndexed(action: (Int, Float) -> Unit) {
+public inline fun FloatList.traverseReverseIndexed(action: (Int, Float) -> Unit) {
     contract { callsInPlace(action, InvocationKind.UNKNOWN) }
 
     val traverser = traverser(size)
@@ -120,7 +120,7 @@ public interface FloatList : FloatCollection, FloatListTraversable {
     public fun last(): Float = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
 
     public fun indexOf(element: Float): Int {
-        foreachIndexed { index, value ->
+        traverseIndexed { index, value ->
             if (value equalsRaw element) {
                 return index
             }
@@ -129,7 +129,7 @@ public interface FloatList : FloatCollection, FloatListTraversable {
     }
 
     public fun lastIndexOf(element: Float): Int {
-        foreachReverseIndexed { index, value ->
+        traverseReverseIndexed { index, value ->
             if (value equalsRaw element) {
                 return index
             }
@@ -192,7 +192,7 @@ public inline fun <R> FloatList.foldRight(initial: R, operation: (Float, accumul
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
 
     var accumulated = initial
-    foreachReverse { value ->
+    traverseReverse { value ->
         accumulated = operation(value, accumulated)
     }
     return accumulated
@@ -258,7 +258,7 @@ public interface MutableFloatList : FloatList, MutableFloatCollection, MutableFl
     override fun clear(): Unit = removeRange(0, size)
 
     override fun addAll(elements: FloatCollection): Boolean {
-        elements.foreach { element ->
+        elements.traverse { element ->
             addLast(element)
         }
         return !elements.isEmpty()
@@ -273,7 +273,7 @@ public interface MutableFloatList : FloatList, MutableFloatCollection, MutableFl
 
     public fun addAll(index: Int, elements: FloatCollection) {
         var i = indexCheckInclusive(index)
-        elements.foreach { element ->
+        elements.traverse { element ->
             add(i++, element)
         }
     }
@@ -392,7 +392,7 @@ public abstract class AbstractFloatList : AbstractFloatCollection(), FloatList {
 
     override fun hashCode(): Int {
         var hashCode = 1
-        foreach { element ->
+        traverse { element ->
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode

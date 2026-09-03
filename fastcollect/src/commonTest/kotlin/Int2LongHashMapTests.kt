@@ -254,7 +254,7 @@ class Int2LongHashMapTests {
     // ---------- iteration ----------
 
     @Test
-    fun foreach_matchesIterator() {
+    fun traverse_matchesIterator() {
         val map = Int2LongHashMap()
         for (i in 1..50) map[i] = i.toLong() + 1000
         map[0] = 9999L
@@ -267,20 +267,20 @@ class Int2LongHashMapTests {
         }
 
         val fromForeach = mutableMapOf<Int, Long>()
-        map.foreach { k, v -> fromForeach[k] = v }
+        map.traverse { k, v -> fromForeach[k] = v }
 
         assertEquals(fromIterator, fromForeach)
         assertEquals(51, fromForeach.size)
     }
 
     @Test
-    fun foreach_emptyAndSingletonMap_matchesIterator() {
+    fun traverse_emptyAndSingletonMap_matchesIterator() {
         val fromEmpty = mutableListOf<Pair<Int, Long>>()
-        Int2LongHashMap().foreach { k, v -> fromEmpty.add(k to v) }
+        Int2LongHashMap().traverse { k, v -> fromEmpty.add(k to v) }
         assertEquals(emptyList(), fromEmpty)
 
         val fromSingleton = mutableListOf<Pair<Int, Long>>()
-        Int2LongHashMap().apply { set(1, 42L) }.foreach { k, v -> fromSingleton.add(k to v) }
+        Int2LongHashMap().apply { set(1, 42L) }.traverse { k, v -> fromSingleton.add(k to v) }
         assertEquals(listOf(1 to 42L), fromSingleton)
     }
 

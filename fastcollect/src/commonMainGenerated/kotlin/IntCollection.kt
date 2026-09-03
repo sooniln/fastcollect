@@ -26,14 +26,14 @@ public interface IntCollection : IntTraversable, Iterable<Int> {
     override fun iterator(): IntIterator
 
     public fun contains(element: Int): Boolean {
-        foreach { e ->
+        traverse { e ->
             if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: IntCollection): Boolean {
-        elements.foreach { element ->
+        elements.traverse { element ->
             if (!contains(element)) {
                 return false
             }
@@ -57,7 +57,7 @@ public interface IntCollection : IntTraversable, Iterable<Int> {
     public fun copyInto(destination: IntArray, destinationOffset: Int = 0): IntArray {
         destination.rangeCheck(destinationOffset, destinationOffset + size)
         var index = destinationOffset
-        foreach { element -> destination[index++] = element }
+        traverse { element -> destination[index++] = element }
         return destination
     }
 }
@@ -84,7 +84,7 @@ public interface MutableIntCollection : IntCollection, MutableIntTraversable {
 
     public fun addAll(elements: IntCollection): Boolean {
         var modified = false
-        elements.foreach { element ->
+        elements.traverse { element ->
             modified = add(element) or modified
         }
         return modified
