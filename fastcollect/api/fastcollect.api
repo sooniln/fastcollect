@@ -4072,8 +4072,8 @@ public final class io/github/sooniln/fastcollect/Traversables {
 public abstract interface class io/github/sooniln/fastcollect/Traverser : java/util/Iterator, kotlin/jvm/internal/markers/KMappedMarker {
 	public abstract fun forward ()Z
 	public abstract fun getElement ()Ljava/lang/Object;
-	public synthetic fun hasNext ()Z
+	public fun hasNext ()Z
 	public synthetic fun next ()Ljava/lang/Object;
-	public synthetic fun next ()Ljava/lang/Void;
+	public fun next ()Ljava/lang/Void;
 }
 

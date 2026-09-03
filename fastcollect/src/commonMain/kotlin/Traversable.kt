@@ -94,11 +94,11 @@ public interface Traverser<out T> : Iterator<Any?> {
     public fun forward(): Boolean
 
     /** DO NOT USE. See class-level note on why iterator interface exists here at all. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "Not a real method, do not use.", replaceWith = ReplaceWith("value"))
+    @Deprecated(level = DeprecationLevel.ERROR, message = "Not a real method, do not use.")
     override fun hasNext(): Boolean = throw UnsupportedOperationException()
 
     /** DO NOT USE. See class-level note on why iterator interface exists here at all. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "Not a real method, do not use.")
+    @Deprecated(level = DeprecationLevel.ERROR, message = "Not a real method, do not use.")
     override fun next(): Nothing = throw UnsupportedOperationException()
 }
 
