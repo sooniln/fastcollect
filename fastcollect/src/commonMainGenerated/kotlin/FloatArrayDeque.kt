@@ -573,11 +573,9 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int) :
          }
 
          override fun forward(): Boolean {
-             if (cursor == last) {
-                 return false
-             }
-
+             if (cursor >= last) return false
              if (ring !== this@FloatArrayDeque.ring) throw ConcurrentModificationException()
+
              position = ++cursor
              return true
          }

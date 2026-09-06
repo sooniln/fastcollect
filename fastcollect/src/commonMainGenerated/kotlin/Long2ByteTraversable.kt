@@ -48,8 +48,7 @@ public interface Long2ByteTraverser: Traverser<Long2ByteMap.Entry> {
     public val value: Byte
 
     /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
-    @get:JvmSynthetic
+    @Deprecated(level = DeprecationLevel.ERROR, message = "May cause boxing.")
     override val element: Long2ByteMap.Entry get() = AbstractLong2ByteMap.SimpleEntry(key, value)
 }
 /**

@@ -573,11 +573,9 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int) : A
          }
 
          override fun forward(): Boolean {
-             if (cursor == last) {
-                 return false
-             }
-
+             if (cursor >= last) return false
              if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
+
              position = ++cursor
              return true
          }

@@ -59,14 +59,11 @@ public interface MutableDoubleListTraversable: MutableDoubleTraversable, DoubleL
     override fun traverser(position: Int): MutableDoubleListTraverser
 }
 
-public interface DoubleListTraverser : DoubleTraverser {
-    public val position: Int
-    public fun backward(): Boolean
-}
+public interface DoubleListTraverser : DoubleTraverser, ListTraverser<Double>
 
-public interface MutableDoubleListTraverser : DoubleListTraverser, MutableDoubleTraverser {
-    public fun set(value: Double)
-    public fun insert(value: Double)
+public interface MutableDoubleListTraverser : DoubleListTraverser, MutableDoubleTraverser, MutableListTraverser<Double> {
+    override fun set(value: Double)
+    override fun insert(value: Double)
 }
 
 @JvmSynthetic

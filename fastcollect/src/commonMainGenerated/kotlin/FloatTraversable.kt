@@ -46,8 +46,7 @@ public interface FloatTraverser : Traverser<Float> {
     public val value: Float
 
     /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.", replaceWith = ReplaceWith("value"))
-    @get:JvmSynthetic
+    @Deprecated(level = DeprecationLevel.ERROR, message = "May cause boxing.", replaceWith = ReplaceWith("value"))
     override val element: Float get() = value
 }
 

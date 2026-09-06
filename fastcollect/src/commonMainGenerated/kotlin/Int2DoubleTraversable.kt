@@ -48,8 +48,7 @@ public interface Int2DoubleTraverser: Traverser<Int2DoubleMap.Entry> {
     public val value: Double
 
     /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
-    @get:JvmSynthetic
+    @Deprecated(level = DeprecationLevel.ERROR, message = "May cause boxing.")
     override val element: Int2DoubleMap.Entry get() = AbstractInt2DoubleMap.SimpleEntry(key, value)
 }
 /**

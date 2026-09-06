@@ -48,8 +48,7 @@ public interface Int2AnyTraverser<out V>: Traverser<Int2AnyMap.Entry<V>> {
     public val value: V
 
     /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
-    @get:JvmSynthetic
+    @Deprecated(level = DeprecationLevel.ERROR, message = "May cause boxing.")
     override val element: Int2AnyMap.Entry<V> get() = AbstractInt2AnyMap.SimpleEntry(key, value)
 }
 /**

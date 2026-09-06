@@ -59,14 +59,11 @@ public interface MutableLongListTraversable: MutableLongTraversable, LongListTra
     override fun traverser(position: Int): MutableLongListTraverser
 }
 
-public interface LongListTraverser : LongTraverser {
-    public val position: Int
-    public fun backward(): Boolean
-}
+public interface LongListTraverser : LongTraverser, ListTraverser<Long>
 
-public interface MutableLongListTraverser : LongListTraverser, MutableLongTraverser {
-    public fun set(value: Long)
-    public fun insert(value: Long)
+public interface MutableLongListTraverser : LongListTraverser, MutableLongTraverser, MutableListTraverser<Long> {
+    override fun set(value: Long)
+    override fun insert(value: Long)
 }
 
 @JvmSynthetic

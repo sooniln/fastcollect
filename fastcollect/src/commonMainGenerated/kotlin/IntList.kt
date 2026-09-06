@@ -59,14 +59,11 @@ public interface MutableIntListTraversable: MutableIntTraversable, IntListTraver
     override fun traverser(position: Int): MutableIntListTraverser
 }
 
-public interface IntListTraverser : IntTraverser {
-    public val position: Int
-    public fun backward(): Boolean
-}
+public interface IntListTraverser : IntTraverser, ListTraverser<Int>
 
-public interface MutableIntListTraverser : IntListTraverser, MutableIntTraverser {
-    public fun set(value: Int)
-    public fun insert(value: Int)
+public interface MutableIntListTraverser : IntListTraverser, MutableIntTraverser, MutableListTraverser<Int> {
+    override fun set(value: Int)
+    override fun insert(value: Int)
 }
 
 @JvmSynthetic

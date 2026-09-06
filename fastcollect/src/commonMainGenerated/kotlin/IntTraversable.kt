@@ -46,8 +46,7 @@ public interface IntTraverser : Traverser<Int> {
     public val value: Int
 
     /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.", replaceWith = ReplaceWith("value"))
-    @get:JvmSynthetic
+    @Deprecated(level = DeprecationLevel.ERROR, message = "May cause boxing.", replaceWith = ReplaceWith("value"))
     override val element: Int get() = value
 }
 

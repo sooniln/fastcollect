@@ -59,14 +59,11 @@ public interface MutableFloatListTraversable: MutableFloatTraversable, FloatList
     override fun traverser(position: Int): MutableFloatListTraverser
 }
 
-public interface FloatListTraverser : FloatTraverser {
-    public val position: Int
-    public fun backward(): Boolean
-}
+public interface FloatListTraverser : FloatTraverser, ListTraverser<Float>
 
-public interface MutableFloatListTraverser : FloatListTraverser, MutableFloatTraverser {
-    public fun set(value: Float)
-    public fun insert(value: Float)
+public interface MutableFloatListTraverser : FloatListTraverser, MutableFloatTraverser, MutableListTraverser<Float> {
+    override fun set(value: Float)
+    override fun insert(value: Float)
 }
 
 @JvmSynthetic

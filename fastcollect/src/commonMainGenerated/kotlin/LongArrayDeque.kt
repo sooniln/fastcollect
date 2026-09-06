@@ -573,11 +573,9 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int) : A
          }
 
          override fun forward(): Boolean {
-             if (cursor == last) {
-                 return false
-             }
-
+             if (cursor >= last) return false
              if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
+
              position = ++cursor
              return true
          }

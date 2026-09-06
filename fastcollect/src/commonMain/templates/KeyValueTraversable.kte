@@ -48,8 +48,7 @@ public interface ${Name}Traverser${OutGenerics}: Traverser<${Name}Map.Entry${Gen
     public val value: ${ValueType}
 
     /** DO NOT USE. May cause boxing. */
-    @Deprecated(level = DeprecationLevel.HIDDEN, message = "May cause boxing.")
-    @get:JvmSynthetic
+    @Deprecated(level = DeprecationLevel.ERROR, message = "May cause boxing.")
     override val element: ${Name}Map.Entry${Generics} get() = Abstract${Name}Map.SimpleEntry(key, value)
 }
 /**

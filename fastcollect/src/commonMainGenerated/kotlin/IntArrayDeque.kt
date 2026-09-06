@@ -573,11 +573,9 @@ public class IntArrayDeque private constructor(array: IntArray, size: Int) : Abs
          }
 
          override fun forward(): Boolean {
-             if (cursor == last) {
-                 return false
-             }
-
+             if (cursor >= last) return false
              if (ring !== this@IntArrayDeque.ring) throw ConcurrentModificationException()
+
              position = ++cursor
              return true
          }

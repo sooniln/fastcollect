@@ -59,14 +59,11 @@ public interface MutableByteListTraversable: MutableByteTraversable, ByteListTra
     override fun traverser(position: Int): MutableByteListTraverser
 }
 
-public interface ByteListTraverser : ByteTraverser {
-    public val position: Int
-    public fun backward(): Boolean
-}
+public interface ByteListTraverser : ByteTraverser, ListTraverser<Byte>
 
-public interface MutableByteListTraverser : ByteListTraverser, MutableByteTraverser {
-    public fun set(value: Byte)
-    public fun insert(value: Byte)
+public interface MutableByteListTraverser : ByteListTraverser, MutableByteTraverser, MutableListTraverser<Byte> {
+    override fun set(value: Byte)
+    override fun insert(value: Byte)
 }
 
 @JvmSynthetic

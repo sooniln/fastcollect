@@ -50,11 +50,11 @@ public interface MutableTraversable<out T> : Traversable<T> {
 /**
  * Provides a way of traversing through elements in a sequence. Like [Iterator], a Traverser points to a space
  * in-between two elements (or before the first element / after the last element), rather than pointing to elements
- * directly. This cursor is referred to as the position (and for a sequence with a finite size the position is in
- * 0..size, unlike the index which is in 0..<size). A position of 0 is before all elements (and for a sequence with
- * a finite size, the position of *size* is after all elements).
+ * directly. This cursor is referred to as the position, and for a sequence with a finite size the position is in
+ * [0, size] (unlike an index which is in [0, size)). A position of 0 is before all elements, and (for a sequence with
+ * a finite size) the position of *size* is after all elements.
  *
- * **ANY** change to the structure of the [Traversable] that does not occur through a Traverser invalidates that
+ * **ANY** change to the structure of the [Traversable] that does not occur through a given Traverser invalidates that
  * Traverser. Some effort is made to throw [ConcurrentModificationException] in these cases (see [forward]), but there
  * is no guarantee that all possible illegal modifications will immediately result in an exception. It is the client's
  * responsibility not to shoot themselves in the foot. If you are traversing a structure, you should be sure it will
@@ -69,15 +69,15 @@ public interface MutableTraversable<out T> : Traversable<T> {
  * }
  * ```
  *
- * NOTE: This interface extends Iterator because many JVMs special case inlining behavior for Iterator and related
- * classes in order to improve performance (see https://bugs.openjdk.org/browse/JDK-8223504). We want the same inlining
- * behavior since we're handling the exact same use cases as Iterator - this hack helps us achieve it. The actual
- * Iterator methods are never intended to be used.
+ * NOTE: This interface extends Iterator because HotSpot special cases inlining behavior for Iterator in order to
+ * improve performance (see https://bugs.openjdk.org/browse/JDK-8223504). More aggressive inlining allows better escape
+ * analysis and thus scalar replacement. Since we want the same advantages this hack helps us achieve it (one hack
+ * engenders another). The actual Iterator methods are never intended to be used.
  */
 public interface Traverser<out T> : Iterator<Any?> {
 
     /**
-     * Returns the last element of the sequence the position moved over. If the position has never been moved, then
+     * Returns the element of the sequence the position last moved over. If the position has never been moved, then
      * this returns the element behind the initial position (as if initial position were reached by invoking [forward]),
      * or throws [IllegalStateException] if there is no element behind the initial position (the initial position is at
      * the beginning).
@@ -105,9 +105,49 @@ public interface Traverser<out T> : Iterator<Any?> {
 public interface MutableTraverser<out T> : Traverser<T> {
     /**
      * Removes [element] from the sequence. Throws an exception in the same circumstances where [element] would throw an
-     * exception. After removal [element] will throw an exception until the position is moved again.
+     * exception. After removal [element] will throw an [IllegalStateException] until the position is moved again.
      */
     public fun remove()
+}
+
+/**
+ * A [Traverser] over a list. A list is defined as a finite ordered collection, where order is independent of element
+ * values. The fact that it is both finite and independently ordered means that ListTraverser can expose an integer
+ * [position] value that indicates where this [Traverser] is currently pointing within the list. Since a list is
+ * independently ordered, ListTraverser can expose a [backward] method which moves the cursor position in the opposite
+ * direction as [forward].
+ */
+public interface ListTraverser<out T> : Traverser<T> {
+    /**
+     * The current cursor position within the list. Recall that this is a position not an index (since a [Traverser]
+     * points at gaps between elements, not elements themselves). The position is updated whenever [forward] or
+     * [backward] return true.
+     */
+    public val position: Int
+
+    /**
+     * Moves the cursor position in the opposite direction as [forward].
+     */
+    public fun backward(): Boolean
+}
+
+/**
+ * A mutable [ListTraverser]. Since a list is independently ordered, MutableListTraverser can expose [set], which
+ * changes the value of [element]. MutableListTraverser can also expose [insert], which inserts a new value at the
+ * current cursor position.
+ */
+public interface MutableListTraverser<T> : ListTraverser<T>, MutableTraverser<T> {
+    /**
+     * Changes the value of the current [element]. Throws an exception in all circumstances where [element] would throw
+     * an exception.
+     */
+    public fun set(value: T)
+
+    /**
+     * Inserts a value at the current cursor position. After insertion, the cursor is located behind the newly inserted
+     * element, such that invoking [forward] will cause [element] to return the newly inserted value.
+     */
+    public fun insert(value: T)
 }
 
 @JvmSynthetic

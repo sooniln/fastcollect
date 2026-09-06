@@ -573,11 +573,9 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int)
          }
 
          override fun forward(): Boolean {
-             if (cursor == last) {
-                 return false
-             }
-
+             if (cursor >= last) return false
              if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
+
              position = ++cursor
              return true
          }
