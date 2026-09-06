@@ -128,6 +128,11 @@ abstract interface <#A: kotlin/Any?> io.github.sooniln.fastcollect/MutableInt2An
         abstract fun <set-value>(#A) // io.github.sooniln.fastcollect/MutableInt2AnyTraverser.value.<set-value>|<set-value>(1:0){}[0]
 }
 
+abstract interface <#A: kotlin/Any?> io.github.sooniln.fastcollect/MutableListTraverser : io.github.sooniln.fastcollect/ListTraverser<#A>, io.github.sooniln.fastcollect/MutableTraverser<#A> { // io.github.sooniln.fastcollect/MutableListTraverser|null[0]
+    abstract fun insert(#A) // io.github.sooniln.fastcollect/MutableListTraverser.insert|insert(1:0){}[0]
+    abstract fun set(#A) // io.github.sooniln.fastcollect/MutableListTraverser.set|set(1:0){}[0]
+}
+
 abstract interface <#A: kotlin/Any?> io.github.sooniln.fastcollect/MutableLong2AnyMap : io.github.sooniln.fastcollect/Long2AnyMap<#A>, io.github.sooniln.fastcollect/MutableLong2AnyTraversable<#A> { // io.github.sooniln.fastcollect/MutableLong2AnyMap|null[0]
     abstract fun clear() // io.github.sooniln.fastcollect/MutableLong2AnyMap.clear|clear(){}[0]
     abstract fun iterator(): kotlin.collections/MutableIterator<io.github.sooniln.fastcollect/MutableLong2AnyMap.MutableEntry<#A>> // io.github.sooniln.fastcollect/MutableLong2AnyMap.iterator|iterator(){}[0]
@@ -209,6 +214,13 @@ abstract interface <#A: out kotlin/Any?> io.github.sooniln.fastcollect/Int2AnyTr
         abstract fun <get-value>(): #A // io.github.sooniln.fastcollect/Int2AnyTraverser.value.<get-value>|<get-value>(){}[0]
     open val element // io.github.sooniln.fastcollect/Int2AnyTraverser.element|{}element[0]
         open fun <get-element>(): io.github.sooniln.fastcollect/Int2AnyMap.Entry<#A> // io.github.sooniln.fastcollect/Int2AnyTraverser.element.<get-element>|<get-element>(){}[0]
+}
+
+abstract interface <#A: out kotlin/Any?> io.github.sooniln.fastcollect/ListTraverser : io.github.sooniln.fastcollect/Traverser<#A> { // io.github.sooniln.fastcollect/ListTraverser|null[0]
+    abstract val position // io.github.sooniln.fastcollect/ListTraverser.position|{}position[0]
+        abstract fun <get-position>(): kotlin/Int // io.github.sooniln.fastcollect/ListTraverser.position.<get-position>|<get-position>(){}[0]
+
+    abstract fun backward(): kotlin/Boolean // io.github.sooniln.fastcollect/ListTraverser.backward|backward(){}[0]
 }
 
 abstract interface <#A: out kotlin/Any?> io.github.sooniln.fastcollect/Long2AnyMap : io.github.sooniln.fastcollect/Long2AnyTraversable<#A> { // io.github.sooniln.fastcollect/Long2AnyMap|null[0]
@@ -309,12 +321,7 @@ abstract interface io.github.sooniln.fastcollect/ByteListTraversable : io.github
     abstract fun traverser(kotlin/Int): io.github.sooniln.fastcollect/ByteListTraverser // io.github.sooniln.fastcollect/ByteListTraversable.traverser|traverser(kotlin.Int){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/ByteListTraverser : io.github.sooniln.fastcollect/ByteTraverser { // io.github.sooniln.fastcollect/ByteListTraverser|null[0]
-    abstract val position // io.github.sooniln.fastcollect/ByteListTraverser.position|{}position[0]
-        abstract fun <get-position>(): kotlin/Int // io.github.sooniln.fastcollect/ByteListTraverser.position.<get-position>|<get-position>(){}[0]
-
-    abstract fun backward(): kotlin/Boolean // io.github.sooniln.fastcollect/ByteListTraverser.backward|backward(){}[0]
-}
+abstract interface io.github.sooniln.fastcollect/ByteListTraverser : io.github.sooniln.fastcollect/ByteTraverser, io.github.sooniln.fastcollect/ListTraverser<kotlin/Byte> // io.github.sooniln.fastcollect/ByteListTraverser|null[0]
 
 abstract interface io.github.sooniln.fastcollect/ByteTraversable : io.github.sooniln.fastcollect/Traversable<kotlin/Byte> { // io.github.sooniln.fastcollect/ByteTraversable|null[0]
     abstract fun traverser(): io.github.sooniln.fastcollect/ByteTraverser // io.github.sooniln.fastcollect/ByteTraversable.traverser|traverser(){}[0]
@@ -355,12 +362,7 @@ abstract interface io.github.sooniln.fastcollect/DoubleListTraversable : io.gith
     abstract fun traverser(kotlin/Int): io.github.sooniln.fastcollect/DoubleListTraverser // io.github.sooniln.fastcollect/DoubleListTraversable.traverser|traverser(kotlin.Int){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/DoubleListTraverser : io.github.sooniln.fastcollect/DoubleTraverser { // io.github.sooniln.fastcollect/DoubleListTraverser|null[0]
-    abstract val position // io.github.sooniln.fastcollect/DoubleListTraverser.position|{}position[0]
-        abstract fun <get-position>(): kotlin/Int // io.github.sooniln.fastcollect/DoubleListTraverser.position.<get-position>|<get-position>(){}[0]
-
-    abstract fun backward(): kotlin/Boolean // io.github.sooniln.fastcollect/DoubleListTraverser.backward|backward(){}[0]
-}
+abstract interface io.github.sooniln.fastcollect/DoubleListTraverser : io.github.sooniln.fastcollect/DoubleTraverser, io.github.sooniln.fastcollect/ListTraverser<kotlin/Double> // io.github.sooniln.fastcollect/DoubleListTraverser|null[0]
 
 abstract interface io.github.sooniln.fastcollect/DoubleSet : io.github.sooniln.fastcollect/DoubleCollection // io.github.sooniln.fastcollect/DoubleSet|null[0]
 
@@ -403,12 +405,7 @@ abstract interface io.github.sooniln.fastcollect/FloatListTraversable : io.githu
     abstract fun traverser(kotlin/Int): io.github.sooniln.fastcollect/FloatListTraverser // io.github.sooniln.fastcollect/FloatListTraversable.traverser|traverser(kotlin.Int){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/FloatListTraverser : io.github.sooniln.fastcollect/FloatTraverser { // io.github.sooniln.fastcollect/FloatListTraverser|null[0]
-    abstract val position // io.github.sooniln.fastcollect/FloatListTraverser.position|{}position[0]
-        abstract fun <get-position>(): kotlin/Int // io.github.sooniln.fastcollect/FloatListTraverser.position.<get-position>|<get-position>(){}[0]
-
-    abstract fun backward(): kotlin/Boolean // io.github.sooniln.fastcollect/FloatListTraverser.backward|backward(){}[0]
-}
+abstract interface io.github.sooniln.fastcollect/FloatListTraverser : io.github.sooniln.fastcollect/FloatTraverser, io.github.sooniln.fastcollect/ListTraverser<kotlin/Float> // io.github.sooniln.fastcollect/FloatListTraverser|null[0]
 
 abstract interface io.github.sooniln.fastcollect/FloatSet : io.github.sooniln.fastcollect/FloatCollection // io.github.sooniln.fastcollect/FloatSet|null[0]
 
@@ -696,12 +693,7 @@ abstract interface io.github.sooniln.fastcollect/IntListTraversable : io.github.
     abstract fun traverser(kotlin/Int): io.github.sooniln.fastcollect/IntListTraverser // io.github.sooniln.fastcollect/IntListTraversable.traverser|traverser(kotlin.Int){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/IntListTraverser : io.github.sooniln.fastcollect/IntTraverser { // io.github.sooniln.fastcollect/IntListTraverser|null[0]
-    abstract val position // io.github.sooniln.fastcollect/IntListTraverser.position|{}position[0]
-        abstract fun <get-position>(): kotlin/Int // io.github.sooniln.fastcollect/IntListTraverser.position.<get-position>|<get-position>(){}[0]
-
-    abstract fun backward(): kotlin/Boolean // io.github.sooniln.fastcollect/IntListTraverser.backward|backward(){}[0]
-}
+abstract interface io.github.sooniln.fastcollect/IntListTraverser : io.github.sooniln.fastcollect/IntTraverser, io.github.sooniln.fastcollect/ListTraverser<kotlin/Int> // io.github.sooniln.fastcollect/IntListTraverser|null[0]
 
 abstract interface io.github.sooniln.fastcollect/IntSet : io.github.sooniln.fastcollect/IntCollection // io.github.sooniln.fastcollect/IntSet|null[0]
 
@@ -989,12 +981,7 @@ abstract interface io.github.sooniln.fastcollect/LongListTraversable : io.github
     abstract fun traverser(kotlin/Int): io.github.sooniln.fastcollect/LongListTraverser // io.github.sooniln.fastcollect/LongListTraversable.traverser|traverser(kotlin.Int){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/LongListTraverser : io.github.sooniln.fastcollect/LongTraverser { // io.github.sooniln.fastcollect/LongListTraverser|null[0]
-    abstract val position // io.github.sooniln.fastcollect/LongListTraverser.position|{}position[0]
-        abstract fun <get-position>(): kotlin/Int // io.github.sooniln.fastcollect/LongListTraverser.position.<get-position>|<get-position>(){}[0]
-
-    abstract fun backward(): kotlin/Boolean // io.github.sooniln.fastcollect/LongListTraverser.backward|backward(){}[0]
-}
+abstract interface io.github.sooniln.fastcollect/LongListTraverser : io.github.sooniln.fastcollect/ListTraverser<kotlin/Long>, io.github.sooniln.fastcollect/LongTraverser // io.github.sooniln.fastcollect/LongListTraverser|null[0]
 
 abstract interface io.github.sooniln.fastcollect/LongSet : io.github.sooniln.fastcollect/LongCollection // io.github.sooniln.fastcollect/LongSet|null[0]
 
@@ -1059,7 +1046,7 @@ abstract interface io.github.sooniln.fastcollect/MutableByteListTraversable : io
     abstract fun traverser(kotlin/Int): io.github.sooniln.fastcollect/MutableByteListTraverser // io.github.sooniln.fastcollect/MutableByteListTraversable.traverser|traverser(kotlin.Int){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/MutableByteListTraverser : io.github.sooniln.fastcollect/ByteListTraverser, io.github.sooniln.fastcollect/MutableByteTraverser { // io.github.sooniln.fastcollect/MutableByteListTraverser|null[0]
+abstract interface io.github.sooniln.fastcollect/MutableByteListTraverser : io.github.sooniln.fastcollect/ByteListTraverser, io.github.sooniln.fastcollect/MutableByteTraverser, io.github.sooniln.fastcollect/MutableListTraverser<kotlin/Byte> { // io.github.sooniln.fastcollect/MutableByteListTraverser|null[0]
     abstract fun insert(kotlin/Byte) // io.github.sooniln.fastcollect/MutableByteListTraverser.insert|insert(kotlin.Byte){}[0]
     abstract fun set(kotlin/Byte) // io.github.sooniln.fastcollect/MutableByteListTraverser.set|set(kotlin.Byte){}[0]
 }
@@ -1120,7 +1107,7 @@ abstract interface io.github.sooniln.fastcollect/MutableDoubleListTraversable : 
     abstract fun traverser(kotlin/Int): io.github.sooniln.fastcollect/MutableDoubleListTraverser // io.github.sooniln.fastcollect/MutableDoubleListTraversable.traverser|traverser(kotlin.Int){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/MutableDoubleListTraverser : io.github.sooniln.fastcollect/DoubleListTraverser, io.github.sooniln.fastcollect/MutableDoubleTraverser { // io.github.sooniln.fastcollect/MutableDoubleListTraverser|null[0]
+abstract interface io.github.sooniln.fastcollect/MutableDoubleListTraverser : io.github.sooniln.fastcollect/DoubleListTraverser, io.github.sooniln.fastcollect/MutableDoubleTraverser, io.github.sooniln.fastcollect/MutableListTraverser<kotlin/Double> { // io.github.sooniln.fastcollect/MutableDoubleListTraverser|null[0]
     abstract fun insert(kotlin/Double) // io.github.sooniln.fastcollect/MutableDoubleListTraverser.insert|insert(kotlin.Double){}[0]
     abstract fun set(kotlin/Double) // io.github.sooniln.fastcollect/MutableDoubleListTraverser.set|set(kotlin.Double){}[0]
 }
@@ -1183,7 +1170,7 @@ abstract interface io.github.sooniln.fastcollect/MutableFloatListTraversable : i
     abstract fun traverser(kotlin/Int): io.github.sooniln.fastcollect/MutableFloatListTraverser // io.github.sooniln.fastcollect/MutableFloatListTraversable.traverser|traverser(kotlin.Int){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/MutableFloatListTraverser : io.github.sooniln.fastcollect/FloatListTraverser, io.github.sooniln.fastcollect/MutableFloatTraverser { // io.github.sooniln.fastcollect/MutableFloatListTraverser|null[0]
+abstract interface io.github.sooniln.fastcollect/MutableFloatListTraverser : io.github.sooniln.fastcollect/FloatListTraverser, io.github.sooniln.fastcollect/MutableFloatTraverser, io.github.sooniln.fastcollect/MutableListTraverser<kotlin/Float> { // io.github.sooniln.fastcollect/MutableFloatListTraverser|null[0]
     abstract fun insert(kotlin/Float) // io.github.sooniln.fastcollect/MutableFloatListTraverser.insert|insert(kotlin.Float){}[0]
     abstract fun set(kotlin/Float) // io.github.sooniln.fastcollect/MutableFloatListTraverser.set|set(kotlin.Float){}[0]
 }
@@ -1416,7 +1403,7 @@ abstract interface io.github.sooniln.fastcollect/MutableIntListTraversable : io.
     abstract fun traverser(kotlin/Int): io.github.sooniln.fastcollect/MutableIntListTraverser // io.github.sooniln.fastcollect/MutableIntListTraversable.traverser|traverser(kotlin.Int){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/MutableIntListTraverser : io.github.sooniln.fastcollect/IntListTraverser, io.github.sooniln.fastcollect/MutableIntTraverser { // io.github.sooniln.fastcollect/MutableIntListTraverser|null[0]
+abstract interface io.github.sooniln.fastcollect/MutableIntListTraverser : io.github.sooniln.fastcollect/IntListTraverser, io.github.sooniln.fastcollect/MutableIntTraverser, io.github.sooniln.fastcollect/MutableListTraverser<kotlin/Int> { // io.github.sooniln.fastcollect/MutableIntListTraverser|null[0]
     abstract fun insert(kotlin/Int) // io.github.sooniln.fastcollect/MutableIntListTraverser.insert|insert(kotlin.Int){}[0]
     abstract fun set(kotlin/Int) // io.github.sooniln.fastcollect/MutableIntListTraverser.set|set(kotlin.Int){}[0]
 }
@@ -1649,7 +1636,7 @@ abstract interface io.github.sooniln.fastcollect/MutableLongListTraversable : io
     abstract fun traverser(kotlin/Int): io.github.sooniln.fastcollect/MutableLongListTraverser // io.github.sooniln.fastcollect/MutableLongListTraversable.traverser|traverser(kotlin.Int){}[0]
 }
 
-abstract interface io.github.sooniln.fastcollect/MutableLongListTraverser : io.github.sooniln.fastcollect/LongListTraverser, io.github.sooniln.fastcollect/MutableLongTraverser { // io.github.sooniln.fastcollect/MutableLongListTraverser|null[0]
+abstract interface io.github.sooniln.fastcollect/MutableLongListTraverser : io.github.sooniln.fastcollect/LongListTraverser, io.github.sooniln.fastcollect/MutableListTraverser<kotlin/Long>, io.github.sooniln.fastcollect/MutableLongTraverser { // io.github.sooniln.fastcollect/MutableLongListTraverser|null[0]
     abstract fun insert(kotlin/Long) // io.github.sooniln.fastcollect/MutableLongListTraverser.insert|insert(kotlin.Long){}[0]
     abstract fun set(kotlin/Long) // io.github.sooniln.fastcollect/MutableLongListTraverser.set|set(kotlin.Long){}[0]
 }
