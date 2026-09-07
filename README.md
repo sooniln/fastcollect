@@ -22,8 +22,8 @@ Note that performance has only been tested on JVM platforms.
 FastCollect ships different artifacts depending on your target:
 
 1. Kotlin Multi-Platform: Use `fastcollect`
-2. Kotlin Single-Platform: Use `fastcollect-<platform>` (i.e. `fastcollect-jvm` for JVM platforms)
-3. Non-Kotlin JVM Target (Java/Scala/etc): Use `fastcollect-java` - no dependency on the Kotlin Standard Library
+2. Kotlin Single-Platform: Use `fastcollect-[jvm|iosArm64|...]`
+3. Non-Kotlin JVM Target (Java/Scala/etc): Use `fastcollect-jvm`
 
 You can add FastCollect as a dependency with:
 
