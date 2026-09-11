@@ -1,0 +1,13 @@
+/**
+ * Methods for dealing with primitive ${Name}HashMaps.
+ */
+@file:JvmName("${Name}HashMaps")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
+
+import java.util.function.Predicate
+
+public fun ${Generics} ${Name}HashMap${Generics}.forEachWhile(action: Predicate<${Name}Map.Entry${Generics}>) {
+    forEach { if (!action.test(it)) return }
+}

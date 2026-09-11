@@ -263,12 +263,12 @@ class IntArrayDequeTests {
     // ---------- iteration ----------
 
     @Test
-    fun traverse_matchesIteratorInOrder() {
+    fun forEach_matchesIteratorInOrder() {
         val list = mutableIntListOf()
         for (i in 1..50) list.add(i)
 
         val fromForeach = mutableListOf<Int>()
-        list.traverse { v -> fromForeach.add(v) }
+        for (v in list) fromForeach.add(v)
 
         assertEquals((1..50).toList(), fromForeach)
     }

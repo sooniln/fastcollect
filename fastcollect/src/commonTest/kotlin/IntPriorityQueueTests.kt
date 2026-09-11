@@ -232,19 +232,19 @@ class IntPriorityQueueTests {
     }
 
     @Test
-    fun traverse_visitsAllElementsExactlyOnce() {
+    fun iteration_visitsAllElementsExactlyOnce() {
         val queue = intPriorityQueueOf(5, 3, 8, 1, 9, 2, 7)
         val visited = mutableListOf<Int>()
-        queue.traverse { visited.add(it) }
+        for (value in queue) visited.add(value)
         assertEquals(listOf(1, 2, 3, 5, 7, 8, 9), visited.sorted())
     }
 
     @Test
-    fun traverse_emptyQueue_visitsNothing() {
+    fun iteration_emptyQueue_visitsNothing() {
         val visited = mutableListOf<Int>()
-        IntPriorityQueue().traverse { visited.add(it) }
+        for (value in IntPriorityQueue()) visited.add(value)
         assertEquals(emptyList(), visited)
-        assertFalse(IntPriorityQueue().traverser().forward())
+        assertFalse(IntPriorityQueue().iterator().hasNext())
     }
 
     @Test

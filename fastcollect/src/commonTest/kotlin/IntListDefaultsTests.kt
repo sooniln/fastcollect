@@ -5,7 +5,7 @@ import kotlin.test.*
 /**
  * Coverage for the default implementations and non-deque list flavours in List.kte: the EmptyIntList and
  * SingletonIntList singletons, the IntArray wrapper, sublist views, and a list that is deliberately NOT
- * RandomAccess so the traverser-based fallbacks are taken instead of the indexed fast paths.
+ * RandomAccess so the iterator-based fallbacks are taken instead of the indexed fast paths.
  */
 class IntListDefaultsTests {
 
@@ -41,12 +41,12 @@ class IntListDefaultsTests {
         assertEquals(-1, empty.indexOf(0))
         assertEquals(-1, empty.lastIndexOf(0))
         assertEquals(-1, empty.lastIndex)
-        assertEquals(IntRange.EMPTY, empty.indices)
         assertFailsWith<IndexOutOfBoundsException> { empty[0] }
         assertFailsWith<NoSuchElementException> { empty.first() }
         assertFailsWith<NoSuchElementException> { empty.last() }
         assertFalse(empty.iterator().hasNext())
-        assertFalse(empty.traverser().forward())
+        assertFalse(empty.listIterator().hasNext())
+        assertFalse(empty.listIterator().hasPrevious())
         assertEquals(emptyIntList(), empty.subList(0, 0))
     }
 
@@ -100,19 +100,20 @@ class IntListDefaultsTests {
     }
 
     @Test
-    fun arrayWrapper_iteratorAndTraverserWalkTheWholeArray() {
+    fun arrayWrapper_iteratorAndListIteratorWalkTheWholeArray() {
         val view = intArrayOf(1, 2, 3).asIntList()
 
         assertEquals(listOf(1, 2, 3), view.toBoxedList())
 
         val collected = mutableListOf<Int>()
-        view.traverse { collected.add(it) }
+        for (value in view) collected.add(value)
         assertEquals(listOf(1, 2, 3), collected)
 
-        val traverser = view.traverser()
-        assertFailsWith<IllegalStateException> { traverser.value }
-        assertTrue(traverser.forward())
-        assertEquals(1, traverser.value)
+        val listIterator = view.listIterator()
+        assertFalse(listIterator.hasPrevious())
+        assertTrue(listIterator.hasNext())
+        assertEquals(1, listIterator.nextInt())
+        assertEquals(1, listIterator.previousInt())
 
         val iterator = view.iterator()
         repeat(3) { iterator.nextInt() }
@@ -123,7 +124,7 @@ class IntListDefaultsTests {
     fun arrayWrapper_emptyArray() {
         val view = intArrayOf().asIntList()
         view.assertContents()
-        assertFalse(view.traverser().forward())
+        assertFalse(view.listIterator().hasNext())
         assertFalse(view.iterator().hasNext())
     }
 
@@ -205,17 +206,17 @@ class IntListDefaultsTests {
     }
 
     @Test
-    fun traverseRemove_subList_doesNotThrowSpuriousConcurrentModificationException() {
-        // regression test: AbstractMutableList.TraverserImpl cached the list's lastIndex once at construction and
-        // never updated it after remove(), which threw a spurious CME on the very next forward() call
+    fun iteratorRemove_subList_doesNotThrowSpuriousConcurrentModificationException() {
+        // regression test: AbstractMutableList's list iterator cached the list's lastIndex once at construction and
+        // never updated it after remove(), which threw a spurious CME on the very next advance
         val backing = mutableIntListOf(1, 2, 3, 4, 5, 6)
         val sub = backing.subList(1, 5)
 
         val kept = mutableListOf<Int>()
-        val traverser = sub.traverser()
-        while (traverser.forward()) {
-            val value = traverser.value
-            if (value % 2 == 0) traverser.remove() else kept.add(value)
+        val iterator = sub.listIterator()
+        while (iterator.hasNext()) {
+            val value = iterator.nextInt()
+            if (value % 2 == 0) iterator.remove() else kept.add(value)
         }
 
         assertEquals(listOf(3, 5), kept)
@@ -294,46 +295,51 @@ class IntListDefaultsTests {
     }
 
     @Test
-    fun traverseIndexed_visitsEveryIndexInOrder() {
-        val seen = mutableListOf<Pair<Int, Int>>()
-        intListOf(10, 20, 30).traverseIndexed { index, value -> seen.add(index to value) }
-        assertEquals(listOf(0 to 10, 1 to 20, 2 to 30), seen)
+    fun listIterator_pairsIndicesWithElementsInBothDirections() {
+        val forwards = mutableListOf<Pair<Int, Int>>()
+        val iterator = intListOf(10, 20, 30).listIterator()
+        while (iterator.hasNext()) {
+            forwards.add(iterator.nextIndex() to iterator.nextInt())
+        }
+        assertEquals(listOf(0 to 10, 1 to 20, 2 to 30), forwards)
 
-        seen.clear()
-        intListOf().traverseIndexed { index, value -> seen.add(index to value) }
-        assertEquals(emptyList(), seen)
+        val backwards = mutableListOf<Pair<Int, Int>>()
+        while (iterator.hasPrevious()) {
+            backwards.add(iterator.previousIndex() to iterator.previousInt())
+        }
+        assertEquals(listOf(2 to 30, 1 to 20, 0 to 10), backwards)
     }
 
     @Test
-    fun traverseReverse_visitsEveryElementBackwards() {
-        val seen = mutableListOf<Int>()
-        intListOf(10, 20, 30).traverseReverse { seen.add(it) }
-        assertEquals(listOf(30, 20, 10), seen)
-
-        seen.clear()
-        intListOf().traverseReverse { seen.add(it) }
-        assertEquals(emptyList(), seen)
+    fun listIterator_onAnEmptyListVisitsNothing() {
+        val iterator = intListOf().listIterator()
+        assertFalse(iterator.hasNext())
+        assertFalse(iterator.hasPrevious())
+        assertFailsWith<NoSuchElementException> { iterator.nextInt() }
+        assertFailsWith<NoSuchElementException> { iterator.previousInt() }
     }
 
     @Test
-    fun traverseReverseIndexed_pairsIndicesWithElementsBackwards() {
-        val seen = mutableListOf<Pair<Int, Int>>()
-        intListOf(10, 20, 30).traverseReverseIndexed { index, value -> seen.add(index to value) }
-        assertEquals(listOf(2 to 30, 1 to 20, 0 to 10), seen)
+    fun listIterator_startsAtTheRequestedIndex() {
+        val iterator = intListOf(10, 20, 30).listIterator(3)
+        assertFalse(iterator.hasNext())
+        assertEquals(30, iterator.previousInt())
+        assertEquals(20, iterator.previousInt())
+
+        assertFailsWith<IndexOutOfBoundsException> { intListOf(10, 20, 30).listIterator(4) }
     }
 
     @Test
-    fun foldRight_correctResult() {
-        assertEquals("123", intListOf(1, 2, 3).foldRight("") { element, acc -> "$element$acc" })
-        assertEquals("", intListOf().foldRight("") { element, acc -> "$element$acc" })
-    }
+    fun mutableListIterator_setAndAddWriteThrough() {
+        val list = mutableIntListOf(1, 2, 3)
+        val iterator = list.listIterator()
 
-    @Test
-    fun reduceRight_correctResult() {
-        // accumulated starts at 4, op(4,2)=6, op(6,1)=7
-        assertEquals(7, intListOf(1, 2, 4).reduceRight { acc, element -> acc + element })
-        assertEquals(42, intListOf(42).reduceRight { acc, element -> acc + element })
-        assertFailsWith<NoSuchElementException> { intListOf().reduceRight { acc, element -> acc + element } }
+        assertEquals(1, iterator.nextInt())
+        iterator.set(99)
+        iterator.add(50)
+
+        assertEquals(2, iterator.nextInt())
+        list.assertContents(99, 50, 2, 3)
     }
 
     // ---------- boxed views ----------

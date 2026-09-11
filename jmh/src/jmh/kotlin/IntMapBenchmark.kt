@@ -138,8 +138,8 @@ open class IntMapBenchmark {
     @Benchmark
     fun naiveCopy(state: RandomState): Int2IntHashMap {
         val copy = Int2IntHashMap()
-        state.map.traverse{ key, value ->
-            copy[key] = value
+        for (entry in state.map) {
+            copy[entry.key] = entry.value
         }
         return copy
     }
@@ -169,18 +169,18 @@ open class IntMapBenchmark {
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun iterate(state: RandomState, bh: Blackhole) {
-        for ((key, value) in state.map) {
-            bh.consume(key)
-            bh.consume(value)
+        for (entry in state.map) {
+            bh.consume(entry.key)
+            bh.consume(entry.value)
         }
     }
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun traverse(state: RandomState, bh: Blackhole) {
-        state.map.traverse { key, value ->
-            bh.consume(key)
-            bh.consume(value)
+    fun forEach(state: RandomState, bh: Blackhole) {
+        state.map.forEach { entry ->
+            bh.consume(entry.key)
+            bh.consume(entry.value)
         }
     }
 }

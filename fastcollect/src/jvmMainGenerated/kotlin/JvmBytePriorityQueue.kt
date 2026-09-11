@@ -1,7 +1,7 @@
 /**
- * Methods for dealing with primitive PriorityQueues.
+ * Methods for dealing with BytePriorityQueues.
  */
-@file:JvmName("PriorityQueues")
+@file:JvmName("BytePriorityQueues")
 @file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
@@ -10,6 +10,10 @@ import java.util.AbstractQueue
 import java.util.Queue
 
 public fun AbstractBytePriorityQueue.asQueue(): Queue<Byte> = BytePriorityQueueWrapper(this)
+
+public fun AbstractBytePriorityQueue.forEachWhile(action: BytePredicate) {
+    forEach { if (!action.test(it)) return }
+}
 
 private class BytePriorityQueueWrapper(private val queue: AbstractBytePriorityQueue) : AbstractQueue<Byte>() {
     override val size: Int get() = queue.size

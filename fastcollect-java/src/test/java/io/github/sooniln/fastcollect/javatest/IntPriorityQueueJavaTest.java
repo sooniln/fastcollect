@@ -9,8 +9,7 @@ import io.github.sooniln.fastcollect.AbstractIntPriorityQueue;
 import io.github.sooniln.fastcollect.IntLists;
 import io.github.sooniln.fastcollect.IntPriorityQueue;
 import io.github.sooniln.fastcollect.IntPriorityQueues;
-import io.github.sooniln.fastcollect.IntTraverser;
-import io.github.sooniln.fastcollect.PriorityQueues;
+import kotlin.collections.IntIterator;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
@@ -106,8 +105,6 @@ class IntPriorityQueueJavaTest {
     void iteration() {
         IntPriorityQueue queue = IntPriorityQueues.intPriorityQueueOf(1, 2, 3);
 
-        // NOTE: iterator() is declared to return the relocated kotlin.collections.IntIterator, so it
-        // cannot be named as a fastcollect type here. nextInt() is still callable.
         int sum = 0;
         var iterator = queue.iterator();
         while (iterator.hasNext()) {
@@ -115,11 +112,11 @@ class IntPriorityQueueJavaTest {
         }
         assertEquals(6, sum);
 
-        int traversedSum = 0;
-        for (IntTraverser t = queue.traverser(); t.forward(); ) {
-            traversedSum += t.getValue();
+        int iteratedSum = 0;
+        for (IntIterator it = queue.iterator(); it.hasNext(); ) {
+            iteratedSum += it.nextInt();
         }
-        assertEquals(6, traversedSum);
+        assertEquals(6, iteratedSum);
 
         assertEquals(3, queue.copyInto(new int[3], 0).length);
     }
@@ -142,7 +139,7 @@ class IntPriorityQueueJavaTest {
 
     @Test
     void boxedView() {
-        Queue<Integer> view = PriorityQueues.asQueue(IntPriorityQueues.intPriorityQueueOf(3, 1, 2));
+        Queue<Integer> view = IntPriorityQueues.asQueue(IntPriorityQueues.intPriorityQueueOf(3, 1, 2));
         assertEquals(3, view.size());
         assertEquals(Integer.valueOf(1), view.peek());
     }

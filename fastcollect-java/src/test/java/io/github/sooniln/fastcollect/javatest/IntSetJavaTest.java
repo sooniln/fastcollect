@@ -8,7 +8,7 @@ import io.github.sooniln.fastcollect.IntHashSet;
 import io.github.sooniln.fastcollect.IntLists;
 import io.github.sooniln.fastcollect.IntSet;
 import io.github.sooniln.fastcollect.IntSets;
-import io.github.sooniln.fastcollect.IntTraverser;
+import kotlin.collections.IntIterator;
 import io.github.sooniln.fastcollect.MutableIntIterator;
 import io.github.sooniln.fastcollect.MutableIntSet;
 import java.util.Arrays;
@@ -84,11 +84,11 @@ class IntSetJavaTest {
         }
         assertEquals(6, sum);
 
-        int traversedSum = 0;
-        for (IntTraverser t = set.traverser(); t.forward(); ) {
-            traversedSum += t.getValue();
+        int iteratedSum = 0;
+        for (IntIterator it = set.iterator(); it.hasNext(); ) {
+            iteratedSum += it.nextInt();
         }
-        assertEquals(6, traversedSum);
+        assertEquals(6, iteratedSum);
     }
 
     @Test

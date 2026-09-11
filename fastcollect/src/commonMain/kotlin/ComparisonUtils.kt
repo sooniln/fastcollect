@@ -33,3 +33,12 @@ public infix fun Float.notEqualsRaw(other: Float): Boolean = toRawBits() != othe
 public infix fun Double.notEqualsRaw(other: Double): Boolean = toRawBits() != other.toRawBits()
 
 public infix fun Any?.notEqualsRaw(other: Any?): Boolean = this != other
+
+// allows using isNan() when the type is unknown
+
+@Suppress("UnusedReceiverParameter")
+public fun Byte.isNaN(): Boolean = false
+@Suppress("UnusedReceiverParameter")
+public fun Int.isNaN(): Boolean = false
+@Suppress("UnusedReceiverParameter")
+public fun Long.isNaN(): Boolean = false

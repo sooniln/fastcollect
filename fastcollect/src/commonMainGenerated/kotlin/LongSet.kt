@@ -43,7 +43,7 @@ public infix fun LongSet.intersect(other: LongSet): LongSet {
     if (other.size > size) return other.intersect(this)
 
     val set = LongHashSet(other.size)
-    other.traverse { element ->
+    for (element in other) {
         if (contains(element)) set.add(element)
     }
     return set
@@ -51,7 +51,7 @@ public infix fun LongSet.intersect(other: LongSet): LongSet {
 
 public infix fun LongSet.subtract(other: LongSet): LongSet {
     val set = LongHashSet(size)
-    traverse { element ->
+    for (element in this) {
         if (!other.contains(element)) set.add(element)
     }
     return set
@@ -75,7 +75,7 @@ public abstract class AbstractLongSet : AbstractLongCollection(), LongSet {
 
     override fun hashCode(): Int {
         var hashCode = 0
-        traverse { element ->
+        for (element in this) {
             hashCode += element.hashCode()
         }
         return hashCode
@@ -95,7 +95,6 @@ private object EmptyLongSet : AbstractLongSet() {
     override fun containsAll(elements: LongCollection): Boolean = elements.isEmpty()
 
     override fun iterator(): LongIterator = emptyLongIterator()
-    override fun traverser(): LongTraverser = emptyLongTraverser()
 }
 
 private class SingletonLongSet(private val value: Long) : AbstractLongSet() {
@@ -111,19 +110,6 @@ private class SingletonLongSet(private val value: Long) : AbstractLongSet() {
             if (complete) throw NoSuchElementException()
             complete = true
             return value
-        }
-    }
-
-    override fun traverser(): LongTraverser = object : LongTraverser {
-        private var complete = false
-        override val value: Long get() {
-            check(complete)
-            return this@SingletonLongSet.value
-        }
-        override fun forward(): Boolean {
-            if (complete) return false
-            complete = true
-            return true
         }
     }
 }

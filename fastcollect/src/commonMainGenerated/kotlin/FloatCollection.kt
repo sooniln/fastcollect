@@ -2,19 +2,23 @@
  * Methods for dealing with FloatCollections.
  */
 @file:JvmName("FloatCollections")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmSynthetic
 
 /**
  * A collection of Floats.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public interface FloatCollection : FloatTraversable, Iterable<Float> {
+public interface FloatCollection {
 
     @get:JvmName("size")
     public val size: Int
@@ -23,18 +27,18 @@ public interface FloatCollection : FloatTraversable, Iterable<Float> {
         return size == 0
     }
 
-    override fun iterator(): FloatIterator
+    public operator fun iterator(): FloatIterator
 
     public fun contains(element: Float): Boolean {
-        traverse { e ->
+        for (e in this) {
             if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: FloatCollection): Boolean {
-        elements.traverse { element ->
-            if (!contains(element)) {
+        for (e in elements) {
+            if (!contains(e)) {
                 return false
             }
         }
@@ -52,39 +56,119 @@ public interface FloatCollection : FloatTraversable, Iterable<Float> {
 
     /**
      * Copies all of the elements of this collection into [destination], starting at [destinationOffset], and returns
-     * [destination].
+     * [destination]. Throws [IndexOutOfBoundsException] if the [destination] is not large enough for all elements.
      */
     public fun copyInto(destination: FloatArray, destinationOffset: Int = 0): FloatArray {
         destination.rangeCheck(destinationOffset, destinationOffset + size)
         var index = destinationOffset
-        traverse { element -> destination[index++] = element }
+        for (element in this) {
+            destination[index++] = element
+        }
         return destination
     }
+
+    /**
+     * Returns a new array containing all elements in this collection.
+     */
+    public fun toArray(): FloatArray = copyInto(FloatArray(size))
 }
 
-public fun FloatCollection.toArray(): FloatArray = copyInto(FloatArray(size))
-
 public fun FloatCollection.isNotEmpty(): Boolean = size != 0
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.any(predicate: (Float) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    for (element in this) {
+        if (predicate(element)) return true
+    }
+    return false
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.all(predicate: (Float) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.none(predicate: (Float) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.find(defaultValue: Float, predicate: (Float) -> Boolean): Float {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    for (element in this) {
+        if (predicate(element)) return element
+    }
+    return defaultValue
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> FloatCollection.fold(initial: R, operation: (accumulator: R, Float) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+    var accumulator = initial
+    for (element in this) {
+        accumulator = operation(accumulator, element)
+    }
+    return accumulator
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun FloatCollection.reduce(operation: (accumulator: Float, Float) -> Float): Float {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+    val iterator = this.iterator()
+    var accumulator = iterator.next()
+    while (iterator.hasNext()) {
+        accumulator = operation(accumulator, iterator.next())
+    }
+    return accumulator
+}
+
+@JvmSynthetic
+public fun <A : Appendable> FloatCollection.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", transform: ((Float) -> CharSequence)? = null): A {
+    buffer.append(prefix)
+    var first = true
+    for (element in this) {
+        if (first) first = false else buffer.append(separator)
+        buffer.append(if (transform == null) element.toString() else transform(element))
+    }
+    buffer.append(postfix)
+    return buffer
+}
+
+@JvmOverloads
+public fun FloatCollection.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = ""): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, null).toString()
+}
 
 /**
  * A mutable collection of Floats.
  */
-public interface MutableFloatCollection : FloatCollection, MutableFloatTraversable {
+public interface MutableFloatCollection : FloatCollection {
     override fun iterator(): MutableFloatIterator
 
     public fun add(element: Float): Boolean
     public fun remove(element: Float): Boolean
 
     public fun clear() {
-        val traverser = traverser()
-        while (traverser.forward()) {
-            traverser.remove()
+        val iterator = iterator()
+        while (iterator.hasNext()) {
+            iterator.nextFloat()
+            iterator.remove()
         }
     }
 
     public fun addAll(elements: FloatCollection): Boolean {
         var modified = false
-        elements.traverse { element ->
+        for (element in elements) {
             modified = add(element) or modified
         }
         return modified
@@ -125,15 +209,16 @@ public interface MutableFloatCollection : FloatCollection, MutableFloatTraversab
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-private inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float) -> Boolean): Boolean {
+internal inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val traverser = traverser()
-    while (traverser.forward()) {
-        if (removePredicate(traverser.value)) {
-            traverser.remove()
+    val iterator = iterator()
+    while (iterator.hasNext()) {
+        if (removePredicate(iterator.nextFloat())) {
+            iterator.remove()
             modified = true
         }
     }
@@ -141,7 +226,5 @@ private inline fun MutableFloatCollection.filterInPlace(removePredicate: (Float)
 }
 
 public abstract class AbstractFloatCollection : FloatCollection {
-    override fun toString(): String {
-        return joinToString(", ", "[", "]")
-    }
+    override fun toString(): String = joinToString(", ", "[", "]")
 }

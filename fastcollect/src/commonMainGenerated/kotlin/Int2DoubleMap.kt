@@ -11,6 +11,7 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
@@ -50,7 +51,7 @@ public inline fun  buildInt2DoubleMap(expectedSize: Int = 0, builderAction: Muta
  * cases more easily.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public interface Int2DoubleMap : Int2DoubleTraversable {
+public interface Int2DoubleMap {
 
     @get:JvmName("size")
     public val size: Int
@@ -76,15 +77,15 @@ public interface Int2DoubleMap : Int2DoubleTraversable {
     public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance Double): Double = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
-        traverseKeys { k ->
-            if (k equalsRaw key) return true
+        for (entry in this) {
+            if (entry.key equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance Double): Boolean {
-        traverse { _, v ->
-            if (v equalsRaw value) return true
+        for (entry in this) {
+            if (entry.value equalsRaw value) return true
         }
         return false
     }
@@ -95,6 +96,10 @@ public interface Int2DoubleMap : Int2DoubleTraversable {
     @get:JvmName("values")
     public val values: DoubleCollection
 
+    /**
+     * Returns an iterator over entries in this map. Each returned entry becomes invalid (and may be reused by the
+     * underlying code as soon as [Iterator.next] is invoked. Do not retain references to the entries.
+     */
     public operator fun iterator(): Iterator<Entry>
 
     /** Prefer to always implement this interface via [AbstractEntry] for correct behavior. */
@@ -116,6 +121,25 @@ public interface Int2DoubleMap : Int2DoubleTraversable {
 
 public fun  Int2DoubleMap.isNotEmpty(): Boolean = size != 0
 
+@JvmSynthetic
+
+public fun <A : Appendable> Int2DoubleMap.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", transform: ((Int2DoubleMap.Entry) -> CharSequence)? = null): A {
+
+    buffer.append(prefix)
+    var first = true
+    for (entry in this) {
+        if (first) first = false else buffer.append(separator)
+        buffer.append(if (transform == null) entry.toString() else transform(entry))
+    }
+    buffer.append(postfix)
+    return buffer
+}
+
+@JvmOverloads
+public fun  Int2DoubleMap.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = ""): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, null).toString()
+}
+
 public fun  Int2DoubleMap.asMap(): Map<Int, Double> = Int2DoubleMapWrapper(this)
 
 public fun  Int2DoubleMap.Entry.asEntry(): Map.Entry<Int, Double> = Int2DoubleMapEntryWrapper(this)
@@ -133,7 +157,7 @@ public inline fun  Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double)
 /**
  * A mutable map of Ints to Doubles.
  */
-public interface MutableInt2DoubleMap : Int2DoubleMap, MutableInt2DoubleTraversable {
+public interface MutableInt2DoubleMap : Int2DoubleMap {
 
     public fun put(key: Int, value: Double): Double
 
@@ -164,8 +188,8 @@ public interface MutableInt2DoubleMap : Int2DoubleMap, MutableInt2DoubleTraversa
     public fun clear()
 
     public fun putAll(from: Int2DoubleMap) {
-        from.traverse { key, value ->
-            set(key, value)
+        for (entry in from) {
+            set(entry.key, entry.value)
         }
     }
 
@@ -256,10 +280,10 @@ public abstract class AbstractInt2DoubleMap : Int2DoubleMap {
         if (other is Int2DoubleMap) {
             if (other.size != size) return false
 
-            traverse { key, value ->
-                if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
+            for (entry in this) {
+                val key = entry.key
+                if (!(other.getOrElse(key) { return false } equalsRaw entry.value)) return false
             }
-
             return true
         }
 
@@ -268,8 +292,8 @@ public abstract class AbstractInt2DoubleMap : Int2DoubleMap {
 
     override fun hashCode(): Int {
         var result = 0
-        traverse { key, value ->
-            result += key.hashCode() xor value.hashCode()
+        for (entry in this) {
+            result += entry.key.hashCode() xor entry.value.hashCode()
         }
         return result
     }
@@ -297,7 +321,6 @@ private object EmptyInt2DoubleMap : AbstractInt2DoubleMap() {
     override fun get(key: Int): Double = Double.NaN
     override val values: DoubleCollection get() = emptyDoubleList()
     override fun iterator(): Iterator<Int2DoubleMap.Entry> = emptyList<Int2DoubleMap.Entry>().iterator()
-    override fun traverser(): Int2DoubleTraverser = emptyInt2DoubleTraverser()
 
 }
 
@@ -328,23 +351,6 @@ private class SingletonInt2DoubleMap(
             return SimpleEntry(key, value)
         }
     }
-
-    override fun traverser(): Int2DoubleTraverser = object : Int2DoubleTraverser {
-        private var complete = false
-        override val key: Int get() {
-            check(complete)
-            return this@SingletonInt2DoubleMap.key
-        }
-        override val value: Double get() {
-            check(complete)
-            return this@SingletonInt2DoubleMap.value
-        }
-        override fun forward(): Boolean {
-            if (complete) return false
-            complete = true
-            return true
-        }
-    }
 }
 
 private class Int2DoubleMapWrapper(private val map: Int2DoubleMap) : AbstractMap<Int, Double>() {
@@ -370,7 +376,10 @@ private class Int2DoubleMapWrapper(private val map: Int2DoubleMap) : AbstractMap
         override fun iterator(): Iterator<Map.Entry<Int, Double>> = object : Iterator<Map.Entry<Int, Double>> {
             private val it = map.iterator()
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): Map.Entry<Int, Double> = it.next().asEntry()
+            override fun next(): Map.Entry<Int, Double> {
+                val entry = it.next()
+                return AbstractInt2DoubleMap.SimpleEntry(entry.key, entry.value).asEntry()
+            }
         }
     }
 }
@@ -423,7 +432,19 @@ private class MutableInt2DoubleMapWrapper(private val map: MutableInt2DoubleMap)
             private val it = map.iterator()
 
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): MutableMap.MutableEntry<Int, Double> = it.next().asEntry()
+
+            override fun next(): MutableMap.MutableEntry<Int, Double> {
+                val (entryKey, entryValue) = it.next()
+                return object : MutableInt2DoubleMap.AbstractMutableEntry() {
+                    override val key: Int = entryKey
+                    override var value: Double = entryValue
+                        set(value) {
+                            map.put(key, value)
+                            field = value
+                        }
+                }.asEntry()
+            }
+
             override fun remove() = it.remove()
         }
     }

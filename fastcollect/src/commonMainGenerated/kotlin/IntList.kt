@@ -2,13 +2,16 @@
  * Methods for dealing with IntLists.
  */
 @file:JvmName("IntLists")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmSynthetic
 import kotlin.random.Random
 
@@ -16,11 +19,11 @@ public fun emptyIntList(): IntList = EmptyIntList
 
 public fun intListOf(): IntList = EmptyIntList
 public fun intListOf(element: Int): IntList = SingletonIntList(element)
-public fun intListOf(vararg elements: Int): IntList = IntArrayDeque(elements)
+public fun intListOf(vararg elements: Int): IntList = IntArrayDeque.wrap(elements)
 
 public fun mutableIntListOf(): MutableIntList = IntArrayDeque()
 public fun mutableIntListOf(element: Int): MutableIntList = IntArrayDeque(1).apply { add(element) }
-public fun mutableIntListOf(vararg elements: Int): MutableIntList = IntArrayDeque(elements)
+public fun mutableIntListOf(vararg elements: Int): MutableIntList = IntArrayDeque.wrap(elements)
 
 public fun IntArray.asIntList(): IntList = IntArrayListWrapper(this)
 
@@ -51,60 +54,13 @@ public inline fun MutableIntList(size: Int, init: (index: Int) -> Int): MutableI
     return list
 }
 
-public interface IntListTraversable: IntTraversable {
-    public fun traverser(position: Int): IntListTraverser
-}
-
-public interface MutableIntListTraversable: MutableIntTraversable, IntListTraversable {
-    override fun traverser(position: Int): MutableIntListTraverser
-}
-
-public interface IntListTraverser : IntTraverser, ListTraverser<Int>
-
-public interface MutableIntListTraverser : IntListTraverser, MutableIntTraverser, MutableListTraverser<Int> {
-    override fun set(value: Int)
-    override fun insert(value: Int)
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun IntList.traverseReverse(action: (Int) -> Unit) {
-    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
-
-    val traverser = traverser(size)
-    while (traverser.backward()) {
-        action(traverser.value)
-    }
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun IntListTraversable.traverseIndexed(action: (Int, Int) -> Unit) {
-    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
-
-    val traverser = traverser(0)
-    var index = 0
-    while (traverser.forward()) {
-        action(index++, traverser.value)
-    }
-}
-
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun IntList.traverseReverseIndexed(action: (Int, Int) -> Unit) {
-    contract { callsInPlace(action, InvocationKind.UNKNOWN) }
-
-    val traverser = traverser(size)
-    var index = size
-    while (traverser.backward()) {
-        action(--index, traverser.value)
-    }
-}
-
 /**
- * A list of Ints.
+ * A random-access list of Ints.
  */
-public interface IntList : IntCollection, IntListTraversable {
+public interface IntList : IntCollection, RandomAccess {
+
+    public fun listIterator(): IntListIterator = listIterator(0)
+    public fun listIterator(index: Int): IntListIterator
 
     override fun contains(element: Int): Boolean {
         return indexOf(element) != -1
@@ -117,8 +73,9 @@ public interface IntList : IntCollection, IntListTraversable {
     public fun last(): Int = if (isEmpty()) throw NoSuchElementException() else get(lastIndex)
 
     public fun indexOf(element: Int): Int {
-        traverseIndexed { index, value ->
-            if (value equalsRaw element) {
+        for (index in 0..<size) {
+            val e = get(index)
+            if (e equalsRaw element) {
                 return index
             }
         }
@@ -126,8 +83,9 @@ public interface IntList : IntCollection, IntListTraversable {
     }
 
     public fun lastIndexOf(element: Int): Int {
-        traverseReverseIndexed { index, value ->
-            if (value equalsRaw element) {
+        for (index in (size - 1) downTo 0) {
+            val e = get(index)
+            if (e equalsRaw element) {
                 return index
             }
         }
@@ -142,30 +100,24 @@ public interface IntList : IntCollection, IntListTraversable {
 
     /**
      * Copies the elements of this list in the range [[fromIndex], [toIndex]) into [destination], starting at
-     * [destinationOffset], and returns [destination].
+     * [destinationOffset], and returns [destination]. Throw [IndexOutOfBoundsException] if [destination] does not have
+     * enough room for all elements in the given range.
      */
     public fun copyInto(destination: IntArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): IntArray {
         rangeCheck(fromIndex, toIndex)
         val destinationToIndex = destinationOffset + toIndex - fromIndex
         destination.rangeCheck(destinationOffset, destinationToIndex)
 
-        val traverser = traverser(fromIndex)
-        for (index in destinationOffset..<destinationToIndex) {
-            check(traverser.forward())
-            destination[index] = traverser.value
+        var destinationIndex = destinationOffset
+        var index = fromIndex
+        while (destinationIndex < destinationToIndex) {
+            destination[destinationIndex++] = get(index++)
         }
         return destination
     }
 }
 
-public val IntList.indices: IntRange @JvmSynthetic inline get() = 0..<size
-
 public val IntList.lastIndex: Int @JvmSynthetic inline get() = size - 1
-
-@JvmSynthetic
-public fun IntList.copyInto(destination: IntArray, destinationOffset: Int = 0, fromIndex: Int = 0, toIndex: Int = destination.size): IntArray {
-    return copyInto(destination, destinationOffset, fromIndex, toIndex)
-}
 
 public fun IntList.indexCheck(index: Int): Int {
     if (index !in 0..<size) throw IndexOutOfBoundsException("index=$index, size=$size")
@@ -183,30 +135,51 @@ public fun IntList.rangeCheck(fromIndex: Int, toIndex: Int) {
     if (toIndex > size) throw IndexOutOfBoundsException("toIndex=$toIndex, size=$size")
 }
 
-@JvmSynthetic
-@OptIn(ExperimentalContracts::class)
-public inline fun <R> IntList.foldRight(initial: R, operation: (Int, accumulated: R) -> R): R {
-    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+@JvmOverloads
+public fun IntList.binarySearch(element: Int, fromIndex: Int = 0, toIndex: Int = size): Int {
+    rangeCheck(fromIndex, toIndex)
 
-    var accumulated = initial
-    traverseReverse { value ->
-        accumulated = operation(value, accumulated)
+    var low = fromIndex
+    var high = toIndex - 1
+
+    while (low <= high) {
+        val mid = low + (high - low) / 2
+        val c = element.compareTo(get(mid))
+
+        if (c > 0) {
+            low = mid + 1
+        } else if (c < 0) {
+            high = mid - 1
+        } else {
+            return mid
+        }
     }
-    return accumulated
+    return -(low + 1)
 }
 
 @JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-public inline fun IntList.reduceRight(operation: (Int, accumulated: Int) -> Int) : Int {
+public inline fun <R> IntList.foldRight(initial: R, operation: (accumulator: R, Int) -> R): R {
     contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
-
-    val traverser = traverser(size)
-    if (!traverser.backward()) throw NoSuchElementException()
-    var accumulated = traverser.value
-    while (traverser.backward()) {
-        accumulated = operation(traverser.value, accumulated)
+    var accumulator = initial
+    var index = size - 1
+    while (index >= 0) {
+        accumulator = operation(accumulator, get(index--))
     }
-    return accumulated
+    return accumulator
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun IntList.reduceRight(operation: (accumulator: Int, Int) -> Int): Int {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+    if (isEmpty()) throw NoSuchElementException()
+    var index = size - 1
+    var accumulator = get(index--)
+    while (index >= 0) {
+        accumulator = operation(accumulator, get(index--))
+    }
+    return accumulator
 }
 
 public fun IntList.asList(): List<Int> = IntListWrapper(this)
@@ -214,9 +187,10 @@ public fun IntList.asList(): List<Int> = IntListWrapper(this)
 /**
  * A mutable list of Ints.
  */
-public interface MutableIntList : IntList, MutableIntCollection, MutableIntListTraversable {
+public interface MutableIntList : IntList, MutableIntCollection {
 
-    override fun traverser(position: Int): MutableIntListTraverser
+    override fun listIterator(): MutableIntListIterator = listIterator(0)
+    override fun listIterator(index: Int): MutableIntListIterator
 
     public operator fun set(index: Int, element: Int)
 
@@ -255,7 +229,7 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableIntListT
     override fun clear(): Unit = removeRange(0, size)
 
     override fun addAll(elements: IntCollection): Boolean {
-        elements.traverse { element ->
+        for (element in elements) {
             addLast(element)
         }
         return !elements.isEmpty()
@@ -268,60 +242,39 @@ public interface MutableIntList : IntList, MutableIntCollection, MutableIntListT
         return !elements.isEmpty()
     }
 
-    public fun addAll(index: Int, elements: IntCollection) {
-        var i = indexCheckInclusive(index)
-        elements.traverse { element ->
-            add(i++, element)
-        }
-    }
-
-    public fun addAll(index: Int, elements: Collection<Int>) {
+    public fun addAll(index: Int, elements: IntCollection): Boolean {
         var i = indexCheckInclusive(index)
         for (element in elements) {
             add(i++, element)
         }
+        return !elements.isEmpty()
+    }
+
+    public fun addAll(index: Int, elements: Collection<Int>): Boolean {
+        var i = indexCheckInclusive(index)
+        for (element in elements) {
+            add(i++, element)
+        }
+        return !elements.isEmpty()
     }
 
     public fun sort() {
-        val sorted = copyInto(IntArray(size)).also { it.sort() }
-        if (this is RandomAccess) {
-            for (index in 0..<sorted.size) {
-                set(index, sorted[index])
-            }
-        } else {
-            val traverser = traverser(0)
-            for (element in sorted) {
-                check(traverser.forward())
-                traverser.set(element)
-            }
+        val sorted = toArray().also { it.sort() }
+        for (index in 0..<sorted.size) {
+            set(index, sorted[index])
         }
     }
 
     public fun sortDescending() {
-        val sorted = copyInto(IntArray(size)).also { it.sortDescending() }
-        if (this is RandomAccess) {
-            for (index in 0..<sorted.size) {
-                set(index, sorted[index])
-            }
-        } else {
-            val traverser = traverser(0)
-            for (element in sorted) {
-                check(traverser.forward())
-                traverser.set(element)
-            }
+        val sorted = toArray().also { it.sortDescending() }
+        for (index in 0..<sorted.size) {
+            set(index, sorted[index])
         }
     }
 
     public fun fill(element: Int) {
-        if (this is RandomAccess) {
-            for (index in 0..<size) {
-                set(index, element)
-            }
-        } else {
-            val traverser = traverser(0)
-            while (traverser.forward()) {
-                traverser.set(element)
-            }
+        for (index in 0..<size) {
+            set(index, element)
         }
     }
 
@@ -356,40 +309,26 @@ public fun MutableIntList.asList(): MutableList<Int> = MutableIntListWrapper(thi
 public abstract class AbstractIntList : AbstractIntCollection(), IntList {
 
     override fun iterator(): IntIterator = IteratorImpl()
-    override fun traverser(): IntTraverser = TraverserImpl()
-    override fun traverser(position: Int): IntListTraverser = ListTraverserImpl(position)
+    override fun listIterator(index: Int): IntListIterator = ListIteratorImpl(index)
 
-    override fun subList(fromIndex: Int, toIndex: Int): IntList {
-        return if (this is RandomAccess) {
-            RandomAccessIntSubList(this, fromIndex, toIndex)
-        } else {
-            IntSubList(this, fromIndex, toIndex)
-        }
-    }
+    override fun subList(fromIndex: Int, toIndex: Int): IntList = IntSubList(this, fromIndex, toIndex)
 
     override fun equals(other: Any?): Boolean {
         if (other === this) return true
         if (other !is IntList) return false
         if (size != other.size) return false
 
-        val traverser = traverser()
-        val otherTraverser = other.traverser()
-
-        var hasNext = traverser.forward()
-        var otherHasNext = otherTraverser.forward()
-        while (hasNext && otherHasNext) {
-            if (!(traverser.value equalsRaw otherTraverser.value)) {
+        for (i in 0..<size) {
+            if (this[i] notEqualsRaw other[i]) {
                 return false
             }
-            hasNext = traverser.forward()
-            otherHasNext = otherTraverser.forward()
         }
-        return !hasNext && !otherHasNext
+        return true
     }
 
     override fun hashCode(): Int {
         var hashCode = 1
-        traverse { element ->
+        for (element in this) {
             hashCode = 31 * hashCode + element.hashCode()
         }
         return hashCode
@@ -407,61 +346,41 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
         }
     }
 
-    private inner class TraverserImpl : IntTraverser {
-        private val last = size - 1
-        private var index = -1
-
-        override val value: Int get() {
-            check(index >= 0)
-            return get(index)
-        }
-
-        override fun forward(): Boolean {
-            if (index >= last) return false
-            if (last != size - 1) throw ConcurrentModificationException()
-            ++index
-            return true
-        }
-    }
-
-    private inner class ListTraverserImpl(position: Int) : IntListTraverser {
+    private inner class ListIteratorImpl(private var position: Int) : IntListIterator() {
         init {
             indexCheckInclusive(position)
         }
 
         private val size = this@AbstractIntList.size
-        private var index = position - 1
 
-        override var position: Int = position
-            private set
-        override val value: Int get() {
-            check(index >= 0)
-            return get(index)
-        }
+        override fun hasNext(): Boolean = position < size
 
-        override fun forward(): Boolean {
-            if (position >= size) return false
+        override fun nextInt(): Int {
+            if (position >= size) throw NoSuchElementException()
             if (size != this@AbstractIntList.size) throw ConcurrentModificationException()
-            index = position++
-            return true
+            return get(position++)
         }
 
-        override fun backward(): Boolean {
-            if (position <= 0) return false
+        override fun hasPrevious(): Boolean = position > 0
+
+        override fun previousInt(): Int {
+            if (position <= 0) throw NoSuchElementException()
             if (size != this@AbstractIntList.size) throw ConcurrentModificationException()
-            index = --position
-            return true
+            return get(--position)
         }
+
+        override fun nextIndex(): Int = position
+        override fun previousIndex(): Int = position - 1
     }
 
-    private open class IntSubList(private val list: IntList, fromIndex: Int, toIndex: Int) : AbstractIntList() {
+    private class IntSubList(private val list: IntList, fromIndex: Int, toIndex: Int) : AbstractIntList() {
 
         init {
             list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
-        final override var size = toIndex - fromIndex
+        override var size = toIndex - fromIndex
             protected set
 
         override fun get(index: Int): Int {
@@ -474,33 +393,24 @@ public abstract class AbstractIntList : AbstractIntCollection(), IntList {
             return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
-
-    private class RandomAccessIntSubList(list: IntList, fromIndex: Int, toIndex: Int) : IntSubList(list, fromIndex, toIndex), RandomAccess
 }
 
 public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList {
 
     override fun iterator(): MutableIntIterator = IteratorImpl()
-    override fun traverser(): MutableIntTraverser = ListTraverserImpl(0)
-    override fun traverser(position: Int): MutableIntListTraverser = ListTraverserImpl(position)
+    override fun listIterator(index: Int): MutableIntListIterator = ListIteratorImpl(index)
 
     override fun removeRange(fromIndex: Int, toIndex: Int) {
         rangeCheck(fromIndex, toIndex)
 
-        val traverser = traverser(toIndex)
+        val iterator = listIterator(toIndex)
         repeat(toIndex-fromIndex) { _ ->
-            check(traverser.backward())
-            traverser.remove()
+            iterator.previousInt()
+            iterator.remove()
         }
     }
 
-    override fun subList(fromIndex: Int, toIndex: Int): MutableIntList {
-        return if (this is RandomAccess) {
-            RandomAccessIntSubList(this, fromIndex, toIndex)
-        } else {
-            IntSubList(this, fromIndex, toIndex)
-        }
-    }
+    override fun subList(fromIndex: Int, toIndex: Int): MutableIntList = IntSubList(this, fromIndex, toIndex)
 
     private inner class IteratorImpl: MutableIntIterator() {
         private var size = this@AbstractMutableIntList.size
@@ -522,34 +432,34 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
         }
     }
 
-    private inner class ListTraverserImpl(position: Int) : MutableIntListTraverser {
+    private inner class ListIteratorImpl(private var position: Int) : MutableIntListIterator() {
         init {
             indexCheckInclusive(position)
         }
 
         private var size = this@AbstractMutableIntList.size
-        private var index = position - 1
+        private var index = -1
 
-        override var position: Int = position
-            private set
-        override val value: Int get() {
-            check(index != -1)
+        override fun hasNext(): Boolean = position != size
+
+        override fun nextInt(): Int {
+            if (position == size) throw NoSuchElementException()
+            if (size != this@AbstractMutableIntList.size) throw ConcurrentModificationException()
+            index = position++
             return get(index)
         }
 
-        override fun forward(): Boolean {
-            if (position == size) return false
-            if (size != this@AbstractMutableIntList.size) throw ConcurrentModificationException()
-            index = position++
-            return true
-        }
+        override fun hasPrevious(): Boolean = position != 0
 
-        override fun backward(): Boolean {
-            if (position == 0) return false
+        override fun previousInt(): Int {
+            if (position == 0) throw NoSuchElementException()
             if (size != this@AbstractMutableIntList.size) throw ConcurrentModificationException()
             index = --position
-            return true
+            return get(index)
         }
+
+        override fun nextIndex(): Int = position
+        override fun previousIndex(): Int = position - 1
 
         override fun remove() {
             check(index != -1)
@@ -559,27 +469,27 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
             --size
         }
 
-        override fun set(value: Int) {
+        override fun set(element: Int) {
             check(index != -1)
-            set(index, value)
+            set(index, element)
         }
 
-        override fun insert(value: Int) {
-            add(position, value)
+        override fun add(element: Int) {
+            add(position, element)
             ++position
             index = -1
             ++size
         }
     }
 
-    private open class IntSubList(private val list: MutableIntList, fromIndex: Int, toIndex: Int) : AbstractMutableIntList() {
+    private class IntSubList(private val list: MutableIntList, fromIndex: Int, toIndex: Int) : AbstractMutableIntList() {
 
         init {
             list.rangeCheck(fromIndex, toIndex)
         }
 
         private val offset = fromIndex
-        final override var size = toIndex - fromIndex
+        override var size = toIndex - fromIndex
             private set
 
         override fun set(index: Int, element: Int) {
@@ -607,14 +517,16 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
             size -= toIndex - fromIndex
         }
 
-        override fun addAll(index: Int, elements: IntCollection) {
+        override fun addAll(index: Int, elements: IntCollection): Boolean {
             list.addAll(offset + indexCheckInclusive(index), elements)
             size += elements.size
+            return !elements.isEmpty()
         }
 
-        override fun addAll(index: Int, elements: Collection<Int>) {
+        override fun addAll(index: Int, elements: Collection<Int>): Boolean {
             list.addAll(offset + indexCheckInclusive(index), elements)
             size += elements.size
+            return !elements.isEmpty()
         }
 
         override fun copyInto(destination: IntArray, destinationOffset: Int, fromIndex: Int, toIndex: Int): IntArray {
@@ -622,18 +534,18 @@ public abstract class AbstractMutableIntList : AbstractIntList(), MutableIntList
             return list.copyInto(destination, destinationOffset, fromIndex + offset, toIndex + offset)
         }
     }
-
-    private class RandomAccessIntSubList(list: MutableIntList, fromIndex: Int, toIndex: Int) : IntSubList(list, fromIndex, toIndex), RandomAccess
 }
 
-private object EmptyIntListTraverser : IntListTraverser {
-    override val position: Int get() = 0
-    override val value: Int get() = throw IllegalStateException()
-    override fun forward(): Boolean = false
-    override fun backward(): Boolean = false
+private object EmptyIntListIterator : IntListIterator() {
+    override fun hasNext(): Boolean = false
+    override fun nextInt(): Int = throw NoSuchElementException()
+    override fun hasPrevious(): Boolean = false
+    override fun previousInt(): Int = throw NoSuchElementException()
+    override fun nextIndex(): Int = 0
+    override fun previousIndex(): Int = -1
 }
 
-private object EmptyIntList : AbstractIntList(), RandomAccess {
+private object EmptyIntList : AbstractIntList() {
     override val size: Int get() = 0
 
     override fun isEmpty(): Boolean = true
@@ -646,10 +558,9 @@ private object EmptyIntList : AbstractIntList(), RandomAccess {
     override fun lastIndexOf(element: Int): Int = -1
 
     override fun iterator(): IntIterator = emptyIntIterator()
-    override fun traverser(): IntTraverser = EmptyIntListTraverser
-    override fun traverser(position: Int): IntListTraverser {
-        indexCheckInclusive(position)
-        return EmptyIntListTraverser
+    override fun listIterator(index: Int): IntListIterator {
+        indexCheckInclusive(index)
+        return EmptyIntListIterator
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): IntList {
@@ -658,7 +569,7 @@ private object EmptyIntList : AbstractIntList(), RandomAccess {
     }
 }
 
-private class SingletonIntList(private val value: Int) : AbstractIntList(), RandomAccess {
+private class SingletonIntList(private val value: Int) : AbstractIntList() {
     override val size: Int get() = 1
 
     override fun isEmpty(): Boolean = false
@@ -674,7 +585,7 @@ private class SingletonIntList(private val value: Int) : AbstractIntList(), Rand
     }
 }
 
-private class IntArrayListWrapper(private val array: IntArray): AbstractIntList(), RandomAccess {
+private class IntArrayListWrapper(private val array: IntArray): AbstractIntList() {
     override val size: Int get() = array.size
     override fun get(index: Int): Int = array[index]
 
@@ -684,19 +595,6 @@ private class IntArrayListWrapper(private val array: IntArray): AbstractIntList(
         override fun nextInt(): Int {
             if (index >= array.size) throw NoSuchElementException()
             return array[index++]
-        }
-    }
-
-    override fun traverser(): IntTraverser = object : IntTraverser {
-        private var index = -1
-        override val value: Int get() {
-            check(index >= 0)
-            return array[index]
-        }
-        override fun forward(): Boolean {
-            if (index >= array.lastIndex) return false
-            ++index
-            return true
         }
     }
 
@@ -716,35 +614,13 @@ private class IntListWrapper(private val list: IntList) : AbstractList<Int>() {
     override fun indexOf(element: Int) = list.indexOf(element)
     override fun lastIndexOf(element: Int) = list.lastIndexOf(element)
 
-    override fun iterator(): Iterator<Int> = listIterator()
-    override fun listIterator(): ListIterator<Int> = ListIteratorImpl(0)
-    override fun listIterator(index: Int): ListIterator<Int> = ListIteratorImpl(index)
+    override fun iterator(): Iterator<Int> = IteratorWrapper(list.iterator())
+    override fun listIterator(): ListIterator<Int> = ListIteratorWrapper(list.listIterator())
+    override fun listIterator(index: Int): ListIterator<Int> = ListIteratorWrapper(list.listIterator(index))
 
-    private inner class ListIteratorImpl(position: Int): ListIterator<Int> {
-        private val size = list.size
-        private val traverser = list.traverser(position)
-
-        override fun hasNext(): Boolean {
-            if (list.size != size) throw ConcurrentModificationException()
-            return traverser.position != size
-        }
-        override fun next(): Int {
-            if (!hasNext()) throw NoSuchElementException()
-            traverser.forward()
-            return traverser.value
-        }
-        override fun hasPrevious(): Boolean {
-            if (list.size != size) throw ConcurrentModificationException()
-            return traverser.position != 0
-        }
-        override fun previous(): Int {
-            if (!hasPrevious()) throw NoSuchElementException()
-            traverser.backward()
-            return traverser.value
-        }
-        override fun nextIndex(): Int = traverser.position
-        override fun previousIndex(): Int = traverser.position - 1
-    }
+    // wrappers exist to remove mutable operations from the underlying types
+    private class IteratorWrapper(iterator: Iterator<Int>): Iterator<Int> by iterator
+    private class ListIteratorWrapper(iterator: ListIterator<Int>): ListIterator<Int> by iterator
 }
 
 private class MutableIntListWrapper(private val list: MutableIntList) : AbstractMutableList<Int>() {
@@ -756,9 +632,8 @@ private class MutableIntListWrapper(private val list: MutableIntList) : Abstract
     override fun indexOf(element: Int) = list.indexOf(element)
     override fun lastIndexOf(element: Int) = list.lastIndexOf(element)
 
-    override fun iterator(): MutableIterator<Int> = listIterator()
-    override fun listIterator(): MutableListIterator<Int> = ListIteratorImpl(0)
-    override fun listIterator(index: Int): MutableListIterator<Int> = ListIteratorImpl(index)
+    override fun iterator(): MutableIterator<Int> = list.iterator()
+    override fun listIterator(index: Int): MutableListIterator<Int> = list.listIterator(index)
 
     override fun set(index: Int, element: Int) = list.replace(index, element)
 
@@ -772,39 +647,4 @@ private class MutableIntListWrapper(private val list: MutableIntList) : Abstract
     override fun clear() = list.clear()
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<Int> = list.subList(fromIndex, toIndex).asList()
-
-    private inner class ListIteratorImpl(position: Int): MutableListIterator<Int> {
-        private var size = list.size
-        private val traverser = list.traverser(position)
-
-        override fun hasNext(): Boolean {
-            if (list.size != size) throw ConcurrentModificationException()
-            return traverser.position != size
-        }
-        override fun next(): Int {
-            if (!hasNext()) throw NoSuchElementException()
-            traverser.forward()
-            return traverser.value
-        }
-        override fun hasPrevious(): Boolean {
-            if (list.size != size) throw ConcurrentModificationException()
-            return traverser.position != 0
-        }
-        override fun previous(): Int {
-            if (!hasPrevious()) throw NoSuchElementException()
-            traverser.backward()
-            return traverser.value
-        }
-        override fun nextIndex(): Int = traverser.position
-        override fun previousIndex(): Int = traverser.position - 1
-        override fun remove() {
-            traverser.remove()
-            --size
-        }
-        override fun set(element: Int) = traverser.set(element)
-        override fun add(element: Int) {
-            traverser.insert(element)
-            ++size
-        }
-    }
 }

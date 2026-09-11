@@ -2,12 +2,14 @@
  * Methods for dealing with LongArrayDeques.
  */
 @file:JvmName("LongArrayDeques")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
@@ -25,10 +27,17 @@ public typealias LongArrayList = LongArrayDeque
  * used anywhere a Kotlin list is expected. Using this wrapper may incur boxing penalties.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public class LongArrayDeque private constructor(array: LongArray, size: Int) : AbstractMutableLongList(), RandomAccess {
+public class LongArrayDeque private constructor(array: LongArray, size: Int) : AbstractMutableLongList() {
 
-    private var head: Int = 0
-    private var ring: LongArray = array
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var head: Int = 0
+
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var ring: LongArray = array
 
     @get:JvmName("size")
     override var size: Int = size
@@ -309,7 +318,7 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int) : A
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        elements.traverse { element ->
+        for (element in elements) {
             addLast(element)
         }
         return true
@@ -444,90 +453,51 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int) : A
         return dest
     }
 
-    override fun iterator(): MutableLongIterator {
+    override fun iterator(): MutableLongIterator = IteratorImpl()
+    override fun listIterator(index: Int): MutableLongListIterator = ListIteratorImpl(index)
+
+    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEach(action: (Long) -> Unit) {
+        val ring = ring
         val tail = head + size
-        return if (tail > ring.size) {
-            DiscreteIterator()
-        } else {
-            ContinuousIterator(tail)
-        }
-    }
-
-    override fun traverser(): MutableLongTraverser {
-        val tail = head + size
-        return if (tail > ring.size) {
-            DiscreteTraverser()
-        } else {
-            ContinuousTraverser(tail)
-        }
-    }
-
-    override fun traverser(position: Int): MutableLongListTraverser = ListTraverser(position)
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is LongList) return false
-
-        if (size != other.size) return false
-        if (other is RandomAccess) {
-            for (i in 0..<size) {
-                if (!(ring[ring.position(head, i)] equalsRaw other[i])) return false
+        if (tail > ring.size) {
+            for (i in head..<ring.size) {
+                action(ring[i])
+            }
+            for (i in 0..<(tail - ring.size)) {
+                action(ring[i])
             }
         } else {
-            val it = other.iterator()
-            var i = 0
-            while (it.hasNext()) {
-                if (!(it.nextLong() equalsRaw this[i++])) return false
+            for (i in head..<tail) {
+                action(ring[i])
             }
         }
-        return true
     }
 
-    override fun hashCode(): Int {
-        var hashCode = 1
-        if (!isEmpty()) {
-            var position = head
-            val end = ring.position(head, size)
-            do {
-                hashCode = 31 * hashCode + ring[position].hashCode()
-                position = ring.incrementPosition(position)
-            } while (position != end)
-        }
-        return hashCode
-    }
-
-    private inner class ContinuousIterator(private var tail: Int) : MutableLongIterator() {
-        private val ring = this@LongArrayDeque.ring
-
-        init {
-            check(tail <= ring.size)
-        }
-
-        private var position = head
-        private var previousPosition = -1
-
-        override fun hasNext() = position < tail
-
-        override fun nextLong(): Long {
-            if (!hasNext()) throw NoSuchElementException()
-            if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
-
-            previousPosition = position++
-            return ring[previousPosition]
-        }
-
-        override fun remove() {
-            check(previousPosition >= 0)
-            if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
-
-            val d = removeAtInternal(previousPosition)
-            tail += d
-            position = ring.negativeMod(position + d)
-            previousPosition = -1
+    /** Guaranteed to be as fast or faster than using [listIterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEachReverse(action: (Long) -> Unit) {
+        val ring = ring
+        val tail = head + size
+        if (tail > ring.size) {
+            var i = (tail - ring.size) - 1
+            while (i >= 0) {
+                action(ring[i--])
+            }
+            i = ring.size - 1
+            while (i >= head) {
+                action(ring[i--])
+            }
+        } else {
+            var i = tail - 1
+            while (i >= head) {
+                action(ring[i--])
+            }
         }
     }
 
-    private inner class DiscreteIterator : MutableLongIterator() {
+    private inner class IteratorImpl : MutableLongIterator() {
         private val ring = this@LongArrayDeque.ring
 
         private var remaining = size
@@ -556,136 +526,65 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int) : A
         }
     }
 
-    private inner class ContinuousTraverser(tail: Int) : MutableLongTraverser {
-         private val ring = this@LongArrayDeque.ring
-
-         init {
-             check(tail <= ring.size)
-         }
-
-         private var last = tail - 1
-         private var cursor = head - 1
-         private var position = -1
-
-         override val value: Long get() {
-             check(position >= 0)
-             return ring[position]
-         }
-
-         override fun forward(): Boolean {
-             if (cursor >= last) return false
-             if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
-
-             position = ++cursor
-             return true
-         }
-
-         override fun remove() {
-             check(position >= 0)
-             if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
-
-             val d = removeAtInternal(position)
-             last = ring.negativeMod(last + d)
-             cursor = ring.negativeMod(cursor + d)
-             position = -1
-         }
-     }
-
-     private inner class DiscreteTraverser : MutableLongTraverser {
-         private val ring = this@LongArrayDeque.ring
-
-         private var remaining = size
-         private var cursor = head - 1
-         private var position = -1
-
-         override val value: Long get() {
-             check(position >= 0)
-             return ring[position]
-         }
-
-         override fun forward(): Boolean {
-             if (remaining <= 0) {
-                 return false
-             }
-
-             if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
-             --remaining
-             cursor = ring.incrementPosition(cursor)
-             position = cursor
-             return true
-         }
-
-         override fun remove() {
-             check(position >= 0)
-             if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
-
-             val d = removeAtInternal(position)
-             cursor = ring.negativeMod(cursor + d)
-             position = -1
-         }
-     }
-
-    private inner class ListTraverser(position: Int) : MutableLongListTraverser {
+    private inner class ListIteratorImpl(private var position: Int) : MutableLongListIterator() {
         init {
             indexCheckInclusive(position)
         }
 
-        private var size = this@LongArrayDeque.size
+        private var ring = this@LongArrayDeque.ring
         private var cursor = if (position == 0) head - 1 else ring.position(head, position - 1)
         private var ringPosition = if (position == 0) -1 else cursor
 
-        override var position: Int = position
-            private set
+        override fun hasNext(): Boolean = position < this@LongArrayDeque.size
 
-        override val value: Long get() {
-            check(ringPosition >= 0)
-            return ring[ringPosition]
-        }
-
-        override fun forward(): Boolean {
-            if (position >= size) return false
-            if (size != this@LongArrayDeque.size) throw ConcurrentModificationException()
+        override fun nextLong(): Long {
+            if (position >= this@LongArrayDeque.size) throw NoSuchElementException()
+            if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
 
             cursor = ring.incrementPosition(cursor)
             ringPosition = cursor
             ++position
-            return true
+            return ring[ringPosition]
         }
 
-        override fun backward(): Boolean {
-            if (position <= 0) return false
-            if (size != this@LongArrayDeque.size) throw ConcurrentModificationException()
+        override fun hasPrevious(): Boolean = position > 0
+
+        override fun previousLong(): Long {
+            if (position <= 0) throw NoSuchElementException()
+            if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
 
             ringPosition = cursor
             cursor = ring.decrementPosition(cursor)
             --position
-            return true
+            return ring[ringPosition]
         }
+
+        override fun nextIndex(): Int = position
+        override fun previousIndex(): Int = position - 1
 
         override fun remove() {
             check(ringPosition >= 0)
-            if (size != this@LongArrayDeque.size) throw ConcurrentModificationException()
+            if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
 
             val index = ring.index(head, ringPosition)
             val d = removeAtInternal(ringPosition)
             position = index
             cursor = ring.negativeMod(ringPosition + d)
             ringPosition = -1
-            --size
         }
 
-        override fun set(value: Long) {
+        override fun set(element: Long) {
             check(ringPosition >= 0)
-            if (size != this@LongArrayDeque.size) throw ConcurrentModificationException()
-            ring[ringPosition] = value
+            if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
+            ring[ringPosition] = element
         }
 
-        override fun insert(value: Long) {
-            if (size != this@LongArrayDeque.size) throw ConcurrentModificationException()
-            add(position, value)
+        override fun add(element: Long) {
+            if (ring !== this@LongArrayDeque.ring) throw ConcurrentModificationException()
+            add(position, element)
+            ring = this@LongArrayDeque.ring
             cursor = ring.position(head, position++)
             ringPosition = -1
-            ++size
         }
     }
 
@@ -707,10 +606,11 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int) : A
         }
 
         private fun LongArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
+
+        @JvmSynthetic
+        internal fun wrap(array: LongArray): LongArrayDeque = LongArrayDeque(array, array.size)
     }
 }
 
-
 public fun LongArrayDeque.removeAll(predicate: LongPredicate): Boolean = filterInPlace { predicate.test(it) }
 public fun LongArrayDeque.retainAll(predicate: LongPredicate): Boolean = filterInPlace { !predicate.test(it) }
-

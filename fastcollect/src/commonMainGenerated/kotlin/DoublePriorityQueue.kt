@@ -2,12 +2,14 @@
  * Methods for dealing with DoublePriorityQueues.
  */
 @file:JvmName("DoublePriorityQueues")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmSynthetic
@@ -65,7 +67,10 @@ public abstract class AbstractDoublePriorityQueue(capacity: Int): DoubleCollecti
         require(capacity >= 0)
     }
 
-    private var heap: DoubleArray = if (capacity == 0) EMPTY_ARRAY else DoubleArray(capacity)
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var heap: DoubleArray = if (capacity == 0) EMPTY_ARRAY else DoubleArray(capacity)
 
     @get:JvmName("size")
     final override var size: Int = 0
@@ -191,7 +196,7 @@ public abstract class AbstractDoublePriorityQueue(capacity: Int): DoubleCollecti
 
     public fun addAll(elements: DoubleCollection) {
         ensureCapacity(size + elements.size)
-        elements.traverse { element ->
+        for (element in elements) {
             heap[size] = element
             onIndexChanged(element, size)
             ++size
@@ -270,20 +275,12 @@ public abstract class AbstractDoublePriorityQueue(capacity: Int): DoubleCollecti
         }
     }
 
-    final override fun traverser(): DoubleTraverser = object : DoubleTraverser {
-        private val last = size - 1
-        private var position: Int = -1
-
-        override val value: Double get() {
-            check(position >= 0)
-            return heap[position]
-        }
-
-        override fun forward(): Boolean {
-            if (position >= last) return false
-            if (last != size - 1) throw ConcurrentModificationException()
-            ++position
-            return true
+    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEach(action: (Double) -> Unit) {
+        val heap = heap
+        for (i in 0..<size) {
+            action(heap[i])
         }
     }
 

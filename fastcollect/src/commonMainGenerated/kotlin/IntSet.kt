@@ -43,7 +43,7 @@ public infix fun IntSet.intersect(other: IntSet): IntSet {
     if (other.size > size) return other.intersect(this)
 
     val set = IntHashSet(other.size)
-    other.traverse { element ->
+    for (element in other) {
         if (contains(element)) set.add(element)
     }
     return set
@@ -51,7 +51,7 @@ public infix fun IntSet.intersect(other: IntSet): IntSet {
 
 public infix fun IntSet.subtract(other: IntSet): IntSet {
     val set = IntHashSet(size)
-    traverse { element ->
+    for (element in this) {
         if (!other.contains(element)) set.add(element)
     }
     return set
@@ -75,7 +75,7 @@ public abstract class AbstractIntSet : AbstractIntCollection(), IntSet {
 
     override fun hashCode(): Int {
         var hashCode = 0
-        traverse { element ->
+        for (element in this) {
             hashCode += element.hashCode()
         }
         return hashCode
@@ -95,7 +95,6 @@ private object EmptyIntSet : AbstractIntSet() {
     override fun containsAll(elements: IntCollection): Boolean = elements.isEmpty()
 
     override fun iterator(): IntIterator = emptyIntIterator()
-    override fun traverser(): IntTraverser = emptyIntTraverser()
 }
 
 private class SingletonIntSet(private val value: Int) : AbstractIntSet() {
@@ -111,19 +110,6 @@ private class SingletonIntSet(private val value: Int) : AbstractIntSet() {
             if (complete) throw NoSuchElementException()
             complete = true
             return value
-        }
-    }
-
-    override fun traverser(): IntTraverser = object : IntTraverser {
-        private var complete = false
-        override val value: Int get() {
-            check(complete)
-            return this@SingletonIntSet.value
-        }
-        override fun forward(): Boolean {
-            if (complete) return false
-            complete = true
-            return true
         }
     }
 }

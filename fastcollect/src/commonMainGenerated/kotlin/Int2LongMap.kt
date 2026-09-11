@@ -11,6 +11,7 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
@@ -50,7 +51,7 @@ public inline fun  buildInt2LongMap(expectedSize: Int = 0, builderAction: Mutabl
  * cases more easily.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public interface Int2LongMap : Int2LongTraversable {
+public interface Int2LongMap {
 
     @get:JvmName("size")
     public val size: Int
@@ -76,15 +77,15 @@ public interface Int2LongMap : Int2LongTraversable {
     public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance Long): Long = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
-        traverseKeys { k ->
-            if (k equalsRaw key) return true
+        for (entry in this) {
+            if (entry.key equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance Long): Boolean {
-        traverse { _, v ->
-            if (v equalsRaw value) return true
+        for (entry in this) {
+            if (entry.value equalsRaw value) return true
         }
         return false
     }
@@ -95,6 +96,10 @@ public interface Int2LongMap : Int2LongTraversable {
     @get:JvmName("values")
     public val values: LongCollection
 
+    /**
+     * Returns an iterator over entries in this map. Each returned entry becomes invalid (and may be reused by the
+     * underlying code as soon as [Iterator.next] is invoked. Do not retain references to the entries.
+     */
     public operator fun iterator(): Iterator<Entry>
 
     /** Prefer to always implement this interface via [AbstractEntry] for correct behavior. */
@@ -116,6 +121,25 @@ public interface Int2LongMap : Int2LongTraversable {
 
 public fun  Int2LongMap.isNotEmpty(): Boolean = size != 0
 
+@JvmSynthetic
+
+public fun <A : Appendable> Int2LongMap.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", transform: ((Int2LongMap.Entry) -> CharSequence)? = null): A {
+
+    buffer.append(prefix)
+    var first = true
+    for (entry in this) {
+        if (first) first = false else buffer.append(separator)
+        buffer.append(if (transform == null) entry.toString() else transform(entry))
+    }
+    buffer.append(postfix)
+    return buffer
+}
+
+@JvmOverloads
+public fun  Int2LongMap.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = ""): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, null).toString()
+}
+
 public fun  Int2LongMap.asMap(): Map<Int, Long> = Int2LongMapWrapper(this)
 
 public fun  Int2LongMap.Entry.asEntry(): Map.Entry<Int, Long> = Int2LongMapEntryWrapper(this)
@@ -133,7 +157,7 @@ public inline fun  Int2LongMap.getOrElse(key: Int, defaultValue: () -> Long): Lo
 /**
  * A mutable map of Ints to Longs.
  */
-public interface MutableInt2LongMap : Int2LongMap, MutableInt2LongTraversable {
+public interface MutableInt2LongMap : Int2LongMap {
 
     public fun put(key: Int, value: Long): Long
 
@@ -164,8 +188,8 @@ public interface MutableInt2LongMap : Int2LongMap, MutableInt2LongTraversable {
     public fun clear()
 
     public fun putAll(from: Int2LongMap) {
-        from.traverse { key, value ->
-            set(key, value)
+        for (entry in from) {
+            set(entry.key, entry.value)
         }
     }
 
@@ -256,10 +280,10 @@ public abstract class AbstractInt2LongMap : Int2LongMap {
         if (other is Int2LongMap) {
             if (other.size != size) return false
 
-            traverse { key, value ->
-                if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
+            for (entry in this) {
+                val key = entry.key
+                if (!(other.getOrElse(key) { return false } equalsRaw entry.value)) return false
             }
-
             return true
         }
 
@@ -268,8 +292,8 @@ public abstract class AbstractInt2LongMap : Int2LongMap {
 
     override fun hashCode(): Int {
         var result = 0
-        traverse { key, value ->
-            result += key.hashCode() xor value.hashCode()
+        for (entry in this) {
+            result += entry.key.hashCode() xor entry.value.hashCode()
         }
         return result
     }
@@ -297,7 +321,6 @@ private object EmptyInt2LongMap : AbstractInt2LongMap() {
     override fun get(key: Int): Long = Long.MIN_VALUE
     override val values: LongCollection get() = emptyLongList()
     override fun iterator(): Iterator<Int2LongMap.Entry> = emptyList<Int2LongMap.Entry>().iterator()
-    override fun traverser(): Int2LongTraverser = emptyInt2LongTraverser()
 
 }
 
@@ -328,23 +351,6 @@ private class SingletonInt2LongMap(
             return SimpleEntry(key, value)
         }
     }
-
-    override fun traverser(): Int2LongTraverser = object : Int2LongTraverser {
-        private var complete = false
-        override val key: Int get() {
-            check(complete)
-            return this@SingletonInt2LongMap.key
-        }
-        override val value: Long get() {
-            check(complete)
-            return this@SingletonInt2LongMap.value
-        }
-        override fun forward(): Boolean {
-            if (complete) return false
-            complete = true
-            return true
-        }
-    }
 }
 
 private class Int2LongMapWrapper(private val map: Int2LongMap) : AbstractMap<Int, Long>() {
@@ -370,7 +376,10 @@ private class Int2LongMapWrapper(private val map: Int2LongMap) : AbstractMap<Int
         override fun iterator(): Iterator<Map.Entry<Int, Long>> = object : Iterator<Map.Entry<Int, Long>> {
             private val it = map.iterator()
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): Map.Entry<Int, Long> = it.next().asEntry()
+            override fun next(): Map.Entry<Int, Long> {
+                val entry = it.next()
+                return AbstractInt2LongMap.SimpleEntry(entry.key, entry.value).asEntry()
+            }
         }
     }
 }
@@ -423,7 +432,19 @@ private class MutableInt2LongMapWrapper(private val map: MutableInt2LongMap) : A
             private val it = map.iterator()
 
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): MutableMap.MutableEntry<Int, Long> = it.next().asEntry()
+
+            override fun next(): MutableMap.MutableEntry<Int, Long> {
+                val (entryKey, entryValue) = it.next()
+                return object : MutableInt2LongMap.AbstractMutableEntry() {
+                    override val key: Int = entryKey
+                    override var value: Long = entryValue
+                        set(value) {
+                            map.put(key, value)
+                            field = value
+                        }
+                }.asEntry()
+            }
+
             override fun remove() = it.remove()
         }
     }

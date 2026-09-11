@@ -1,0 +1,11 @@
+/**
+ * Methods for dealing with primitive ${Type}HashSets.
+ */
+@file:JvmName("${Type}HashSets")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
+
+public fun ${Type}HashSet.forEachWhile(action: ${Type}Predicate) {
+    forEach { if (!action.test(it)) return }
+}

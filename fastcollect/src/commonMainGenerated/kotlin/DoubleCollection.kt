@@ -2,19 +2,23 @@
  * Methods for dealing with DoubleCollections.
  */
 @file:JvmName("DoubleCollections")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmSynthetic
 
 /**
  * A collection of Doubles.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public interface DoubleCollection : DoubleTraversable, Iterable<Double> {
+public interface DoubleCollection {
 
     @get:JvmName("size")
     public val size: Int
@@ -23,18 +27,18 @@ public interface DoubleCollection : DoubleTraversable, Iterable<Double> {
         return size == 0
     }
 
-    override fun iterator(): DoubleIterator
+    public operator fun iterator(): DoubleIterator
 
     public fun contains(element: Double): Boolean {
-        traverse { e ->
+        for (e in this) {
             if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: DoubleCollection): Boolean {
-        elements.traverse { element ->
-            if (!contains(element)) {
+        for (e in elements) {
+            if (!contains(e)) {
                 return false
             }
         }
@@ -52,39 +56,119 @@ public interface DoubleCollection : DoubleTraversable, Iterable<Double> {
 
     /**
      * Copies all of the elements of this collection into [destination], starting at [destinationOffset], and returns
-     * [destination].
+     * [destination]. Throws [IndexOutOfBoundsException] if the [destination] is not large enough for all elements.
      */
     public fun copyInto(destination: DoubleArray, destinationOffset: Int = 0): DoubleArray {
         destination.rangeCheck(destinationOffset, destinationOffset + size)
         var index = destinationOffset
-        traverse { element -> destination[index++] = element }
+        for (element in this) {
+            destination[index++] = element
+        }
         return destination
     }
+
+    /**
+     * Returns a new array containing all elements in this collection.
+     */
+    public fun toArray(): DoubleArray = copyInto(DoubleArray(size))
 }
 
-public fun DoubleCollection.toArray(): DoubleArray = copyInto(DoubleArray(size))
-
 public fun DoubleCollection.isNotEmpty(): Boolean = size != 0
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.any(predicate: (Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    for (element in this) {
+        if (predicate(element)) return true
+    }
+    return false
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.all(predicate: (Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.none(predicate: (Double) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.find(defaultValue: Double, predicate: (Double) -> Boolean): Double {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    for (element in this) {
+        if (predicate(element)) return element
+    }
+    return defaultValue
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> DoubleCollection.fold(initial: R, operation: (accumulator: R, Double) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+    var accumulator = initial
+    for (element in this) {
+        accumulator = operation(accumulator, element)
+    }
+    return accumulator
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun DoubleCollection.reduce(operation: (accumulator: Double, Double) -> Double): Double {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+    val iterator = this.iterator()
+    var accumulator = iterator.next()
+    while (iterator.hasNext()) {
+        accumulator = operation(accumulator, iterator.next())
+    }
+    return accumulator
+}
+
+@JvmSynthetic
+public fun <A : Appendable> DoubleCollection.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", transform: ((Double) -> CharSequence)? = null): A {
+    buffer.append(prefix)
+    var first = true
+    for (element in this) {
+        if (first) first = false else buffer.append(separator)
+        buffer.append(if (transform == null) element.toString() else transform(element))
+    }
+    buffer.append(postfix)
+    return buffer
+}
+
+@JvmOverloads
+public fun DoubleCollection.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = ""): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, null).toString()
+}
 
 /**
  * A mutable collection of Doubles.
  */
-public interface MutableDoubleCollection : DoubleCollection, MutableDoubleTraversable {
+public interface MutableDoubleCollection : DoubleCollection {
     override fun iterator(): MutableDoubleIterator
 
     public fun add(element: Double): Boolean
     public fun remove(element: Double): Boolean
 
     public fun clear() {
-        val traverser = traverser()
-        while (traverser.forward()) {
-            traverser.remove()
+        val iterator = iterator()
+        while (iterator.hasNext()) {
+            iterator.nextDouble()
+            iterator.remove()
         }
     }
 
     public fun addAll(elements: DoubleCollection): Boolean {
         var modified = false
-        elements.traverse { element ->
+        for (element in elements) {
             modified = add(element) or modified
         }
         return modified
@@ -125,15 +209,16 @@ public interface MutableDoubleCollection : DoubleCollection, MutableDoubleTraver
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-private inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
+internal inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Double) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val traverser = traverser()
-    while (traverser.forward()) {
-        if (removePredicate(traverser.value)) {
-            traverser.remove()
+    val iterator = iterator()
+    while (iterator.hasNext()) {
+        if (removePredicate(iterator.nextDouble())) {
+            iterator.remove()
             modified = true
         }
     }
@@ -141,7 +226,5 @@ private inline fun MutableDoubleCollection.filterInPlace(removePredicate: (Doubl
 }
 
 public abstract class AbstractDoubleCollection : DoubleCollection {
-    override fun toString(): String {
-        return joinToString(", ", "[", "]")
-    }
+    override fun toString(): String = joinToString(", ", "[", "]")
 }

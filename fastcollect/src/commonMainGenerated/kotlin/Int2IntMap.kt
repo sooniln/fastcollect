@@ -11,6 +11,7 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
@@ -50,7 +51,7 @@ public inline fun  buildInt2IntMap(expectedSize: Int = 0, builderAction: Mutable
  * cases more easily.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public interface Int2IntMap : Int2IntTraversable {
+public interface Int2IntMap {
 
     @get:JvmName("size")
     public val size: Int
@@ -76,15 +77,15 @@ public interface Int2IntMap : Int2IntTraversable {
     public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance Int): Int = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
-        traverseKeys { k ->
-            if (k equalsRaw key) return true
+        for (entry in this) {
+            if (entry.key equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance Int): Boolean {
-        traverse { _, v ->
-            if (v equalsRaw value) return true
+        for (entry in this) {
+            if (entry.value equalsRaw value) return true
         }
         return false
     }
@@ -95,6 +96,10 @@ public interface Int2IntMap : Int2IntTraversable {
     @get:JvmName("values")
     public val values: IntCollection
 
+    /**
+     * Returns an iterator over entries in this map. Each returned entry becomes invalid (and may be reused by the
+     * underlying code as soon as [Iterator.next] is invoked. Do not retain references to the entries.
+     */
     public operator fun iterator(): Iterator<Entry>
 
     /** Prefer to always implement this interface via [AbstractEntry] for correct behavior. */
@@ -116,6 +121,25 @@ public interface Int2IntMap : Int2IntTraversable {
 
 public fun  Int2IntMap.isNotEmpty(): Boolean = size != 0
 
+@JvmSynthetic
+
+public fun <A : Appendable> Int2IntMap.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", transform: ((Int2IntMap.Entry) -> CharSequence)? = null): A {
+
+    buffer.append(prefix)
+    var first = true
+    for (entry in this) {
+        if (first) first = false else buffer.append(separator)
+        buffer.append(if (transform == null) entry.toString() else transform(entry))
+    }
+    buffer.append(postfix)
+    return buffer
+}
+
+@JvmOverloads
+public fun  Int2IntMap.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = ""): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, null).toString()
+}
+
 public fun  Int2IntMap.asMap(): Map<Int, Int> = Int2IntMapWrapper(this)
 
 public fun  Int2IntMap.Entry.asEntry(): Map.Entry<Int, Int> = Int2IntMapEntryWrapper(this)
@@ -133,7 +157,7 @@ public inline fun  Int2IntMap.getOrElse(key: Int, defaultValue: () -> Int): Int 
 /**
  * A mutable map of Ints to Ints.
  */
-public interface MutableInt2IntMap : Int2IntMap, MutableInt2IntTraversable {
+public interface MutableInt2IntMap : Int2IntMap {
 
     public fun put(key: Int, value: Int): Int
 
@@ -164,8 +188,8 @@ public interface MutableInt2IntMap : Int2IntMap, MutableInt2IntTraversable {
     public fun clear()
 
     public fun putAll(from: Int2IntMap) {
-        from.traverse { key, value ->
-            set(key, value)
+        for (entry in from) {
+            set(entry.key, entry.value)
         }
     }
 
@@ -256,10 +280,10 @@ public abstract class AbstractInt2IntMap : Int2IntMap {
         if (other is Int2IntMap) {
             if (other.size != size) return false
 
-            traverse { key, value ->
-                if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
+            for (entry in this) {
+                val key = entry.key
+                if (!(other.getOrElse(key) { return false } equalsRaw entry.value)) return false
             }
-
             return true
         }
 
@@ -268,8 +292,8 @@ public abstract class AbstractInt2IntMap : Int2IntMap {
 
     override fun hashCode(): Int {
         var result = 0
-        traverse { key, value ->
-            result += key.hashCode() xor value.hashCode()
+        for (entry in this) {
+            result += entry.key.hashCode() xor entry.value.hashCode()
         }
         return result
     }
@@ -297,7 +321,6 @@ private object EmptyInt2IntMap : AbstractInt2IntMap() {
     override fun get(key: Int): Int = Int.MIN_VALUE
     override val values: IntCollection get() = emptyIntList()
     override fun iterator(): Iterator<Int2IntMap.Entry> = emptyList<Int2IntMap.Entry>().iterator()
-    override fun traverser(): Int2IntTraverser = emptyInt2IntTraverser()
 
 }
 
@@ -328,23 +351,6 @@ private class SingletonInt2IntMap(
             return SimpleEntry(key, value)
         }
     }
-
-    override fun traverser(): Int2IntTraverser = object : Int2IntTraverser {
-        private var complete = false
-        override val key: Int get() {
-            check(complete)
-            return this@SingletonInt2IntMap.key
-        }
-        override val value: Int get() {
-            check(complete)
-            return this@SingletonInt2IntMap.value
-        }
-        override fun forward(): Boolean {
-            if (complete) return false
-            complete = true
-            return true
-        }
-    }
 }
 
 private class Int2IntMapWrapper(private val map: Int2IntMap) : AbstractMap<Int, Int>() {
@@ -370,7 +376,10 @@ private class Int2IntMapWrapper(private val map: Int2IntMap) : AbstractMap<Int, 
         override fun iterator(): Iterator<Map.Entry<Int, Int>> = object : Iterator<Map.Entry<Int, Int>> {
             private val it = map.iterator()
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): Map.Entry<Int, Int> = it.next().asEntry()
+            override fun next(): Map.Entry<Int, Int> {
+                val entry = it.next()
+                return AbstractInt2IntMap.SimpleEntry(entry.key, entry.value).asEntry()
+            }
         }
     }
 }
@@ -423,7 +432,19 @@ private class MutableInt2IntMapWrapper(private val map: MutableInt2IntMap) : Abs
             private val it = map.iterator()
 
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): MutableMap.MutableEntry<Int, Int> = it.next().asEntry()
+
+            override fun next(): MutableMap.MutableEntry<Int, Int> {
+                val (entryKey, entryValue) = it.next()
+                return object : MutableInt2IntMap.AbstractMutableEntry() {
+                    override val key: Int = entryKey
+                    override var value: Int = entryValue
+                        set(value) {
+                            map.put(key, value)
+                            field = value
+                        }
+                }.asEntry()
+            }
+
             override fun remove() = it.remove()
         }
     }

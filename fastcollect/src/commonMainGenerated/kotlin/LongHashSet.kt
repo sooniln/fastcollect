@@ -1,7 +1,15 @@
+/**
+ * Methods for dealing with primitive LongHashSets.
+ */
+@file:JvmName("LongHashSets")
+@file:JvmMultifileClass
+
 package io.github.sooniln.fastcollect
 
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -15,7 +23,7 @@ import kotlin.random.Random
  * the actual load factor is (capacity - 1)/capacity). For small capacities, this HashSet automatically forces a load
  * factor of 1.0.
  *
- * The extension method [asSet] produces a thin wrapper around this class which exposes it as Kotlin map which can be
+ * The extension method [asSet] produces a thin wrapper around this class which exposes it as Kotlin set which can be
  * used anywhere a Kotlin set is expected. Using this wrapper may incur boxing penalties.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
@@ -26,9 +34,15 @@ public class LongHashSet @JvmOverloads constructor(
     public constructor(elements: LongCollection): this() { addAll(elements) }
     public constructor(elements: Collection<Long>): this() { addAll(elements) }
 
-    private var keysArr = EMPTY_ARRAY
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var keysArr: LongArray = EMPTY_ARRAY
 
-    private var emptyKey = ZERO
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var emptyKey: Long = ZERO
 
     // threshold + size == capacity (rehash once threshold <= 0, if we haven't allocated yet then threshold.inv() is
     // our initial capacity)
@@ -208,7 +222,7 @@ public class LongHashSet @JvmOverloads constructor(
             }
         } else {
             ensureCapacity(max(size + (elements.size / 2), elements.size))
-            elements.traverse { element ->
+            for (element in elements) {
                 add(element)
             }
         }
@@ -319,7 +333,16 @@ public class LongHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableLongIterator = Iterator()
 
-    override fun traverser(): MutableLongTraverser = Traverser()
+    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEach(action: (Long) -> Unit) {
+        val keysArr = keysArr
+        for (i in 0..<keysArr.size) {
+            if (keysArr[i] notEqualsRaw emptyKey) {
+                action(keysArr[i])
+            }
+        }
+    }
 
     private inner class Iterator : MutableLongIterator() {
         private val keysArr = this@LongHashSet.keysArr
@@ -365,45 +388,6 @@ public class LongHashSet @JvmOverloads constructor(
         }
     }
 
-    private inner class Traverser : MutableLongTraverser {
-        private val keysArr = this@LongHashSet.keysArr
-        private val emptyKey = this@LongHashSet.emptyKey
-        private val mask = keysArr.size - 1
-
-        private var slotsLeft = size
-        private var slot = keysArr.size
-        private var key = emptyKey
-
-        override val value: Long get() {
-            check(key notEqualsRaw emptyKey)
-            return key
-        }
-
-        override fun forward(): Boolean {
-            if (slotsLeft <= 0) {
-                return false
-            }
-            if (keysArr !== this@LongHashSet.keysArr) throw ConcurrentModificationException()
-
-            while (true) {
-                slot = (slot - 1) and mask
-                key = keysArr[slot]
-                if (key notEqualsRaw emptyKey) {
-                    --slotsLeft
-                    return true
-                }
-            }
-        }
-
-        override fun remove() {
-            check(key notEqualsRaw emptyKey)
-            if (keysArr !== this@LongHashSet.keysArr) throw ConcurrentModificationException()
-
-            removeSlot(slot)
-            key = emptyKey
-        }
-    }
-
     private fun Long.slot(mask: Int): Int = Hash.mix(this) and mask
     private fun Long.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask
 
@@ -434,3 +418,6 @@ public class LongHashSet @JvmOverloads constructor(
         }
     }
 }
+
+public fun LongHashSet.removeAll(predicate: LongPredicate): Boolean = filterInPlace { predicate.test(it) }
+public fun LongHashSet.retainAll(predicate: LongPredicate): Boolean = filterInPlace { !predicate.test(it) }

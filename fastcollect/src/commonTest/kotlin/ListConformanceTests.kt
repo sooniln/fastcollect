@@ -80,20 +80,21 @@ class ByteListConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableListOf<Byte>()
-        list.traverse { fromForeach.add(it) }
+        for (value in list) fromForeach.add(value)
         assertEquals(expected, fromForeach)
 
-        val fromTraverser = mutableListOf<Byte>()
-        val traverser = list.traverser(0)
-        while (traverser.forward()) fromTraverser.add(traverser.value)
-        assertEquals(expected, fromTraverser)
-        while (traverser.backward()) { }
-        traverser.forward()
-        traverser.set(0.toByte())
+        val fromListIterator = mutableListOf<Byte>()
+        val listIterator = list.listIterator(0)
+        while (listIterator.hasNext()) fromListIterator.add(listIterator.nextByte())
+        assertEquals(expected, fromListIterator)
+        while (listIterator.hasPrevious()) { listIterator.previousByte() }
+        listIterator.nextByte()
+        listIterator.set(0.toByte())
         assertEquals(listOf(0.toByte(), 2.toByte(), 3.toByte()), list.asList())
 
         val fromReverse = mutableListOf<Byte>()
-        list.traverseReverse { fromReverse.add(it) }
+        val reverseIterator = list.listIterator(list.size)
+        while (reverseIterator.hasPrevious()) fromReverse.add(reverseIterator.previousByte())
         assertEquals(list.asList().reversed(), fromReverse)
 
         // equality holds against a different ByteList implementation, not just another deque
@@ -174,20 +175,21 @@ class IntListConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableListOf<Int>()
-        list.traverse { fromForeach.add(it) }
+        for (value in list) fromForeach.add(value)
         assertEquals(expected, fromForeach)
 
-        val fromTraverser = mutableListOf<Int>()
-        val traverser = list.traverser(0)
-        while (traverser.forward()) fromTraverser.add(traverser.value)
-        assertEquals(expected, fromTraverser)
-        while (traverser.backward()) { }
-        traverser.forward()
-        traverser.set(0)
+        val fromListIterator = mutableListOf<Int>()
+        val listIterator = list.listIterator(0)
+        while (listIterator.hasNext()) fromListIterator.add(listIterator.nextInt())
+        assertEquals(expected, fromListIterator)
+        while (listIterator.hasPrevious()) { listIterator.previousInt() }
+        listIterator.nextInt()
+        listIterator.set(0)
         assertEquals(listOf(0, 2, 3), list.asList())
 
         val fromReverse = mutableListOf<Int>()
-        list.traverseReverse { fromReverse.add(it) }
+        val reverseIterator = list.listIterator(list.size)
+        while (reverseIterator.hasPrevious()) fromReverse.add(reverseIterator.previousInt())
         assertEquals(list.asList().reversed(), fromReverse)
 
         // equality holds against a different IntList implementation, not just another deque
@@ -268,20 +270,21 @@ class LongListConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableListOf<Long>()
-        list.traverse { fromForeach.add(it) }
+        for (value in list) fromForeach.add(value)
         assertEquals(expected, fromForeach)
 
-        val fromTraverser = mutableListOf<Long>()
-        val traverser = list.traverser(0)
-        while (traverser.forward()) fromTraverser.add(traverser.value)
-        assertEquals(expected, fromTraverser)
-        while (traverser.backward()) { }
-        traverser.forward()
-        traverser.set(0L)
+        val fromListIterator = mutableListOf<Long>()
+        val listIterator = list.listIterator(0)
+        while (listIterator.hasNext()) fromListIterator.add(listIterator.nextLong())
+        assertEquals(expected, fromListIterator)
+        while (listIterator.hasPrevious()) { listIterator.previousLong() }
+        listIterator.nextLong()
+        listIterator.set(0L)
         assertEquals(listOf(0L, 2L, 3L), list.asList())
 
         val fromReverse = mutableListOf<Long>()
-        list.traverseReverse { fromReverse.add(it) }
+        val reverseIterator = list.listIterator(list.size)
+        while (reverseIterator.hasPrevious()) fromReverse.add(reverseIterator.previousLong())
         assertEquals(list.asList().reversed(), fromReverse)
 
         // equality holds against a different LongList implementation, not just another deque
@@ -362,20 +365,21 @@ class FloatListConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableListOf<Float>()
-        list.traverse { fromForeach.add(it) }
+        for (value in list) fromForeach.add(value)
         assertEquals(expected, fromForeach)
 
-        val fromTraverser = mutableListOf<Float>()
-        val traverser = list.traverser(0)
-        while (traverser.forward()) fromTraverser.add(traverser.value)
-        assertEquals(expected, fromTraverser)
-        while (traverser.backward()) { }
-        traverser.forward()
-        traverser.set(0f)
+        val fromListIterator = mutableListOf<Float>()
+        val listIterator = list.listIterator(0)
+        while (listIterator.hasNext()) fromListIterator.add(listIterator.nextFloat())
+        assertEquals(expected, fromListIterator)
+        while (listIterator.hasPrevious()) { listIterator.previousFloat() }
+        listIterator.nextFloat()
+        listIterator.set(0f)
         assertEquals(listOf(0f, 2f, 3f), list.asList())
 
         val fromReverse = mutableListOf<Float>()
-        list.traverseReverse { fromReverse.add(it) }
+        val reverseIterator = list.listIterator(list.size)
+        while (reverseIterator.hasPrevious()) fromReverse.add(reverseIterator.previousFloat())
         assertEquals(list.asList().reversed(), fromReverse)
 
         // equality holds against a different FloatList implementation, not just another deque
@@ -456,20 +460,21 @@ class DoubleListConformanceTest {
         assertEquals(expected, fromIterator)
 
         val fromForeach = mutableListOf<Double>()
-        list.traverse { fromForeach.add(it) }
+        for (value in list) fromForeach.add(value)
         assertEquals(expected, fromForeach)
 
-        val fromTraverser = mutableListOf<Double>()
-        val traverser = list.traverser(0)
-        while (traverser.forward()) fromTraverser.add(traverser.value)
-        assertEquals(expected, fromTraverser)
-        while (traverser.backward()) { }
-        traverser.forward()
-        traverser.set(0.0)
+        val fromListIterator = mutableListOf<Double>()
+        val listIterator = list.listIterator(0)
+        while (listIterator.hasNext()) fromListIterator.add(listIterator.nextDouble())
+        assertEquals(expected, fromListIterator)
+        while (listIterator.hasPrevious()) { listIterator.previousDouble() }
+        listIterator.nextDouble()
+        listIterator.set(0.0)
         assertEquals(listOf(0.0, 2.0, 3.0), list.asList())
 
         val fromReverse = mutableListOf<Double>()
-        list.traverseReverse { fromReverse.add(it) }
+        val reverseIterator = list.listIterator(list.size)
+        while (reverseIterator.hasPrevious()) fromReverse.add(reverseIterator.previousDouble())
         assertEquals(list.asList().reversed(), fromReverse)
 
         // equality holds against a different DoubleList implementation, not just another deque

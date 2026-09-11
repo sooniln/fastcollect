@@ -10,11 +10,10 @@ import io.github.sooniln.fastcollect.Int2AnyHashMap;
 import io.github.sooniln.fastcollect.Int2IntHashMap;
 import io.github.sooniln.fastcollect.Int2IntMap;
 import io.github.sooniln.fastcollect.Int2IntMaps;
-import io.github.sooniln.fastcollect.Int2IntTraverser;
+import java.util.Iterator;
 import io.github.sooniln.fastcollect.MutableInt2IntMap;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
@@ -117,11 +116,11 @@ class Int2IntMapJavaTest {
         assertEquals(30, valueSum);
         assertEquals(11, map.get(1));
 
-        int traversedKeys = 0;
-        for (Int2IntTraverser t = map.traverser(); t.forward(); ) {
-            traversedKeys += t.getKey();
+        int iteratedKeys = 0;
+        for (Iterator<? extends Int2IntMap.Entry> it = map.iterator(); it.hasNext(); ) {
+            iteratedKeys += it.next().getKey();
         }
-        assertEquals(3, traversedKeys);
+        assertEquals(3, iteratedKeys);
     }
 
     @Test

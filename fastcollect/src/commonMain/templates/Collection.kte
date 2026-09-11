@@ -2,19 +2,23 @@
  * Methods for dealing with ${Type}Collections.
  */
 @file:JvmName("${Type}Collections")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmSynthetic
 
 /**
  * A collection of ${Type}s.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public interface ${Type}Collection : ${Type}Traversable, Iterable<$Type> {
+public interface ${Type}Collection {
 
     @get:JvmName("size")
     public val size: Int
@@ -23,18 +27,18 @@ public interface ${Type}Collection : ${Type}Traversable, Iterable<$Type> {
         return size == 0
     }
 
-    override fun iterator(): ${Type}Iterator
+    public operator fun iterator(): ${Type}Iterator
 
     public fun contains(element: ${Type}): Boolean {
-        traverse { e ->
+        for (e in this) {
             if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: ${Type}Collection): Boolean {
-        elements.traverse { element ->
-            if (!contains(element)) {
+        for (e in elements) {
+            if (!contains(e)) {
                 return false
             }
         }
@@ -52,39 +56,119 @@ public interface ${Type}Collection : ${Type}Traversable, Iterable<$Type> {
 
     /**
      * Copies all of the elements of this collection into [destination], starting at [destinationOffset], and returns
-     * [destination].
+     * [destination]. Throws [IndexOutOfBoundsException] if the [destination] is not large enough for all elements.
      */
     public fun copyInto(destination: ${Type}Array, destinationOffset: Int = 0): ${Type}Array {
         destination.rangeCheck(destinationOffset, destinationOffset + size)
         var index = destinationOffset
-        traverse { element -> destination[index++] = element }
+        for (element in this) {
+            destination[index++] = element
+        }
         return destination
     }
+
+    /**
+     * Returns a new array containing all elements in this collection.
+     */
+    public fun toArray(): ${Type}Array = copyInto(${Type}Array(size))
 }
 
-public fun ${Type}Collection.toArray(): ${Type}Array = copyInto(${Type}Array(size))
-
 public fun ${Type}Collection.isNotEmpty(): Boolean = size != 0
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Collection.any(predicate: (${Type}) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    for (element in this) {
+        if (predicate(element)) return true
+    }
+    return false
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Collection.all(predicate: (${Type}) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Collection.none(predicate: (${Type}) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Collection.find(defaultValue: ${Type}, predicate: (${Type}) -> Boolean): ${Type} {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    for (element in this) {
+        if (predicate(element)) return element
+    }
+    return defaultValue
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> ${Type}Collection.fold(initial: R, operation: (accumulator: R, ${Type}) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+    var accumulator = initial
+    for (element in this) {
+        accumulator = operation(accumulator, element)
+    }
+    return accumulator
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun ${Type}Collection.reduce(operation: (accumulator: ${Type}, ${Type}) -> ${Type}): ${Type} {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+    val iterator = this.iterator()
+    var accumulator = iterator.next()
+    while (iterator.hasNext()) {
+        accumulator = operation(accumulator, iterator.next())
+    }
+    return accumulator
+}
+
+@JvmSynthetic
+public fun <A : Appendable> ${Type}Collection.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", transform: ((${Type}) -> CharSequence)? = null): A {
+    buffer.append(prefix)
+    var first = true
+    for (element in this) {
+        if (first) first = false else buffer.append(separator)
+        buffer.append(if (transform == null) element.toString() else transform(element))
+    }
+    buffer.append(postfix)
+    return buffer
+}
+
+@JvmOverloads
+public fun ${Type}Collection.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = ""): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, null).toString()
+}
 
 /**
  * A mutable collection of ${Type}s.
  */
-public interface Mutable${Type}Collection : ${Type}Collection, Mutable${Type}Traversable {
+public interface Mutable${Type}Collection : ${Type}Collection {
     override fun iterator(): Mutable${Type}Iterator
 
     public fun add(element: ${Type}): Boolean
     public fun remove(element: ${Type}): Boolean
 
     public fun clear() {
-        val traverser = traverser()
-        while (traverser.forward()) {
-            traverser.remove()
+        val iterator = iterator()
+        while (iterator.hasNext()) {
+            iterator.next${Type}()
+            iterator.remove()
         }
     }
 
     public fun addAll(elements: ${Type}Collection): Boolean {
         var modified = false
-        elements.traverse { element ->
+        for (element in elements) {
             modified = add(element) or modified
         }
         return modified
@@ -125,15 +209,16 @@ public interface Mutable${Type}Collection : ${Type}Collection, Mutable${Type}Tra
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-private inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${Type}) -> Boolean): Boolean {
+internal inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${Type}) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val traverser = traverser()
-    while (traverser.forward()) {
-        if (removePredicate(traverser.value)) {
-            traverser.remove()
+    val iterator = iterator()
+    while (iterator.hasNext()) {
+        if (removePredicate(iterator.next${Type}())) {
+            iterator.remove()
             modified = true
         }
     }
@@ -141,7 +226,5 @@ private inline fun Mutable${Type}Collection.filterInPlace(removePredicate: (${Ty
 }
 
 public abstract class Abstract${Type}Collection : ${Type}Collection {
-    override fun toString(): String {
-        return joinToString(", ", "[", "]")
-    }
+    override fun toString(): String = joinToString(", ", "[", "]")
 }

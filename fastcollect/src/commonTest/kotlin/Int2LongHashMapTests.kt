@@ -254,7 +254,7 @@ class Int2LongHashMapTests {
     // ---------- iteration ----------
 
     @Test
-    fun traverse_matchesIterator() {
+    fun iterator_visitsEveryEntry() {
         val map = Int2LongHashMap()
         for (i in 1..50) map[i] = i.toLong() + 1000
         map[0] = 9999L
@@ -266,21 +266,19 @@ class Int2LongHashMapTests {
             fromIterator[entry.key] = entry.value
         }
 
-        val fromForeach = mutableMapOf<Int, Long>()
-        map.traverse { k, v -> fromForeach[k] = v }
-
-        assertEquals(fromIterator, fromForeach)
-        assertEquals(51, fromForeach.size)
+        assertEquals(51, fromIterator.size)
+        assertEquals(9999L, fromIterator[0])
+        for (i in 1..50) assertEquals(i.toLong() + 1000, fromIterator[i])
     }
 
     @Test
-    fun traverse_emptyAndSingletonMap_matchesIterator() {
+    fun iterator_emptyAndSingletonMap() {
         val fromEmpty = mutableListOf<Pair<Int, Long>>()
-        Int2LongHashMap().traverse { k, v -> fromEmpty.add(k to v) }
+        for (entry in Int2LongHashMap()) fromEmpty.add(entry.key to entry.value)
         assertEquals(emptyList(), fromEmpty)
 
         val fromSingleton = mutableListOf<Pair<Int, Long>>()
-        Int2LongHashMap().apply { set(1, 42L) }.traverse { k, v -> fromSingleton.add(k to v) }
+        for (entry in Int2LongHashMap().apply { set(1, 42L) }) fromSingleton.add(entry.key to entry.value)
         assertEquals(listOf(1 to 42L), fromSingleton)
     }
 
@@ -327,16 +325,16 @@ class Int2LongHashMapTests {
     }
 
     @Test
-    fun traverseRemove_visitsEveryEntryExactlyOnceAndRemovesMatching() {
+    fun iteratorRemove_visitsEveryEntryExactlyOnceAndRemovesMatching() {
         val map = Int2LongHashMap()
         for (i in 1..50) map[i] = i.toLong() + 1000
 
         val visited = mutableListOf<Int>()
-        val traverser = map.traverser()
-        while (traverser.forward()) {
-            val key = traverser.key
+        val iterator = map.iterator()
+        while (iterator.hasNext()) {
+            val key = iterator.next().key
             visited.add(key)
-            if (key % 2 == 0) traverser.remove()
+            if (key % 2 == 0) iterator.remove()
         }
 
         assertEquals((1..50).toList(), visited.sorted(), "every entry must be visited exactly once")
@@ -346,37 +344,42 @@ class Int2LongHashMapTests {
     }
 
     @Test
-    fun traverserSetValue_writesThroughToTheMap() {
+    fun entrySetValue_writesThroughToTheMap() {
         val map = Int2LongHashMap()
         for (i in 1..20) map[i] = i.toLong()
 
-        val traverser = map.traverser()
-        while (traverser.forward()) traverser.value = traverser.value * 10
+        for (entry in map) {
+            entry.value = entry.value * 10
+        }
 
         for (i in 1..20) assertEquals(i.toLong() * 10, map[i])
     }
 
     @Test
-    fun traverser_keyAndValueBeforeFirstForward_throw() {
-        val traverser = Int2LongHashMap().apply { set(1, 10L) }.traverser()
-        assertFailsWith<IllegalStateException> { traverser.key }
-        assertFailsWith<IllegalStateException> { traverser.value }
-        assertTrue(traverser.forward())
-        assertEquals(1, traverser.key)
-        assertEquals(10L, traverser.value)
-        assertFalse(traverser.forward())
+    fun iterator_reusesASingleEntryInstance() {
+        // map iterators are documented to reuse one entry, repositioned on each next(), so that iteration does not
+        // allocate - the entry must therefore track the iterator rather than snapshot a position
+        val map = Int2LongHashMap().apply { set(1, 10L); set(2, 20L) }
+        val iterator = map.iterator()
+
+        val first = iterator.next()
+        val firstKey = first.key
+        val second = iterator.next()
+
+        assertSame(first, second)
+        assertNotEquals(firstKey, second.key, "the shared entry must have moved on to the next mapping")
     }
 
     @Test
-    fun traverser_afterRemove_keyAndValueThrowUntilTheNextForward() {
+    fun entry_afterRemove_keyAndValueThrowUntilTheNextAdvance() {
         val map = Int2LongHashMap().apply { set(1, 10L); set(2, 20L) }
-        val traverser = map.traverser()
-        assertTrue(traverser.forward())
-        traverser.remove()
-        assertFailsWith<IllegalStateException> { traverser.key }
-        assertFailsWith<IllegalStateException> { traverser.value }
-        assertTrue(traverser.forward())
-        traverser.key
+        val iterator = map.iterator()
+        val entry = iterator.next()
+        iterator.remove()
+        assertFailsWith<IllegalStateException> { entry.key }
+        assertFailsWith<IllegalStateException> { entry.value }
+        assertTrue(iterator.hasNext())
+        iterator.next().key
     }
 
     // ---------- equality ----------

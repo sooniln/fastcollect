@@ -14,6 +14,16 @@ public fun intIteratorOf(value: Int): IntIterator = SingletonIntIterator(value)
 
 public abstract class MutableIntIterator : IntIterator(), MutableIterator<Int>
 
+public abstract class IntListIterator : IntIterator(), ListIterator<Int> {
+    public abstract fun previousInt(): Int
+    final override fun previous(): Int = previousInt()
+}
+
+public abstract class MutableIntListIterator : IntListIterator(), MutableListIterator<Int> {
+    abstract override fun set(element: Int)
+    abstract override fun add(element: Int)
+}
+
 private object EmptyIntIterator : MutableIntIterator() {
     override fun hasNext(): Boolean = false
     override fun nextInt(): Int = throw NoSuchElementException()

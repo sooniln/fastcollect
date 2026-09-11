@@ -2,12 +2,14 @@
  * Methods for dealing with DoubleArrayDeques.
  */
 @file:JvmName("DoubleArrayDeques")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
@@ -25,10 +27,17 @@ public typealias DoubleArrayList = DoubleArrayDeque
  * used anywhere a Kotlin list is expected. Using this wrapper may incur boxing penalties.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int) : AbstractMutableDoubleList(), RandomAccess {
+public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int) : AbstractMutableDoubleList() {
 
-    private var head: Int = 0
-    private var ring: DoubleArray = array
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var head: Int = 0
+
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var ring: DoubleArray = array
 
     @get:JvmName("size")
     override var size: Int = size
@@ -309,7 +318,7 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int)
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        elements.traverse { element ->
+        for (element in elements) {
             addLast(element)
         }
         return true
@@ -444,90 +453,51 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int)
         return dest
     }
 
-    override fun iterator(): MutableDoubleIterator {
+    override fun iterator(): MutableDoubleIterator = IteratorImpl()
+    override fun listIterator(index: Int): MutableDoubleListIterator = ListIteratorImpl(index)
+
+    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEach(action: (Double) -> Unit) {
+        val ring = ring
         val tail = head + size
-        return if (tail > ring.size) {
-            DiscreteIterator()
-        } else {
-            ContinuousIterator(tail)
-        }
-    }
-
-    override fun traverser(): MutableDoubleTraverser {
-        val tail = head + size
-        return if (tail > ring.size) {
-            DiscreteTraverser()
-        } else {
-            ContinuousTraverser(tail)
-        }
-    }
-
-    override fun traverser(position: Int): MutableDoubleListTraverser = ListTraverser(position)
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is DoubleList) return false
-
-        if (size != other.size) return false
-        if (other is RandomAccess) {
-            for (i in 0..<size) {
-                if (!(ring[ring.position(head, i)] equalsRaw other[i])) return false
+        if (tail > ring.size) {
+            for (i in head..<ring.size) {
+                action(ring[i])
+            }
+            for (i in 0..<(tail - ring.size)) {
+                action(ring[i])
             }
         } else {
-            val it = other.iterator()
-            var i = 0
-            while (it.hasNext()) {
-                if (!(it.nextDouble() equalsRaw this[i++])) return false
+            for (i in head..<tail) {
+                action(ring[i])
             }
         }
-        return true
     }
 
-    override fun hashCode(): Int {
-        var hashCode = 1
-        if (!isEmpty()) {
-            var position = head
-            val end = ring.position(head, size)
-            do {
-                hashCode = 31 * hashCode + ring[position].hashCode()
-                position = ring.incrementPosition(position)
-            } while (position != end)
-        }
-        return hashCode
-    }
-
-    private inner class ContinuousIterator(private var tail: Int) : MutableDoubleIterator() {
-        private val ring = this@DoubleArrayDeque.ring
-
-        init {
-            check(tail <= ring.size)
-        }
-
-        private var position = head
-        private var previousPosition = -1
-
-        override fun hasNext() = position < tail
-
-        override fun nextDouble(): Double {
-            if (!hasNext()) throw NoSuchElementException()
-            if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
-
-            previousPosition = position++
-            return ring[previousPosition]
-        }
-
-        override fun remove() {
-            check(previousPosition >= 0)
-            if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
-
-            val d = removeAtInternal(previousPosition)
-            tail += d
-            position = ring.negativeMod(position + d)
-            previousPosition = -1
+    /** Guaranteed to be as fast or faster than using [listIterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEachReverse(action: (Double) -> Unit) {
+        val ring = ring
+        val tail = head + size
+        if (tail > ring.size) {
+            var i = (tail - ring.size) - 1
+            while (i >= 0) {
+                action(ring[i--])
+            }
+            i = ring.size - 1
+            while (i >= head) {
+                action(ring[i--])
+            }
+        } else {
+            var i = tail - 1
+            while (i >= head) {
+                action(ring[i--])
+            }
         }
     }
 
-    private inner class DiscreteIterator : MutableDoubleIterator() {
+    private inner class IteratorImpl : MutableDoubleIterator() {
         private val ring = this@DoubleArrayDeque.ring
 
         private var remaining = size
@@ -556,136 +526,65 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int)
         }
     }
 
-    private inner class ContinuousTraverser(tail: Int) : MutableDoubleTraverser {
-         private val ring = this@DoubleArrayDeque.ring
-
-         init {
-             check(tail <= ring.size)
-         }
-
-         private var last = tail - 1
-         private var cursor = head - 1
-         private var position = -1
-
-         override val value: Double get() {
-             check(position >= 0)
-             return ring[position]
-         }
-
-         override fun forward(): Boolean {
-             if (cursor >= last) return false
-             if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
-
-             position = ++cursor
-             return true
-         }
-
-         override fun remove() {
-             check(position >= 0)
-             if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
-
-             val d = removeAtInternal(position)
-             last = ring.negativeMod(last + d)
-             cursor = ring.negativeMod(cursor + d)
-             position = -1
-         }
-     }
-
-     private inner class DiscreteTraverser : MutableDoubleTraverser {
-         private val ring = this@DoubleArrayDeque.ring
-
-         private var remaining = size
-         private var cursor = head - 1
-         private var position = -1
-
-         override val value: Double get() {
-             check(position >= 0)
-             return ring[position]
-         }
-
-         override fun forward(): Boolean {
-             if (remaining <= 0) {
-                 return false
-             }
-
-             if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
-             --remaining
-             cursor = ring.incrementPosition(cursor)
-             position = cursor
-             return true
-         }
-
-         override fun remove() {
-             check(position >= 0)
-             if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
-
-             val d = removeAtInternal(position)
-             cursor = ring.negativeMod(cursor + d)
-             position = -1
-         }
-     }
-
-    private inner class ListTraverser(position: Int) : MutableDoubleListTraverser {
+    private inner class ListIteratorImpl(private var position: Int) : MutableDoubleListIterator() {
         init {
             indexCheckInclusive(position)
         }
 
-        private var size = this@DoubleArrayDeque.size
+        private var ring = this@DoubleArrayDeque.ring
         private var cursor = if (position == 0) head - 1 else ring.position(head, position - 1)
         private var ringPosition = if (position == 0) -1 else cursor
 
-        override var position: Int = position
-            private set
+        override fun hasNext(): Boolean = position < this@DoubleArrayDeque.size
 
-        override val value: Double get() {
-            check(ringPosition >= 0)
-            return ring[ringPosition]
-        }
-
-        override fun forward(): Boolean {
-            if (position >= size) return false
-            if (size != this@DoubleArrayDeque.size) throw ConcurrentModificationException()
+        override fun nextDouble(): Double {
+            if (position >= this@DoubleArrayDeque.size) throw NoSuchElementException()
+            if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
 
             cursor = ring.incrementPosition(cursor)
             ringPosition = cursor
             ++position
-            return true
+            return ring[ringPosition]
         }
 
-        override fun backward(): Boolean {
-            if (position <= 0) return false
-            if (size != this@DoubleArrayDeque.size) throw ConcurrentModificationException()
+        override fun hasPrevious(): Boolean = position > 0
+
+        override fun previousDouble(): Double {
+            if (position <= 0) throw NoSuchElementException()
+            if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
 
             ringPosition = cursor
             cursor = ring.decrementPosition(cursor)
             --position
-            return true
+            return ring[ringPosition]
         }
+
+        override fun nextIndex(): Int = position
+        override fun previousIndex(): Int = position - 1
 
         override fun remove() {
             check(ringPosition >= 0)
-            if (size != this@DoubleArrayDeque.size) throw ConcurrentModificationException()
+            if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
 
             val index = ring.index(head, ringPosition)
             val d = removeAtInternal(ringPosition)
             position = index
             cursor = ring.negativeMod(ringPosition + d)
             ringPosition = -1
-            --size
         }
 
-        override fun set(value: Double) {
+        override fun set(element: Double) {
             check(ringPosition >= 0)
-            if (size != this@DoubleArrayDeque.size) throw ConcurrentModificationException()
-            ring[ringPosition] = value
+            if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
+            ring[ringPosition] = element
         }
 
-        override fun insert(value: Double) {
-            if (size != this@DoubleArrayDeque.size) throw ConcurrentModificationException()
-            add(position, value)
+        override fun add(element: Double) {
+            if (ring !== this@DoubleArrayDeque.ring) throw ConcurrentModificationException()
+            add(position, element)
+            ring = this@DoubleArrayDeque.ring
             cursor = ring.position(head, position++)
             ringPosition = -1
-            ++size
         }
     }
 
@@ -707,10 +606,11 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int)
         }
 
         private fun DoubleArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
+
+        @JvmSynthetic
+        internal fun wrap(array: DoubleArray): DoubleArrayDeque = DoubleArrayDeque(array, array.size)
     }
 }
 
-
 public fun DoubleArrayDeque.removeAll(predicate: DoublePredicate): Boolean = filterInPlace { predicate.test(it) }
 public fun DoubleArrayDeque.retainAll(predicate: DoublePredicate): Boolean = filterInPlace { !predicate.test(it) }
-

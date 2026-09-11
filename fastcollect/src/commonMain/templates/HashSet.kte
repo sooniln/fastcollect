@@ -1,7 +1,15 @@
+/**
+ * Methods for dealing with primitive ${Type}HashSets.
+ */
+@file:JvmName("${Type}HashSets")
+@file:JvmMultifileClass
+
 package io.github.sooniln.fastcollect
 
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -15,7 +23,7 @@ import kotlin.random.Random
  * the actual load factor is (capacity - 1)/capacity). For small capacities, this HashSet automatically forces a load
  * factor of 1.0.
  *
- * The extension method [asSet] produces a thin wrapper around this class which exposes it as Kotlin map which can be
+ * The extension method [asSet] produces a thin wrapper around this class which exposes it as Kotlin set which can be
  * used anywhere a Kotlin set is expected. Using this wrapper may incur boxing penalties.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
@@ -26,9 +34,15 @@ public class ${Type}HashSet @JvmOverloads constructor(
     public constructor(elements: ${Type}Collection): this() { addAll(elements) }
     public constructor(elements: Collection<${Type}>): this() { addAll(elements) }
 
-    private var keysArr = EMPTY_ARRAY
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var keysArr: ${Type}Array = EMPTY_ARRAY
 
-    private var emptyKey = ZERO
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var emptyKey: ${Type} = ZERO
 
     // threshold + size == capacity (rehash once threshold <= 0, if we haven't allocated yet then threshold.inv() is
     // our initial capacity)
@@ -208,7 +222,7 @@ public class ${Type}HashSet @JvmOverloads constructor(
             }
         } else {
             ensureCapacity(max(size + (elements.size / 2), elements.size))
-            elements.traverse { element ->
+            for (element in elements) {
                 add(element)
             }
         }
@@ -323,7 +337,16 @@ public class ${Type}HashSet @JvmOverloads constructor(
 
     override fun iterator(): Mutable${Type}Iterator = Iterator()
 
-    override fun traverser(): Mutable${Type}Traverser = Traverser()
+    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEach(action: (${Type}) -> Unit) {
+        val keysArr = keysArr
+        for (i in 0..<keysArr.size) {
+            if (keysArr[i] notEqualsRaw emptyKey) {
+                action(keysArr[i])
+            }
+        }
+    }
 
     private inner class Iterator : Mutable${Type}Iterator() {
         private val keysArr = this@${Type}HashSet.keysArr
@@ -369,45 +392,6 @@ public class ${Type}HashSet @JvmOverloads constructor(
         }
     }
 
-    private inner class Traverser : Mutable${Type}Traverser {
-        private val keysArr = this@${Type}HashSet.keysArr
-        private val emptyKey = this@${Type}HashSet.emptyKey
-        private val mask = keysArr.size - 1
-
-        private var slotsLeft = size
-        private var slot = keysArr.size
-        private var key = emptyKey
-
-        override val value: ${Type} get() {
-            check(key notEqualsRaw emptyKey)
-            return key
-        }
-
-        override fun forward(): Boolean {
-            if (slotsLeft <= 0) {
-                return false
-            }
-            if (keysArr !== this@${Type}HashSet.keysArr) throw ConcurrentModificationException()
-
-            while (true) {
-                slot = (slot - 1) and mask
-                key = keysArr[slot]
-                if (key notEqualsRaw emptyKey) {
-                    --slotsLeft
-                    return true
-                }
-            }
-        }
-
-        override fun remove() {
-            check(key notEqualsRaw emptyKey)
-            if (keysArr !== this@${Type}HashSet.keysArr) throw ConcurrentModificationException()
-
-            removeSlot(slot)
-            key = emptyKey
-        }
-    }
-
     private fun ${Type}.slot(mask: Int): Int = Hash.mix(this) and mask
     private fun ${Type}.slotDistance(slot: Int, mask: Int): Int = (slot - Hash.mix(this)) and mask
 
@@ -438,3 +422,6 @@ public class ${Type}HashSet @JvmOverloads constructor(
         }
     }
 }
+
+public fun ${Type}HashSet.removeAll(predicate: ${Type}Predicate): Boolean = filterInPlace { predicate.test(it) }
+public fun ${Type}HashSet.retainAll(predicate: ${Type}Predicate): Boolean = filterInPlace { !predicate.test(it) }

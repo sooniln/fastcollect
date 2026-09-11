@@ -14,6 +14,16 @@ public fun longIteratorOf(value: Long): LongIterator = SingletonLongIterator(val
 
 public abstract class MutableLongIterator : LongIterator(), MutableIterator<Long>
 
+public abstract class LongListIterator : LongIterator(), ListIterator<Long> {
+    public abstract fun previousLong(): Long
+    final override fun previous(): Long = previousLong()
+}
+
+public abstract class MutableLongListIterator : LongListIterator(), MutableListIterator<Long> {
+    abstract override fun set(element: Long)
+    abstract override fun add(element: Long)
+}
+
 private object EmptyLongIterator : MutableLongIterator() {
     override fun hasNext(): Boolean = false
     override fun nextLong(): Long = throw NoSuchElementException()

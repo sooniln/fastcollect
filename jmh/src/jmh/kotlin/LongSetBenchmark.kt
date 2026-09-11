@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit
  */
 @Fork(1, jvmArgs = ["-Xmx4g"])
 @Timeout(time = 10, timeUnit = TimeUnit.SECONDS)
-@Warmup(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 10, time = 500, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 10, time = 250, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class LongSetBenchmark {
@@ -138,7 +138,7 @@ open class LongSetBenchmark {
     @Benchmark
     fun naiveCopy(state: RandomState): LongHashSet {
         val copy = LongHashSet()
-        state.set.traverse { key ->
+        for (key in state.set) {
             copy.add(key)
         }
         return copy
@@ -176,7 +176,9 @@ open class LongSetBenchmark {
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun traverse(state: RandomState, bh: Blackhole) {
-        state.set.traverse { key -> bh.consume(key) }
+    fun forEach(state: IntSetBenchmark.RandomState, bh: Blackhole) {
+        state.set.forEach { element ->
+            bh.consume(element)
+        }
     }
 }

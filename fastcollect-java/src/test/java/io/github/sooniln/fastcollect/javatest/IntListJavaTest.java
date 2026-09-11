@@ -6,13 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.sooniln.fastcollect.IntList;
-import io.github.sooniln.fastcollect.IntListTraverser;
+import io.github.sooniln.fastcollect.IntListIterator;
 import io.github.sooniln.fastcollect.IntLists;
-import io.github.sooniln.fastcollect.IntTraversables;
 import io.github.sooniln.fastcollect.MutableIntList;
-import io.github.sooniln.fastcollect.MutableIntListTraverser;
+import io.github.sooniln.fastcollect.MutableIntListIterator;
 import java.util.List;
-import java.util.function.IntConsumer;
 import org.junit.jupiter.api.Test;
 
 /** Smoke tests that IntList/MutableIntList and the IntLists factories are usable from Java. */
@@ -100,44 +98,38 @@ class IntListJavaTest {
     }
 
     @Test
-    void traverser() {
+    void listIterator() {
         IntList list = IntLists.intListOf(1, 2, 3);
 
         int sum = 0;
-        for (IntListTraverser t = list.traverser(0); t.forward(); ) {
-            sum += t.getValue();
+        for (IntListIterator it = list.listIterator(0); it.hasNext(); ) {
+            sum += it.nextInt();
         }
         assertEquals(6, sum);
 
-        IntListTraverser backwards = list.traverser(list.size());
-        assertTrue(backwards.backward());
-        assertEquals(3, backwards.getValue());
+        IntListIterator backwards = list.listIterator(list.size());
+        assertTrue(backwards.hasPrevious());
+        assertEquals(3, backwards.previousInt());
+        assertEquals(2, backwards.nextIndex());
     }
 
     @Test
-    void mutableTraverser() {
+    void mutableListIterator() {
         MutableIntList list = IntLists.mutableIntListOf(1, 2, 3);
 
-        MutableIntListTraverser t = list.traverser(0);
-        assertTrue(t.forward());
-        t.set(9);
+        MutableIntListIterator it = list.listIterator(0);
+        assertTrue(it.hasNext());
+        assertEquals(1, it.nextInt());
+        it.set(9);
         assertEquals(9, list.get(0));
 
-        t.insert(8);
+        it.add(8);
         assertEquals(4, list.size());
 
-        assertTrue(t.forward());
-        t.remove();
+        assertTrue(it.hasNext());
+        assertEquals(2, it.nextInt());
+        it.remove();
         assertEquals(3, list.size());
-    }
-
-    @Test
-    void jdkConsumer() {
-        // fastcollect's IntConsumer is a typealias for java.util.function.IntConsumer on the JVM
-        int[] sum = {0};
-        IntConsumer consumer = value -> sum[0] += value;
-        IntTraversables.traverse(IntLists.intListOf(1, 2, 3), consumer);
-        assertEquals(6, sum[0]);
     }
 
     @Test

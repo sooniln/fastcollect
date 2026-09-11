@@ -1,7 +1,7 @@
 /**
- * Methods for dealing with primitive PriorityQueues.
+ * Methods for dealing with FloatPriorityQueues.
  */
-@file:JvmName("PriorityQueues")
+@file:JvmName("FloatPriorityQueues")
 @file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
@@ -10,6 +10,10 @@ import java.util.AbstractQueue
 import java.util.Queue
 
 public fun AbstractFloatPriorityQueue.asQueue(): Queue<Float> = FloatPriorityQueueWrapper(this)
+
+public fun AbstractFloatPriorityQueue.forEachWhile(action: FloatPredicate) {
+    forEach { if (!action.test(it)) return }
+}
 
 private class FloatPriorityQueueWrapper(private val queue: AbstractFloatPriorityQueue) : AbstractQueue<Float>() {
     override val size: Int get() = queue.size

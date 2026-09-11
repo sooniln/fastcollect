@@ -1,7 +1,15 @@
+/**
+ * Methods for dealing with primitive Int2AnyHashMaps.
+ */
+@file:JvmName("Int2AnyHashMaps")
+@file:JvmMultifileClass
+
 package io.github.sooniln.fastcollect
 
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -30,15 +38,25 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
     public constructor(map: Map<Int, V>): this() { putAll(map) }
 
 
-    private var keysArr = EMPTY_KEY_ARRAY
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var keysArr: IntArray = EMPTY_KEY_ARRAY
+
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
 
     @Suppress("UNCHECKED_CAST")
-    private var valuesArr = EMPTY_VALUE_ARRAY as Array<V?>
+    internal var valuesArr: Array<V?> = EMPTY_VALUE_ARRAY as Array<V?>
 
     private inline val defaultValue: V? get() = null
 
 
-    private var emptyKey = ZERO
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var emptyKey: Int = ZERO
 
     // threshold + size == capacity (rehash once threshold <= 0, if we haven't allocated yet then threshold.inv() is
     // our initial capacity)
@@ -311,8 +329,8 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             }
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
-            from.traverse { key, value ->
-                set(key, value)
+            for (entry in from) {
+                set(entry.key, entry.value)
             }
         }
     }
@@ -343,7 +361,6 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
                 override val size: Int get() = this@Int2AnyHashMap.size
                 override fun contains(element: Int): Boolean = containsKey(element)
                 override fun iterator(): IntIterator = KeyIterator()
-                override fun traverser(): IntTraverser = Traverser().asKeyTraverser()
             }
             .also { _keys = it }
     }
@@ -359,7 +376,6 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
                 override val size: Int get() = this@Int2AnyHashMap.size
                 override fun contains(element: V): Boolean = containsValue(element)
                 override fun iterator(): Iterator<V> = ValueIterator()
-
             }
             .also { _values = it }
     }
@@ -464,11 +480,37 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
 
     override operator fun iterator(): MutableIterator<MutableInt2AnyMap.MutableEntry<V>> = EntryIterator()
 
-    override fun traverser(): MutableInt2AnyTraverser<V> = Traverser()
+    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEach(action: (Int2AnyMap.Entry<V>) -> Unit) {
+        val keysArr = keysArr
+        val reusableEntry = ReusableEntry<V>(keysArr.size - 1, valuesArr)
+        while (reusableEntry.slot >= 0) {
+            reusableEntry.key = keysArr[reusableEntry.slot]
+            if (reusableEntry.key notEqualsRaw emptyKey) {
+                action(reusableEntry)
+            }
+            --reusableEntry.slot
+        }
+    }
 
-    private open inner class SlotIterator {
+    @PublishedApi
+    internal class ReusableEntry<V>(
+        @get:JvmSynthetic
+        @set:JvmSynthetic
+        var slot: Int,
+
+        private val valuesArr: Array<V?>,
+
+    ) : Int2AnyMap.AbstractEntry<V>() {
+        @set:JvmSynthetic
+        override var key: Int = 0.toInt()
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        override val value: V get() = valuesArr[slot] as V
+    }
+
+    private inner class MutableReusableEntry : MutableInt2AnyMap.AbstractMutableEntry<V>() {
         private val keysArr = this@Int2AnyHashMap.keysArr
-        private val valuesArr = this@Int2AnyHashMap.valuesArr
         private val emptyKey = this@Int2AnyHashMap.emptyKey
         private val mask = keysArr.size - 1
 
@@ -491,10 +533,22 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             if (--slotsLeft > 0) decrement()
         }
 
-        fun slot(): Int = previousSlot
-        fun key(): Int = keysArr[previousSlot]
+        override val key: Int get() {
+            check(previousSlot != -1)
+            return keysArr[previousSlot]
+        }
+
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        fun value(): V = valuesArr[previousSlot] as V
+        override var value: V
+            get() {
+                check(previousSlot != -1)
+                return valuesArr[previousSlot] as V
+            }
+            set(value) {
+                check(previousSlot != -1)
+                if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
+                valuesArr[previousSlot] = value
+            }
 
         fun remove() {
             check(previousSlot != -1)
@@ -517,94 +571,38 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
     }
 
     private inner class KeyIterator : IntIterator() {
-        private val it = SlotIterator()
-
-        override fun hasNext(): Boolean = it.hasNext()
-
+        private val entry = MutableReusableEntry()
+        override fun hasNext(): Boolean = entry.hasNext()
         override fun nextInt(): Int {
-            it.nextSlot()
-            return it.key()
+            entry.nextSlot()
+            return entry.key
         }
     }
 
 
     private inner class ValueIterator : Iterator<V> {
 
-        private val it = SlotIterator()
+        private val entry = MutableReusableEntry()
 
-        override fun hasNext(): Boolean = it.hasNext()
+        override fun hasNext(): Boolean = entry.hasNext()
 
 
         override fun next(): V {
 
-            it.nextSlot()
-            return it.value()
+            entry.nextSlot()
+            return entry.value
         }
     }
 
-    private inner class EntryIterator: SlotIterator(), MutableIterator<MutableInt2AnyMap.MutableEntry<V>> {
+    private inner class EntryIterator : MutableIterator<MutableInt2AnyMap.MutableEntry<V>> {
+        private val entry = MutableReusableEntry()
+
+        override fun hasNext(): Boolean = entry.hasNext()
         override fun next(): MutableInt2AnyMap.MutableEntry<V> {
-            nextSlot()
-            return object: MutableInt2AnyMap.AbstractMutableEntry<V>() {
-                private val slot = slot()
-                override val key: Int = key()
-                override var value: V = value()
-                    set(value) {
-                        if (keysArr[slot] != key || valuesArr[slot] notEqualsRaw field) throw ConcurrentModificationException()
-                        valuesArr[slot] = value
-                        field = value
-                    }
-            }
+            entry.nextSlot()
+            return entry
         }
-    }
-
-    private inner class Traverser : MutableInt2AnyTraverser<V> {
-        private val keysArr = this@Int2AnyHashMap.keysArr
-        private val valuesArr = this@Int2AnyHashMap.valuesArr
-        private val emptyKey = this@Int2AnyHashMap.emptyKey
-        private val mask = keysArr.size - 1
-
-        private var slotsLeft = size
-        private var slot = keysArr.size
-        private var _key = emptyKey
-
-        override val key: Int get() {
-            check(_key != emptyKey)
-            return _key
-        }
-        override var value: V
-            get() {
-                check(_key != emptyKey)
-                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                return valuesArr[slot] as V
-            }
-            set(value) {
-                check(_key != emptyKey)
-                if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
-                valuesArr[slot] = value
-            }
-
-        override fun forward(): Boolean {
-            if (slotsLeft <= 0) return false
-            if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
-
-            while (true) {
-                slot = (slot - 1) and mask
-                _key = keysArr[slot]
-                if (_key != emptyKey) {
-                    --slotsLeft
-                    return true
-                }
-            }
-        }
-
-        override fun remove() {
-            check(_key != emptyKey)
-            if (keysArr !== this@Int2AnyHashMap.keysArr) throw ConcurrentModificationException()
-
-            removeSlot(slot)
-            _key = emptyKey
-        }
+        override fun remove() = entry.remove()
     }
 
     private fun Int.slot(mask: Int): Int = Hash.mix(this) and mask

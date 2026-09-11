@@ -14,6 +14,16 @@ public fun ${lowerType}IteratorOf(value: ${Type}): ${Type}Iterator = Singleton${
 
 public abstract class Mutable${Type}Iterator : ${Type}Iterator(), MutableIterator<${Type}>
 
+public abstract class ${Type}ListIterator : ${Type}Iterator(), ListIterator<${Type}> {
+    public abstract fun previous${Type}(): ${Type}
+    final override fun previous(): ${Type} = previous${Type}()
+}
+
+public abstract class Mutable${Type}ListIterator : ${Type}ListIterator(), MutableListIterator<${Type}> {
+    abstract override fun set(element: ${Type})
+    abstract override fun add(element: ${Type})
+}
+
 private object Empty${Type}Iterator : Mutable${Type}Iterator() {
     override fun hasNext(): Boolean = false
     override fun next${Type}(): ${Type} = throw NoSuchElementException()

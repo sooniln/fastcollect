@@ -35,7 +35,6 @@ class IntSetDefaultsTests {
         assertFalse(empty.contains(0))
         assertFalse(empty.contains(1))
         assertFalse(empty.iterator().hasNext())
-        assertFalse(empty.traverser().forward())
         assertTrue(empty.containsAll(intSetOf()))
         assertFalse(empty.containsAll(intSetOf(1)))
         assertEquals("[]", empty.toString())
@@ -52,12 +51,6 @@ class IntSetDefaultsTests {
         assertFalse(single.contains(0))
         assertEquals(listOf(42), single.toBoxedList())
         assertEquals("[42]", single.toString())
-
-        val traverser = single.traverser()
-        assertFailsWith<IllegalStateException> { traverser.value }
-        assertTrue(traverser.forward())
-        assertEquals(42, traverser.value)
-        assertFalse(traverser.forward())
     }
 
     @Test

@@ -11,6 +11,7 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
@@ -50,7 +51,7 @@ public inline fun  buildInt2ByteMap(expectedSize: Int = 0, builderAction: Mutabl
  * cases more easily.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public interface Int2ByteMap : Int2ByteTraversable {
+public interface Int2ByteMap {
 
     @get:JvmName("size")
     public val size: Int
@@ -76,15 +77,15 @@ public interface Int2ByteMap : Int2ByteTraversable {
     public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance Byte): Byte = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
-        traverseKeys { k ->
-            if (k equalsRaw key) return true
+        for (entry in this) {
+            if (entry.key equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance Byte): Boolean {
-        traverse { _, v ->
-            if (v equalsRaw value) return true
+        for (entry in this) {
+            if (entry.value equalsRaw value) return true
         }
         return false
     }
@@ -95,6 +96,10 @@ public interface Int2ByteMap : Int2ByteTraversable {
     @get:JvmName("values")
     public val values: ByteCollection
 
+    /**
+     * Returns an iterator over entries in this map. Each returned entry becomes invalid (and may be reused by the
+     * underlying code as soon as [Iterator.next] is invoked. Do not retain references to the entries.
+     */
     public operator fun iterator(): Iterator<Entry>
 
     /** Prefer to always implement this interface via [AbstractEntry] for correct behavior. */
@@ -116,6 +121,25 @@ public interface Int2ByteMap : Int2ByteTraversable {
 
 public fun  Int2ByteMap.isNotEmpty(): Boolean = size != 0
 
+@JvmSynthetic
+
+public fun <A : Appendable> Int2ByteMap.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", transform: ((Int2ByteMap.Entry) -> CharSequence)? = null): A {
+
+    buffer.append(prefix)
+    var first = true
+    for (entry in this) {
+        if (first) first = false else buffer.append(separator)
+        buffer.append(if (transform == null) entry.toString() else transform(entry))
+    }
+    buffer.append(postfix)
+    return buffer
+}
+
+@JvmOverloads
+public fun  Int2ByteMap.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = ""): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, null).toString()
+}
+
 public fun  Int2ByteMap.asMap(): Map<Int, Byte> = Int2ByteMapWrapper(this)
 
 public fun  Int2ByteMap.Entry.asEntry(): Map.Entry<Int, Byte> = Int2ByteMapEntryWrapper(this)
@@ -133,7 +157,7 @@ public inline fun  Int2ByteMap.getOrElse(key: Int, defaultValue: () -> Byte): By
 /**
  * A mutable map of Ints to Bytes.
  */
-public interface MutableInt2ByteMap : Int2ByteMap, MutableInt2ByteTraversable {
+public interface MutableInt2ByteMap : Int2ByteMap {
 
     public fun put(key: Int, value: Byte): Byte
 
@@ -164,8 +188,8 @@ public interface MutableInt2ByteMap : Int2ByteMap, MutableInt2ByteTraversable {
     public fun clear()
 
     public fun putAll(from: Int2ByteMap) {
-        from.traverse { key, value ->
-            set(key, value)
+        for (entry in from) {
+            set(entry.key, entry.value)
         }
     }
 
@@ -256,10 +280,10 @@ public abstract class AbstractInt2ByteMap : Int2ByteMap {
         if (other is Int2ByteMap) {
             if (other.size != size) return false
 
-            traverse { key, value ->
-                if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
+            for (entry in this) {
+                val key = entry.key
+                if (!(other.getOrElse(key) { return false } equalsRaw entry.value)) return false
             }
-
             return true
         }
 
@@ -268,8 +292,8 @@ public abstract class AbstractInt2ByteMap : Int2ByteMap {
 
     override fun hashCode(): Int {
         var result = 0
-        traverse { key, value ->
-            result += key.hashCode() xor value.hashCode()
+        for (entry in this) {
+            result += entry.key.hashCode() xor entry.value.hashCode()
         }
         return result
     }
@@ -297,7 +321,6 @@ private object EmptyInt2ByteMap : AbstractInt2ByteMap() {
     override fun get(key: Int): Byte = Byte.MIN_VALUE
     override val values: ByteCollection get() = emptyByteList()
     override fun iterator(): Iterator<Int2ByteMap.Entry> = emptyList<Int2ByteMap.Entry>().iterator()
-    override fun traverser(): Int2ByteTraverser = emptyInt2ByteTraverser()
 
 }
 
@@ -328,23 +351,6 @@ private class SingletonInt2ByteMap(
             return SimpleEntry(key, value)
         }
     }
-
-    override fun traverser(): Int2ByteTraverser = object : Int2ByteTraverser {
-        private var complete = false
-        override val key: Int get() {
-            check(complete)
-            return this@SingletonInt2ByteMap.key
-        }
-        override val value: Byte get() {
-            check(complete)
-            return this@SingletonInt2ByteMap.value
-        }
-        override fun forward(): Boolean {
-            if (complete) return false
-            complete = true
-            return true
-        }
-    }
 }
 
 private class Int2ByteMapWrapper(private val map: Int2ByteMap) : AbstractMap<Int, Byte>() {
@@ -370,7 +376,10 @@ private class Int2ByteMapWrapper(private val map: Int2ByteMap) : AbstractMap<Int
         override fun iterator(): Iterator<Map.Entry<Int, Byte>> = object : Iterator<Map.Entry<Int, Byte>> {
             private val it = map.iterator()
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): Map.Entry<Int, Byte> = it.next().asEntry()
+            override fun next(): Map.Entry<Int, Byte> {
+                val entry = it.next()
+                return AbstractInt2ByteMap.SimpleEntry(entry.key, entry.value).asEntry()
+            }
         }
     }
 }
@@ -423,7 +432,19 @@ private class MutableInt2ByteMapWrapper(private val map: MutableInt2ByteMap) : A
             private val it = map.iterator()
 
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): MutableMap.MutableEntry<Int, Byte> = it.next().asEntry()
+
+            override fun next(): MutableMap.MutableEntry<Int, Byte> {
+                val (entryKey, entryValue) = it.next()
+                return object : MutableInt2ByteMap.AbstractMutableEntry() {
+                    override val key: Int = entryKey
+                    override var value: Byte = entryValue
+                        set(value) {
+                            map.put(key, value)
+                            field = value
+                        }
+                }.asEntry()
+            }
+
             override fun remove() = it.remove()
         }
     }

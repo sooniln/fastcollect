@@ -55,16 +55,17 @@ class RandomizedWorkloadTests {
                         assertEquals(reference.retainAll { it < cutoff }, deque.retainAll { it < cutoff }, where)
                     }
                     10 -> {
-                        // traverser-driven removal must visit every element exactly once
+                        // iterator-driven removal must visit every element exactly once
                         val cutoff = random.nextInt(-50, 50)
                         val visited = mutableListOf<Int>()
                         val expected = reference.toList()
-                        val traverser = deque.traverser()
-                        while (traverser.forward()) {
-                            visited.add(traverser.value)
-                            if (traverser.value < cutoff) traverser.remove()
+                        val iterator = deque.iterator()
+                        while (iterator.hasNext()) {
+                            val element = iterator.nextInt()
+                            visited.add(element)
+                            if (element < cutoff) iterator.remove()
                         }
-                        assertEquals(expected, visited, "$where traverser visit order")
+                        assertEquals(expected, visited, "$where iterator visit order")
                         reference.removeAll { it < cutoff }
                     }
                     11 -> if (reference.isNotEmpty()) {
@@ -123,12 +124,13 @@ class RandomizedWorkloadTests {
                     6 -> {
                         val cutoff = random.nextInt(-100, 100)
                         val visited = mutableListOf<Int>()
-                        val traverser = set.traverser()
-                        while (traverser.forward()) {
-                            visited.add(traverser.value)
-                            if (traverser.value < cutoff) traverser.remove()
+                        val iterator = set.iterator()
+                        while (iterator.hasNext()) {
+                            val element = iterator.nextInt()
+                            visited.add(element)
+                            if (element < cutoff) iterator.remove()
                         }
-                        assertEquals(reference.sorted(), visited.sorted(), "$where traverser visited every element once")
+                        assertEquals(reference.sorted(), visited.sorted(), "$where iterator visited every element once")
                         reference.removeAll { it < cutoff }
                     }
                     7 -> if (random.nextBoolean()) set.ensureCapacity(random.nextInt(0, 500)) else set.trimToSize()
@@ -194,12 +196,13 @@ class RandomizedWorkloadTests {
                     10 -> {
                         val cutoff = random.nextInt(-100, 100)
                         val visited = mutableListOf<Int>()
-                        val traverser = map.traverser()
-                        while (traverser.forward()) {
-                            visited.add(traverser.key)
-                            if (traverser.key < cutoff) traverser.remove() else traverser.value = traverser.value
+                        val iterator = map.iterator()
+                        while (iterator.hasNext()) {
+                            val entry = iterator.next()
+                            visited.add(entry.key)
+                            if (entry.key < cutoff) iterator.remove() else entry.value = entry.value
                         }
-                        assertEquals(reference.keys.sorted(), visited.sorted(), "$where traverser visited every entry once")
+                        assertEquals(reference.keys.sorted(), visited.sorted(), "$where iterator visited every entry once")
                         reference.keys.removeAll { it < cutoff }
                     }
                     11 -> if (random.nextBoolean()) map.ensureCapacity(random.nextInt(0, 500)) else map.trimToSize()
@@ -254,12 +257,13 @@ class RandomizedWorkloadTests {
                     7 -> {
                         val cutoff = random.nextInt(-100, 100)
                         val visited = mutableListOf<Int>()
-                        val traverser = map.traverser()
-                        while (traverser.forward()) {
-                            visited.add(traverser.key)
-                            if (traverser.key < cutoff) traverser.remove() else traverser.value = value
+                        val iterator = map.iterator()
+                        while (iterator.hasNext()) {
+                            val entry = iterator.next()
+                            visited.add(entry.key)
+                            if (entry.key < cutoff) iterator.remove() else entry.value = value
                         }
-                        assertEquals(reference.keys.sorted(), visited.sorted(), "$where traverser visited every entry once")
+                        assertEquals(reference.keys.sorted(), visited.sorted(), "$where iterator visited every entry once")
                         reference.keys.removeAll { it < cutoff }
                         reference.keys.forEach { reference[it] = value }
                     }

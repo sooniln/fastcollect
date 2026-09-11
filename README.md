@@ -29,14 +29,14 @@ You can add FastCollect as a dependency with:
 
 Gradle:
 ```groovy
-implementation 'io.github.sooniln:fastcollect-jvm:5.0.0'
+implementation 'io.github.sooniln:fastcollect-jvm:6.0.0'
 ```
 Maven:
 ```xml
 <dependency>
     <groupId>io.github.sooniln</groupId>
     <artifactId>fastcollect-jvm</artifactId>
-    <version>5.0.0</version>
+    <version>6.0.0</version>
 </dependency>
 ```
 
@@ -44,9 +44,9 @@ FastCollect can be used as a replacement for Kotlin standard library collections
 CPU improvements without any further changes. As with most Kotlin libraries, you are encouraged to import the entire
 library space via `import io.github.sooniln.fastcollect.*` so that extension functions 'just work'.
 
-FastCollect can interact with normal Kotlin collections through the use of extension methods like [asList], [asSet],
-[asMap], and [asQueue], which produce a thin wrapper around the FastCollect collection which allows it to be used as a
-Kotlin collection, safe for use in any legacy APIs. Beware that using these wrappers may incur boxing penalties.
+FastCollect can interact with normal Kotlin collections through the use of extension methods like `asList()`, `asSet()`,
+`asMap()`, and `asQueue()`, which produce a thin wrapper around the FastCollect collection which allows it to be used as
+a Kotlin/Java collection, safe for use in any legacy APIs. Beware that using these wrappers may incur boxing penalties.
 
 Using FastCollect types should be quite straightforward for anyone familiar with standard Kotlin/Java collections.
 FastCollect provides ArrayList/ArrayDeque, HashSet, HashMap, and PriorityQueue analogues that can store primitives
@@ -62,7 +62,6 @@ FastCollect provides ArrayList/ArrayDeque, HashSet, HashMap, and PriorityQueue a
 
 Concrete primitive collection types supported:
 * **Iterator**
-* **Traverser**
 * **ArrayList/Deque**
 * **HashSet**
 * **HashMap**
@@ -94,11 +93,11 @@ be used when interacting with these collections via external lambdas, for exampl
 ```kotlin
 import io.github.sooniln.fastcollect.*
 
-var set = mutableFloatSetOf(Float.NaN)
+var set = FloatHashSet(...)
 // option 1 - removes NaN from the set
 set.remove(Float.NaN)
 // option 2 - does not remove NaN from the set
-set.removeAll(value -> value == Float.NaN)
+set.removeAll { value -> value == Float.NaN }
 ```
 
 Default JVM equality uses IEEE conventions for primitives. For this reason, FastCollect exposes publicly the comparison
@@ -107,11 +106,11 @@ methods it uses internally, as `equalsRaw()` and `notEqualsRaw()`.
 ```kotlin
 import io.github.sooniln.fastcollect.*
 
-var set = mutableFloatSetOf(Float.NaN)
+var set = FloatHashSet(...)
 // option 1 - removes NaN from the set
 set.remove(Float.NaN)
 // option 2 - removes NaN from the set
-set.removeAll(value -> value equalsRaw Float.NaN)
+set.removeAll { value -> value equalsRaw Float.NaN}
 ```
 
 ### ConcurrentModificationException ###
@@ -121,24 +120,17 @@ collections being modified in inappropriate ways. This already only a best effor
 FastCollect makes even less of an effort in the interests of performance. Do not expect FastCollect to throw
 ConcurrentModificationException every time you shoot yourself in the foot, only occasionally.
 
-### Traverser ###
+### Iteration ###
 
-FastCollect introduces a new method of iterating through collections called `Traverser`. `Traversable`/`Traverser` are
-roughly equivalent to `Iterable`/`Iterator`, but offer a slightly different API shape which (1) makes it easier to
-implement iteration correctly (2) offers increased opportunities for compiler optimizations in complex implementations.
-Benchmarking shows up to a 20% speed improvement when using `Traverser` vs `Iterator` for the same operations.
-FastCollect still supports `Iterator` - all collection classes implement `Iterable` so they can be used in normal
-for-each loops and anywhere that expects an `Iterable`. There also exists `ListTraverser` as an equivalent to
-`ListIterator`.
+All collection classes do not implement `Iterable`, but do offer an `iterator` method (this is deliberate, to avoid the
+usage of standard library extension methods defined on Iterable, which have numerous problems). This means that in Kotlin
+they can be used in normal for-each loops, but not in Java. The returned iterator should avoid any boxing of primitive
+values. Concrete classes (as opposed to interfaces) offer `forEach` methods (`forEachWhile` for Java clients) which are
+guaranteed to be as fast as or faster than iterators.
 
-Traverser APIs offer many of the same utility extension methods as Iterable, such as:
-
-* **traverse** (the preferred method of iterating through a collection, similar to `forEach()`)
-* **any/all/none**
-* **fold/reduce**
-* **sum/sumOf**
-* **joinToString**
-* etc...
+Map iteration is allocation free: `Map.iterator()` returns the same `Entry` instance repeatedly, repositioned over each
+successive entry. Read what you need from an entry before advancing the iterator again, and never retain an entry
+beyond that point.
 
 See the following examples section for further usage.
 
@@ -151,7 +143,7 @@ You'll find that FastCollect collection usage is pretty much exactly like Kotlin
 import io.github.sooniln.fastcollect.*
 
 // creating a list
-var list = IntArrayList()
+var list = IntArrayDeque()
 list = mutableIntListOf(1, 2, 3)
 
 // get/set by index
@@ -164,7 +156,7 @@ list.lastIndexOf(2)
 list.contains(3)
 
 // iterate over list
-list.traverse { value ->
+for (value in list) {
     println(value)
 }
 
@@ -192,7 +184,7 @@ set = mutableIntSetOf(1, 2, 3) // directly create FastCollect set
 set.contains(3)
 
 // iterate over set
-set.traverse { value ->
+for (value in set) {
     println(value)
 }
 
@@ -219,10 +211,10 @@ map.containsKey(1)
 map.containsValue(2)
 
 // iterate over map
-map.traverse { key, value ->
-    println("$key -> $value")
+for (entry in map) {
+    println("${entry.key} -> ${entry.value}")
 }
-map.traverseKeys { key ->
+for (key in map.keys) {
     println(key)
 }
 
@@ -251,7 +243,7 @@ priorityQueue.removeFirst() // returns 8
 priorityQueue.clear()
 
 // iterate over priority queue (no ordering guarantees)
-priorityQueue.traverse { value ->
+for (value in priorityQueue) {
     println(value)
 }
 

@@ -1,7 +1,7 @@
 /**
- * Methods for dealing with primitive PriorityQueues.
+ * Methods for dealing with IntPriorityQueues.
  */
-@file:JvmName("PriorityQueues")
+@file:JvmName("IntPriorityQueues")
 @file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
@@ -10,6 +10,10 @@ import java.util.AbstractQueue
 import java.util.Queue
 
 public fun AbstractIntPriorityQueue.asQueue(): Queue<Int> = IntPriorityQueueWrapper(this)
+
+public fun AbstractIntPriorityQueue.forEachWhile(action: IntPredicate) {
+    forEach { if (!action.test(it)) return }
+}
 
 private class IntPriorityQueueWrapper(private val queue: AbstractIntPriorityQueue) : AbstractQueue<Int>() {
     override val size: Int get() = queue.size

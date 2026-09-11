@@ -2,12 +2,14 @@
  * Methods for dealing with ByteArrayDeques.
  */
 @file:JvmName("ByteArrayDeques")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
@@ -25,10 +27,17 @@ public typealias ByteArrayList = ByteArrayDeque
  * used anywhere a Kotlin list is expected. Using this wrapper may incur boxing penalties.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public class ByteArrayDeque private constructor(array: ByteArray, size: Int) : AbstractMutableByteList(), RandomAccess {
+public class ByteArrayDeque private constructor(array: ByteArray, size: Int) : AbstractMutableByteList() {
 
-    private var head: Int = 0
-    private var ring: ByteArray = array
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var head: Int = 0
+
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var ring: ByteArray = array
 
     @get:JvmName("size")
     override var size: Int = size
@@ -309,7 +318,7 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int) : A
         if (elements.isEmpty()) return false
 
         ensureCapacity(size + elements.size)
-        elements.traverse { element ->
+        for (element in elements) {
             addLast(element)
         }
         return true
@@ -444,90 +453,51 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int) : A
         return dest
     }
 
-    override fun iterator(): MutableByteIterator {
+    override fun iterator(): MutableByteIterator = IteratorImpl()
+    override fun listIterator(index: Int): MutableByteListIterator = ListIteratorImpl(index)
+
+    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEach(action: (Byte) -> Unit) {
+        val ring = ring
         val tail = head + size
-        return if (tail > ring.size) {
-            DiscreteIterator()
-        } else {
-            ContinuousIterator(tail)
-        }
-    }
-
-    override fun traverser(): MutableByteTraverser {
-        val tail = head + size
-        return if (tail > ring.size) {
-            DiscreteTraverser()
-        } else {
-            ContinuousTraverser(tail)
-        }
-    }
-
-    override fun traverser(position: Int): MutableByteListTraverser = ListTraverser(position)
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is ByteList) return false
-
-        if (size != other.size) return false
-        if (other is RandomAccess) {
-            for (i in 0..<size) {
-                if (!(ring[ring.position(head, i)] equalsRaw other[i])) return false
+        if (tail > ring.size) {
+            for (i in head..<ring.size) {
+                action(ring[i])
+            }
+            for (i in 0..<(tail - ring.size)) {
+                action(ring[i])
             }
         } else {
-            val it = other.iterator()
-            var i = 0
-            while (it.hasNext()) {
-                if (!(it.nextByte() equalsRaw this[i++])) return false
+            for (i in head..<tail) {
+                action(ring[i])
             }
         }
-        return true
     }
 
-    override fun hashCode(): Int {
-        var hashCode = 1
-        if (!isEmpty()) {
-            var position = head
-            val end = ring.position(head, size)
-            do {
-                hashCode = 31 * hashCode + ring[position].hashCode()
-                position = ring.incrementPosition(position)
-            } while (position != end)
-        }
-        return hashCode
-    }
-
-    private inner class ContinuousIterator(private var tail: Int) : MutableByteIterator() {
-        private val ring = this@ByteArrayDeque.ring
-
-        init {
-            check(tail <= ring.size)
-        }
-
-        private var position = head
-        private var previousPosition = -1
-
-        override fun hasNext() = position < tail
-
-        override fun nextByte(): Byte {
-            if (!hasNext()) throw NoSuchElementException()
-            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
-
-            previousPosition = position++
-            return ring[previousPosition]
-        }
-
-        override fun remove() {
-            check(previousPosition >= 0)
-            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
-
-            val d = removeAtInternal(previousPosition)
-            tail += d
-            position = ring.negativeMod(position + d)
-            previousPosition = -1
+    /** Guaranteed to be as fast or faster than using [listIterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEachReverse(action: (Byte) -> Unit) {
+        val ring = ring
+        val tail = head + size
+        if (tail > ring.size) {
+            var i = (tail - ring.size) - 1
+            while (i >= 0) {
+                action(ring[i--])
+            }
+            i = ring.size - 1
+            while (i >= head) {
+                action(ring[i--])
+            }
+        } else {
+            var i = tail - 1
+            while (i >= head) {
+                action(ring[i--])
+            }
         }
     }
 
-    private inner class DiscreteIterator : MutableByteIterator() {
+    private inner class IteratorImpl : MutableByteIterator() {
         private val ring = this@ByteArrayDeque.ring
 
         private var remaining = size
@@ -556,136 +526,65 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int) : A
         }
     }
 
-    private inner class ContinuousTraverser(tail: Int) : MutableByteTraverser {
-         private val ring = this@ByteArrayDeque.ring
-
-         init {
-             check(tail <= ring.size)
-         }
-
-         private var last = tail - 1
-         private var cursor = head - 1
-         private var position = -1
-
-         override val value: Byte get() {
-             check(position >= 0)
-             return ring[position]
-         }
-
-         override fun forward(): Boolean {
-             if (cursor >= last) return false
-             if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
-
-             position = ++cursor
-             return true
-         }
-
-         override fun remove() {
-             check(position >= 0)
-             if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
-
-             val d = removeAtInternal(position)
-             last = ring.negativeMod(last + d)
-             cursor = ring.negativeMod(cursor + d)
-             position = -1
-         }
-     }
-
-     private inner class DiscreteTraverser : MutableByteTraverser {
-         private val ring = this@ByteArrayDeque.ring
-
-         private var remaining = size
-         private var cursor = head - 1
-         private var position = -1
-
-         override val value: Byte get() {
-             check(position >= 0)
-             return ring[position]
-         }
-
-         override fun forward(): Boolean {
-             if (remaining <= 0) {
-                 return false
-             }
-
-             if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
-             --remaining
-             cursor = ring.incrementPosition(cursor)
-             position = cursor
-             return true
-         }
-
-         override fun remove() {
-             check(position >= 0)
-             if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
-
-             val d = removeAtInternal(position)
-             cursor = ring.negativeMod(cursor + d)
-             position = -1
-         }
-     }
-
-    private inner class ListTraverser(position: Int) : MutableByteListTraverser {
+    private inner class ListIteratorImpl(private var position: Int) : MutableByteListIterator() {
         init {
             indexCheckInclusive(position)
         }
 
-        private var size = this@ByteArrayDeque.size
+        private var ring = this@ByteArrayDeque.ring
         private var cursor = if (position == 0) head - 1 else ring.position(head, position - 1)
         private var ringPosition = if (position == 0) -1 else cursor
 
-        override var position: Int = position
-            private set
+        override fun hasNext(): Boolean = position < this@ByteArrayDeque.size
 
-        override val value: Byte get() {
-            check(ringPosition >= 0)
-            return ring[ringPosition]
-        }
-
-        override fun forward(): Boolean {
-            if (position >= size) return false
-            if (size != this@ByteArrayDeque.size) throw ConcurrentModificationException()
+        override fun nextByte(): Byte {
+            if (position >= this@ByteArrayDeque.size) throw NoSuchElementException()
+            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
 
             cursor = ring.incrementPosition(cursor)
             ringPosition = cursor
             ++position
-            return true
+            return ring[ringPosition]
         }
 
-        override fun backward(): Boolean {
-            if (position <= 0) return false
-            if (size != this@ByteArrayDeque.size) throw ConcurrentModificationException()
+        override fun hasPrevious(): Boolean = position > 0
+
+        override fun previousByte(): Byte {
+            if (position <= 0) throw NoSuchElementException()
+            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
 
             ringPosition = cursor
             cursor = ring.decrementPosition(cursor)
             --position
-            return true
+            return ring[ringPosition]
         }
+
+        override fun nextIndex(): Int = position
+        override fun previousIndex(): Int = position - 1
 
         override fun remove() {
             check(ringPosition >= 0)
-            if (size != this@ByteArrayDeque.size) throw ConcurrentModificationException()
+            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
 
             val index = ring.index(head, ringPosition)
             val d = removeAtInternal(ringPosition)
             position = index
             cursor = ring.negativeMod(ringPosition + d)
             ringPosition = -1
-            --size
         }
 
-        override fun set(value: Byte) {
+        override fun set(element: Byte) {
             check(ringPosition >= 0)
-            if (size != this@ByteArrayDeque.size) throw ConcurrentModificationException()
-            ring[ringPosition] = value
+            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
+            ring[ringPosition] = element
         }
 
-        override fun insert(value: Byte) {
-            if (size != this@ByteArrayDeque.size) throw ConcurrentModificationException()
-            add(position, value)
+        override fun add(element: Byte) {
+            if (ring !== this@ByteArrayDeque.ring) throw ConcurrentModificationException()
+            add(position, element)
+            ring = this@ByteArrayDeque.ring
             cursor = ring.position(head, position++)
             ringPosition = -1
-            ++size
         }
     }
 
@@ -707,10 +606,11 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int) : A
         }
 
         private fun ByteArray.decrementPosition(position: Int): Int = if (position == 0) size - 1 else position - 1
+
+        @JvmSynthetic
+        internal fun wrap(array: ByteArray): ByteArrayDeque = ByteArrayDeque(array, array.size)
     }
 }
 
-
 public fun ByteArrayDeque.removeAll(predicate: BytePredicate): Boolean = filterInPlace { predicate.test(it) }
 public fun ByteArrayDeque.retainAll(predicate: BytePredicate): Boolean = filterInPlace { !predicate.test(it) }
-

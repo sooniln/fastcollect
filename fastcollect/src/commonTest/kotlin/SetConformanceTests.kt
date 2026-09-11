@@ -68,16 +68,17 @@ class IntSetConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Int>()
-        set.traverse { fromForeach.add(it) }
+        for (value in set) fromForeach.add(value)
         assertEquals(expected, fromForeach.sorted())
 
-        val fromTraverser = mutableListOf<Int>()
-        val traverser = set.traverser()
-        while (traverser.forward()) {
-            fromTraverser.add(traverser.value)
-            if (traverser.value == 2) traverser.remove()
+        val fromMutatingIterator = mutableListOf<Int>()
+        val mutatingIterator = set.iterator()
+        while (mutatingIterator.hasNext()) {
+            val value = mutatingIterator.nextInt()
+            fromMutatingIterator.add(value)
+            if (value == 2) mutatingIterator.remove()
         }
-        assertEquals(expected, fromTraverser.sorted())
+        assertEquals(expected, fromMutatingIterator.sorted())
         assertEquals(setOf(1, 3), set.asSet())
 
         val a = intSetOf(1, 2, 3)
@@ -154,16 +155,17 @@ class LongSetConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Long>()
-        set.traverse { fromForeach.add(it) }
+        for (value in set) fromForeach.add(value)
         assertEquals(expected, fromForeach.sorted())
 
-        val fromTraverser = mutableListOf<Long>()
-        val traverser = set.traverser()
-        while (traverser.forward()) {
-            fromTraverser.add(traverser.value)
-            if (traverser.value == 2L) traverser.remove()
+        val fromMutatingIterator = mutableListOf<Long>()
+        val mutatingIterator = set.iterator()
+        while (mutatingIterator.hasNext()) {
+            val value = mutatingIterator.nextLong()
+            fromMutatingIterator.add(value)
+            if (value == 2L) mutatingIterator.remove()
         }
-        assertEquals(expected, fromTraverser.sorted())
+        assertEquals(expected, fromMutatingIterator.sorted())
         assertEquals(setOf(1L, 3L), set.asSet())
 
         val a = longSetOf(1L, 2L, 3L)
@@ -240,16 +242,17 @@ class FloatSetConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Float>()
-        set.traverse { fromForeach.add(it) }
+        for (value in set) fromForeach.add(value)
         assertEquals(expected, fromForeach.sorted())
 
-        val fromTraverser = mutableListOf<Float>()
-        val traverser = set.traverser()
-        while (traverser.forward()) {
-            fromTraverser.add(traverser.value)
-            if (traverser.value == 2f) traverser.remove()
+        val fromMutatingIterator = mutableListOf<Float>()
+        val mutatingIterator = set.iterator()
+        while (mutatingIterator.hasNext()) {
+            val value = mutatingIterator.nextFloat()
+            fromMutatingIterator.add(value)
+            if (value == 2f) mutatingIterator.remove()
         }
-        assertEquals(expected, fromTraverser.sorted())
+        assertEquals(expected, fromMutatingIterator.sorted())
         assertEquals(setOf(1f, 3f), set.asSet())
 
         val a = floatSetOf(1f, 2f, 3f)
@@ -326,16 +329,17 @@ class DoubleSetConformanceTest {
         assertEquals(expected, fromIterator.sorted())
 
         val fromForeach = mutableListOf<Double>()
-        set.traverse { fromForeach.add(it) }
+        for (value in set) fromForeach.add(value)
         assertEquals(expected, fromForeach.sorted())
 
-        val fromTraverser = mutableListOf<Double>()
-        val traverser = set.traverser()
-        while (traverser.forward()) {
-            fromTraverser.add(traverser.value)
-            if (traverser.value == 2.0) traverser.remove()
+        val fromMutatingIterator = mutableListOf<Double>()
+        val mutatingIterator = set.iterator()
+        while (mutatingIterator.hasNext()) {
+            val value = mutatingIterator.nextDouble()
+            fromMutatingIterator.add(value)
+            if (value == 2.0) mutatingIterator.remove()
         }
-        assertEquals(expected, fromTraverser.sorted())
+        assertEquals(expected, fromMutatingIterator.sorted())
         assertEquals(setOf(1.0, 3.0), set.asSet())
 
         val a = doubleSetOf(1.0, 2.0, 3.0)

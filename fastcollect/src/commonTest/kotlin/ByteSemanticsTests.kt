@@ -31,17 +31,6 @@ class ByteSemanticsTests {
     }
 
     @Test
-    fun byteSum_widensToInt() {
-        // the running total must not be truncated to a Byte on the way
-        val list = mutableByteListOf(Byte.MAX_VALUE, Byte.MAX_VALUE, Byte.MAX_VALUE)
-        val total: Int = list.sum()
-        assertEquals(381, total)
-
-        assertEquals(-384, mutableByteListOf(Byte.MIN_VALUE, Byte.MIN_VALUE, Byte.MIN_VALUE).sum())
-        assertEquals(0, mutableByteListOf().sum())
-    }
-
-    @Test
     fun byteValuedMap_defaultValueIsByteMinValue() {
         val map = mutableInt2ByteMapOf()
         assertEquals(Byte.MIN_VALUE, map[1])

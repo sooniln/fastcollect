@@ -15,7 +15,7 @@ internal fun IntList.assertContents(vararg expected: Int) {
     expected.forEachIndexed { i, v -> assertEquals(v, get(i), "element[$i]") }
 }
 
-// A MutableIntList that is NOT RandomAccess, so the traverser-based fallbacks in AbstractMutableIntList
+// A MutableIntList that is NOT RandomAccess, so the iterator-based fallbacks in AbstractMutableIntList
 // (sort/sortDescending/fill/reverse/subList/removeRange) are taken instead of the indexed fast paths.
 internal class SequentialIntList(vararg elements: Int) : AbstractMutableIntList() {
     private val backing = IntArrayDeque(elements)

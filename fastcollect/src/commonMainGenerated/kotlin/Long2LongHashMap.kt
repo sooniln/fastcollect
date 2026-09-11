@@ -1,7 +1,15 @@
+/**
+ * Methods for dealing with primitive Long2LongHashMaps.
+ */
+@file:JvmName("Long2LongHashMaps")
+@file:JvmMultifileClass
+
 package io.github.sooniln.fastcollect
 
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmSynthetic
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -35,12 +43,22 @@ public class Long2LongHashMap @JvmOverloads constructor(
     public constructor(map: Map<Long, Long>, defaultValue: Long = Long.MIN_VALUE): this(defaultValue = defaultValue) { putAll(map) }
 
 
-    private var keysArr = EMPTY_KEY_ARRAY
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var keysArr: LongArray = EMPTY_KEY_ARRAY
 
-    private var valuesArr = EMPTY_VALUE_ARRAY
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+
+    internal var valuesArr: LongArray = EMPTY_VALUE_ARRAY
 
 
-    private var emptyKey = ZERO
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var emptyKey: Long = ZERO
 
     // threshold + size == capacity (rehash once threshold <= 0, if we haven't allocated yet then threshold.inv() is
     // our initial capacity)
@@ -309,8 +327,8 @@ public class Long2LongHashMap @JvmOverloads constructor(
             }
         } else {
             ensureCapacity(max(size + (from.size / 2), from.size))
-            from.traverse { key, value ->
-                set(key, value)
+            for (entry in from) {
+                set(entry.key, entry.value)
             }
         }
     }
@@ -341,7 +359,6 @@ public class Long2LongHashMap @JvmOverloads constructor(
                 override val size: Int get() = this@Long2LongHashMap.size
                 override fun contains(element: Long): Boolean = containsKey(element)
                 override fun iterator(): LongIterator = KeyIterator()
-                override fun traverser(): LongTraverser = Traverser().asKeyTraverser()
             }
             .also { _keys = it }
     }
@@ -357,9 +374,6 @@ public class Long2LongHashMap @JvmOverloads constructor(
                 override val size: Int get() = this@Long2LongHashMap.size
                 override fun contains(element: Long): Boolean = containsValue(element)
                 override fun iterator(): LongIterator = ValueIterator()
-
-                override fun traverser(): LongTraverser = Traverser().asValueTraverser()
-
             }
             .also { _values = it }
     }
@@ -464,11 +478,37 @@ public class Long2LongHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableIterator<MutableLong2LongMap.MutableEntry> = EntryIterator()
 
-    override fun traverser(): MutableLong2LongTraverser = Traverser()
+    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEach(action: (Long2LongMap.Entry) -> Unit) {
+        val keysArr = keysArr
+        val reusableEntry = ReusableEntry(keysArr.size - 1, valuesArr)
+        while (reusableEntry.slot >= 0) {
+            reusableEntry.key = keysArr[reusableEntry.slot]
+            if (reusableEntry.key notEqualsRaw emptyKey) {
+                action(reusableEntry)
+            }
+            --reusableEntry.slot
+        }
+    }
 
-    private open inner class SlotIterator {
+    @PublishedApi
+    internal class ReusableEntry(
+        @get:JvmSynthetic
+        @set:JvmSynthetic
+        var slot: Int,
+
+        private val valuesArr: LongArray,
+
+    ) : Long2LongMap.AbstractEntry() {
+        @set:JvmSynthetic
+        override var key: Long = 0.toLong()
+        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        override val value: Long get() = valuesArr[slot] as Long
+    }
+
+    private inner class MutableReusableEntry : MutableLong2LongMap.AbstractMutableEntry() {
         private val keysArr = this@Long2LongHashMap.keysArr
-        private val valuesArr = this@Long2LongHashMap.valuesArr
         private val emptyKey = this@Long2LongHashMap.emptyKey
         private val mask = keysArr.size - 1
 
@@ -491,10 +531,22 @@ public class Long2LongHashMap @JvmOverloads constructor(
             if (--slotsLeft > 0) decrement()
         }
 
-        fun slot(): Int = previousSlot
-        fun key(): Long = keysArr[previousSlot]
+        override val key: Long get() {
+            check(previousSlot != -1)
+            return keysArr[previousSlot]
+        }
+
         @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        fun value(): Long = valuesArr[previousSlot] as Long
+        override var value: Long
+            get() {
+                check(previousSlot != -1)
+                return valuesArr[previousSlot] as Long
+            }
+            set(value) {
+                check(previousSlot != -1)
+                if (keysArr !== this@Long2LongHashMap.keysArr) throw ConcurrentModificationException()
+                valuesArr[previousSlot] = value
+            }
 
         fun remove() {
             check(previousSlot != -1)
@@ -517,94 +569,38 @@ public class Long2LongHashMap @JvmOverloads constructor(
     }
 
     private inner class KeyIterator : LongIterator() {
-        private val it = SlotIterator()
-
-        override fun hasNext(): Boolean = it.hasNext()
-
+        private val entry = MutableReusableEntry()
+        override fun hasNext(): Boolean = entry.hasNext()
         override fun nextLong(): Long {
-            it.nextSlot()
-            return it.key()
+            entry.nextSlot()
+            return entry.key
         }
     }
 
 
     private inner class ValueIterator : LongIterator() {
 
-        private val it = SlotIterator()
+        private val entry = MutableReusableEntry()
 
-        override fun hasNext(): Boolean = it.hasNext()
+        override fun hasNext(): Boolean = entry.hasNext()
 
 
         override fun nextLong(): Long {
 
-            it.nextSlot()
-            return it.value()
+            entry.nextSlot()
+            return entry.value
         }
     }
 
-    private inner class EntryIterator: SlotIterator(), MutableIterator<MutableLong2LongMap.MutableEntry> {
+    private inner class EntryIterator : MutableIterator<MutableLong2LongMap.MutableEntry> {
+        private val entry = MutableReusableEntry()
+
+        override fun hasNext(): Boolean = entry.hasNext()
         override fun next(): MutableLong2LongMap.MutableEntry {
-            nextSlot()
-            return object: MutableLong2LongMap.AbstractMutableEntry() {
-                private val slot = slot()
-                override val key: Long = key()
-                override var value: Long = value()
-                    set(value) {
-                        if (keysArr[slot] != key || valuesArr[slot] notEqualsRaw field) throw ConcurrentModificationException()
-                        valuesArr[slot] = value
-                        field = value
-                    }
-            }
+            entry.nextSlot()
+            return entry
         }
-    }
-
-    private inner class Traverser : MutableLong2LongTraverser {
-        private val keysArr = this@Long2LongHashMap.keysArr
-        private val valuesArr = this@Long2LongHashMap.valuesArr
-        private val emptyKey = this@Long2LongHashMap.emptyKey
-        private val mask = keysArr.size - 1
-
-        private var slotsLeft = size
-        private var slot = keysArr.size
-        private var _key = emptyKey
-
-        override val key: Long get() {
-            check(_key != emptyKey)
-            return _key
-        }
-        override var value: Long
-            get() {
-                check(_key != emptyKey)
-                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                return valuesArr[slot] as Long
-            }
-            set(value) {
-                check(_key != emptyKey)
-                if (keysArr !== this@Long2LongHashMap.keysArr) throw ConcurrentModificationException()
-                valuesArr[slot] = value
-            }
-
-        override fun forward(): Boolean {
-            if (slotsLeft <= 0) return false
-            if (keysArr !== this@Long2LongHashMap.keysArr) throw ConcurrentModificationException()
-
-            while (true) {
-                slot = (slot - 1) and mask
-                _key = keysArr[slot]
-                if (_key != emptyKey) {
-                    --slotsLeft
-                    return true
-                }
-            }
-        }
-
-        override fun remove() {
-            check(_key != emptyKey)
-            if (keysArr !== this@Long2LongHashMap.keysArr) throw ConcurrentModificationException()
-
-            removeSlot(slot)
-            _key = emptyKey
-        }
+        override fun remove() = entry.remove()
     }
 
     private fun Long.slot(mask: Int): Int = Hash.mix(this) and mask

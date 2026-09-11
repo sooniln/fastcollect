@@ -1,7 +1,7 @@
 /**
- * Methods for dealing with primitive PriorityQueues.
+ * Methods for dealing with DoublePriorityQueues.
  */
-@file:JvmName("PriorityQueues")
+@file:JvmName("DoublePriorityQueues")
 @file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
@@ -10,6 +10,10 @@ import java.util.AbstractQueue
 import java.util.Queue
 
 public fun AbstractDoublePriorityQueue.asQueue(): Queue<Double> = DoublePriorityQueueWrapper(this)
+
+public fun AbstractDoublePriorityQueue.forEachWhile(action: DoublePredicate) {
+    forEach { if (!action.test(it)) return }
+}
 
 private class DoublePriorityQueueWrapper(private val queue: AbstractDoublePriorityQueue) : AbstractQueue<Double>() {
     override val size: Int get() = queue.size

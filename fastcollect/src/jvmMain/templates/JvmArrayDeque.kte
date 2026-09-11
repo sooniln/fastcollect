@@ -1,0 +1,17 @@
+/**
+ * Methods for dealing with ${Type}ArrayDeques.
+ */
+@file:JvmName("${Type}ArrayDeques")
+@file:JvmMultifileClass
+
+package io.github.sooniln.fastcollect
+
+import kotlin.jvm.JvmMultifileClass
+
+public fun ${Type}ArrayDeque.forEachWhile(action: ${Type}Predicate) {
+    forEach { if (!action.test(it)) return }
+}
+
+public fun ${Type}ArrayDeque.forEachWhileReverse(action: ${Type}Predicate) {
+    forEachReverse { if (!action.test(it)) return }
+}

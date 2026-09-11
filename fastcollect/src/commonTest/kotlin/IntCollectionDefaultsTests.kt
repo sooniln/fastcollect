@@ -66,7 +66,6 @@ class IntCollectionDefaultsTests {
             collection.clear()
             assertTrue(collection.isEmpty())
             assertFalse(collection.iterator().hasNext())
-            assertFalse(collection.traverser().forward())
         }
     }
 

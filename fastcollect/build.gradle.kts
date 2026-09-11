@@ -38,8 +38,6 @@ tasks.register<Sync>("generateCommonMain") {
     generate(
         "commonMain",
         listOf(
-            TemplateInstantiation("ValueTraversable.kte", typeExpansions()) { "${it["Type"]}Traversable.kt" },
-            TemplateInstantiation("KeyValueTraversable.kte", keyValueExpansions()) { "${it["Name"]}Traversable.kt" },
             TemplateInstantiation("Iterator.kte", typeExpansions()) { "${it["Type"]}Iterator.kt" },
             TemplateInstantiation("Collection.kte", typeExpansions()) { "${it["Type"]}Collection.kt" },
             TemplateInstantiation("List.kte", typeExpansions()) { "${it["Type"]}List.kt" },
@@ -68,9 +66,12 @@ tasks.register<Sync>("generateJvmMain") {
     generate(
         "jvmMain",
         listOf(
-            TemplateInstantiation("JvmValueTraversable.kte", typeExpansions()) { "Jvm${it["Type"]}Traversable.kt" },
-            TemplateInstantiation("JvmKeyValueTraversable.kte", keyValueExpansions()) { "Jvm${it["Name"]}Traversable.kt" },
-            TemplateInstantiation("JvmMap.kte", keyValueExpansions()) { "Jvm${it["Name"]}Maps.kt" },
+            TemplateInstantiation("JvmArrayDeque.kte", typeExpansions()) { "Jvm${it["Type"]}ArrayDeque.kt" },
+            TemplateInstantiation("JvmCollection.kte", typeExpansions()) { "Jvm${it["Type"]}Collection.kt" },
+            TemplateInstantiation("JvmHashMap.kte", keyValueExpansions()) { "Jvm${it["Name"]}HashMap.kt" },
+            TemplateInstantiation("JvmHashSet.kte", typeExpansions(setTypes)) { "Jvm${it["Type"]}HashSet.kt" },
+            TemplateInstantiation("JvmList.kte", typeExpansions()) { "Jvm${it["Type"]}List.kt" },
+            TemplateInstantiation("JvmMap.kte", keyValueExpansions()) { "Jvm${it["Name"]}Map.kt" },
             TemplateInstantiation("JvmPriorityQueue.kte", typeExpansions()) { "Jvm${it["Type"]}PriorityQueue.kt" },
         ),
     )
@@ -138,7 +139,7 @@ dokka {
 
     dokkaSourceSets.all {
         sourceLink {
-            localDirectory = file("src/main/kotlin")
+            localDirectory = rootDir
             remoteUrl = uri("https://github.com/sooniln/fastcollect/blob/main/")
             remoteLineSuffix = "#L"
         }

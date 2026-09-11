@@ -11,6 +11,7 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmSynthetic
 
 @Suppress("UNCHECKED_CAST")
@@ -50,7 +51,7 @@ public inline fun  buildInt2FloatMap(expectedSize: Int = 0, builderAction: Mutab
  * cases more easily.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public interface Int2FloatMap : Int2FloatTraversable {
+public interface Int2FloatMap {
 
     @get:JvmName("size")
     public val size: Int
@@ -76,15 +77,15 @@ public interface Int2FloatMap : Int2FloatTraversable {
     public fun getOrDefault(key: Int, defaultValue: @UnsafeVariance Float): Float = getOrElse(key) { defaultValue }
 
     public fun containsKey(key: Int): Boolean {
-        traverseKeys { k ->
-            if (k equalsRaw key) return true
+        for (entry in this) {
+            if (entry.key equalsRaw key) return true
         }
         return false
     }
 
     public fun containsValue(value: @UnsafeVariance Float): Boolean {
-        traverse { _, v ->
-            if (v equalsRaw value) return true
+        for (entry in this) {
+            if (entry.value equalsRaw value) return true
         }
         return false
     }
@@ -95,6 +96,10 @@ public interface Int2FloatMap : Int2FloatTraversable {
     @get:JvmName("values")
     public val values: FloatCollection
 
+    /**
+     * Returns an iterator over entries in this map. Each returned entry becomes invalid (and may be reused by the
+     * underlying code as soon as [Iterator.next] is invoked. Do not retain references to the entries.
+     */
     public operator fun iterator(): Iterator<Entry>
 
     /** Prefer to always implement this interface via [AbstractEntry] for correct behavior. */
@@ -116,6 +121,25 @@ public interface Int2FloatMap : Int2FloatTraversable {
 
 public fun  Int2FloatMap.isNotEmpty(): Boolean = size != 0
 
+@JvmSynthetic
+
+public fun <A : Appendable> Int2FloatMap.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", transform: ((Int2FloatMap.Entry) -> CharSequence)? = null): A {
+
+    buffer.append(prefix)
+    var first = true
+    for (entry in this) {
+        if (first) first = false else buffer.append(separator)
+        buffer.append(if (transform == null) entry.toString() else transform(entry))
+    }
+    buffer.append(postfix)
+    return buffer
+}
+
+@JvmOverloads
+public fun  Int2FloatMap.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = ""): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, null).toString()
+}
+
 public fun  Int2FloatMap.asMap(): Map<Int, Float> = Int2FloatMapWrapper(this)
 
 public fun  Int2FloatMap.Entry.asEntry(): Map.Entry<Int, Float> = Int2FloatMapEntryWrapper(this)
@@ -133,7 +157,7 @@ public inline fun  Int2FloatMap.getOrElse(key: Int, defaultValue: () -> Float): 
 /**
  * A mutable map of Ints to Floats.
  */
-public interface MutableInt2FloatMap : Int2FloatMap, MutableInt2FloatTraversable {
+public interface MutableInt2FloatMap : Int2FloatMap {
 
     public fun put(key: Int, value: Float): Float
 
@@ -164,8 +188,8 @@ public interface MutableInt2FloatMap : Int2FloatMap, MutableInt2FloatTraversable
     public fun clear()
 
     public fun putAll(from: Int2FloatMap) {
-        from.traverse { key, value ->
-            set(key, value)
+        for (entry in from) {
+            set(entry.key, entry.value)
         }
     }
 
@@ -256,10 +280,10 @@ public abstract class AbstractInt2FloatMap : Int2FloatMap {
         if (other is Int2FloatMap) {
             if (other.size != size) return false
 
-            traverse { key, value ->
-                if (!(other.getOrElse(key) { return false } equalsRaw value)) return false
+            for (entry in this) {
+                val key = entry.key
+                if (!(other.getOrElse(key) { return false } equalsRaw entry.value)) return false
             }
-
             return true
         }
 
@@ -268,8 +292,8 @@ public abstract class AbstractInt2FloatMap : Int2FloatMap {
 
     override fun hashCode(): Int {
         var result = 0
-        traverse { key, value ->
-            result += key.hashCode() xor value.hashCode()
+        for (entry in this) {
+            result += entry.key.hashCode() xor entry.value.hashCode()
         }
         return result
     }
@@ -297,7 +321,6 @@ private object EmptyInt2FloatMap : AbstractInt2FloatMap() {
     override fun get(key: Int): Float = Float.NaN
     override val values: FloatCollection get() = emptyFloatList()
     override fun iterator(): Iterator<Int2FloatMap.Entry> = emptyList<Int2FloatMap.Entry>().iterator()
-    override fun traverser(): Int2FloatTraverser = emptyInt2FloatTraverser()
 
 }
 
@@ -328,23 +351,6 @@ private class SingletonInt2FloatMap(
             return SimpleEntry(key, value)
         }
     }
-
-    override fun traverser(): Int2FloatTraverser = object : Int2FloatTraverser {
-        private var complete = false
-        override val key: Int get() {
-            check(complete)
-            return this@SingletonInt2FloatMap.key
-        }
-        override val value: Float get() {
-            check(complete)
-            return this@SingletonInt2FloatMap.value
-        }
-        override fun forward(): Boolean {
-            if (complete) return false
-            complete = true
-            return true
-        }
-    }
 }
 
 private class Int2FloatMapWrapper(private val map: Int2FloatMap) : AbstractMap<Int, Float>() {
@@ -370,7 +376,10 @@ private class Int2FloatMapWrapper(private val map: Int2FloatMap) : AbstractMap<I
         override fun iterator(): Iterator<Map.Entry<Int, Float>> = object : Iterator<Map.Entry<Int, Float>> {
             private val it = map.iterator()
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): Map.Entry<Int, Float> = it.next().asEntry()
+            override fun next(): Map.Entry<Int, Float> {
+                val entry = it.next()
+                return AbstractInt2FloatMap.SimpleEntry(entry.key, entry.value).asEntry()
+            }
         }
     }
 }
@@ -423,7 +432,19 @@ private class MutableInt2FloatMapWrapper(private val map: MutableInt2FloatMap) :
             private val it = map.iterator()
 
             override fun hasNext(): Boolean = it.hasNext()
-            override fun next(): MutableMap.MutableEntry<Int, Float> = it.next().asEntry()
+
+            override fun next(): MutableMap.MutableEntry<Int, Float> {
+                val (entryKey, entryValue) = it.next()
+                return object : MutableInt2FloatMap.AbstractMutableEntry() {
+                    override val key: Int = entryKey
+                    override var value: Float = entryValue
+                        set(value) {
+                            map.put(key, value)
+                            field = value
+                        }
+                }.asEntry()
+            }
+
             override fun remove() = it.remove()
         }
     }

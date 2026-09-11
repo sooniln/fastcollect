@@ -116,16 +116,16 @@ class Int2IntHashMapTests {
     // ---------- iteration ----------
 
     @Test
-    fun traverseRemove_visitsEveryEntryExactlyOnceAndRemovesMatching() {
+    fun iteratorRemove_visitsEveryEntryExactlyOnceAndRemovesMatching() {
         val map = Int2IntHashMap()
         for (i in 1..50) map[i] = i + 1000
 
         val visited = mutableListOf<Int>()
-        val traverser = map.traverser()
-        while (traverser.forward()) {
-            val key = traverser.key
+        val iterator = map.iterator()
+        while (iterator.hasNext()) {
+            val key = iterator.next().key
             visited.add(key)
-            if (key % 2 == 0) traverser.remove()
+            if (key % 2 == 0) iterator.remove()
         }
 
         assertEquals((1..50).toList(), visited.sorted(), "every entry must be visited exactly once")

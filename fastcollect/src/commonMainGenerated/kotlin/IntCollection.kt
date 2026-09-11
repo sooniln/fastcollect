@@ -2,19 +2,23 @@
  * Methods for dealing with IntCollections.
  */
 @file:JvmName("IntCollections")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmSynthetic
 
 /**
  * A collection of Ints.
  */
 @Suppress("INAPPLICABLE_JVM_NAME")
-public interface IntCollection : IntTraversable, Iterable<Int> {
+public interface IntCollection {
 
     @get:JvmName("size")
     public val size: Int
@@ -23,18 +27,18 @@ public interface IntCollection : IntTraversable, Iterable<Int> {
         return size == 0
     }
 
-    override fun iterator(): IntIterator
+    public operator fun iterator(): IntIterator
 
     public fun contains(element: Int): Boolean {
-        traverse { e ->
+        for (e in this) {
             if (e equalsRaw element) return true
         }
         return false
     }
 
     public fun containsAll(elements: IntCollection): Boolean {
-        elements.traverse { element ->
-            if (!contains(element)) {
+        for (e in elements) {
+            if (!contains(e)) {
                 return false
             }
         }
@@ -52,39 +56,119 @@ public interface IntCollection : IntTraversable, Iterable<Int> {
 
     /**
      * Copies all of the elements of this collection into [destination], starting at [destinationOffset], and returns
-     * [destination].
+     * [destination]. Throws [IndexOutOfBoundsException] if the [destination] is not large enough for all elements.
      */
     public fun copyInto(destination: IntArray, destinationOffset: Int = 0): IntArray {
         destination.rangeCheck(destinationOffset, destinationOffset + size)
         var index = destinationOffset
-        traverse { element -> destination[index++] = element }
+        for (element in this) {
+            destination[index++] = element
+        }
         return destination
     }
+
+    /**
+     * Returns a new array containing all elements in this collection.
+     */
+    public fun toArray(): IntArray = copyInto(IntArray(size))
 }
 
-public fun IntCollection.toArray(): IntArray = copyInto(IntArray(size))
-
 public fun IntCollection.isNotEmpty(): Boolean = size != 0
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.any(predicate: (Int) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    for (element in this) {
+        if (predicate(element)) return true
+    }
+    return false
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.all(predicate: (Int) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any { !predicate(it) }
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.none(predicate: (Int) -> Boolean): Boolean {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    return !any(predicate)
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.find(defaultValue: Int, predicate: (Int) -> Boolean): Int {
+    contract { callsInPlace(predicate, InvocationKind.UNKNOWN) }
+    for (element in this) {
+        if (predicate(element)) return element
+    }
+    return defaultValue
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun <R> IntCollection.fold(initial: R, operation: (accumulator: R, Int) -> R): R {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+    var accumulator = initial
+    for (element in this) {
+        accumulator = operation(accumulator, element)
+    }
+    return accumulator
+}
+
+@JvmSynthetic
+@OptIn(ExperimentalContracts::class)
+public inline fun IntCollection.reduce(operation: (accumulator: Int, Int) -> Int): Int {
+    contract { callsInPlace(operation, InvocationKind.UNKNOWN) }
+    val iterator = this.iterator()
+    var accumulator = iterator.next()
+    while (iterator.hasNext()) {
+        accumulator = operation(accumulator, iterator.next())
+    }
+    return accumulator
+}
+
+@JvmSynthetic
+public fun <A : Appendable> IntCollection.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", transform: ((Int) -> CharSequence)? = null): A {
+    buffer.append(prefix)
+    var first = true
+    for (element in this) {
+        if (first) first = false else buffer.append(separator)
+        buffer.append(if (transform == null) element.toString() else transform(element))
+    }
+    buffer.append(postfix)
+    return buffer
+}
+
+@JvmOverloads
+public fun IntCollection.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = ""): String {
+    return joinTo(StringBuilder(), separator, prefix, postfix, null).toString()
+}
 
 /**
  * A mutable collection of Ints.
  */
-public interface MutableIntCollection : IntCollection, MutableIntTraversable {
+public interface MutableIntCollection : IntCollection {
     override fun iterator(): MutableIntIterator
 
     public fun add(element: Int): Boolean
     public fun remove(element: Int): Boolean
 
     public fun clear() {
-        val traverser = traverser()
-        while (traverser.forward()) {
-            traverser.remove()
+        val iterator = iterator()
+        while (iterator.hasNext()) {
+            iterator.nextInt()
+            iterator.remove()
         }
     }
 
     public fun addAll(elements: IntCollection): Boolean {
         var modified = false
-        elements.traverse { element ->
+        for (element in elements) {
             modified = add(element) or modified
         }
         return modified
@@ -125,15 +209,16 @@ public interface MutableIntCollection : IntCollection, MutableIntTraversable {
     }
 }
 
+@JvmSynthetic
 @OptIn(ExperimentalContracts::class)
-private inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) -> Boolean): Boolean {
+internal inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) -> Boolean): Boolean {
     contract { callsInPlace(removePredicate, InvocationKind.UNKNOWN) }
 
     var modified = false
-    val traverser = traverser()
-    while (traverser.forward()) {
-        if (removePredicate(traverser.value)) {
-            traverser.remove()
+    val iterator = iterator()
+    while (iterator.hasNext()) {
+        if (removePredicate(iterator.nextInt())) {
+            iterator.remove()
             modified = true
         }
     }
@@ -141,7 +226,5 @@ private inline fun MutableIntCollection.filterInPlace(removePredicate: (Int) -> 
 }
 
 public abstract class AbstractIntCollection : IntCollection {
-    override fun toString(): String {
-        return joinToString(", ", "[", "]")
-    }
+    override fun toString(): String = joinToString(", ", "[", "]")
 }

@@ -23,8 +23,8 @@ import kotlin.random.Random
  */
 @Fork(1)
 @Timeout(time = 10, timeUnit = TimeUnit.SECONDS)
-@Warmup(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
-@Measurement(iterations = 10, time = 200, timeUnit = TimeUnit.MILLISECONDS)
+@Warmup(iterations = 10, time = 250, timeUnit = TimeUnit.MILLISECONDS)
+@Measurement(iterations = 5, time = 500, timeUnit = TimeUnit.MILLISECONDS)
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 open class LongListBenchmark {
@@ -84,7 +84,7 @@ open class LongListBenchmark {
     @Benchmark
     fun naiveCopy(state: BaseState): LongArrayList {
         val copy = LongArrayList()
-        state.list.traverse { key -> copy.add(key) }
+        for (key in state.list) copy.add(key)
         return copy
     }
 
@@ -106,14 +106,41 @@ open class LongListBenchmark {
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
     fun iterate(state: BaseState, bh: Blackhole) {
+        var sum = 0L
         for (element in state.list) {
-            bh.consume(element)
+            sum += element
         }
+        bh.consume(sum)
     }
 
     @OutputTimeUnit(TimeUnit.MICROSECONDS)
     @Benchmark
-    fun traverse(state: BaseState, bh: Blackhole) {
-        state.list.traverse { element -> bh.consume(element) }
+    fun iterateReverse(state: BaseState, bh: Blackhole) {
+        var sum = 0L
+        val iterator = state.list.listIterator(state.list.size)
+        while (iterator.hasPrevious()) {
+            sum += iterator.previousLong()
+        }
+        bh.consume(sum)
+    }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun forEach(state: BaseState, bh: Blackhole) {
+        var sum = 0L
+        state.list.forEach { element ->
+            sum += element
+        }
+        bh.consume(sum)
+    }
+
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    @Benchmark
+    fun forEachReverse(state: BaseState, bh: Blackhole) {
+        var sum = 0L
+        state.list.forEachReverse { element ->
+            sum += element
+        }
+        bh.consume(sum)
     }
 }

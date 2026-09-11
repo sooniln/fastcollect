@@ -14,6 +14,16 @@ public fun doubleIteratorOf(value: Double): DoubleIterator = SingletonDoubleIter
 
 public abstract class MutableDoubleIterator : DoubleIterator(), MutableIterator<Double>
 
+public abstract class DoubleListIterator : DoubleIterator(), ListIterator<Double> {
+    public abstract fun previousDouble(): Double
+    final override fun previous(): Double = previousDouble()
+}
+
+public abstract class MutableDoubleListIterator : DoubleListIterator(), MutableListIterator<Double> {
+    abstract override fun set(element: Double)
+    abstract override fun add(element: Double)
+}
+
 private object EmptyDoubleIterator : MutableDoubleIterator() {
     override fun hasNext(): Boolean = false
     override fun nextDouble(): Double = throw NoSuchElementException()

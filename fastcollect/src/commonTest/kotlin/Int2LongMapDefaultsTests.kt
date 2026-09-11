@@ -51,7 +51,6 @@ class Int2LongMapDefaultsTests {
         assertEquals(99L, empty.getOrDefault(1, 99L))
         assertEquals(99L, empty.getOrElse(1) { 99L })
         assertFalse(empty.iterator().hasNext())
-        assertFalse(empty.traverser().forward())
         assertTrue(empty.keys.isEmpty())
         assertTrue(empty.values.isEmpty())
         assertEquals("{}", empty.toString())
@@ -78,7 +77,7 @@ class Int2LongMapDefaultsTests {
     }
 
     @Test
-    fun singletonMap_iteratorAndTraverserYieldOneEntry() {
+    fun singletonMap_iteratorYieldsOneEntry() {
         val single = int2LongMapOf(1 to 10L)
 
         val iterator = single.iterator()
@@ -88,14 +87,6 @@ class Int2LongMapDefaultsTests {
         assertEquals(10L, entry.value)
         assertFalse(iterator.hasNext())
         assertFailsWith<NoSuchElementException> { iterator.next() }
-
-        val traverser = single.traverser()
-        assertFailsWith<IllegalStateException> { traverser.key }
-        assertFailsWith<IllegalStateException> { traverser.value }
-        assertTrue(traverser.forward())
-        assertEquals(1, traverser.key)
-        assertEquals(10L, traverser.value)
-        assertFalse(traverser.forward())
     }
 
     // ---------- inline lookup helpers ----------

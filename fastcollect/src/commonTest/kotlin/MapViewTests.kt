@@ -52,7 +52,7 @@ class MapViewTests {
         map[0] = 0L
 
         val fromForeachKey = mutableListOf<Int>()
-        map.traverseKeys { fromForeachKey.add(it) }
+        for (entry in map) fromForeachKey.add(entry.key)
 
         // hash iteration order is unspecified, so only the multiset is guaranteed
         assertEquals((0..50).toList(), fromForeachKey.sorted())
@@ -60,12 +60,11 @@ class MapViewTests {
     }
 
     @Test
-    fun keys_traverserVisitsEveryKeyOnce() {
+    fun keys_iteratorVisitsEveryKeyOnce() {
         val map = mutableInt2LongMapOf(1 to 10L, 2 to 20L, 3 to 30L)
 
         val seen = mutableListOf<Int>()
-        val traverser = map.keys.traverser()
-        while (traverser.forward()) seen.add(traverser.value)
+        for (key in map.keys) seen.add(key)
 
         assertEquals(listOf(1, 2, 3), seen.sorted())
     }
@@ -141,19 +140,18 @@ class MapViewTests {
         for (i in 1..50) map[i] = i.toLong() * 10
 
         val fromEntries = mutableListOf<Long>()
-        map.traverse { _, v -> fromEntries.add(v) }
+        for (entry in map) fromEntries.add(entry.value)
 
         // hash iteration order is unspecified, so only the multiset is guaranteed
         assertEquals(fromEntries.sorted(), map.values.toBoxedList().sorted())
     }
 
     @Test
-    fun values_traverserVisitsEveryValueOnce() {
+    fun values_iteratorVisitsEveryValueOnce() {
         val map = mutableInt2LongMapOf(1 to 10L, 2 to 20L, 3 to 30L)
 
         val seen = mutableListOf<Long>()
-        val traverser = map.values.traverser()
-        while (traverser.forward()) seen.add(traverser.value)
+        for (value in map.values) seen.add(value)
 
         assertEquals(listOf(10L, 20L, 30L), seen.sorted())
     }

@@ -13,7 +13,7 @@ the template files rather than the generated output.
 # Java APIs
 
 This library is intended to be used from Java code as a first class client as well as from Kotlin. The ApiTest test
-will help catch many issues with JVM APIs and Kotlin name mangling. The current ABI is found at api/fastgraph.api
+will help catch many issues with JVM APIs and Kotlin name mangling. The current ABI is found at api/fastcollect.api
 and can be updated via the `updateKotlinAbi` Gradle task. This is useful for determining what is actually part of the
 public API, and which names are currently mangled. This library must never ship any mangled names as part of the public
 ABI.

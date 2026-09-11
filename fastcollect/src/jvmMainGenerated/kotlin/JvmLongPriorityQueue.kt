@@ -1,7 +1,7 @@
 /**
- * Methods for dealing with primitive PriorityQueues.
+ * Methods for dealing with LongPriorityQueues.
  */
-@file:JvmName("PriorityQueues")
+@file:JvmName("LongPriorityQueues")
 @file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
@@ -10,6 +10,10 @@ import java.util.AbstractQueue
 import java.util.Queue
 
 public fun AbstractLongPriorityQueue.asQueue(): Queue<Long> = LongPriorityQueueWrapper(this)
+
+public fun AbstractLongPriorityQueue.forEachWhile(action: LongPredicate) {
+    forEach { if (!action.test(it)) return }
+}
 
 private class LongPriorityQueueWrapper(private val queue: AbstractLongPriorityQueue) : AbstractQueue<Long>() {
     override val size: Int get() = queue.size

@@ -43,7 +43,7 @@ public infix fun DoubleSet.intersect(other: DoubleSet): DoubleSet {
     if (other.size > size) return other.intersect(this)
 
     val set = DoubleHashSet(other.size)
-    other.traverse { element ->
+    for (element in other) {
         if (contains(element)) set.add(element)
     }
     return set
@@ -51,7 +51,7 @@ public infix fun DoubleSet.intersect(other: DoubleSet): DoubleSet {
 
 public infix fun DoubleSet.subtract(other: DoubleSet): DoubleSet {
     val set = DoubleHashSet(size)
-    traverse { element ->
+    for (element in this) {
         if (!other.contains(element)) set.add(element)
     }
     return set
@@ -75,7 +75,7 @@ public abstract class AbstractDoubleSet : AbstractDoubleCollection(), DoubleSet 
 
     override fun hashCode(): Int {
         var hashCode = 0
-        traverse { element ->
+        for (element in this) {
             hashCode += element.hashCode()
         }
         return hashCode
@@ -95,7 +95,6 @@ private object EmptyDoubleSet : AbstractDoubleSet() {
     override fun containsAll(elements: DoubleCollection): Boolean = elements.isEmpty()
 
     override fun iterator(): DoubleIterator = emptyDoubleIterator()
-    override fun traverser(): DoubleTraverser = emptyDoubleTraverser()
 }
 
 private class SingletonDoubleSet(private val value: Double) : AbstractDoubleSet() {
@@ -111,19 +110,6 @@ private class SingletonDoubleSet(private val value: Double) : AbstractDoubleSet(
             if (complete) throw NoSuchElementException()
             complete = true
             return value
-        }
-    }
-
-    override fun traverser(): DoubleTraverser = object : DoubleTraverser {
-        private var complete = false
-        override val value: Double get() {
-            check(complete)
-            return this@SingletonDoubleSet.value
-        }
-        override fun forward(): Boolean {
-            if (complete) return false
-            complete = true
-            return true
         }
     }
 }

@@ -108,25 +108,25 @@ class IntHashSetTests {
     // ---------- iteration ----------
 
     @Test
-    fun traverse_matchesIterator() {
+    fun iteration_visitsEveryElement() {
         val set = IntHashSet()
         for (i in 0..50) set.add(i)
 
         val fromForeach = mutableListOf<Int>()
-        set.traverse { fromForeach.add(it) }
+        for (value in set) fromForeach.add(value)
 
         // hash iteration order is unspecified, so only the multiset is guaranteed
         assertEquals((0..50).toList(), fromForeach.sorted())
     }
 
     @Test
-    fun traverse_emptyAndSingletonSet_matchesIterator() {
+    fun iteration_emptyAndSingletonSet() {
         val fromEmpty = mutableListOf<Int>()
-        IntHashSet().traverse { fromEmpty.add(it) }
+        for (value in IntHashSet()) fromEmpty.add(value)
         assertEquals(emptyList(), fromEmpty)
 
         val fromSingleton = mutableListOf<Int>()
-        IntHashSet(intListOf(42)).traverse { fromSingleton.add(it) }
+        for (value in IntHashSet(intListOf(42))) fromSingleton.add(value)
         assertEquals(listOf(42), fromSingleton)
     }
 
@@ -159,16 +159,16 @@ class IntHashSetTests {
     }
 
     @Test
-    fun traverseRemove_visitsEveryElementExactlyOnceAndRemovesMatching() {
+    fun iteratorRemove_visitsEveryElementExactlyOnceAndRemovesMatching() {
         val set = IntHashSet()
         for (i in 1..50) set.add(i)
 
         val visited = mutableListOf<Int>()
-        val traverser = set.traverser()
-        while (traverser.forward()) {
-            val value = traverser.value
+        val iterator = set.iterator()
+        while (iterator.hasNext()) {
+            val value = iterator.nextInt()
             visited.add(value)
-            if (value % 2 == 0) traverser.remove()
+            if (value % 2 == 0) iterator.remove()
         }
 
         assertEquals((1..50).toList(), visited.sorted(), "every element must be visited exactly once")
@@ -176,23 +176,23 @@ class IntHashSetTests {
     }
 
     @Test
-    fun traverser_valueBeforeFirstForward_throws() {
-        val traverser = IntHashSet(intListOf(1)).traverser()
-        assertFailsWith<IllegalStateException> { traverser.value }
-        assertTrue(traverser.forward())
-        assertEquals(1, traverser.value)
-        assertFalse(traverser.forward())
+    fun iterator_advancesPastTheLastElement() {
+        val iterator = IntHashSet(intListOf(1)).iterator()
+        assertTrue(iterator.hasNext())
+        assertEquals(1, iterator.nextInt())
+        assertFalse(iterator.hasNext())
+        assertFailsWith<NoSuchElementException> { iterator.nextInt() }
     }
 
     @Test
-    fun traverser_valueAfterRemove_throwsUntilTheNextForward() {
+    fun iterator_removeTwiceInARowThrows() {
         val set = IntHashSet(intListOf(1, 2))
-        val traverser = set.traverser()
-        assertTrue(traverser.forward())
-        traverser.remove()
-        assertFailsWith<IllegalStateException> { traverser.value }
-        assertTrue(traverser.forward())
-        traverser.value
+        val iterator = set.iterator()
+        iterator.nextInt()
+        iterator.remove()
+        assertFailsWith<IllegalStateException> { iterator.remove() }
+        assertTrue(iterator.hasNext())
+        iterator.nextInt()
     }
 
     // ---------- equality ----------

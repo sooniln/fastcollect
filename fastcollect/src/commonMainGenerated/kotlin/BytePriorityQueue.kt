@@ -2,12 +2,14 @@
  * Methods for dealing with BytePriorityQueues.
  */
 @file:JvmName("BytePriorityQueues")
+@file:JvmMultifileClass
 
 package io.github.sooniln.fastcollect
 
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmSynthetic
@@ -65,7 +67,10 @@ public abstract class AbstractBytePriorityQueue(capacity: Int): ByteCollection {
         require(capacity >= 0)
     }
 
-    private var heap: ByteArray = if (capacity == 0) EMPTY_ARRAY else ByteArray(capacity)
+    @PublishedApi
+    @get:JvmSynthetic
+    @set:JvmSynthetic
+    internal var heap: ByteArray = if (capacity == 0) EMPTY_ARRAY else ByteArray(capacity)
 
     @get:JvmName("size")
     final override var size: Int = 0
@@ -191,7 +196,7 @@ public abstract class AbstractBytePriorityQueue(capacity: Int): ByteCollection {
 
     public fun addAll(elements: ByteCollection) {
         ensureCapacity(size + elements.size)
-        elements.traverse { element ->
+        for (element in elements) {
             heap[size] = element
             onIndexChanged(element, size)
             ++size
@@ -270,20 +275,12 @@ public abstract class AbstractBytePriorityQueue(capacity: Int): ByteCollection {
         }
     }
 
-    final override fun traverser(): ByteTraverser = object : ByteTraverser {
-        private val last = size - 1
-        private var position: Int = -1
-
-        override val value: Byte get() {
-            check(position >= 0)
-            return heap[position]
-        }
-
-        override fun forward(): Boolean {
-            if (position >= last) return false
-            if (last != size - 1) throw ConcurrentModificationException()
-            ++position
-            return true
+    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    @JvmSynthetic
+    public inline fun forEach(action: (Byte) -> Unit) {
+        val heap = heap
+        for (i in 0..<size) {
+            action(heap[i])
         }
     }
 

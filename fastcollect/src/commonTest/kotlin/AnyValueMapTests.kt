@@ -114,10 +114,10 @@ class AnyValueMapTests {
         entry.value = listOf("c")
         assertEquals(listOf("c"), map[1L])
 
-        val traverser = map.traverser()
-        assertTrue(traverser.forward())
-        assertEquals(listOf("c"), traverser.value)
-        traverser.value = emptyList()
+        val iterator = map.iterator()
+        val sameEntry = iterator.next()
+        assertEquals(listOf("c"), sameEntry.value)
+        sameEntry.value = emptyList()
         assertEquals(emptyList(), map[1L])
     }
 

@@ -7,9 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.sooniln.fastcollect.IntArrayDeque;
 import io.github.sooniln.fastcollect.IntLists;
-import io.github.sooniln.fastcollect.IntTraverser;
 import io.github.sooniln.fastcollect.MutableIntIterator;
-import io.github.sooniln.fastcollect.MutableIntListTraverser;
+import io.github.sooniln.fastcollect.MutableIntListIterator;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
@@ -105,15 +104,11 @@ class IntArrayDequeJavaTest {
         }
         assertEquals(6, sum);
 
-        int traversedSum = 0;
-        for (IntTraverser t = deque.traverser(); t.forward(); ) {
-            traversedSum += t.getValue();
-        }
-        assertEquals(6, traversedSum);
-
-        MutableIntListTraverser positioned = deque.traverser(1);
-        assertTrue(positioned.forward());
-        assertEquals(2, positioned.getValue());
+        MutableIntListIterator positioned = deque.listIterator(1);
+        assertTrue(positioned.hasNext());
+        assertEquals(2, positioned.nextInt());
+        assertEquals(2, positioned.previousInt());
+        assertTrue(positioned.hasPrevious());
     }
 
     @Test

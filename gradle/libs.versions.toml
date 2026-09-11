@@ -5,10 +5,8 @@ jmh = "0.7.3"
 junit = "5.11.4"
 kotlin = "2.4.0"
 mavenPublish = "0.35.0"
-shadow = "9.6.1"
 
 [libraries]
-abi-tools = { module = "org.jetbrains.kotlin:abi-tools", version.ref = "kotlin" }
 guava-testlib = { module = "com.google.guava:guava-testlib", version.ref = "guava" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
@@ -20,4 +18,3 @@ jmh = { id = "me.champeau.jmh", version.ref = "jmh" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
-shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
