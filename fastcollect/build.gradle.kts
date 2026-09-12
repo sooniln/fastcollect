@@ -132,15 +132,15 @@ tasks.named("jvmTest") {
 dokka {
     moduleName = "FastCollect"
     dokkaPublications.html {
-        includes.from("README.md")
         suppressInheritedMembers = true
         failOnWarning = true
     }
 
     dokkaSourceSets.all {
+        includes.from("module.md")
         sourceLink {
             localDirectory = rootDir
-            remoteUrl = uri("https://github.com/sooniln/fastcollect/blob/main/")
+            remoteUrl = uri("https://github.com/sooniln/fastcollect/blob/main")
             remoteLineSuffix = "#L"
         }
     }

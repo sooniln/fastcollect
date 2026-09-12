@@ -1,5 +1,5 @@
-[![Maven Central Version](https://img.shields.io/maven-central/v/io.github.sooniln/fastcollect-kotlin)](https://central.sonatype.com/artifact/io.github.sooniln/fastcollect-kotlin)
-[![javadoc](https://javadoc.io/badge2/io.github.sooniln/fastcollect-kotlin/javadoc.svg)](https://javadoc.io/doc/io.github.sooniln/fastcollect-kotlin)
+[![Maven Central Version](https://img.shields.io/maven-central/v/io.github.sooniln/fastcollect)](https://central.sonatype.com/artifact/io.github.sooniln/fastcollect)
+[![javadoc](https://javadoc.io/badge2/io.github.sooniln/fastcollect/javadoc.svg)](https://javadoc.io/doc/io.github.sooniln/fastcollect)
 
 # FastCollect
 
