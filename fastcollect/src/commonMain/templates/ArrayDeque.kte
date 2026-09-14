@@ -456,7 +456,10 @@ public class ${Type}ArrayDeque private constructor(array: ${Type}Array, size: In
     override fun iterator(): Mutable${Type}Iterator = IteratorImpl()
     override fun listIterator(index: Int): Mutable${Type}ListIterator = ListIteratorImpl(index)
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the ArrayDeque while this method
+     * is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (${Type}) -> Unit) {
         val ring = ring

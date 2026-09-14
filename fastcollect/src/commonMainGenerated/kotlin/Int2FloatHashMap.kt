@@ -478,7 +478,10 @@ public class Int2FloatHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableIterator<MutableInt2FloatMap.MutableEntry> = EntryIterator()
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the Int2FloatHashMap while this
+     * method is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (Int2FloatMap.Entry) -> Unit) {
         val keysArr = keysArr

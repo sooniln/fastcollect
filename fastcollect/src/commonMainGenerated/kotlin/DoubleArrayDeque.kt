@@ -456,7 +456,10 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int)
     override fun iterator(): MutableDoubleIterator = IteratorImpl()
     override fun listIterator(index: Int): MutableDoubleListIterator = ListIteratorImpl(index)
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the ArrayDeque while this method
+     * is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (Double) -> Unit) {
         val ring = ring

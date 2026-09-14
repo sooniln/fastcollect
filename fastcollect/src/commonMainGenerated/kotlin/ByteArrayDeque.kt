@@ -456,7 +456,10 @@ public class ByteArrayDeque private constructor(array: ByteArray, size: Int) : A
     override fun iterator(): MutableByteIterator = IteratorImpl()
     override fun listIterator(index: Int): MutableByteListIterator = ListIteratorImpl(index)
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the ArrayDeque while this method
+     * is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (Byte) -> Unit) {
         val ring = ring

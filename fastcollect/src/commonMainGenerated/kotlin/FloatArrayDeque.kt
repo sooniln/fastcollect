@@ -456,7 +456,10 @@ public class FloatArrayDeque private constructor(array: FloatArray, size: Int) :
     override fun iterator(): MutableFloatIterator = IteratorImpl()
     override fun listIterator(index: Int): MutableFloatListIterator = ListIteratorImpl(index)
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the ArrayDeque while this method
+     * is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (Float) -> Unit) {
         val ring = ring

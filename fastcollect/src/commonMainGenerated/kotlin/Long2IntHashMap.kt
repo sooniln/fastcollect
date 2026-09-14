@@ -478,7 +478,10 @@ public class Long2IntHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableIterator<MutableLong2IntMap.MutableEntry> = EntryIterator()
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the Long2IntHashMap while this
+     * method is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (Long2IntMap.Entry) -> Unit) {
         val keysArr = keysArr

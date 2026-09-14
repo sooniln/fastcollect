@@ -431,7 +431,10 @@ public class Int2IntHashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableIterator<MutableInt2IntMap.MutableEntry> = EntryIterator()
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the Int2IntHashMap while this
+     * method is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (Int2IntMap.Entry) -> Unit) {
         val kvArr = kvArr

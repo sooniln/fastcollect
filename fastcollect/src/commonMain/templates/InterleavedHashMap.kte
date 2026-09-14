@@ -431,7 +431,10 @@ public class ${Name}HashMap @JvmOverloads constructor(
 
     override operator fun iterator(): MutableIterator<Mutable${Name}Map.MutableEntry> = EntryIterator()
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the ${Name}HashMap while this
+     * method is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (${Name}Map.Entry) -> Unit) {
         val kvArr = kvArr

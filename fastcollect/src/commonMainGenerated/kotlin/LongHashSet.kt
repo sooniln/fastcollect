@@ -333,7 +333,10 @@ public class LongHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableLongIterator = Iterator()
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the LongHashSet while this
+     * method is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (Long) -> Unit) {
         val keysArr = keysArr

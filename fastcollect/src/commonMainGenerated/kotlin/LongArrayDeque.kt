@@ -456,7 +456,10 @@ public class LongArrayDeque private constructor(array: LongArray, size: Int) : A
     override fun iterator(): MutableLongIterator = IteratorImpl()
     override fun listIterator(index: Int): MutableLongListIterator = ListIteratorImpl(index)
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the ArrayDeque while this method
+     * is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (Long) -> Unit) {
         val ring = ring

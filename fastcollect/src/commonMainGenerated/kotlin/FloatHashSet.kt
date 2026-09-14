@@ -333,7 +333,10 @@ public class FloatHashSet @JvmOverloads constructor(
 
     override fun iterator(): MutableFloatIterator = Iterator()
 
-    /** Guaranteed to be as fast or faster than using [iterator] to iterate. */
+    /**
+     * Guaranteed to be as fast or faster than using [iterator] to iterate. Modifying the FloatHashSet while this
+     * method is ongoing is not supported and leads to undefined behavior.
+     */
     @JvmSynthetic
     public inline fun forEach(action: (Float) -> Unit) {
         val keysArr = keysArr
