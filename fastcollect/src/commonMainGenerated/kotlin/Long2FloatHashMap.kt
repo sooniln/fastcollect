@@ -107,11 +107,11 @@ public class Long2FloatHashMap @JvmOverloads constructor(
 
     override fun get(key: Long): Float = findSlot(key, { slot -> valuesArr[slot] }, { defaultValue })
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    override fun getValue(key: Long): Float = findSlot(key, { slot -> valuesArr[slot] as Float }, { throw NoSuchElementException() })
+    @Suppress("UNCHECKED_CAST")
+    override fun getValue(key: Long): Float = findSlot(key, { slot -> valuesArr[slot] }, { throw NoSuchElementException() })
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    override fun getOrDefault(key: Long, defaultValue: Float): Float = findSlot(key, { slot -> valuesArr[slot] as Float }, { defaultValue })
+    @Suppress("UNCHECKED_CAST")
+    override fun getOrDefault(key: Long, defaultValue: Float): Float = findSlot(key, { slot -> valuesArr[slot] }, { defaultValue })
 
     override fun put(key: Long, value: Float): Float {
         var returnValue = defaultValue
@@ -137,8 +137,8 @@ public class Long2FloatHashMap @JvmOverloads constructor(
         return findSlot(key, { slot ->
             val oldValue = valuesArr[slot]
             valuesArr[slot] = value
-            @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-            oldValue as Float
+            @Suppress("UNCHECKED_CAST")
+            oldValue
         }, {
             throw NoSuchElementException()
         })
@@ -161,8 +161,8 @@ public class Long2FloatHashMap @JvmOverloads constructor(
             { slot ->
                 val oldValue = valuesArr[slot]
                 removeSlot(slot)
-                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                oldValue as Float
+                @Suppress("UNCHECKED_CAST")
+                oldValue
             },
             { throw NoSuchElementException() })
     }
@@ -321,8 +321,8 @@ public class Long2FloatHashMap @JvmOverloads constructor(
             for (slot in oldKeysArr.indices) {
                 val key = oldKeysArr[slot]
                 if (key != oldEmptyKey) {
-                    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                    putIfAbsent(key, oldValuesArr[slot] as Float)
+                    @Suppress("UNCHECKED_CAST")
+                    putIfAbsent(key, oldValuesArr[slot])
                 }
             }
         } else {
@@ -387,7 +387,7 @@ public class Long2FloatHashMap @JvmOverloads constructor(
         }
     }
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    @Suppress("UNCHECKED_CAST")
     private fun rehash(capacity: Int) {
         check(capacity >= size)
 
@@ -503,8 +503,8 @@ public class Long2FloatHashMap @JvmOverloads constructor(
     ) : Long2FloatMap.AbstractEntry() {
         @set:JvmSynthetic
         override var key: Long = 0.toLong()
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        override val value: Float get() = valuesArr[slot] as Float
+        @Suppress("UNCHECKED_CAST")
+        override val value: Float get() = valuesArr[slot]
     }
 
     private inner class MutableReusableEntry : MutableLong2FloatMap.AbstractMutableEntry() {
@@ -536,11 +536,11 @@ public class Long2FloatHashMap @JvmOverloads constructor(
             return keysArr[previousSlot]
         }
 
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        @Suppress("UNCHECKED_CAST")
         override var value: Float
             get() {
                 check(previousSlot != -1)
-                return valuesArr[previousSlot] as Float
+                return valuesArr[previousSlot]
             }
             set(value) {
                 check(previousSlot != -1)

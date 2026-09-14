@@ -150,8 +150,8 @@ public inline fun  Int2DoubleMap.getOrElse(key: Int, defaultValue: () -> Double)
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = get(key)
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as Double
+    @Suppress("UNCHECKED_CAST")
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
 }
 
 /**
@@ -221,8 +221,8 @@ public inline fun  MutableInt2DoubleMap.merge(key: Int, value: Double, merge: (o
 
     val oldValue = get(key)
     val absent = isDefaultValue(oldValue) && !containsKey(key)
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    val newValue = if (absent) value else merge(oldValue as Double, value)
+    @Suppress("UNCHECKED_CAST")
+    val newValue = if (absent) value else merge(oldValue, value)
     if (absent || !(newValue equalsRaw oldValue)) {
         set(key, newValue)
     }
@@ -240,8 +240,8 @@ public inline fun  MutableInt2DoubleMap.getOrPut(key: Int, defaultValue: () -> D
         set(key, value)
         return value
     } else {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        return value as Double
+        @Suppress("UNCHECKED_CAST")
+        return value
     }
 }
 
@@ -251,8 +251,8 @@ public inline fun  MutableInt2DoubleMap.replaceOrSet(key: Int, value: Double, ol
     contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
 
     if (containsKey(key)) {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        return put(key, value) as Double
+        @Suppress("UNCHECKED_CAST")
+        return put(key, value)
     } else {
         val returnValue = oldValue()
         set(key, value)
@@ -266,8 +266,8 @@ public inline fun  MutableInt2DoubleMap.removeOrElse(key: Int, defaultValue: () 
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     return if (containsKey(key)) {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        remove(key) as Double
+        @Suppress("UNCHECKED_CAST")
+        remove(key)
     } else {
         defaultValue()
     }

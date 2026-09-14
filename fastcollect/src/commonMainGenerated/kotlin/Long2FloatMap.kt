@@ -150,8 +150,8 @@ public inline fun  Long2FloatMap.getOrElse(key: Long, defaultValue: () -> Float)
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = get(key)
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as Float
+    @Suppress("UNCHECKED_CAST")
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value
 }
 
 /**
@@ -221,8 +221,8 @@ public inline fun  MutableLong2FloatMap.merge(key: Long, value: Float, merge: (o
 
     val oldValue = get(key)
     val absent = isDefaultValue(oldValue) && !containsKey(key)
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    val newValue = if (absent) value else merge(oldValue as Float, value)
+    @Suppress("UNCHECKED_CAST")
+    val newValue = if (absent) value else merge(oldValue, value)
     if (absent || !(newValue equalsRaw oldValue)) {
         set(key, newValue)
     }
@@ -240,8 +240,8 @@ public inline fun  MutableLong2FloatMap.getOrPut(key: Long, defaultValue: () -> 
         set(key, value)
         return value
     } else {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        return value as Float
+        @Suppress("UNCHECKED_CAST")
+        return value
     }
 }
 
@@ -251,8 +251,8 @@ public inline fun  MutableLong2FloatMap.replaceOrSet(key: Long, value: Float, ol
     contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
 
     if (containsKey(key)) {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        return put(key, value) as Float
+        @Suppress("UNCHECKED_CAST")
+        return put(key, value)
     } else {
         val returnValue = oldValue()
         set(key, value)
@@ -266,8 +266,8 @@ public inline fun  MutableLong2FloatMap.removeOrElse(key: Long, defaultValue: ()
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     return if (containsKey(key)) {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        remove(key) as Float
+        @Suppress("UNCHECKED_CAST")
+        remove(key)
     } else {
         defaultValue()
     }

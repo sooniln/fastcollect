@@ -355,7 +355,6 @@ public class Int2IntHashMap @JvmOverloads constructor(
         }
     }
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
     private fun rehash(capacity: Int) {
         check(capacity >= size)
 

@@ -115,11 +115,11 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
 
     override fun get(key: ${KeyType}): ${ValueType}${Nullable} = findSlot(key, { slot -> valuesArr[slot] }, { defaultValue })
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    override fun getValue(key: ${KeyType}): ${ValueType} = findSlot(key, { slot -> valuesArr[slot] as ${ValueType} }, { throw NoSuchElementException() })
+    @Suppress("UNCHECKED_CAST")
+    override fun getValue(key: ${KeyType}): ${ValueType} = findSlot(key, { slot -> valuesArr[slot]${AsValueType} }, { throw NoSuchElementException() })
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    override fun getOrDefault(key: ${KeyType}, defaultValue: ${ValueType}): ${ValueType} = findSlot(key, { slot -> valuesArr[slot] as ${ValueType} }, { defaultValue })
+    @Suppress("UNCHECKED_CAST")
+    override fun getOrDefault(key: ${KeyType}, defaultValue: ${ValueType}): ${ValueType} = findSlot(key, { slot -> valuesArr[slot]${AsValueType} }, { defaultValue })
 
     override fun put(key: ${KeyType}, value: ${ValueType}): ${ValueType}${Nullable} {
         var returnValue = defaultValue
@@ -145,8 +145,8 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
         return findSlot(key, { slot ->
             val oldValue = valuesArr[slot]
             valuesArr[slot] = value
-            @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-            oldValue as ${ValueType}
+            @Suppress("UNCHECKED_CAST")
+            oldValue${AsValueType}
         }, {
             throw NoSuchElementException()
         })
@@ -169,8 +169,8 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
             { slot ->
                 val oldValue = valuesArr[slot]
                 removeSlot(slot)
-                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                oldValue as ${ValueType}
+                @Suppress("UNCHECKED_CAST")
+                oldValue${AsValueType}
             },
             { throw NoSuchElementException() })
     }
@@ -333,8 +333,8 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
             for (slot in oldKeysArr.indices) {
                 val key = oldKeysArr[slot]
                 if (key != oldEmptyKey) {
-                    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-                    putIfAbsent(key, oldValuesArr[slot] as ${ValueType})
+                    @Suppress("UNCHECKED_CAST")
+                    putIfAbsent(key, oldValuesArr[slot]${AsValueType})
                 }
             }
         } else {
@@ -401,7 +401,7 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
         }
     }
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    @Suppress("UNCHECKED_CAST")
     private fun rehash(capacity: Int) {
         check(capacity >= size)
 
@@ -525,8 +525,8 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
     ) : ${Name}Map.AbstractEntry${Generics}() {
         @set:JvmSynthetic
         override var key: ${KeyType} = 0.to${KeyType}()
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        override val value: ${ValueType} get() = valuesArr[slot] as ${ValueType}
+        @Suppress("UNCHECKED_CAST")
+        override val value: ${ValueType} get() = valuesArr[slot]${AsValueType}
     }
 
     private inner class MutableReusableEntry : Mutable${Name}Map.AbstractMutableEntry${Generics}() {
@@ -558,11 +558,11 @@ public class ${Name}HashMap${Generics} @JvmOverloads constructor(
             return keysArr[previousSlot]
         }
 
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        @Suppress("UNCHECKED_CAST")
         override var value: ${ValueType}
             get() {
                 check(previousSlot != -1)
-                return valuesArr[previousSlot] as ${ValueType}
+                return valuesArr[previousSlot]${AsValueType}
             }
             set(value) {
                 check(previousSlot != -1)

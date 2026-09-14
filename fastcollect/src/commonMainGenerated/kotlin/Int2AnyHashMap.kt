@@ -105,10 +105,10 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
 
     override fun get(key: Int): V? = findSlot(key, { slot -> valuesArr[slot] }, { defaultValue })
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    @Suppress("UNCHECKED_CAST")
     override fun getValue(key: Int): V = findSlot(key, { slot -> valuesArr[slot] as V }, { throw NoSuchElementException() })
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    @Suppress("UNCHECKED_CAST")
     override fun getOrDefault(key: Int, defaultValue: V): V = findSlot(key, { slot -> valuesArr[slot] as V }, { defaultValue })
 
     override fun put(key: Int, value: V): V? {
@@ -135,7 +135,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         return findSlot(key, { slot ->
             val oldValue = valuesArr[slot]
             valuesArr[slot] = value
-            @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+            @Suppress("UNCHECKED_CAST")
             oldValue as V
         }, {
             throw NoSuchElementException()
@@ -159,7 +159,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             { slot ->
                 val oldValue = valuesArr[slot]
                 removeSlot(slot)
-                @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+                @Suppress("UNCHECKED_CAST")
                 oldValue as V
             },
             { throw NoSuchElementException() })
@@ -323,7 +323,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             for (slot in oldKeysArr.indices) {
                 val key = oldKeysArr[slot]
                 if (key != oldEmptyKey) {
-                    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+                    @Suppress("UNCHECKED_CAST")
                     putIfAbsent(key, oldValuesArr[slot] as V)
                 }
             }
@@ -389,7 +389,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
         }
     }
 
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    @Suppress("UNCHECKED_CAST")
     private fun rehash(capacity: Int) {
         check(capacity >= size)
 
@@ -505,7 +505,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
     ) : Int2AnyMap.AbstractEntry<V>() {
         @set:JvmSynthetic
         override var key: Int = 0.toInt()
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        @Suppress("UNCHECKED_CAST")
         override val value: V get() = valuesArr[slot] as V
     }
 
@@ -538,7 +538,7 @@ public class Int2AnyHashMap<V> @JvmOverloads constructor(
             return keysArr[previousSlot]
         }
 
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        @Suppress("UNCHECKED_CAST")
         override var value: V
             get() {
                 check(previousSlot != -1)

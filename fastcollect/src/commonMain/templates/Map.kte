@@ -152,8 +152,8 @@ public inline fun ${Generics} ${Name}Map${Generics}.getOrElse(key: ${KeyType}, d
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = get(key)
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as ${ValueType}
+    @Suppress("UNCHECKED_CAST")
+    return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value${AsValueType}
 }
 
 /**
@@ -223,8 +223,8 @@ public inline fun ${Generics} Mutable${Name}Map${Generics}.merge(key: ${KeyType}
 
     val oldValue = get(key)
     val absent = isDefaultValue(oldValue) && !containsKey(key)
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-    val newValue = if (absent) value else merge(oldValue as ${ValueType}, value)
+    @Suppress("UNCHECKED_CAST")
+    val newValue = if (absent) value else merge(oldValue${AsValueType}, value)
     if (absent || !(newValue equalsRaw oldValue)) {
         set(key, newValue)
     }
@@ -242,8 +242,8 @@ public inline fun ${Generics} Mutable${Name}Map${Generics}.getOrPut(key: ${KeyTy
         set(key, value)
         return value
     } else {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        return value as ${ValueType}
+        @Suppress("UNCHECKED_CAST")
+        return value${AsValueType}
     }
 }
 
@@ -253,8 +253,8 @@ public inline fun ${Generics} Mutable${Name}Map${Generics}.replaceOrSet(key: ${K
     contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
 
     if (containsKey(key)) {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        return put(key, value) as ${ValueType}
+        @Suppress("UNCHECKED_CAST")
+        return put(key, value)${AsValueType}
     } else {
         val returnValue = oldValue()
         set(key, value)
@@ -268,8 +268,8 @@ public inline fun ${Generics} Mutable${Name}Map${Generics}.removeOrElse(key: ${K
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     return if (containsKey(key)) {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
-        remove(key) as ${ValueType}
+        @Suppress("UNCHECKED_CAST")
+        remove(key)${AsValueType}
     } else {
         defaultValue()
     }

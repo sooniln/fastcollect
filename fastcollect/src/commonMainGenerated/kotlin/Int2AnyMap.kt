@@ -150,7 +150,7 @@ public inline fun <V> Int2AnyMap<V>.getOrElse(key: Int, defaultValue: () -> V): 
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     val value = get(key)
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    @Suppress("UNCHECKED_CAST")
     return if (isDefaultValue(value) && !containsKey(key)) defaultValue() else value as V
 }
 
@@ -221,7 +221,7 @@ public inline fun <V> MutableInt2AnyMap<V>.merge(key: Int, value: V, merge: (old
 
     val oldValue = get(key)
     val absent = isDefaultValue(oldValue) && !containsKey(key)
-    @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+    @Suppress("UNCHECKED_CAST")
     val newValue = if (absent) value else merge(oldValue as V, value)
     if (absent || !(newValue equalsRaw oldValue)) {
         set(key, newValue)
@@ -240,7 +240,7 @@ public inline fun <V> MutableInt2AnyMap<V>.getOrPut(key: Int, defaultValue: () -
         set(key, value)
         return value
     } else {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        @Suppress("UNCHECKED_CAST")
         return value as V
     }
 }
@@ -251,7 +251,7 @@ public inline fun <V> MutableInt2AnyMap<V>.replaceOrSet(key: Int, value: V, oldV
     contract { callsInPlace(oldValue, InvocationKind.AT_MOST_ONCE) }
 
     if (containsKey(key)) {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        @Suppress("UNCHECKED_CAST")
         return put(key, value) as V
     } else {
         val returnValue = oldValue()
@@ -266,7 +266,7 @@ public inline fun <V> MutableInt2AnyMap<V>.removeOrElse(key: Int, defaultValue: 
     contract { callsInPlace(defaultValue, InvocationKind.AT_MOST_ONCE) }
 
     return if (containsKey(key)) {
-        @Suppress("UNCHECKED_CAST", "USELESS_CAST")
+        @Suppress("UNCHECKED_CAST")
         remove(key) as V
     } else {
         defaultValue()
