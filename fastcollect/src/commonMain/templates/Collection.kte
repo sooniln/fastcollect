@@ -182,6 +182,15 @@ public interface Mutable${Type}Collection : ${Type}Collection {
         return modified
     }
 
+    public fun addAll(array: ${Type}Array, fromIndex: Int = 0, toIndex: Int = array.size): Boolean {
+        array.rangeCheck(fromIndex, toIndex)
+        var modified = false
+        for (i in fromIndex..<toIndex) {
+            modified = add(array[i]) or modified
+        }
+        return modified
+    }
+
     public fun removeAll(elements: ${Type}Collection): Boolean = filterInPlace { elements.contains(it) }
     public fun removeAll(elements: Collection<${Type}>): Boolean = filterInPlace { elements.contains(it) }
 

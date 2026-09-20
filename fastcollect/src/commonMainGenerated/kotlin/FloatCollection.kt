@@ -182,6 +182,15 @@ public interface MutableFloatCollection : FloatCollection {
         return modified
     }
 
+    public fun addAll(array: FloatArray, fromIndex: Int = 0, toIndex: Int = array.size): Boolean {
+        array.rangeCheck(fromIndex, toIndex)
+        var modified = false
+        for (i in fromIndex..<toIndex) {
+            modified = add(array[i]) or modified
+        }
+        return modified
+    }
+
     public fun removeAll(elements: FloatCollection): Boolean = filterInPlace { elements.contains(it) }
     public fun removeAll(elements: Collection<Float>): Boolean = filterInPlace { elements.contains(it) }
 

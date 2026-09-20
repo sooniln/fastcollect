@@ -19,6 +19,20 @@ class IntHashSetTests {
         assertEquals(listOf(1, 2, 3), IntHashSet(listOf(1, 2, 3)).toBoxedList().sorted())
         // duplicates in the source collapse
         assertEquals(listOf(1, 2), IntHashSet(intListOf(1, 2, 1, 2)).toBoxedList().sorted())
+        assertEquals(listOf(1, 2, 3), IntHashSet(intArrayOf(1, 2, 3, 1)).toBoxedList().sorted())
+        assertEquals(listOf(2, 3), IntHashSet(intArrayOf(1, 2, 3, 4), 1, 3).toBoxedList().sorted())
+        assertFailsWith<IndexOutOfBoundsException> { IntHashSet(intArrayOf(1), 0, 2) }
+    }
+
+    @Test
+    fun addAll_array_reportsWhetherAnythingChanged() {
+        val set = IntHashSet(intListOf(1, 2))
+        assertFalse(set.addAll(intArrayOf(1, 2)))
+        assertTrue(set.addAll(intArrayOf(2, 3)))
+        assertTrue(set.addAll(intArrayOf(9, 4, 9, 9), 1, 2))
+        assertFalse(set.addAll(intArrayOf(9), 1, 1))
+        assertEquals(listOf(1, 2, 3, 4), set.toBoxedList().sorted())
+        assertFailsWith<IndexOutOfBoundsException> { set.addAll(intArrayOf(1), 0, 2) }
     }
 
     @Test

@@ -182,6 +182,15 @@ public interface MutableByteCollection : ByteCollection {
         return modified
     }
 
+    public fun addAll(array: ByteArray, fromIndex: Int = 0, toIndex: Int = array.size): Boolean {
+        array.rangeCheck(fromIndex, toIndex)
+        var modified = false
+        for (i in fromIndex..<toIndex) {
+            modified = add(array[i]) or modified
+        }
+        return modified
+    }
+
     public fun removeAll(elements: ByteCollection): Boolean = filterInPlace { elements.contains(it) }
     public fun removeAll(elements: Collection<Byte>): Boolean = filterInPlace { elements.contains(it) }
 

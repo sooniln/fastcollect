@@ -334,6 +334,28 @@ public class DoubleArrayDeque private constructor(array: DoubleArray, size: Int)
         return true
     }
 
+    override fun addAll(array: DoubleArray, fromIndex: Int, toIndex: Int): Boolean {
+        array.rangeCheck(fromIndex, toIndex)
+        val count = toIndex - fromIndex
+        if (count == 0) return false
+
+        val newSize = size + count
+        ensureCapacity(newSize)
+
+        // the free space starting at the tail is contiguous until the end of the ring
+        val start = ring.position(head, size)
+        val firstRun = ring.size - start
+        if (count <= firstRun) {
+            array.copyInto(ring, start, fromIndex, toIndex)
+        } else {
+            array.copyInto(ring, start, fromIndex, fromIndex + firstRun)
+            array.copyInto(ring, 0, fromIndex + firstRun, toIndex)
+        }
+        size = newSize
+
+        return true
+    }
+
     public override fun removeAll(elements: DoubleCollection): Boolean {
         return filterInPlace { e -> elements.contains(e) }
     }

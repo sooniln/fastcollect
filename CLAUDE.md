@@ -44,16 +44,6 @@ something annotated with @JvmSynthetic. Generally, for any public method/propert
 should be an alternate API for a Java client to invoke the same functionality (@JvmSynthetic is often used on extension
 methods which provide syntactic sugar for Kotlin clients and are not idiomatic to use from Java for example).
 
-## Java Artifact
-
-The fastcollect-java subproject defines a new publication "fastcollect-kotlin-java" which bundles a minified
-kotlin-stdlib so that Java projects do not need to take a large dependency on the Kotlin standard simply to use this
-library.
-
-The ABI of the shaded jar is checked in at fastcollect-java/api/fastcollect-java.api and can be updated via the
-`updateJavaAbi` Gradle task. This dump deliberately includes the relocated shaded.kotlin.** classes, so changes to
-the set of declarations R8 keeps or drops are visible in review.
-
 # Testing
 
 Prefer to run only JVM tests for speed (unless there is a good reason to run tests on other platforms).

@@ -604,6 +604,7 @@ public final class io/github/sooniln/fastcollect/ByteArrayDeque : io/github/soon
 	public final fun addAll (Lio/github/sooniln/fastcollect/ByteArrayDeque;)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/ByteCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([BII)Z
 	public fun addFirst (B)V
 	public fun addLast (B)V
 	public fun clear ()V
@@ -796,6 +797,7 @@ public final class io/github/sooniln/fastcollect/DoubleArrayDeque : io/github/so
 	public final fun addAll (Lio/github/sooniln/fastcollect/DoubleArrayDeque;)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/DoubleCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([DII)Z
 	public fun addFirst (D)V
 	public fun addLast (D)V
 	public fun clear ()V
@@ -877,9 +879,14 @@ public final class io/github/sooniln/fastcollect/DoubleHashSet : io/github/sooni
 	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/DoubleCollection;)V
 	public fun <init> (Ljava/util/Collection;)V
+	public fun <init> ([D)V
+	public fun <init> ([DI)V
+	public fun <init> ([DII)V
+	public synthetic fun <init> ([DIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun add (D)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/DoubleCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([DII)Z
 	public fun clear ()V
 	public fun contains (D)Z
 	public final fun ensureCapacity (I)V
@@ -1016,6 +1023,7 @@ public final class io/github/sooniln/fastcollect/FloatArrayDeque : io/github/soo
 	public final fun addAll (Lio/github/sooniln/fastcollect/FloatArrayDeque;)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/FloatCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([FII)Z
 	public fun addFirst (F)V
 	public fun addLast (F)V
 	public fun clear ()V
@@ -1097,9 +1105,14 @@ public final class io/github/sooniln/fastcollect/FloatHashSet : io/github/soonil
 	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/FloatCollection;)V
 	public fun <init> (Ljava/util/Collection;)V
+	public fun <init> ([F)V
+	public fun <init> ([FI)V
+	public fun <init> ([FII)V
+	public synthetic fun <init> ([FIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun add (F)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/FloatCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([FII)Z
 	public fun clear ()V
 	public fun contains (F)Z
 	public final fun ensureCapacity (I)V
@@ -1945,6 +1958,7 @@ public final class io/github/sooniln/fastcollect/IntArrayDeque : io/github/sooni
 	public final fun addAll (Lio/github/sooniln/fastcollect/IntArrayDeque;)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/IntCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([III)Z
 	public fun addFirst (I)V
 	public fun addLast (I)V
 	public fun clear ()V
@@ -2026,9 +2040,14 @@ public final class io/github/sooniln/fastcollect/IntHashSet : io/github/sooniln/
 	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/IntCollection;)V
 	public fun <init> (Ljava/util/Collection;)V
+	public fun <init> ([I)V
+	public fun <init> ([II)V
+	public fun <init> ([III)V
+	public synthetic fun <init> ([IIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun add (I)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/IntCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([III)Z
 	public fun clear ()V
 	public fun contains (I)Z
 	public final fun ensureCapacity (I)V
@@ -2875,6 +2894,7 @@ public final class io/github/sooniln/fastcollect/LongArrayDeque : io/github/soon
 	public final fun addAll (Lio/github/sooniln/fastcollect/LongArrayDeque;)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/LongCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([JII)Z
 	public fun addFirst (J)V
 	public fun addLast (J)V
 	public fun clear ()V
@@ -2956,9 +2976,14 @@ public final class io/github/sooniln/fastcollect/LongHashSet : io/github/sooniln
 	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lio/github/sooniln/fastcollect/LongCollection;)V
 	public fun <init> (Ljava/util/Collection;)V
+	public fun <init> ([J)V
+	public fun <init> ([JI)V
+	public fun <init> ([JII)V
+	public synthetic fun <init> ([JIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun add (J)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/LongCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([JII)Z
 	public fun clear ()V
 	public fun contains (J)Z
 	public final fun ensureCapacity (I)V
@@ -3088,6 +3113,8 @@ public abstract interface class io/github/sooniln/fastcollect/MutableByteCollect
 	public abstract fun add (B)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/ByteCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([BII)Z
+	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/MutableByteCollection;[BIIILjava/lang/Object;)Z
 	public fun clear ()V
 	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableByteIterator;
 	public synthetic fun iterator ()Lkotlin/collections/ByteIterator;
@@ -3113,8 +3140,11 @@ public abstract interface class io/github/sooniln/fastcollect/MutableByteList : 
 	public abstract fun add (IB)V
 	public fun addAll (ILio/github/sooniln/fastcollect/ByteCollection;)Z
 	public fun addAll (ILjava/util/Collection;)Z
+	public fun addAll (I[BII)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/ByteCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([BII)Z
+	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/MutableByteList;I[BIIILjava/lang/Object;)Z
 	public fun addFirst (B)V
 	public fun addLast (B)V
 	public fun clear ()V
@@ -3151,6 +3181,8 @@ public abstract interface class io/github/sooniln/fastcollect/MutableDoubleColle
 	public abstract fun add (D)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/DoubleCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([DII)Z
+	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/MutableDoubleCollection;[DIIILjava/lang/Object;)Z
 	public fun clear ()V
 	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableDoubleIterator;
 	public synthetic fun iterator ()Lkotlin/collections/DoubleIterator;
@@ -3176,8 +3208,11 @@ public abstract interface class io/github/sooniln/fastcollect/MutableDoubleList 
 	public abstract fun add (ID)V
 	public fun addAll (ILio/github/sooniln/fastcollect/DoubleCollection;)Z
 	public fun addAll (ILjava/util/Collection;)Z
+	public fun addAll (I[DII)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/DoubleCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([DII)Z
+	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/MutableDoubleList;I[DIIILjava/lang/Object;)Z
 	public fun addFirst (D)V
 	public fun addLast (D)V
 	public fun clear ()V
@@ -3217,6 +3252,8 @@ public abstract interface class io/github/sooniln/fastcollect/MutableFloatCollec
 	public abstract fun add (F)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/FloatCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([FII)Z
+	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/MutableFloatCollection;[FIIILjava/lang/Object;)Z
 	public fun clear ()V
 	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableFloatIterator;
 	public synthetic fun iterator ()Lkotlin/collections/FloatIterator;
@@ -3242,8 +3279,11 @@ public abstract interface class io/github/sooniln/fastcollect/MutableFloatList :
 	public abstract fun add (IF)V
 	public fun addAll (ILio/github/sooniln/fastcollect/FloatCollection;)Z
 	public fun addAll (ILjava/util/Collection;)Z
+	public fun addAll (I[FII)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/FloatCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([FII)Z
+	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/MutableFloatList;I[FIIILjava/lang/Object;)Z
 	public fun addFirst (F)V
 	public fun addLast (F)V
 	public fun clear ()V
@@ -3421,6 +3461,8 @@ public abstract interface class io/github/sooniln/fastcollect/MutableIntCollecti
 	public abstract fun add (I)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/IntCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([III)Z
+	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/MutableIntCollection;[IIIILjava/lang/Object;)Z
 	public fun clear ()V
 	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableIntIterator;
 	public synthetic fun iterator ()Lkotlin/collections/IntIterator;
@@ -3446,8 +3488,11 @@ public abstract interface class io/github/sooniln/fastcollect/MutableIntList : i
 	public abstract fun add (II)V
 	public fun addAll (ILio/github/sooniln/fastcollect/IntCollection;)Z
 	public fun addAll (ILjava/util/Collection;)Z
+	public fun addAll (I[III)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/IntCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([III)Z
+	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/MutableIntList;I[IIIILjava/lang/Object;)Z
 	public fun addFirst (I)V
 	public fun addLast (I)V
 	public fun clear ()V
@@ -3625,6 +3670,8 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLongCollect
 	public abstract fun add (J)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/LongCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([JII)Z
+	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/MutableLongCollection;[JIIILjava/lang/Object;)Z
 	public fun clear ()V
 	public abstract fun iterator ()Lio/github/sooniln/fastcollect/MutableLongIterator;
 	public synthetic fun iterator ()Lkotlin/collections/LongIterator;
@@ -3650,8 +3697,11 @@ public abstract interface class io/github/sooniln/fastcollect/MutableLongList : 
 	public fun add (J)Z
 	public fun addAll (ILio/github/sooniln/fastcollect/LongCollection;)Z
 	public fun addAll (ILjava/util/Collection;)Z
+	public fun addAll (I[JII)Z
 	public fun addAll (Lio/github/sooniln/fastcollect/LongCollection;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public fun addAll ([JII)Z
+	public static synthetic fun addAll$default (Lio/github/sooniln/fastcollect/MutableLongList;I[JIIILjava/lang/Object;)Z
 	public fun addFirst (J)V
 	public fun addLast (J)V
 	public fun clear ()V

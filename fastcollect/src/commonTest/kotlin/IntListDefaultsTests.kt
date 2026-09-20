@@ -177,6 +177,24 @@ class IntListDefaultsTests {
 
         sub.addAll(0, listOf(0))
         backing.assertContents(1, 0, 2, 3, 4, 5)
+
+        assertTrue(sub.addAll(1, intArrayOf(9, 7, 8, 9), 1, 3))
+        sub.assertContents(0, 7, 8, 2, 3, 4)
+        backing.assertContents(1, 0, 7, 8, 2, 3, 4, 5)
+        assertFalse(sub.addAll(0, intArrayOf(9), 0, 0))
+        assertEquals(6, sub.size)
+    }
+
+    @Test
+    fun addAll_array_appendsAndInsertsRange() {
+        val list = SequentialIntList(1, 5)
+        assertTrue(list.addAll(1, intArrayOf(0, 2, 3, 4, 0), 1, 4))
+        list.assertContents(1, 2, 3, 4, 5)
+        assertTrue(list.addAll(intArrayOf(6, 7)))
+        list.assertContents(1, 2, 3, 4, 5, 6, 7)
+        assertFalse(list.addAll(intArrayOf(8), 1, 1))
+        assertFailsWith<IndexOutOfBoundsException> { list.addAll(8, intArrayOf(0)) }
+        assertFailsWith<IndexOutOfBoundsException> { list.addAll(intArrayOf(0), 0, 2) }
     }
 
     @Test

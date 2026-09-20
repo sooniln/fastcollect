@@ -33,6 +33,8 @@ public class FloatHashSet @JvmOverloads constructor(
 
     public constructor(elements: FloatCollection): this() { addAll(elements) }
     public constructor(elements: Collection<Float>): this() { addAll(elements) }
+    @JvmOverloads
+    public constructor(array: FloatArray, fromIndex: Int = 0, toIndex: Int = array.size): this() { addAll(array, fromIndex, toIndex) }
 
     @PublishedApi
     @get:JvmSynthetic
@@ -234,6 +236,17 @@ public class FloatHashSet @JvmOverloads constructor(
         var modified = false
         for (element in elements) {
             modified = add(element) or modified
+        }
+        return modified
+    }
+
+    override fun addAll(array: FloatArray, fromIndex: Int, toIndex: Int): Boolean {
+        array.rangeCheck(fromIndex, toIndex)
+        val count = toIndex - fromIndex
+        ensureCapacity(max(size + (count / 2), count))
+        var modified = false
+        for (i in fromIndex..<toIndex) {
+            modified = add(array[i]) or modified
         }
         return modified
     }

@@ -174,6 +174,29 @@ class IntArrayDequeTests {
     }
 
     @Test
+    fun addAll_array_appendsRange() {
+        val deque = IntArrayDeque(intArrayOf(0))
+        assertTrue(deque.addAll(intArrayOf(1, 2, 3)))
+        assertTrue(deque.addAll(intArrayOf(9, 4, 5, 9), 1, 3))
+        assertFalse(deque.addAll(intArrayOf(9), 1, 1))
+        deque.assertContents(0, 1, 2, 3, 4, 5)
+        assertFailsWith<IndexOutOfBoundsException> { deque.addAll(intArrayOf(1), 0, 2) }
+    }
+
+    @Test
+    fun addAll_array_wrapsAroundRingEnd() {
+        // head sits mid-ring so the tail run hits the end of the ring before the copy is complete
+        val deque = IntArrayDeque(8)
+        for (i in 0..<6) deque.addLast(i)
+        for (i in 0..<5) deque.removeFirst()
+        deque.assertContents(5)
+        assertTrue(deque.addAll(intArrayOf(6, 7, 8, 9, 10, 11)))
+        deque.assertContents(5, 6, 7, 8, 9, 10, 11)
+        assertEquals(0, deque.indexOf(5))
+        assertEquals(6, deque.indexOf(11))
+    }
+
+    @Test
     fun removeAll_andRetainAll_withPredicate() {
         val removed = IntArrayDeque(intArrayOf(1, 2, 3, 4, 5, 6))
         assertTrue(removed.removeAll { it % 2 == 0 })

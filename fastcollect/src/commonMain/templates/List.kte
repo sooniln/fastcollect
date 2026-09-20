@@ -242,6 +242,14 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection {
         return !elements.isEmpty()
     }
 
+    override fun addAll(array: ${Type}Array, fromIndex: Int, toIndex: Int): Boolean {
+        array.rangeCheck(fromIndex, toIndex)
+        for (i in fromIndex..<toIndex) {
+            addLast(array[i])
+        }
+        return fromIndex != toIndex
+    }
+
     public fun addAll(index: Int, elements: ${Type}Collection): Boolean {
         var i = indexCheckInclusive(index)
         for (element in elements) {
@@ -256,6 +264,15 @@ public interface Mutable${Type}List : ${Type}List, Mutable${Type}Collection {
             add(i++, element)
         }
         return !elements.isEmpty()
+    }
+
+    public fun addAll(index: Int, array: ${Type}Array, fromIndex: Int = 0, toIndex: Int = array.size): Boolean {
+        array.rangeCheck(fromIndex, toIndex)
+        var i = indexCheckInclusive(index)
+        for (j in fromIndex..<toIndex) {
+            add(i++, array[j])
+        }
+        return fromIndex != toIndex
     }
 
     public fun sort() {
@@ -527,6 +544,12 @@ public abstract class AbstractMutable${Type}List : Abstract${Type}List(), Mutabl
             list.addAll(offset + indexCheckInclusive(index), elements)
             size += elements.size
             return !elements.isEmpty()
+        }
+
+        override fun addAll(index: Int, array: ${Type}Array, fromIndex: Int, toIndex: Int): Boolean {
+            list.addAll(offset + indexCheckInclusive(index), array, fromIndex, toIndex)
+            size += toIndex - fromIndex
+            return fromIndex != toIndex
         }
 
         override fun copyInto(destination: ${Type}Array, destinationOffset: Int, fromIndex: Int, toIndex: Int): ${Type}Array {

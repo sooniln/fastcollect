@@ -61,6 +61,25 @@ class IntCollectionDefaultsTests {
     }
 
     @Test
+    fun addAll_array_defaultImplementation() {
+        // every shipped collection overrides addAll(array), so exercise the interface default through a minimal set
+        val set = object : AbstractMutableIntSet() {
+            private val backing = IntHashSet()
+            override val size: Int get() = backing.size
+            override fun iterator(): MutableIntIterator = backing.iterator()
+            override fun add(element: Int): Boolean = backing.add(element)
+            override fun remove(element: Int): Boolean = backing.remove(element)
+        }
+        assertTrue(set.addAll(intArrayOf(1, 2, 3)))
+        assertFalse(set.addAll(intArrayOf(1, 2, 3)))
+        assertTrue(set.addAll(intArrayOf(0, 3, 4, 0), 1, 3))
+        assertFalse(set.addAll(intArrayOf(9, 9), 1, 1))
+        assertEquals(listOf(1, 2, 3, 4), set.toBoxedList().sorted())
+        assertFailsWith<IndexOutOfBoundsException> { set.addAll(intArrayOf(1, 2), 1, 3) }
+        assertFailsWith<IllegalArgumentException> { set.addAll(intArrayOf(1, 2), 2, 1) }
+    }
+
+    @Test
     fun clear_emptiesEveryCollectionKind() {
         for (collection in collections(1, 2, 3, 4, 5)) {
             collection.clear()
