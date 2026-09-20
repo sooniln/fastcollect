@@ -29,14 +29,14 @@ You can add FastCollect as a dependency with:
 
 Gradle:
 ```groovy
-implementation 'io.github.sooniln:fastcollect-jvm:6.0.0'
+implementation 'io.github.sooniln:fastcollect-jvm:6.1.0'
 ```
 Maven:
 ```xml
 <dependency>
     <groupId>io.github.sooniln</groupId>
     <artifactId>fastcollect-jvm</artifactId>
-    <version>6.0.0</version>
+    <version>6.1.0</version>
 </dependency>
 ```
 
